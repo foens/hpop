@@ -1,8 +1,8 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.3077"
-        SchemaVersion = "2.0"
+        ProductVersion = "7.0.3077"
+        SchemaVersion = "1.0"
         ProjectGuid = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
     >
         <Build>

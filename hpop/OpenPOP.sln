@@ -1,24 +1,22 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
+Microsoft Visual Studio Solution File, Format Version 7.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOP", "OpenPOP.csproj", "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POP3Test", "POP3Test\POP3Test.csproj", "{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
-		Debug = Debug
-		Release = Release
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug.ActiveCfg = Release|.NET
-		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug.Build.0 = Release|.NET
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug.ActiveCfg = Debug|.NET
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug.Build.0 = Debug|.NET
 		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release.ActiveCfg = Release|.NET
 		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release.Build.0 = Release|.NET
-		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug.ActiveCfg = Release|.NET
-		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug.Build.0 = Release|.NET
+		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug.ActiveCfg = Debug|.NET
+		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug.Build.0 = Debug|.NET
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Release.ActiveCfg = Release|.NET
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Release.Build.0 = Release|.NET
 	EndGlobalSection

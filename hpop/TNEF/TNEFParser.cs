@@ -336,7 +336,7 @@ namespace OpenPOP.TNEF
 
 					byte[] _subjectBuffer=new byte[len-1];
 
-					Array.Copy(buf,_subjectBuffer,(long)len-1);
+					Array.Copy(buf,_subjectBuffer,(int)len-1);
 
 					strSubject=Encoding.Default.GetString(_subjectBuffer);
 
@@ -351,7 +351,7 @@ namespace OpenPOP.TNEF
 					StreamReadBytes(buf,len);
 					//PrintResult("File-Name: {0}\n", buf);
 					byte[] _fileNameBuffer=new byte[len-1];
-					Array.Copy(buf,_fileNameBuffer,(long)len-1);
+					Array.Copy(buf,_fileNameBuffer,(int)len-1);
 
 					if (_fileNameBuffer == null) _fileNameBuffer = Encoding.Default.GetBytes("tnef.dat");
 					string strFileName=Encoding.Default.GetString(_fileNameBuffer);
