@@ -5,15 +5,10 @@ using System.Text;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Wrapper class for computing MD5 hash
+	/// Summary description for MyMD5.
 	/// </summary>
 	public class MyMD5
 	{
-		/// <summary>
-		/// Calculates the MD5 hash
-		/// </summary>
-		/// <param name="input">The string on which the hash is being computed</param>
-		/// <returns>The MD5 Hash</returns>
 		public static string GetMD5Hash(String input)
 		{
 			MD5 md5=new MD5CryptoServiceProvider();
@@ -26,11 +21,6 @@ namespace OpenPOP.POP3
 			return new String(temp);
 		}
 
-		/// <summary>
-		/// Calculates the MD5 hash in Hexadecimal format
-		/// </summary>
-		/// <param name="input">The string on which the hash is being computed</param>
-		/// <returns>The MD5 Hash in Hexadecimal format</returns>
 		public static string GetMD5HashHex(String input)
 		{
 			MD5 md5=new MD5CryptoServiceProvider();
@@ -48,6 +38,7 @@ namespace OpenPOP.POP3
 			returnThis=returnThis.ToLower();
 
 			return returnThis;
+
 
 		}
 

@@ -20,5 +20,6 @@ namespace OpenPOP.POP3
 	public enum  AuthenticationMethod
 	{
 		USERPASS=0,APOP=1,TRYBOTH=2
-	}			
+	}
+
 }

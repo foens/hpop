@@ -25,18 +25,18 @@ namespace OpenPOP.POP3
 		private string _basePath=null;
 		internal bool _receiveFinish=false;
 		private bool _autoDecodeMSTNEF=true;
-		//private const string systemGUID="http://ioffice.net.2003";
-		//internal string	userGUID=null;
+		private const string systemGUID="http://ioffice.net.2003";
+		internal string	userGUID=null;
 		private TcpClient clientSocket=null;		
 		private StreamReader reader;
 		private StreamWriter writer;
 
 
-		//public string GUID
-		//{
-		//get { return userGUID; }
-		//	set { userGUID=value; }
-		//}
+		public string GUID
+		{
+			get { return userGUID; }
+			set { userGUID=value; }
+		}
 		
 		public bool AutoDecodeMSTNEF
 		{
@@ -142,8 +142,8 @@ namespace OpenPOP.POP3
 		/// <returns></returns>
 		public void Connect(string host,int port)
 		{
-//			if(userGUID==systemGUID)
-//			{
+			if(userGUID==systemGUID)
+			{
 				clientSocket=new TcpClient();
 				clientSocket.ReceiveTimeout=_receiveTimeOut;
 				clientSocket.SendTimeout=_sendTimeOut;
@@ -177,11 +177,11 @@ namespace OpenPOP.POP3
 					Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
 					throw new PopServerNotAvailableException();
 				}
-//			}
-//			else
-//			{
-//				throw new Exception("wrong user id");
-//			}
+			}
+			else
+			{
+				throw new Exception("wrong user id");
+			}
 		}
 
 		/// <summary>

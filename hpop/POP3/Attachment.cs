@@ -203,7 +203,7 @@ namespace OpenPOP.POP3
 		{
 			get
 			{
-				return DecodedAttachmentAsBytes();
+				return DecodedAsBytes();
 			}
 		}
 
@@ -228,10 +228,14 @@ namespace OpenPOP.POP3
 
 			StringReader sr=new StringReader(sAttachment);
 
-			string temp=null;
-			while( (temp=sr.ReadLine())!=null & temp!="")
+			string temp=sr.ReadLine();
+			while(temp!=null & temp!="")
 			{
-				parseHeader(sr,temp);
+				parseHeader(sr,ref temp);
+				if(temp==null || temp=="")
+					break;
+				else
+					temp=sr.ReadLine();
 			}
 
 			this._rawAttachment=sr.ReadToEnd();
@@ -244,7 +248,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="sr">string reader</param>
 		/// <param name="temp">header line</param>
-		private void parseHeader(StringReader sr,string temp)
+		private void parseHeader(StringReader sr,ref string temp)
 		{
 			string []array=Utility.getHeadersValue(temp);
 			string []values=array[1].Split(";".ToCharArray());
@@ -281,9 +285,14 @@ namespace OpenPOP.POP3
 							_contentFileName=Utility.GetQuotedValue(strRet,"=","name");
 							_contentFileName=Utility.deCode(_contentFileName);
 						}
+						else if(strRet=="")
+						{
+							temp="";
+							break;
+						}
 						else
 						{
-							parseHeader(sr,strRet);
+							parseHeader(sr,ref strRet);
 						}
 					}
 					break;
@@ -328,7 +337,7 @@ namespace OpenPOP.POP3
 		/// Decode the attachment to text
 		/// </summary>
 		/// <returns>Decoded attachment text</returns>
-		public string DecodeAttachmentAsText()
+		public string DecodeAsText()
 		{
 			string decodedAttachment=null;
 
@@ -369,7 +378,7 @@ namespace OpenPOP.POP3
 		/// Decode the attachment to bytes
 		/// </summary>
 		/// <returns>Decoded attachment bytes</returns>
-		public byte[] DecodedAttachmentAsBytes()
+		public byte[] DecodedAsBytes()
 		{
 			if(_rawAttachment==null)
 				return null;

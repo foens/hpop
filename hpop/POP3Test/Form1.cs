@@ -85,6 +85,7 @@ namespace OpenPOP.NET_Sample_App
 		private void InitializeComponent()
 		{
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.button2 = new System.Windows.Forms.Button();
 			this.txtTotalMessages = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
@@ -111,7 +112,6 @@ namespace OpenPOP.NET_Sample_App
 			this.listAttachments = new System.Windows.Forms.TreeView();
 			this.label3 = new System.Windows.Forms.Label();
 			this.saveFile = new System.Windows.Forms.SaveFileDialog();
-			this.button2 = new System.Windows.Forms.Button();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -140,6 +140,15 @@ namespace OpenPOP.NET_Sample_App
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(804, 69);
 			this.panel1.TabIndex = 0;
+			// 
+			// button2
+			// 
+			this.button2.Location = new System.Drawing.Point(552, 48);
+			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(96, 23);
+			this.button2.TabIndex = 11;
+			this.button2.Text = "UIDL";
+			this.button2.Click += new System.EventHandler(this.button2_Click);
 			// 
 			// txtTotalMessages
 			// 
@@ -172,7 +181,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPassword.PasswordChar = '*';
 			this.txtPassword.Size = new System.Drawing.Size(153, 21);
 			this.txtPassword.TabIndex = 7;
-			this.txtPassword.Text = "";
+			this.txtPassword.Text = "lovebell";
 			// 
 			// label8
 			// 
@@ -188,7 +197,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtLogin.Name = "txtLogin";
 			this.txtLogin.Size = new System.Drawing.Size(153, 21);
 			this.txtLogin.TabIndex = 5;
-			this.txtLogin.Text = "unruledboy";
+			this.txtLogin.Text = "wilsonchan";
 			// 
 			// button1
 			// 
@@ -375,15 +384,6 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			this.saveFile.Title = "Save Attachment";
 			// 
-			// button2
-			// 
-			this.button2.Location = new System.Drawing.Point(552, 48);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(96, 23);
-			this.button2.TabIndex = 11;
-			this.button2.Text = "UIDL";
-			this.button2.Click += new System.EventHandler(this.button2_Click);
-			// 
 			// mainForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -420,6 +420,7 @@ namespace OpenPOP.NET_Sample_App
 		private void ReceiveMails()
 		{
 			Utility.Log=true;
+			popClient.GUID="http://ioffice.net.2003";
 			popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text));
 			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
@@ -482,9 +483,7 @@ namespace OpenPOP.NET_Sample_App
 //					{}
 				if(m.MessageBody.Count>0)
 				{
-					
-					//txtMessage.Text=(string)m.MessageBody[m.MessageBody.Count-1];
-					txtMessage.Text = m.RawMessageBody;
+					txtMessage.Text=(string)m.MessageBody[m.MessageBody.Count-1];
 				}
 				listAttachments.Nodes.Clear();
 				for(int i=0;i<m.AttachmentCount;i++)

@@ -420,11 +420,15 @@ namespace OpenPOP.POP3
 //				parseHeader(builder,reader,temp);
 //				temp=reader.ReadLine();
 //			}
-			string temp=null;
-			while( (temp=reader.ReadLine()) !=null && temp.Trim()!="")
+			string temp=reader.ReadLine();
+			while(temp!=null && temp.Trim()!="")
 			{	
 				builder.Append(temp);
-				parseHeader(builder,reader,temp);
+				parseHeader(builder,reader,ref temp);
+				if(temp==null || temp.Trim()=="")
+					break;
+				else
+					temp=reader.ReadLine();
 			}
 
 			_rawHeader=builder.ToString();
@@ -447,14 +451,14 @@ namespace OpenPOP.POP3
 					{
 						Attachment at=this.GetAttachment(0);
 						if(at.NotAttachment)
-							this.GetMessageBody(at.DecodeAttachmentAsText());
+							this.GetMessageBody(at.DecodeAsText());
 						else
 						{}
 						if(this.Attachments.Count>1)
 						{
 							at=this.GetAttachment(1);
 							if(at!=null&&at.NotAttachment)
-								this.GetMessageBody(at.DecodeAttachmentAsText());						
+								this.GetMessageBody(at.DecodeAsText());						
 							else
 							{}
 						}
@@ -664,7 +668,7 @@ namespace OpenPOP.POP3
 					if(Utility.IsPictureFile(att.ContentFileName)==true)
 					{
 						if(att.ContentID!=null && att.ContentID!="")
-							//support for outlook embedded pictures
+							//support for embedded pictures
 							strBody=strBody.Replace("cid:"+att.ContentID,hsbFiles[att.ContentFileName].ToString());
 
 						strBody=strBody.Replace(att.ContentFileName,hsbFiles[att.ContentFileName].ToString());
@@ -692,7 +696,7 @@ namespace OpenPOP.POP3
 					if(Utility.IsPictureFile(att.ContentFileName)==true)
 					{
 						if(att.ContentID!=null && att.ContentID!="")
-							//support for outlook embedded pictures
+							//support for embedded pictures
 							strBody=strBody.Replace("cid:"+att.ContentID,strPath+att.ContentFileName);
 						strBody=strBody.Replace(att.ContentFileName,strPath+att.ContentFileName);
 					}
@@ -801,7 +805,7 @@ namespace OpenPOP.POP3
 				}
 				else
 				{
-					this.GetMessageBody(attItem.DecodeAttachmentAsText());
+					this.GetMessageBody(attItem.DecodeAsText());
 					da=Encoding.Default.GetBytes((string)this.MessageBody[this.MessageBody.Count-1]);
 				}
 				return Utility.SaveByteContentToFile(da,strFileName);
@@ -873,7 +877,7 @@ namespace OpenPOP.POP3
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
 					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
-					if (tnef.OpenTNEFStream(att.DecodedAttachmentAsBytes()))
+					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
 						{
@@ -937,7 +941,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="temp"></param>
 		/// 
-		private void parseHeader(StringBuilder builder,StringReader reader,string temp)
+		private void parseHeader(StringBuilder builder,StringReader reader,ref string temp)
 		{
 			string []array=Utility.getHeadersValue(temp);		
 			string line="";
@@ -1005,7 +1009,8 @@ namespace OpenPOP.POP3
 						line=reader.ReadLine();
 					}
 					builder.Append(line);
-					parseHeader(builder,reader,line);
+					temp=line;
+					parseHeader(builder,reader,ref line);
 					break;
 
 				case "RECEIVED":
@@ -1057,7 +1062,8 @@ namespace OpenPOP.POP3
 					}
 					_subject=Utility.deCodeLine(_subject);
 					builder.Append(line);
-					parseHeader(builder,reader,line);
+					temp=line;
+					parseHeader(builder,reader,ref line);
 					break;
 				
 				case "RETURN-PATH":
@@ -1120,7 +1126,8 @@ namespace OpenPOP.POP3
 							else if(temp.IndexOf(":")!=-1)
 							{
 								builder.Append(temp);
-								parseHeader(builder,reader,temp);
+								temp=line;
+								parseHeader(builder,reader,ref line);
 								return;						
 							}
 							else
@@ -1140,7 +1147,8 @@ namespace OpenPOP.POP3
 						if(temp==null||temp==""||temp.IndexOf(":")!=-1)
 						{
 							builder.Append(temp);
-							parseHeader(builder,reader,temp);
+							temp=line;
+							parseHeader(builder,reader,ref line);
 							return;
 						}
 						else
