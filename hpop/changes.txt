@@ -1,6 +1,12 @@
-2004/3/29 10:38 GMT-8 by Unruled Boy
+2004/4/23 20:29 GMT+8 by Unruled Boy
+	1.Separating OpenPOP into two independant libries: OpenPOP and MIMEParser
+	2.Modifies the construction for new Message in POPClient class
+	3.New Contructor of Message Class
+	4.Tidy up the codes to follow Hungarian Notation
+
+2004/3/29 10:38 GMT+8 by Unruled Boy
 	1.removing bugs in decoding message
-2004/3/29 17:22 GMT-8 by Unruled Boy
+2004/3/29 17:22 GMT+8 by Unruled Boy
 	1.adding support for reply message using ms-tnef 
 	2.adding support for all custom message headers
 	3.rewriting the message header parser(adding 3 ParseStreamLines)

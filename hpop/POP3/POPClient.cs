@@ -5,7 +5,11 @@
 *Created:		2003/8
 *Modified:		2004/4/2 21:25 GMT-8 by Unruled Boy
 *Description	:
-*Changes:		2004/4/2 21:25 GMT-8 by Unruled Boy
+*Changes:		
+*				2004/4/23 21:07 GMT-8 by Unruled Boy
+*					1.Modifies the construction for new Message
+*					2.Tidy up the codes to follow Hungarian Notation
+*				2004/4/2 21:25 GMT-8 by Unruled Boy
 *					1.modifies the WaitForResponse
 *					2.added handling for PopServerLockException
 */
@@ -34,7 +38,7 @@ namespace OpenPOP.POP3
 		private int _receiveBufferSize=4090;
 		private int _sendBufferSize=4090;
 		private string _basePath=null;
-		internal bool _receiveFinish=false;
+		private bool _receiveFinish=false;
 		private bool _autoDecodeMSTNEF=true;
 		private TcpClient clientSocket=null;		
 		private StreamReader reader;
@@ -128,10 +132,10 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// connect to remote server
 		/// </summary>
-		/// <param name="host">pop3 host</param>
-		/// <param name="port">pop3 port</param>
+		/// <param name="strHost">pop3 host</param>
+		/// <param name="intPort">pop3 port</param>
 		/// <returns></returns>
-		public void Connect(string host,int port)
+		public void Connect(string strHost,int intPort)
 		{
 				clientSocket=new TcpClient();
 				clientSocket.ReceiveTimeout=_receiveTimeOut;
@@ -141,7 +145,7 @@ namespace OpenPOP.POP3
 
 				try
 				{
-					clientSocket.Connect(host,port);				
+					clientSocket.Connect(strHost,intPort);				
 				}
 				catch(SocketException e)
 				{				
@@ -204,34 +208,34 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// verify user and password
 		/// </summary>
-		/// <param name="login">user name</param>
-		/// <param name="password">password</param>
-		public void Authenticate(string login,string password)
+		/// <param name="strlogin">user name</param>
+		/// <param name="strPassword">password</param>
+		public void Authenticate(string strlogin,string strPassword)
 		{
-			Authenticate(login,password,AuthenticationMethod.USERPASS);
+			Authenticate(strlogin,strPassword,AuthenticationMethod.USERPASS);
 		}
 
 		/// <summary>
 		/// verify user and password
 		/// </summary>
-		/// <param name="login">user name</param>
-		/// <param name="password">password</param>
+		/// <param name="strlogin">user name</param>
+		/// <param name="strPassword">strPassword</param>
 		/// <param name="authenticationMethod">verification mode</param>
-		public void Authenticate(string login,string password,AuthenticationMethod authenticationMethod)
+		public void Authenticate(string strlogin,string strPassword,AuthenticationMethod authenticationMethod)
 		{
 			if(authenticationMethod==AuthenticationMethod.USERPASS)
 			{
-				AuthenticateUsingUSER(login,password);				
+				AuthenticateUsingUSER(strlogin,strPassword);				
 			}
 			else if(authenticationMethod==AuthenticationMethod.APOP)
 			{
-				AuthenticateUsingAPOP(login,password);
+				AuthenticateUsingAPOP(strlogin,strPassword);
 			}
 			else if(authenticationMethod==AuthenticationMethod.TRYBOTH)
 			{
 				try
 				{
-					AuthenticateUsingUSER(login,password);
+					AuthenticateUsingUSER(strlogin,strPassword);
 				}
 				catch(InvalidLoginException e)
 				{
@@ -244,7 +248,7 @@ namespace OpenPOP.POP3
 				catch(Exception e)
 				{
 					Utility.LogError("Authenticate():"+e.Message);
-					AuthenticateUsingAPOP(login,password);
+					AuthenticateUsingAPOP(strlogin,strPassword);
 				}
 			}
 		}
@@ -252,11 +256,11 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// verify user and password
 		/// </summary>
-		/// <param name="login">user name</param>
-		/// <param name="password">password</param>
-		private void AuthenticateUsingUSER(string login,string password)
+		/// <param name="strlogin">user name</param>
+		/// <param name="strPassword">password</param>
+		private void AuthenticateUsingUSER(string strlogin,string strPassword)
 		{				
-			writer.WriteLine("USER " + login);
+			writer.WriteLine("USER " + strlogin);
 
 			//writer.Flush();
 
@@ -272,7 +276,7 @@ namespace OpenPOP.POP3
 			
 			WaitForResponse(ref writer,200);
 			
-			writer.WriteLine("PASS " + password);
+			writer.WriteLine("PASS " + strPassword);
 
 			//writer.Flush();
 
@@ -298,11 +302,11 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// verify user and password using APOP
 		/// </summary>
-		/// <param name="login">user name</param>
-		/// <param name="password">password</param>
-		private void AuthenticateUsingAPOP(string login,string password)
+		/// <param name="strlogin">user name</param>
+		/// <param name="strPassword">password</param>
+		private void AuthenticateUsingAPOP(string strlogin,string strPassword)
 		{
-			writer.WriteLine("APOP " + login + " " + MyMD5.GetMD5HashHex(password));
+			writer.WriteLine("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword));
 			
 			WaitForResponse(ref reader,100);
 			
@@ -366,15 +370,15 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Deletes message with given index when Close() is called
 		/// </summary>
-		/// <param name="MessageIndex"> </param>
-		public bool DeleteMessage(int MessageIndex) 
+		/// <param name="intMessageIndex"> </param>
+		public bool DeleteMessage(int intMessageIndex) 
 		{
 			try
 			{
-				if(MessageIndex >0)
+				if(intMessageIndex >0)
 				{
 					string strCmd = "DELE ";
-					strCmd += MessageIndex.ToString();
+					strCmd += intMessageIndex.ToString();
 					writer.WriteLine(strCmd);
 
 					WaitForResponse(ref reader,200);
@@ -391,7 +395,7 @@ namespace OpenPOP.POP3
 				_Error ="DeleteMessage():"+e.Message;
 				_Error += "\n";
 				_Error += "Could not delete message at index ";
-				_Error += MessageIndex.ToString();
+				_Error += intMessageIndex.ToString();
 				//TRACE(strErr);
 				Utility.LogError(_Error);
 
@@ -547,16 +551,16 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// get messages info
 		/// </summary>
-		/// <param name="messageNumber">message number</param>
+		/// <param name="intMessageNumber">message number</param>
 		/// <returns>Message object</returns>
-		public Message GetMessageHeader(int messageNumber)
+		public MIMEParser.Message GetMessageHeader(int intMessageNumber)
 		{
 			_receiveFinish=false;
-			writer.WriteLine("TOP "+messageNumber+" 0");
+			writer.WriteLine("TOP "+intMessageNumber+" 0");
 
 			string receivedContent=ReceiveContent(-1).Substring(3);
 
-			Message msg=new Message(this,receivedContent,true);
+			MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,true);
 			
 			WaitForResponse(_receiveFinish,200);
 
@@ -566,10 +570,10 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// get message uid
 		/// </summary>
-		/// <param name="messageNumber">message number</param>
-		public string GetMessageUID(int messageNumber)
+		/// <param name="intMessageNumber">message number</param>
+		public string GetMessageUID(int intMessageNumber)
 		{
-			writer.WriteLine("UIDL "+messageNumber);
+			writer.WriteLine("UIDL "+intMessageNumber);
 
 			WaitForResponse(ref reader,200);
 
@@ -617,9 +621,9 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// read stream content
 		/// </summary>
-		/// <param name="contentLength">length of content to read</param>
+		/// <param name="intContentLength">length of content to read</param>
 		/// <returns>content</returns>
-		private string ReceiveContent(int contentLength)
+		private string ReceiveContent(int intContentLength)
 		{
 			string response=null;
 			StringBuilder builder = new StringBuilder();
@@ -630,7 +634,7 @@ namespace OpenPOP.POP3
 			int intLines=0;
 			int intLen=0;
 
-			while (response!=".")// || (intLen<contentLength)) //(response.IndexOf(".")==0 && intLen<contentLength)
+			while (response!=".")// || (intLen<intContentLength)) //(response.IndexOf(".")==0 && intLen<intContentLength)
 			{
 				builder.Append(response + "\r\n");
 				intLines+=1;
@@ -645,7 +649,7 @@ namespace OpenPOP.POP3
 
 			builder.Append(response+ "\r\n");
 
-			return builder.ToString();//.Substring(0,contentLength);
+			return builder.ToString();//.Substring(0,intContentLength);
 
 		}
 
@@ -654,11 +658,11 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="number">message number on server</param>
 		/// <returns>Message object</returns>
-		public Message GetMessage(int number, bool onlyHeader)
+		public MIMEParser.Message GetMessage(int intNumber, bool blnOnlyHeader)
 		{			
 			_receiveFinish=false;
 
-			writer.WriteLine("RETR " + number);
+			writer.WriteLine("RETR " + intNumber);
 
 			WaitForResponse(ref reader,200);
 
@@ -673,7 +677,7 @@ namespace OpenPOP.POP3
 				//messageSize=Convert.ToInt32(GetParameters(response)[0]);
 				string receivedContent=ReceiveContent(messageSize);
 
-				Message msg=new Message(this,receivedContent,onlyHeader);
+				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
 
 				WaitForResponse(_receiveFinish,100);
 

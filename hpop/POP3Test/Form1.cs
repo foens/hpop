@@ -181,7 +181,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPassword.PasswordChar = '*';
 			this.txtPassword.Size = new System.Drawing.Size(153, 21);
 			this.txtPassword.TabIndex = 7;
-			this.txtPassword.Text = "wantgirl";
+			this.txtPassword.Text = "";
 			// 
 			// label8
 			// 
@@ -197,7 +197,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtLogin.Name = "txtLogin";
 			this.txtLogin.Size = new System.Drawing.Size(153, 21);
 			this.txtLogin.TabIndex = 5;
-			this.txtLogin.Text = "wilsonchan";
+			this.txtLogin.Text = "";
 			// 
 			// button1
 			// 
@@ -239,7 +239,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPOPServer.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
 			this.txtPOPServer.Size = new System.Drawing.Size(153, 21);
 			this.txtPOPServer.TabIndex = 0;
-			this.txtPOPServer.Text = "pop.163.net";
+			this.txtPOPServer.Text = "";
 			// 
 			// panel2
 			// 
@@ -433,7 +433,7 @@ namespace OpenPOP.NET_Sample_App
 
 			for(int i=Count;i>=1;i-=1)
 			{
-				POP3.Message m=popClient.GetMessage(i,false);
+				MIMEParser.Message m=popClient.GetMessage(i,false);
 				TreeNode node;
 				if(m!=null)
 				{
@@ -467,12 +467,12 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listMessages_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
-			POP3.Message m=(POP3.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(m!=null)
 			{
 //				if (m.Attachments.Count>0)
 //					{
-//						Attachment at=m.GetAttachment(0);
+//						MIMEParser.Attachment at=m.GetAttachment(0);
 //						if(at.NotAttachment)
 //							m.GetMessageBody(at.DecodeAttachment());						
 //						else
@@ -487,7 +487,7 @@ namespace OpenPOP.NET_Sample_App
 				listAttachments.Nodes.Clear();
 				for(int i=0;i<m.AttachmentCount;i++)
 				{
-					Attachment att=m.GetAttachment(i);
+					MIMEParser.Attachment att=m.GetAttachment(i);
 					//string name=att.ContentFileName;
 					//listAttachments.Nodes.Add(name==null||name==""?(m.IsMIMEMailFile(att)==true?att.DefaultMIMEFileName:att.DefaultFileName):name).Tag=m.GetAttachment(i);
 					listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag=att;
@@ -538,8 +538,8 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listAttachments_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
-			Attachment att=(Attachment)listAttachments.SelectedNode.Tag;
-			POP3.Message m=(POP3.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			MIMEParser.Attachment att=(MIMEParser.Attachment)listAttachments.SelectedNode.Tag;
+			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(att!=null && m!=null)// && att.ContentFileName.Length>0)
 			{
 				//saveFile.FileName=(att.ContentFileName==null||att.ContentFileName==""?att.DefaultFileName:att.ContentFileName);//+(m.HTML==true?".html":"");
@@ -553,13 +553,13 @@ namespace OpenPOP.NET_Sample_App
 					result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 					if(result==DialogResult.Yes)
 					{
-						POP3.Message m2=att.DecodeAsMessage();
+						MIMEParser.Message m2=att.DecodeAsMessage();
 						string attachmentNames="";
 						bool blnRet=false;
 						if(m2.AttachmentCount>0)
 							for(int i=0;i<m2.AttachmentCount;i++)
 							{
-								Attachment att2=m2.GetAttachment(i);
+								MIMEParser.Attachment att2=m2.GetAttachment(i);
 								//string attachmentName=att2.ContentFileName;
 								//attachmentNames+=(attachmentName==null||attachmentName==""?att2.DefaultFileName:att2.ContentFileName)+"("+att2.ContentLength+")";
 								attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";

@@ -1,15 +1,15 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.0.3077"
-        SchemaVersion = "1.0"
+        ProductVersion = "7.10.3077"
+        SchemaVersion = "2.0"
         ProjectGuid = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
     >
         <Build>
             <Settings
                 ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
-                AssemblyName = "OpenPOP.NET"
+                AssemblyName = "OpenPOP"
                 AssemblyOriginatorKeyFile = ""
                 DefaultClientScript = "JScript"
                 DefaultHTMLPageLayout = "Grid"
@@ -18,7 +18,7 @@
                 OutputType = "Library"
                 PreBuildEvent = ""
                 PostBuildEvent = ""
-                RootNamespace = "OpenPOP.NET"
+                RootNamespace = "OpenPOP"
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
             >
@@ -69,6 +69,11 @@
                     AssemblyName = "System"
                     HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.dll"
                 />
+                <Reference
+                    Name = "MIMEParser"
+                    Project = "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
             </References>
         </Build>
         <Files>
@@ -79,32 +84,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Utility.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "POP3\Attachment.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "POP3\Common.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "POP3\DecodeQP.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "POP3\Exceptions.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "POP3\Message.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -119,17 +104,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "POP3\QuotedCoding.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TNEF\TNEFAttachment.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TNEF\TNEFParser.cs"
+                    RelPath = "POP3\Utility.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
