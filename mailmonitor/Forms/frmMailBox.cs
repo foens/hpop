@@ -49,8 +49,8 @@ namespace MailMonitor
 		private bool _loaded;
 		private bool _dirty;
 		private bool _new;
-		private bool _auto;
-		private bool _driven;
+//		private bool _auto;
+//		private bool _driven;
 
 
 		public frmMailBox()
@@ -341,7 +341,7 @@ namespace MailMonitor
 				_new=false;
 			}
 			_loaded=true;
-			_auto=false;
+			//_auto=false;
 		}
 
 		private void cmdCancel_Click(object sender, System.EventArgs e)

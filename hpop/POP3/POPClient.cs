@@ -326,11 +326,16 @@ namespace OpenPOP.POP3
 			_lastCommandResponse = "";
 			try
 			{
-				writer.WriteLine(strCommand);
-				writer.Flush();
-				WaitForResponse(ref reader,WaitForResponseInterval);
-				_lastCommandResponse = reader.ReadLine();				
-				return IsOkResponse(_lastCommandResponse);
+				if(writer.BaseStream.CanWrite)
+				{
+					writer.WriteLine(strCommand);
+					writer.Flush();
+					WaitForResponse(ref reader,WaitForResponseInterval);
+					_lastCommandResponse = reader.ReadLine();				
+					return IsOkResponse(_lastCommandResponse);
+				}
+				else
+					return false;
 			}
 			catch(Exception e)
 			{
@@ -446,8 +451,12 @@ namespace OpenPOP.POP3
 		public void Disconnect()
 		{
 			try
-			{				
+			{
+				clientSocket.ReceiveTimeout=500;
+				clientSocket.SendTimeout=500;
 				SendCommand("QUIT",true);
+				clientSocket.ReceiveTimeout=_receiveTimeOut;
+				clientSocket.SendTimeout=_sendTimeOut;
 				reader.Close();
 				writer.Close();
 				clientSocket.GetStream().Close();

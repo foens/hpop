@@ -407,7 +407,8 @@ namespace MailMonitor
 				}
 
 				string strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
-				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,(string)_msg.MessageBody[_msg.MessageBody.Count-1],true);
+				string strBodyText=Utilities.ToFormattedHTML((string)_msg.MessageBody[_msg.MessageBody.Count-1]);
+				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
 				
@@ -486,6 +487,13 @@ namespace MailMonitor
 			}
 		}
 
+		private void frmMail_Resize(object sender, EventArgs e)
+		{
+			_settings.MailWindow.State=this.WindowState;
+			_settings.MailWindow.Size=this.Size;
+			_settings.MailWindow.Location=this.Location;
+		}
+
 		private void mnuDelete_Click(object sender, System.EventArgs e)
 		{
 			_popClient.DeleteMessage(_messageIndex);
@@ -493,11 +501,5 @@ namespace MailMonitor
 		}
 		#endregion
 
-		private void frmMail_Resize(object sender, EventArgs e)
-		{
-			_settings.MailWindow.State=this.WindowState;
-			_settings.MailWindow.Size=this.Size;
-			_settings.MailWindow.Location=this.Location;
-		}
 	}
 }
