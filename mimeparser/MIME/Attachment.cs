@@ -5,6 +5,8 @@
 *Created:		2003/8
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description:
+*				2004/5/8 17:00 GMT+8 by Unruled Boy
+*					1.Again, hopefully we have handled the NotAttachment property correctly
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
 *					1.Adding three more constructors
 *					2.Adding descriptions to every public functions/property/void
@@ -92,7 +94,7 @@ namespace OpenPOP.MIMEParser
 					return true;
 				else
 					return (_contentFileName!="");*/
-				if ((_contentType==null||_contentFileName=="")&&_contentType.ToLower().IndexOf("text/")!=-1)
+				if ((_contentType==null||_contentFileName==""))//&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
 				else
 					return false;

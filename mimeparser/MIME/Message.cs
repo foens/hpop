@@ -6,6 +6,8 @@
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/8 17:00 GMT+8 by Unruled Boy
+*					1.Fixed a bug in parsing boundary
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
 *					1.Adding three more constructors
 *					2.Adding descriptions to every public functions/property/void
@@ -1346,24 +1348,30 @@ namespace OpenPOP.MIMEParser
 					}
 					else
 					{
-						if(strLine.IndexOf(";")!=-1)
+						/*if(strLine.IndexOf(";")!=-1)
 							_attachmentboundry=strLine.Split(';')[1];
-						else
-							_attachmentboundry=strLine;
+						else*/
+						_attachmentboundry=strLine;
 					}
 
-/*					int indexOfQuote=_attachmentboundry.IndexOf("\"");
-					int lastIndexOfQuote=_attachmentboundry.LastIndexOf("\"");
-					if(indexOfQuote>=0&&lastIndexOfQuote>=0)
-					{
-						_attachmentboundry=_attachmentboundry.Substring(indexOfQuote+1,lastIndexOfQuote-(indexOfQuote+1));
+					//					int indexOfQuote=_attachmentboundry.IndexOf("\"");
+					//					int lastIndexOfQuote=_attachmentboundry.LastIndexOf("\"");
+					//					if(indexOfQuote>=0&&lastIndexOfQuote>=0)
+					//					{
+					//						_attachmentboundry=_attachmentboundry.Substring(indexOfQuote+1,lastIndexOfQuote-(indexOfQuote+1));
+					//
+					//						_hasAttachment=true;
+					//					}
 
-						_hasAttachment=true;
-					}
-*/					
 					int intBound=_attachmentboundry.ToLower().IndexOf("boundary=");
 					if(intBound!=-1)
-						_attachmentboundry=_attachmentboundry.Substring(intBound+9);
+					{
+						int intBound2=_attachmentboundry.ToLower().IndexOf(";",intBound+10);
+						if(intBound2==-1)
+							intBound2=_attachmentboundry.Length;
+						intBound2-=(intBound+9);
+						_attachmentboundry=_attachmentboundry.Substring(intBound+9,intBound2);
+					}
 					_attachmentboundry=Utility.RemoveQuote(_attachmentboundry);
 					_hasAttachment=true;
 

@@ -3,7 +3,7 @@
 *Function:		Assembly
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
+*Modified:		2004/5/8 17:00 GMT+8 by Unruled Boy
 *Description:
 */
 using System.Reflection;
@@ -18,7 +18,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 
-[assembly: AssemblyVersion("2004.05.03.13")]
+[assembly: AssemblyVersion("2004.05.08.12")]
 
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]
