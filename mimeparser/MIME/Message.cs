@@ -3,9 +3,12 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 17:22 GMT+8
+*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description	:
 *Changes:		
+*				2004/5/1 14:13 GMT+8 by Unruled Boy
+*					1.Adding three more constructors
+*					2.Adding descriptions to every public functions/property/void
 *				2004/4/29 19:05 GMT+8 by Unruled Boy
 *					1.Fixed the bug parsing headers/boundary
 *				2004/4/28 19:06 GMT+8 by Unruled Boy
@@ -25,7 +28,6 @@
 *				2004/3/30 09:15 GMT+8 by Unruled Boy
 *					1.Adding ImportanceType
 */
-
 using System;
 using System.IO;
 using System.Collections;
@@ -78,19 +80,29 @@ namespace OpenPOP.MIMEParser
 		private Hashtable _customHeaders=new Hashtable();
 		#endregion
 
+
 		#region Properties
+		/// <summary>
+		/// custom headers
+		/// </summary>
 		public Hashtable CustomHeaders
 		{
 			get{return _customHeaders;}
 			set{_customHeaders=value;}
 		}
 
+		/// <summary>
+		/// whether auto decoding MS-TNEF attachment files
+		/// </summary>
 		public bool AutoDecodeMSTNEF
 		{
 			get{return _autoDecodeMSTNEF;}
 			set{_autoDecodeMSTNEF=value;}
 		}
 
+		/// <summary>
+		/// path to extract MS-TNEF attachment files
+		/// </summary>
 		public string BasePath
 		{
 			get{return _basePath;}
@@ -108,30 +120,46 @@ namespace OpenPOP.MIMEParser
 				}
 			}
 		}
+
+		/// <summary>
+		/// message keywords
+		/// </summary>
 		public ArrayList Keywords
 		{
 			get{return _keywords;}
 		}
 
+		/// <summary>
+		/// disposition notification
+		/// </summary>
 		public string DispositionNotificationTo
 		{
 			get{return _dispositionNotificationTo;}
 		}
 
+		/// <summary>
+		/// received server
+		/// </summary>
 		public string Received
 		{
 			get{return _received;}
 		}
 
+		/// <summary>
+		/// importance level
+		/// </summary>
 		public string Importance
 		{
 			get{return _importance;}
 		}
 
+		/// <summary>
+		/// importance level type
+		/// </summary>
 		public MessageImportanceType ImportanceType
 		{
 			get{
-				switch(_importance)
+				switch(_importance.ToUpper())
 				{
 					case "5":
 					case "HIGH":
@@ -148,151 +176,292 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Content Charset
+		/// </summary>
 		public string ContentCharset
 		{
 			get{return _contentCharset;}
 		}
 
+		/// <summary>
+		/// Content Transfer Encoding
+		/// </summary>
 		public string ContentTransferEncoding
 		{
 			get{return _contentTransferEncoding;}
 		}
 
+		/// <summary>
+		/// Message Bodies
+		/// </summary>
 		public ArrayList MessageBody
 		{
 			get{return _messageBody;}
 		}
 
+		/// <summary>
+		/// Attachment Boundry
+		/// </summary>
 		public string AttachmentBoundry
 		{
 			get{return _attachmentboundry;}
 		}
 
+		/// <summary>
+		/// Alternate Attachment Boundry
+		/// </summary>
 		public string AttachmentBoundry2
 		{
 			get{return _attachmentboundry2;}
 		}
 
+		/// <summary>
+		/// Attachment Count
+		/// </summary>
 		public int AttachmentCount
 		{
 			get{return _attachmentCount;}
 		}
 
+		/// <summary>
+		/// Attachments
+		/// </summary>
 		public ArrayList Attachments
 		{
 			get{return _attachments;}
 		}
 		
+		/// <summary>
+		/// CC
+		/// </summary>
 		public string[] CC
 		{
 			get{return _cc;}
 		}
 
+		/// <summary>
+		/// BCC
+		/// </summary>
 		public string[] BCC
 		{
 			get{return _bcc;}
 		}
 
+		/// <summary>
+		/// TO
+		/// </summary>
 		public string[] TO
 		{
 			get{return _to;}
 		}
 
+		/// <summary>
+		/// Content Encoding
+		/// </summary>
 		public string ContentEncoding
 		{
 			get{return _contentEncoding;}
 		}
 
+		/// <summary>
+		/// Content Length
+		/// </summary>
 		public long ContentLength
 		{
 			get{return _contentLength;}
 		}
 
+		/// <summary>
+		/// Content Type
+		/// </summary>
 		public string ContentType
 		{
 			get{return _contentType;}
 		}
 
+		/// <summary>
+		/// Report Type
+		/// </summary>
 		public string ReportType
 		{
 			get{return _reportType;}
 		}
 
+		/// <summary>
+		/// HTML
+		/// </summary>
 		public bool HTML
 		{
 			get{return _html;}
 		}
 
+		/// <summary>
+		/// Date
+		/// </summary>
 		public string Date
 		{
 			get{return _date;}
 		}
 
+		/// <summary>
+		/// DateTime Info
+		/// </summary>
 		public string DateTimeInfo
 		{
 			get{return _dateTimeInfo;}
 		}
 
+		/// <summary>
+		/// From name
+		/// </summary>
 		public string From
 		{
 			get{return _from;}
 		}
 
+		/// <summary>
+		/// From Email
+		/// </summary>
 		public string FromEmail
 		{
 			get{return _fromEmail;}
 		}
 
+		/// <summary>
+		/// Reply to name
+		/// </summary>
 		public string ReplyTo
 		{
 			get{return _replyTo;}
 		}
 
+		/// <summary>
+		/// Reply to email
+		/// </summary>
 		public string ReplyToEmail
 		{
 			get{return _replyToEmail;}
 		}
 
+		/// <summary>
+		/// whether has attachment
+		/// </summary>
 		public bool HasAttachment
 		{
 			get{return _hasAttachment;}
 		}
 
+		/// <summary>
+		/// raw message body
+		/// </summary>
 		public string RawMessageBody
 		{
 			get{return _rawMessageBody;}
 		}
 
+		/// <summary>
+		/// Message ID
+		/// </summary>
 		public string MessageID
 		{
 			get{return _messageID;}
 		}
 
+		/// <summary>
+		/// MIME version
+		/// </summary>
 		public string MimeVersion
 		{
 			get{return _mimeVersion;}
 		}
 
+		/// <summary>
+		/// raw header
+		/// </summary>
 		public string RawHeader
 		{
 			get{return _rawHeader;}
 		}
 
+		/// <summary>
+		/// raw message
+		/// </summary>
 		public string RawMessage
 		{
 			get{return _rawMessage;}
 		}
 
+		/// <summary>
+		/// return path
+		/// </summary>
 		public string ReturnPath
 		{
 			get{return _returnPath;}
 		}
 
+		/// <summary>
+		/// subject
+		/// </summary>
 		public string Subject
 		{
 			get{return _subject;}
 		}
 		#endregion
+
+
+		/// <summary>
+		/// New Message
+		/// </summary>
+		/// <param name="blnFinish">reference for the finishing state</param>
+		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
+		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
+		/// <param name="strEMLFile">file of email content to load from</param>
+		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
+		{
+			string strMessage=null;
+			if(Utility.ReadPlainTextFromFile(strEMLFile,ref strMessage))
+			{
+				NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
+			}
+			else
+				blnFinish=true;
+		}
+
+		/// <summary>
+		/// New Message
+		/// </summary>
+		/// <param name="blnFinish">reference for the finishing state</param>
+		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
+		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="strMessage">raw message content</param>
+		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
+		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
+		{
+			NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
+		}
+
+		/// <summary>
+		/// New Message
+		/// </summary>
+		/// <param name="blnFinish">reference for the finishing state</param>
+		/// <param name="strMessage">raw message content</param>
+		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
+		public Message(ref bool blnFinish, string strMessage, bool blnOnlyHeader)
+		{
+			NewMessage(ref blnFinish,"",false,strMessage,blnOnlyHeader);
+		}
+
+		/// <summary>
+		/// New Message
+		/// </summary>
+		/// <param name="blnFinish">reference for the finishing state</param>
+		/// <param name="strMessage">raw message content</param>
+		public Message(ref bool blnFinish, string strMessage)
+		{
+			NewMessage(ref blnFinish,"",false,strMessage,false);
+		}
 
 		/// <summary>
 		/// get valid attachment
@@ -309,6 +478,15 @@ namespace OpenPOP.MIMEParser
 			return (Attachment)_attachments[intAttachmentNumber];		
 		}
 
+		/// <summary>
+		/// New Message
+		/// </summary>
+		/// <param name="blnFinish">reference for the finishing state</param>
+		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
+		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="strMessage">raw message content</param>
+		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
+		/// <returns>construction result whether successfully new a message</returns>
 		private bool NewMessage(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
 		{
 			StringReader srdReader=new StringReader(strMessage);
@@ -373,22 +551,6 @@ namespace OpenPOP.MIMEParser
 
 			blnFinish=true;
 			return true;
-		}
-
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
-		{
-			string strMessage=null;
-			if(Utility.ReadPlainTextFromFile(strEMLFile,ref strMessage))
-			{
-				NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
-			}
-			else
-				blnFinish=true;
-		}
-
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
-		{
-			NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
 		}
 
 		/// <summary>
@@ -733,21 +895,6 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
-//		/// <summary>
-//		/// Parse the message for attachment boundry and calculate number of _attachments
-//		/// based on that
-//		/// </summary>
-//		private void set_attachmentCount()
-//		{
-//			int indexOf_attachmentboundry=0;
-//
-//			while( (indexOf_attachmentboundry=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentboundry+1))>0)
-//			{
-//				_attachmentCount++;
-//			}
-//			_attachmentCount--;
-//		}
-
 		/// <summary>
 		/// set attachments
 		/// </summary>
@@ -860,9 +1007,14 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
-		public bool SaveToMIMEEmailFile(string strFile)
+		/// <summary>
+		/// Save message content to eml file
+		/// </summary>
+		/// <param name="strFile"></param>
+		/// <returns></returns>
+		public bool SaveToMIMEEmailFile(string strFile,bool blnReplaceExists)
 		{
-			return Utility.SaveByteContentToFile(Encoding.Default.GetBytes(_rawMessage),strFile);
+			return Utility.SavePlainTextToFile(strFile,_rawMessage,blnReplaceExists);
 		}
 
 		/// <summary>

@@ -3,8 +3,11 @@
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 17:32 GMT+8
+*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description	:
+*				2004/5/1 14:13 GMT+8 by Unruled Boy
+*					1.Adding three more constructors
+*					2.Adding descriptions to every public functions/property/void
 *				2004/4/29 19:05 GMT+8 by Unruled Boy
 *					1.Hopefully we have handled the NotAttachment property correctly
 *Changes:		2004/3/29 10:28 GMT+8 by Unruled Boy
@@ -14,7 +17,6 @@
 *					2.adding detail description for every function
 *					3.cleaning up the codes
 */
-
 using System;
 using System.IO;
 using System.Text;
@@ -46,19 +48,29 @@ namespace OpenPOP.MIMEParser
 		private byte[] _rawBytes=null;
 		#endregion
 
+
 		#region Properties
+		/// <summary>
+		/// raw attachment content bytes
+		/// </summary>
 		public byte[] RawBytes
 		{
 			get{return _rawBytes;}
 			set{_rawBytes=value;}
 		}
 
+		/// <summary>
+		/// whether attachment is in bytes
+		/// </summary>
 		public bool InBytes
 		{
 			get{return _inBytes;}
 			set{_inBytes=value;}
 		}
 
+		/// <summary>
+		/// Content length
+		/// </summary>
 		public long ContentLength
 		{
 			get{return _contentLength;}
@@ -67,6 +79,7 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// verify the attachment whether it is a real attachment or not
 		/// </summary>
+		/// <remarks>this is so far not comprehensive and needs more work to finish</remarks>
 		public bool NotAttachment
 		{
 			get
@@ -87,67 +100,110 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Content format
+		/// </summary>
 		public string ContentFormat
 		{
 			get{return _contentFormat;}
 		}
 
+		/// <summary>
+		/// Content charset
+		/// </summary>
 		public string ContentCharset
 		{
 			get{return _contentCharset;}
 		}
 
+		/// <summary>
+		/// default file name
+		/// </summary>
 		public string DefaultFileName
 		{
 			get{return _defaultFileName;}
+			set{_defaultFileName=value;}
 		}
 
+		/// <summary>
+		/// default file name 2
+		/// </summary>
 		public string DefaultFileName2
 		{
 			get{return _defaultFileName2;}
+			set{_defaultFileName2=value;}
 		}
 
+		/// <summary>
+		/// default report file name
+		/// </summary>
 		public string DefaultReportFileName
 		{
 			get{return _defaultReportFileName;}
+			set{_defaultReportFileName=value;}
 		}
 
+		/// <summary>
+		/// default MIME File Name
+		/// </summary>
 		public string DefaultMIMEFileName
 		{
 			get{return _defaultMIMEFileName;}
+			set{_defaultMIMEFileName=value;}
 		}
 
+		/// <summary>
+		/// Content Type
+		/// </summary>
 		public string ContentType
 		{
 			get{return _contentType;}
 		}
 
+		/// <summary>
+		/// Content Transfer Encoding
+		/// </summary>
 		public string ContentTransferEncoding
 		{
 			get{return _contentTransferEncoding;}
 		}
 
+		/// <summary>
+		/// Content Description
+		/// </summary>
 		public string ContentDescription
 		{
 			get{return _contentDescription;}
 		}
 
+		/// <summary>
+		/// Content File Name
+		/// </summary>
 		public string ContentFileName
 		{
 			get{return _contentFileName;}
 			set{_contentFileName=value;}
 		}
 
+		/// <summary>
+		/// Content Disposition
+		/// </summary>
 		public string ContentDisposition
 		{
 			get{return _contentDisposition;}
 		}
 
+		/// <summary>
+		/// Content ID
+		/// </summary>
 		public string ContentID
 		{
 			get{return _contentID;}
 		}
 
+		/// <summary>
+		/// Raw Attachment
+		/// </summary>
 		public string RawAttachment
 		{
 			get{return _rawAttachment;}
@@ -165,6 +221,14 @@ namespace OpenPOP.MIMEParser
 		}
 		#endregion
 
+
+		/// <summary>
+		/// New Attachment
+		/// </summary>
+		/// <param name="bytAttachment">attachment bytes content</param>
+		/// <param name="lngFileLength">file length</param>
+		/// <param name="strFileName">file name</param>
+		/// <param name="strContentType">content type</param>
 		public Attachment(byte[] bytAttachment, long lngFileLength, string strFileName, string strContentType)
 		{
 			_inBytes=true;
@@ -174,6 +238,27 @@ namespace OpenPOP.MIMEParser
 			_contentType=strContentType;
 		}
 
+		/// <summary>
+		/// New Attachment
+		/// </summary>
+		/// <param name="bytAttachment">attachment bytes content</param>
+		/// <param name="strFileName">file name</param>
+		/// <param name="strContentType">content type</param>
+		public Attachment(byte[] bytAttachment, string strFileName, string strContentType)
+		{
+			_inBytes=true;
+			_rawBytes=bytAttachment;
+			_contentLength=bytAttachment.Length;
+			_contentFileName=strFileName;
+			_contentType=strContentType;
+		}
+
+		/// <summary>
+		/// New Attachment
+		/// </summary>
+		/// <param name="strAttachment">attachment content</param>
+		/// <param name="strContentType">content type</param>
+		/// <param name="blnParseHeader">whether only parse the header or not</param>
 		public Attachment(string strAttachment,string strContentType, bool blnParseHeader)
 		{
 			if(!blnParseHeader)
@@ -184,6 +269,10 @@ namespace OpenPOP.MIMEParser
 			this.NewAttachment(strAttachment,blnParseHeader);
 		}
 
+		/// <summary>
+		/// New Attachment
+		/// </summary>
+		/// <param name="strAttachment">attachment content</param>
 		public Attachment(string strAttachment)
 		{	
 			this.NewAttachment(strAttachment,true);

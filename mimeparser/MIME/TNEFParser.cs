@@ -2,7 +2,17 @@
 * Based on tnef.c from Thomas Boll 
 **********************************************************************/
 
-
+/*
+*Name:			OpenPOP.MIMEParser.Message
+*Function:		Message Parser
+*Author:		Thomas Boll(c version), Unruled Boy(c# version)
+*Created:		2004/3
+*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
+*Description	:
+*Changes:		
+*				2004/5/1 14:13 GMT+8 by Unruled Boy
+*					1.Adding descriptions to every public functions/property/void
+*/
 using System;
 using System.IO;
 using System.Text;
@@ -15,6 +25,7 @@ namespace OpenPOP.MIMEParser
 	/// </summary>
 	public class TNEFParser
 	{
+		#region Member Variables
 		private const int TNEF_SIGNATURE  =0x223e9f78;
 		private const int LVL_MESSAGE     =0x01;
 		private const int LVL_ATTACHMENT  =0x02;
@@ -42,9 +53,9 @@ namespace OpenPOP.MIMEParser
 		private long _fileLength=0;
 		private string _tnefFile="";
 		private string strSubject;
+		#endregion
 
-
-
+		#region Properties
 		//		public string LogFilePath
 		//		{
 		//			get{return _logFile;}
@@ -98,13 +109,15 @@ namespace OpenPOP.MIMEParser
 			get{return _offset;}
 			set{_offset=value;}
 		}
+		#endregion
 
-		public int GETINT32(byte[] p)
+
+		private int GETINT32(byte[] p)
 		{
 			return (p[0]+(p[1]<<8)+(p[2]<<16)+(p[3]<<24));
 		}
 
-		public short GETINT16(byte[] p)
+		private short GETINT16(byte[] p)
 		{
 			return (short)(p[0]+(p[1]<<8));
 		}
@@ -176,6 +189,11 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Open the MS-TNEF stream from file
+		/// </summary>
+		/// <param name="strFile">MS-TNEF file</param>
+		/// <returns></returns>
 		public bool OpenTNEFStream(string strFile)
 		{
 			//Utility.LogFilePath=LogFilePath;
@@ -196,6 +214,11 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Open the MS-TNEF stream from bytes
+		/// </summary>
+		/// <param name="bytContents">MS-TNEF bytes</param>
+		/// <returns></returns>
 		public bool OpenTNEFStream(byte[] bytContents)
 		{
 			//Utility.LogFilePath=LogFilePath;
@@ -213,6 +236,10 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Find the MS-TNEF signature
+		/// </summary>
+		/// <returns>true if found, vice versa</returns>
 		public bool FindSignature()
 		{
 			bool ret=false;
@@ -397,11 +424,19 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// decoded attachments
+		/// </summary>
+		/// <returns>attachment array</returns>
 		public Hashtable Attachments()
 		{
 			return _attachments;
 		}
 
+		/// <summary>
+		/// save all decoded attachments to files
+		/// </summary>
+		/// <returns>true is succeded, vice versa</returns>
 		public bool SaveAttachments()
 		{
 			bool blnRet=false;
@@ -415,6 +450,11 @@ namespace OpenPOP.MIMEParser
 			return blnRet;
 		}
 
+		/// <summary>
+		/// save a decoded attachment to file
+		/// </summary>
+		/// <param name="attachment">decoded attachment</param>
+		/// <returns>true is succeded, vice versa</returns>
 		public bool SaveAttachment(TNEFAttachment attachment)
 		{
 			try
@@ -438,6 +478,10 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// parse MS-TNEF stream
+		/// </summary>
+		/// <returns>true is succeded, vice versa</returns>
 		public bool Parse()
 		{
 			byte[] buf=new byte[4];
@@ -505,11 +549,19 @@ namespace OpenPOP.MIMEParser
 		{
 		}
 
+		/// <summary>
+		/// open MS-TNEF stream from a file
+		/// </summary>
+		/// <param name="strFile">MS-TNEF file</param>
 		public TNEFParser(string strFile)
 		{
 			OpenTNEFStream(strFile);
 		}	
 
+		/// <summary>
+		/// open MS-TNEF stream from bytes
+		/// </summary>
+		/// <param name="bytContents">MS-TNEF bytes</param>
 		public TNEFParser(byte[] bytContents)
 		{
 			OpenTNEFStream(bytContents);

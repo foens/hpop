@@ -15,7 +15,6 @@ namespace OpenPOP.NET_Sample_App
 	/// </summary>
 	public class mainForm : System.Windows.Forms.Form
 	{
-		private POPClient popClient=new POPClient();
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.TextBox txtPOPServer;
 		private System.Windows.Forms.Label label1;
@@ -48,7 +47,10 @@ namespace OpenPOP.NET_Sample_App
 		private System.Windows.Forms.ContextMenu ctmMessages;
 		private System.Windows.Forms.MenuItem mnuDeleteMessage;
 		private System.Windows.Forms.Button button2;
+		private POPClient popClient=new POPClient();
+		private System.Windows.Forms.TextBox txtEvents;
 		private Hashtable msgs=new Hashtable();
+
 
 		public mainForm()
 		{
@@ -60,6 +62,8 @@ namespace OpenPOP.NET_Sample_App
 			//
 			// TODO: Add any constructor code after InitializeComponent call
 			//
+			popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
+			popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
 		}
 
 		/// <summary>
@@ -101,6 +105,7 @@ namespace OpenPOP.NET_Sample_App
 			this.gridHeaders = new System.Windows.Forms.DataGrid();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.panel4 = new System.Windows.Forms.Panel();
+			this.txtEvents = new System.Windows.Forms.TextBox();
 			this.txtMessage = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.panel5 = new System.Windows.Forms.Panel();
@@ -276,6 +281,7 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// panel4
 			// 
+			this.panel4.Controls.Add(this.txtEvents);
 			this.panel4.Controls.Add(this.txtMessage);
 			this.panel4.Controls.Add(this.label4);
 			this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -283,6 +289,19 @@ namespace OpenPOP.NET_Sample_App
 			this.panel4.Name = "panel4";
 			this.panel4.Size = new System.Drawing.Size(477, 177);
 			this.panel4.TabIndex = 6;
+			// 
+			// txtEvents
+			// 
+			this.txtEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.txtEvents.Location = new System.Drawing.Point(8, 152);
+			this.txtEvents.MaxLength = 999999999;
+			this.txtEvents.Multiline = true;
+			this.txtEvents.Name = "txtEvents";
+			this.txtEvents.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+			this.txtEvents.Size = new System.Drawing.Size(458, 24);
+			this.txtEvents.TabIndex = 7;
+			this.txtEvents.Text = "";
 			// 
 			// txtMessage
 			// 
@@ -338,7 +357,7 @@ namespace OpenPOP.NET_Sample_App
 			// mnuDeleteMessage
 			// 
 			this.mnuDeleteMessage.Index = 0;
-			this.mnuDeleteMessage.Text = "É¾³ýÓÊ¼þ";
+			this.mnuDeleteMessage.Text = "Delete Mail";
 			this.mnuDeleteMessage.Click += new System.EventHandler(this.mnuDeleteMessage_Click);
 			// 
 			// label5
@@ -616,6 +635,22 @@ namespace OpenPOP.NET_Sample_App
 				string uid = (string)i.Current;
 				txtMessage.Text+=(uid+"\r\n");
 			}
+		}
+
+		private void AddEvent(string strEvent)
+		{
+			txtEvents.Text+=strEvent+"\r\n";
+			txtEvents.SelectionStart=txtEvents.Text.Length;
+		}
+
+		private void popClient_AuthenticationBegan(object sender, EventArgs e)
+		{
+			AddEvent("AuthenticationBegan");
+		}
+
+		private void popClient_AuthenticationFinished(object sender, EventArgs e)
+		{
+			AddEvent("AuthenticationFinished");
 		}
 	}
 }

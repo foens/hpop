@@ -3,9 +3,12 @@
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/4/2 21:25 GMT-8 by Unruled Boy
+*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description	:
 *Changes:		
+*				2004/5/1 14:13 GMT+8 by Unruled Boy
+*					1.Adding descriptions to every public functions/property/void
+*					2.Now with 6 events!
 *				2004/4/23 21:07 GMT-8 by Unruled Boy
 *					1.Modifies the construction for new Message
 *					2.Tidy up the codes to follow Hungarian Notation
@@ -13,7 +16,6 @@
 *					1.modifies the WaitForResponse
 *					2.added handling for PopServerLockException
 */
-
 using System;
 using System.Net.Sockets;
 using System.IO;
@@ -28,7 +30,71 @@ namespace OpenPOP.POP3
 	/// </summary>
 	public class POPClient
 	{
-		//public event EventHandler CommunicationOccured;	
+		/// <summary>
+		/// Event that fires when connected with target POP3 server.
+		/// </summary>
+		public event EventHandler CommunicationOccured;
+
+		/// <summary>
+		/// Event that fires when disconnected with target POP3 server.
+		/// </summary>
+		public event EventHandler CommunicationLost;
+
+		/// <summary>
+		/// Event that fires when authentication began with target POP3 server.
+		/// </summary>
+		public event EventHandler AuthenticationBegan;
+
+		/// <summary>
+		/// Event that fires when authentication finished with target POP3 server.
+		/// </summary>
+		public event EventHandler AuthenticationFinished;
+
+		/// <summary>
+		/// Event that fires when message transfer has begun.
+		/// </summary>		
+		public event EventHandler MessageTransferBegan;
+		
+		/// <summary>
+		/// Event that fires when message transfer has finished.
+		/// </summary>
+		public event EventHandler MessageTransferFinished;
+
+		internal void OnCommunicationOccured(EventArgs e)
+		{
+			if (CommunicationOccured != null)
+				CommunicationOccured(this, e);
+		}
+
+		internal void OnCommunicationLost(EventArgs e)
+		{
+			if (CommunicationLost != null)
+				CommunicationLost(this, e);
+		}
+
+		internal void OnAuthenticationBegan(EventArgs e)
+		{
+			if (AuthenticationBegan != null)
+				AuthenticationBegan(this, e);
+		}
+
+		internal void OnAuthenticationFinished(EventArgs e)
+		{
+			if (AuthenticationFinished != null)
+				AuthenticationFinished(this, e);
+		}
+
+		internal void OnMessageTransferBegan(EventArgs e)
+		{
+			if (MessageTransferBegan != null)
+				MessageTransferBegan(this, e);
+		}
+		
+		internal void OnMessageTransferFinished(EventArgs e)
+		{
+			if (MessageTransferFinished != null)
+				MessageTransferFinished(this, e);
+		}
 
 		private static string strOK="+OK";
 		private static string strERR="-ERR";
@@ -45,12 +111,18 @@ namespace OpenPOP.POP3
 		private StreamWriter writer;
 
 
+		/// <summary>
+		/// whether auto decoding MS-TNEF attachment files
+		/// </summary>
 		public bool AutoDecodeMSTNEF
 		{
 			get{return _autoDecodeMSTNEF;}
 			set{_autoDecodeMSTNEF=value;}
 		}
 
+		/// <summary>
+		/// path to extract MS-TNEF attachment files
+		/// </summary>
 		public string BasePath
 		{
 			get{return _basePath;}
@@ -69,36 +141,45 @@ namespace OpenPOP.POP3
 			}
 		}
 
-		public POPClient()
-		{
-			Utility.Log=false;
-		}		
-
+		/// <summary>
+		/// Receive timeout for the connection to the SMTP server in milliseconds.
+		/// The default value is 10000 milliseconds.
+		/// </summary>
 		public int ReceiveTimeOut
 		{
 			get{return _receiveTimeOut;}
 			set{_receiveTimeOut=value;}
 		}
 
+		/// <summary>
+		/// Send timeout for the connection to the SMTP server in milliseconds.
+		/// The default value is 10000 milliseconds.
+		/// </summary>
 		public int SendTimeOut
 		{
 			get{return _sendTimeOut;}
 			set{_sendTimeOut=value;}
 		}
 
+		/// <summary>
+		/// Receive buffer size
+		/// </summary>
 		public int ReceiveBufferSize
 		{
 			get{return _receiveBufferSize;}
 			set{_receiveBufferSize=value;}
 		}
 
+		/// <summary>
+		/// Send buffer size
+		/// </summary>
 		public int SendBufferSize
 		{
 			get{return _sendBufferSize;}
 			set{_sendBufferSize=value;}
 		}
 
-		public static void WaitForResponse(bool blnCondiction, int intInterval)
+		private static void WaitForResponse(bool blnCondiction, int intInterval)
 		{
 			if(intInterval==0)
 				intInterval=100;
@@ -108,7 +189,7 @@ namespace OpenPOP.POP3
 			}
 		}
 
-		public static void WaitForResponse(ref StreamReader rdReader, int intInterval)
+		private static void WaitForResponse(ref StreamReader rdReader, int intInterval)
 		{
 			if(intInterval==0)
 				intInterval=100;
@@ -119,7 +200,7 @@ namespace OpenPOP.POP3
 			}
 		}
 
-		public static void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
+		private static void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
 		{
 			if(intInterval==0)
 				intInterval=100;
@@ -128,6 +209,11 @@ namespace OpenPOP.POP3
 				Thread.Sleep(intInterval);
 			}
 		}
+
+		public POPClient()
+		{
+			Utility.Log=false;
+		}		
 
 		/// <summary>
 		/// connect to remote server
@@ -170,6 +256,10 @@ namespace OpenPOP.POP3
 					Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
 					throw new PopServerNotAvailableException();
 				}
+				else
+				{
+					OnCommunicationOccured(EventArgs.Empty);
+				}
 		}
 
 		/// <summary>
@@ -195,6 +285,7 @@ namespace OpenPOP.POP3
 				writer=null;
 				clientSocket=null;
 			}
+			OnCommunicationLost(EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -260,6 +351,8 @@ namespace OpenPOP.POP3
 		/// <param name="strPassword">password</param>
 		private void AuthenticateUsingUSER(string strlogin,string strPassword)
 		{				
+			OnAuthenticationBegan(EventArgs.Empty);
+
 			writer.WriteLine("USER " + strlogin);
 
 			//writer.Flush();
@@ -297,6 +390,8 @@ namespace OpenPOP.POP3
 					throw new InvalidPasswordException();
 				}
 			}
+
+			OnAuthenticationFinished(EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -306,6 +401,8 @@ namespace OpenPOP.POP3
 		/// <param name="strPassword">password</param>
 		private void AuthenticateUsingAPOP(string strlogin,string strPassword)
 		{
+			OnAuthenticationBegan(EventArgs.Empty);
+
 			writer.WriteLine("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword));
 			
 			WaitForResponse(ref reader,100);
@@ -317,7 +414,8 @@ namespace OpenPOP.POP3
 				Utility.LogError("AuthenticateUsingAPOP():wrong user or password");
 				throw new InvalidLoginOrPasswordException();		
 			}
-		}		
+			OnAuthenticationFinished(EventArgs.Empty);
+		}
 
 		private string GetCommand(string input)
 		{			
@@ -555,7 +653,10 @@ namespace OpenPOP.POP3
 		/// <returns>Message object</returns>
 		public MIMEParser.Message GetMessageHeader(int intMessageNumber)
 		{
+			OnMessageTransferBegan(EventArgs.Empty);
+
 			_receiveFinish=false;
+
 			writer.WriteLine("TOP "+intMessageNumber+" 0");
 
 			string receivedContent=ReceiveContent(-1).Substring(3);
@@ -563,6 +664,8 @@ namespace OpenPOP.POP3
 			MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,true);
 			
 			WaitForResponse(_receiveFinish,200);
+
+			OnMessageTransferFinished(EventArgs.Empty);
 
 			return msg;
 		}
@@ -660,6 +763,8 @@ namespace OpenPOP.POP3
 		/// <returns>Message object</returns>
 		public MIMEParser.Message GetMessage(int intNumber, bool blnOnlyHeader)
 		{			
+			OnMessageTransferBegan(EventArgs.Empty);
+
 			_receiveFinish=false;
 
 			writer.WriteLine("RETR " + intNumber);
@@ -668,26 +773,31 @@ namespace OpenPOP.POP3
 
 			string response=reader.ReadLine();
 			int messageSize=0;
+			MIMEParser.Message msg;
 
-			if(GetCommand(response)!=strOK)			
-				return null;
+			if(GetCommand(response)==strOK)
+				try
+				{
+					//messageSize=Convert.ToInt32(GetParameters(response)[0]);
+					string receivedContent=ReceiveContent(messageSize);
 
-			try
+					msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
+
+					WaitForResponse(_receiveFinish,100);
+				}
+				catch(Exception e)
+				{
+					Utility.LogError("GetMessage():"+intNumber.ToString()+":"+e.Message);
+					msg=null;
+				}
+			else
 			{
-				//messageSize=Convert.ToInt32(GetParameters(response)[0]);
-				string receivedContent=ReceiveContent(messageSize);
-
-				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
-
-				WaitForResponse(_receiveFinish,100);
-
-				return msg;
+				msg=null;
 			}
-			catch(Exception e)
-			{
-				Utility.LogError("GetMessage():"+intNumber.ToString()+":"+e.Message);
-				return null;
-			}
+
+			OnMessageTransferFinished(EventArgs.Empty);
+
+			return msg;
 		}
 	}
 }

@@ -95,6 +95,7 @@
                 />
                 <File
                     RelPath = "MIME\Exceptions.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

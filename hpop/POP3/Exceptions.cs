@@ -8,7 +8,6 @@
 *Changes:		2004/4/2 21:25 GMT-8 by Unruled Boy
 *					1.added PopServerLockException
 */
-
 using System;
 
 namespace OpenPOP.POP3

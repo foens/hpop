@@ -6,7 +6,6 @@
 *Modified:		2004/3
 *Description	:
 */
-
 using System;
 using System.Security.Cryptography;
 using System.Text;

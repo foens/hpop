@@ -6,7 +6,6 @@
 *Modified:		2004/3/29 12:28 GMT-8
 *Description:
 */
-
 using System;
 
 namespace OpenPOP.POP3

@@ -140,6 +140,36 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		public static bool SavePlainTextToFile(string strFile, string strText, bool blnReplaceExists)
+		{
+			try
+			{
+				bool blnRet=true;
+
+				if(File.Exists(strFile))
+				{
+					if(blnReplaceExists)
+						File.Delete(strFile);
+					else
+						blnRet=false;
+				}
+
+				if(blnRet==true)
+				{
+					StreamWriter sw=File.CreateText(strFile);
+					sw.Write(strText);
+					sw.Close();
+				}
+
+				return blnRet;
+			}
+			catch(Exception e)
+			{
+				Utility.LogError("SavePlainTextToFile():"+e.Message);
+				return false;
+			}
+		}
+
 		public static bool ReadPlainTextFromFile(string strFile, ref string strText)
 		{
 			if(File.Exists(strFile))
