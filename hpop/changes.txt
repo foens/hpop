@@ -1,3 +1,6 @@
+2004/6/17 17:20 GMT+8 by Unruled Boy
+	1.Fixed a bug in parsing file name
+
 2004/6/16 18:34 GMT+8 by Unruled Boy
 	1.fixed a loop in message body decoding by .
 

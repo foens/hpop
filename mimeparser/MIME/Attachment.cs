@@ -20,9 +20,11 @@
 *Function:		Attachment
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
+*Last Modified:	2004/6/17 17:20 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/17 17:20 GMT+8 by Unruled Boy
+*					1.Fixed a bug in parsing file name
 *				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
 *					1.Fixed a bug in parsing ContentFileName @ https://sourceforge.net/forum/message.php?msg_id=2589759
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
@@ -376,7 +378,7 @@ namespace OpenPOP.MIMEParser
 							strLine="";
 							break;
 						}
-						_contentFileName=Utility.ParseFileName(strLine);
+						_contentFileName=Utility.ParseFileName(strRet);
 						if(_contentFileName=="")
 							ParseHeader(srReader,ref strRet);
 					}

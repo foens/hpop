@@ -20,7 +20,7 @@
 *Function:		Assembly
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/6/16 18:34 GMT+8 by Unruled Boy
+*Modified:		2004/6/17 17:20 GMT+8 by Unruled Boy
 *Description:
 */
 using System.Reflection;
