@@ -3,9 +3,10 @@
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:25 GMT+8
+*Modified:		3 May 2004 0200 GMT+5 by Hamid Qureshi
 *Description:
-*Changes:		
+*Changes:		3rd May 1600 GMT+5 by Hamid Qureshi
+*					1.Adding NDoc Comments
 */
 using System;
 using System.Text;
@@ -15,22 +16,22 @@ using System.Threading;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Summary description for Utility.
+	/// Utility functions
 	/// </summary>
 	public class Utility
 	{
+		/// <summary>
+		/// Weather auto loggin is on or off
+		/// </summary>
 		private static bool m_blnLog=false;
-		private static string m_strLogFile = "OpenPOP.log";
-
-		public Utility()
-		{
-			//
-			// TODO: Add constructor logic here
-			//
-		}
 
 		/// <summary>
-		/// Turns file logging on and off.
+		/// The file name in which the logging will be done
+		/// </summary>
+		private static string m_strLogFile = "OpenPOP.log";
+
+		/// <summary>
+		/// Turns file logging on and off.<font color="red"><h1>Change Property Name</h1></font>
 		/// </summary>
 		/// <remarks>Comming soon.</remarks>
 		public static bool Log
@@ -45,6 +46,10 @@ namespace OpenPOP.POP3
 			}
 		}
 
+		/// <summary>
+		/// Log an error to the log file
+		/// </summary>
+		/// <param name="strText">The error text to log</param>
 		internal static void LogError(string strText) 
 		{
 			//Log=true;
@@ -82,4 +87,5 @@ namespace OpenPOP.POP3
 		}
 
 	}
+
 }
