@@ -3,8 +3,11 @@
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 20:13
+*Modified:		2004/4/2 21:25 GMT-8 by Unruled Boy
 *Description	:
+*Changes:		2004/4/2 21:25 GMT-8 by Unruled Boy
+*					1.modifies the WaitForResponse
+*					2.added handling for PopServerLockException
 */
 
 using System;
@@ -91,19 +94,32 @@ namespace OpenPOP.POP3
 			set{_sendBufferSize=value;}
 		}
 
-		public static void WaitForResponse(bool blnCondiction)
-		{
-			while(!blnCondiction==true)
-			{
-				Thread.Sleep(100);
-			}
-		}
-
 		public static void WaitForResponse(bool blnCondiction, int intInterval)
 		{
 			if(intInterval==0)
 				intInterval=100;
 			while(!blnCondiction==true)
+			{
+				Thread.Sleep(intInterval);
+			}
+		}
+
+		public static void WaitForResponse(ref StreamReader rdReader, int intInterval)
+		{
+			if(intInterval==0)
+				intInterval=100;
+			//while(rdReader.Peek()==-1 || !rdReader.BaseStream.CanRead)
+			while(!rdReader.BaseStream.CanRead)
+			{
+				Thread.Sleep(intInterval);
+			}
+		}
+
+		public static void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
+		{
+			if(intInterval==0)
+				intInterval=100;
+			while(!wrWriter.BaseStream.CanWrite)
 			{
 				Thread.Sleep(intInterval);
 			}
@@ -138,7 +154,7 @@ namespace OpenPOP.POP3
 				writer=new StreamWriter(clientSocket.GetStream());
 				writer.AutoFlush=true;
 		
-				WaitForResponse(reader.BaseStream.CanRead,200);
+				WaitForResponse(ref reader,200);
 
 				string response=reader.ReadLine();
 
@@ -242,9 +258,9 @@ namespace OpenPOP.POP3
 		{				
 			writer.WriteLine("USER " + login);
 
-			writer.Flush();
+			//writer.Flush();
 
-			WaitForResponse(reader.BaseStream.CanRead,200);
+			WaitForResponse(ref reader,200);
 			
 			string response=reader.ReadLine();				
             
@@ -254,20 +270,28 @@ namespace OpenPOP.POP3
 				throw new InvalidLoginException();
 			}
 			
-			WaitForResponse(writer.BaseStream.CanWrite,500);
+			WaitForResponse(ref writer,200);
 			
 			writer.WriteLine("PASS " + password);
 
-			writer.Flush();
+			//writer.Flush();
 
-			WaitForResponse(reader.BaseStream.CanRead,500);
+			WaitForResponse(ref reader,200);
 
 			response=reader.ReadLine();
 
 			if(GetCommand(response)!=strOK)		
 			{
-				Utility.LogError("AuthenticateUsingUSER():wrong password");
-				throw new InvalidPasswordException();			
+				if(response.ToLower().IndexOf("lock")!=-1)
+				{
+					Utility.LogError("AuthenticateUsingUSER():maildrop is locked");
+					throw new PopServerLockException();			
+				}
+				else
+				{
+					Utility.LogError("AuthenticateUsingUSER():wrong password");
+					throw new InvalidPasswordException();
+				}
 			}
 		}
 
@@ -279,7 +303,9 @@ namespace OpenPOP.POP3
 		private void AuthenticateUsingAPOP(string login,string password)
 		{
 			writer.WriteLine("APOP " + login + " " + MyMD5.GetMD5HashHex(password));
-			WaitForResponse(reader.BaseStream.CanRead,500);
+			
+			WaitForResponse(ref reader,100);
+			
 			string response=reader.ReadLine();
 		
 			if(GetCommand(response)!=strOK)
@@ -319,7 +345,7 @@ namespace OpenPOP.POP3
 		{			
 			writer.WriteLine("STAT");
 
-			WaitForResponse(reader.BaseStream.CanRead,200);
+			WaitForResponse(ref reader,200);
 
 			string response=reader.ReadLine();			
 
@@ -351,7 +377,7 @@ namespace OpenPOP.POP3
 					strCmd += MessageIndex.ToString();
 					writer.WriteLine(strCmd);
 
-					WaitForResponse(reader.BaseStream.CanRead,200);
+					WaitForResponse(ref reader,200);
 					
 					string response=reader.ReadLine();
 
@@ -388,7 +414,7 @@ namespace OpenPOP.POP3
 					strCmd = "DELE "+messageItem.ToString();
 					writer.WriteLine(strCmd);
 
-					WaitForResponse(reader.BaseStream.CanRead,200);
+					WaitForResponse(ref reader,200);
 
 					string response=reader.ReadLine();
 				}
@@ -416,7 +442,7 @@ namespace OpenPOP.POP3
 				string strCmd = "QUIT";
 				writer.WriteLine(strCmd);
 
-				WaitForResponse(reader.BaseStream.CanRead,200);
+				WaitForResponse(ref reader,200);
 
 				string response=reader.ReadLine();
 
@@ -444,7 +470,7 @@ namespace OpenPOP.POP3
 				string strCmd = "NOOP";
 				writer.WriteLine(strCmd);
 
-				WaitForResponse(reader.BaseStream.CanRead,200);
+				WaitForResponse(ref reader,200);
 
 				string response=reader.ReadLine();
 
@@ -472,7 +498,7 @@ namespace OpenPOP.POP3
 				string strCmd = "RSET";
 				writer.WriteLine(strCmd);
 
-				WaitForResponse(reader.BaseStream.CanRead,200);
+				WaitForResponse(ref reader,200);
 
 				string response=reader.ReadLine();
 
@@ -500,7 +526,7 @@ namespace OpenPOP.POP3
 				string strCmd = "USER";
 				writer.WriteLine(strCmd);
 
-				WaitForResponse(reader.BaseStream.CanRead,200);
+				WaitForResponse(ref reader,200);
 
 				string response=reader.ReadLine();
 
@@ -527,16 +553,13 @@ namespace OpenPOP.POP3
 		{
 			_receiveFinish=false;
 			writer.WriteLine("TOP "+messageNumber+" 0");
-			//string tmp=Receive();
-			//delete +OK (3 chars) and create message
-			//Message message=new Message(ReceiveContent(-1).Substring(3),true);
+
 			string receivedContent=ReceiveContent(-1).Substring(3);
+
 			Message msg=new Message(this,receivedContent,true);
-//			while(!_receiveFinish==true)
-//			{
-//				Thread.Sleep(1);
-//			}
+			
 			WaitForResponse(_receiveFinish,200);
+
 			return msg;
 		}
 
@@ -548,7 +571,7 @@ namespace OpenPOP.POP3
 		{
 			writer.WriteLine("UIDL "+messageNumber);
 
-			WaitForResponse(reader.BaseStream.CanRead,200);
+			WaitForResponse(ref reader,200);
 
 			string response=reader.ReadLine();
 			
@@ -572,7 +595,7 @@ namespace OpenPOP.POP3
 
 			writer.WriteLine("UIDL");
 			
-			WaitForResponse(reader.BaseStream.CanRead,200);
+			WaitForResponse(ref reader,200);
 
 			string response=reader.ReadLine();
 			if(GetCommand(response)==strOK)
@@ -600,7 +623,9 @@ namespace OpenPOP.POP3
 		{
 			string response=null;
 			StringBuilder builder = new StringBuilder();
-			WaitForResponse(reader.BaseStream.CanRead);
+			
+			WaitForResponse(ref reader,50);
+
 			response = reader.ReadLine();
 			int intLines=0;
 			int intLen=0;
@@ -611,7 +636,7 @@ namespace OpenPOP.POP3
 				intLines+=1;
 				intLen+=response.Length+"\r\n".Length;
 				
-				WaitForResponse(reader.BaseStream.CanRead,1);
+				WaitForResponse(ref reader,1);
 
 				response = reader.ReadLine();
 				if((intLines % 100)==0) //make an interval pause to ensure response from server
@@ -635,7 +660,7 @@ namespace OpenPOP.POP3
 
 			writer.WriteLine("RETR " + number);
 
-			WaitForResponse(reader.BaseStream.CanRead,200);
+			WaitForResponse(ref reader,200);
 
 			string response=reader.ReadLine();
 			int messageSize=0;

@@ -295,7 +295,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="encoding">encoding to verify</param>
 		/// <returns>true if encoding</returns>
-		public bool IsEncoding(string encoding)
+		private bool IsEncoding(string encoding)
 		{
 			return _contentTransferEncoding.ToLower().IndexOf(encoding.ToLower())!=-1;
 		}

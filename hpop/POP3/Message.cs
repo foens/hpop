@@ -13,6 +13,8 @@
 *					3.rewriting the header parser(adding 3 ParseStreamLines)
 *					4.adding detail description for every function
 *					5.cleaning up the codes
+*				2004/3/30 09:15 GMT-8 by Unruled Boy
+*					1.Adding ImportanceType
 */
 
 using System;
@@ -114,6 +116,26 @@ namespace OpenPOP.POP3
 		public string Importance
 		{
 			get{return _importance;}
+		}
+
+		public MessageImportanceType ImportanceType
+		{
+			get{
+				switch(_importance)
+				{
+					case "5":
+					case "HIGH":
+						return MessageImportanceType.HIGH;
+					case "3":
+					case "NORMAL":
+						return MessageImportanceType.NORMAL;
+					case "1":
+					case "LOW":
+						return MessageImportanceType.LOW;
+					default:
+						return MessageImportanceType.NORMAL;
+				}
+			}
 		}
 
 		public string ContentCharset
