@@ -35,7 +35,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace COM.NET.MAIL.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
