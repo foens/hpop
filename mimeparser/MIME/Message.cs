@@ -1,11 +1,14 @@
 /*
-*Name:			OpenPOP.MIMEParser.Message
+*Name:			COM.NET.MAIL.POP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/11 17:00 GMT+8 by Unruled Boy
+*					1.Fixed a bug in parsing ContentCharset
+*					2.Fixed a bug in ParseStreamLines
 *				2004/5/8 17:00 GMT+8 by Unruled Boy
 *					1.Fixed a bug in parsing boundary
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
@@ -35,7 +38,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace OpenPOP.MIMEParser
+namespace COM.NET.MAIL.POP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -160,7 +163,8 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		public MessageImportanceType ImportanceType
 		{
-			get{
+			get
+			{
 				switch(_importance.ToUpper())
 				{
 					case "5":
@@ -568,10 +572,10 @@ namespace OpenPOP.MIMEParser
 				return strBuffer;
 		}
 
-        /// <summary>
-        /// parse message body
-        /// </summary>
-        /// <param name="strBuffer">raw message body</param>
+		/// <summary>
+		/// parse message body
+		/// </summary>
+		/// <param name="strBuffer">raw message body</param>
 		public void GetMessageBody(string strBuffer)
 		{
 			int end, begin;
@@ -585,11 +589,11 @@ namespace OpenPOP.MIMEParser
 			{
 				if(Utility.IsOrNullTextEx(strBuffer))
 					return;
-				else if(Utility.IsOrNullTextEx(_contentType))
+				else if(Utility.IsOrNullTextEx(_contentType) && _contentTransferEncoding==null)
 				{
 					_messageBody.Add(GetTextBody(strBuffer));
 				}
-				else if(_contentType.IndexOf("digest") >= 0)
+				else if(_contentType!=null && _contentType.IndexOf("digest") >= 0)
 				{
 					// this is a digest method
 					//ParseDigestMessage(strBuffer);
@@ -856,20 +860,20 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-//				FileStream fs=File.Create(strFileName);
-//				byte[] da;
-//				if(attItem.ContentFileName.Length>0)
-//				{
-//					da=attItem.DecodedAttachment;
-//				}
-//				else
-//				{
-//					this.GetMessageBody(attItem.DecodeAttachmentAsText());
-//					da=Encoding.Default.GetBytes((string)this.MessageBody[this.MessageBody.Count-1]);
-//				}
-//				fs.Write(da,0,da.Length);
-//				fs.Close();
-//				return true;
+				//				FileStream fs=File.Create(strFileName);
+				//				byte[] da;
+				//				if(attItem.ContentFileName.Length>0)
+				//				{
+				//					da=attItem.DecodedAttachment;
+				//				}
+				//				else
+				//				{
+				//					this.GetMessageBody(attItem.DecodeAttachmentAsText());
+				//					da=Encoding.Default.GetBytes((string)this.MessageBody[this.MessageBody.Count-1]);
+				//				}
+				//				fs.Write(da,0,da.Length);
+				//				fs.Close();
+				//				return true;
 				byte[] da;
 				if(attItem.InBytes)
 				{
@@ -951,7 +955,7 @@ namespace OpenPOP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "COM.NET.MAIL.POP.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
@@ -989,11 +993,11 @@ namespace OpenPOP.MIMEParser
 			indexOfAttachmentBoundry2Begin=strBuffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
 			if(indexOfAttachmentBoundry2Begin!=-1)
 			{
-/*				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
-				indexOfAttachmentBoundry2End=strBuffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
-				if(indexOfAttachmentBoundry2Begin!=-1&&indexOfAttachmentBoundry2End!=-1)
-					_attachmentboundry2=strBuffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
-*/
+				/*				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
+								indexOfAttachmentBoundry2End=strBuffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
+								if(indexOfAttachmentBoundry2Begin!=-1&&indexOfAttachmentBoundry2End!=-1)
+									_attachmentboundry2=strBuffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
+				*/
 				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=");
 				if(indexOfAttachmentBoundry2Begin!=-1)
 				{
@@ -1028,10 +1032,10 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">reference header line</param>
 		/// <param name="alCollection">collection to hold every content line</param>
 		private void ParseStreamLines(StringBuilder sbdBuilder
-									  ,StringReader srdReader
-									  ,string strValue
-									  ,ref string strLine
-									  ,ArrayList alCollection)
+			,StringReader srdReader
+			,string strValue
+			,ref string strLine
+			,ArrayList alCollection)
 		{
 			string strFormmated;
 			int intLines=0;
@@ -1049,12 +1053,16 @@ namespace OpenPOP.MIMEParser
 				strLine=srdReader.ReadLine();
 				intLines++;
 			}
-			sbdBuilder.Append(strLine);
 
-			if(intLines==0)
+			if(strLine!="")
 			{
-				strLine=srdReader.ReadLine();
 				sbdBuilder.Append(strLine);
+
+				if(intLines==0)
+				{
+					strLine=srdReader.ReadLine();
+					sbdBuilder.Append(strLine);
+				}
 			}
 
 			parseHeader(sbdBuilder,srdReader,ref strLine);
@@ -1070,17 +1078,17 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">reference header line</param>
 		/// <param name="hstCollection">collection to hold every content line</param>
 		private void ParseStreamLines(StringBuilder sbdBuilder
-									  ,StringReader srdReader
-									  ,string strName
-									  ,string strValue
-									  ,ref string strLine
-									  ,Hashtable hstCollection)
+			,StringReader srdReader
+			,string strName
+			,string strValue
+			,ref string strLine
+			,Hashtable hstCollection)
 		{
 			string strFormmated;
 			string strReturn=strValue;
 			int intLines=0;
 
-			sbdBuilder.Append(strLine);
+			//sbdBuilder.Append(strLine);
 
 			strLine=srdReader.ReadLine();
 			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
@@ -1093,12 +1101,16 @@ namespace OpenPOP.MIMEParser
 			}
 			if(!hstCollection.ContainsKey(strName))
 				hstCollection.Add(strName,strReturn);
-			sbdBuilder.Append(strLine);
 
-			if(intLines==0)
+			if(strLine!="")
 			{
-				strLine=srdReader.ReadLine();
 				sbdBuilder.Append(strLine);
+
+				if(intLines==0)
+				{
+					strLine=srdReader.ReadLine();
+					sbdBuilder.Append(strLine);
+				}
 			}
 
 			parseHeader(sbdBuilder,srdReader,ref strLine);
@@ -1114,11 +1126,11 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strReturn">return value</param>
 		/// <param name="blnLineDecode">decode each line</param>
 		private void ParseStreamLines(StringBuilder sbdBuilder
-									  ,StringReader srdReader
-									  ,string strValue
-									  ,ref string strLine
-									  ,ref string strReturn
-									  ,bool blnLineDecode)
+			,StringReader srdReader
+			,string strValue
+			,ref string strLine
+			,ref string strReturn
+			,bool blnLineDecode)
 		{
 			string strFormmated;
 			int intLines=0;
@@ -1138,13 +1150,18 @@ namespace OpenPOP.MIMEParser
 				strLine=srdReader.ReadLine();
 				intLines++;
 			}
-			sbdBuilder.Append(strLine);
 
-			if(intLines==0)
+			if(strLine!="")
 			{
-				strLine=srdReader.ReadLine();
 				sbdBuilder.Append(strLine);
+
+				if(intLines==0)
+				{
+					strLine=srdReader.ReadLine();
+					sbdBuilder.Append(strLine);
+				}
 			}
+
 			if(!blnLineDecode)
 				strReturn=Utility.DecodeLine(strReturn);
 				
@@ -1291,7 +1308,12 @@ namespace OpenPOP.MIMEParser
 					{
 						//int intPos=strLine.IndexOf("\"",intCharset+9);
 						//_contentCharset=strLine.Substring(intCharset+9,intPos-intCharset-9);
-						_contentCharset=strLine.Substring(intCharset+8);
+						//_contentCharset=strLine.Substring(intCharset+8);
+						int intBound2=strLine.ToLower().IndexOf(";",intCharset+8);
+						if(intBound2==-1)
+							intBound2=strLine.Length;
+						intBound2-=(intCharset+8);
+						_contentCharset=strLine.Substring(intCharset+8,intBound2);
 						_contentCharset=Utility.RemoveQuote(_contentCharset);
 					}
 					else 
@@ -1393,3 +1415,4 @@ namespace OpenPOP.MIMEParser
 
 	}
 }
+
