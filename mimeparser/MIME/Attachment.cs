@@ -20,9 +20,11 @@
 *Function:		Attachment
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
+*Last Modified:	2004/6/26 15:5 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/26 15:5 GMT+8 by Unruled Boy
+*					1.Modified DecodeAsMessage() function and added RawContent property to make it handle forwarded email that treats original email as attachment
 *				2004/6/23 09:02 GMT+8 by grandepuffo via Unruled Boy
 *					1.Fixed a bug in verifying the null return line @ http://sourceforge.net/tracker/index.php?func=detail&aid=975232&group_id=92166&atid=599778
 *				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
@@ -71,6 +73,7 @@ namespace OpenPOP.MIMEParser
 		private string _contentID=null;
 		private long _contentLength=0;
 		private string _rawAttachment=null;
+		private string _rawContent=null;
 		private bool _inBytes=false;
 		private byte[] _rawBytes=null;
 		#endregion
@@ -229,6 +232,14 @@ namespace OpenPOP.MIMEParser
 		}
 
 		/// <summary>
+		/// Raw Content
+		/// </summary>
+		public string RawContent
+		{
+			get{return _rawContent;}
+		}
+
+		/// <summary>
 		/// Raw Attachment
 		/// </summary>
 		public string RawAttachment
@@ -325,6 +336,8 @@ namespace OpenPOP.MIMEParser
 
 			if(strAttachment==null)
 				throw new ArgumentNullException("strAttachment");
+
+			_rawContent=strAttachment;
 
 			StringReader srReader=new StringReader(strAttachment);
 
@@ -474,17 +487,26 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// decode attachment to be a message object
 		/// </summary>
-		/// <returns>message</returns>
-		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine)
+		/// <param name="blnRemoveHeaderBlankLine"></param>
+		/// <param name="blnUseRawContent"></param>
+		/// <returns>new message object</returns>
+		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine, bool blnUseRawContent)
 		{
 			bool blnRet=false;
-			if(blnRemoveHeaderBlankLine)
+			string strContent=blnUseRawContent?_rawContent:_rawAttachment;
+
+			/*if(blnRemoveHeaderBlankLine)
 			{
-				int intPos=_rawAttachment.IndexOf("\r\n");
-				if(intPos!=-1)
-					_rawAttachment=_rawAttachment.Substring(intPos+2,_rawAttachment.Length-intPos-2);
-			}
-			return new Message(ref blnRet,"",false ,_rawAttachment,false);
+				int intPos;
+				{
+					intPos=strContent.IndexOf("\r\n");
+					if(intPos!=-1)
+						strContent=strContent.Substring(intPos+2,strContent.Length-intPos-2);
+				}
+			}*/
+			if(blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
+				strContent=strContent.Substring(2,strContent.Length-2);					
+			return new Message(ref blnRet,"",false ,strContent,false);
 		}
 
 		/// <summary>

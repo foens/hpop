@@ -1,3 +1,15 @@
+2004/6/28 01:32 GMT+8 by Unruled Boy
+	1.Fixed a bug in not docoding multi-line sender
+
+2004/6/26 16:03 GMT+8 by Unruled Boy
+	1.Renamed set_attachments to SetAttachments(), modified it and related functions to handle forwarded email that treats original email as attachment
+
+2004/6/26 15:5 GMT+8 by Unruled Boy
+	1.Modified DecodeAsMessage() function and added RawContent property to make it handle forwarded email that treats original email as attachment
+
+2004/6/23 09:02 GMT+8 by grandepuffo via Unruled Boy
+	1.Fixed a bug in verifying the null return line @ http://sourceforge.net/tracker/index.php?func=detail&aid=975232&group_id=92166&atid=599778
+
 2004/6/20 18:38 GMT+8 by Unruled Boy
 	1.fixed a bug in decoding forwared emails
 

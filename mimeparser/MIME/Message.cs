@@ -20,9 +20,13 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/6/16 18:34 GMT+8 by Unruled Boy
+*Modified:		2004/6/28 01:32 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/28 01:32 GMT+8 by Unruled Boy
+*					1.Fixed a bug in not docoding multi-line sender
+*				2004/6/26 16:03 GMT+8 by Unruled Boy
+*					1.Renamed set_attachments to SetAttachments(), modified it and related functions to handle forwarded email that treats original email as attachment
 *				2004/6/16 18:34 GMT+8 by Unruled Boy
 *					1.fixed a loop in message body decoding by .
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
@@ -519,7 +523,7 @@ namespace OpenPOP.MIMEParser
 				Utility.LogError("GetAttachment():attachment not exist");
 				throw new ArgumentOutOfRangeException("intAttachmentNumber");	
 			}
-			return (Attachment)_attachments[intAttachmentNumber];		
+			return (Attachment)_attachments[intAttachmentNumber];
 		}
 
 		/// <summary>
@@ -565,7 +569,7 @@ namespace OpenPOP.MIMEParser
 				//the auto reply mail by outlook uses ms-tnef format
 				if((_hasAttachment==true && _attachmentboundry!=null)||MIMETypes.IsMSTNEF(_contentType))
 				{
-					set_attachments();
+					SetAttachments();
 
 					if (this.Attachments.Count>0)
 					{
@@ -769,7 +773,8 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				return (attItem.ContentType.ToLower()=="multipart/related".ToLower() && attItem.ContentFileName=="");
+				//return (attItem.ContentType.ToLower()=="multipart/related".ToLower() && attItem.ContentFileName=="");
+				return (attItem.ContentType.ToLower().StartsWith("multipart/".ToLower()) && attItem.ContentFileName=="");
 			}
 			catch(Exception e)
 			{
@@ -932,20 +937,6 @@ namespace OpenPOP.MIMEParser
 			byte[] da;
 			try
 			{
-				//				FileStream fs=File.Create(strFileName);
-				//				byte[] da;
-				//				if(attItem.ContentFileName.Length>0)
-				//				{
-				//					da=attItem.DecodedAttachment;
-				//				}
-				//				else
-				//				{
-				//					this.GetMessageBody(attItem.DecodeAttachmentAsText());
-				//					da=Encoding.Default.GetBytes((string)this.MessageBody[this.MessageBody.Count-1]);
-				//				}
-				//				fs.Write(da,0,da.Length);
-				//				fs.Close();
-				//				return true;
 				if(attItem.InBytes)
 				{
 					da=attItem.RawBytes;
@@ -977,7 +968,7 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// set attachments
 		/// </summary>
-		private void set_attachments()
+		private void SetAttachments()
 		{
 			int indexOfAttachmentStart=0;
 			int indexOfAttachmentEnd=0;
@@ -1028,7 +1019,7 @@ namespace OpenPOP.MIMEParser
 				//ms-tnef format might contain multiple attachments
 				if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF && !isMSTNEF) 
 				{
-					Utility.LogError("set_attachments():found ms-tnef file");
+					Utility.LogError("SetAttachments():found ms-tnef file");
 					TNEFParser tnef=new TNEFParser();
 					TNEFAttachment tatt=new TNEFAttachment();
 					Attachment attNew=null;
@@ -1049,14 +1040,14 @@ namespace OpenPOP.MIMEParser
 							}
 						}
 						else
-							Utility.LogError("set_attachments():ms-tnef file parse failed");
+							Utility.LogError("SetAttachments():ms-tnef file parse failed");
 					}
 					else
-						Utility.LogError("set_attachments():ms-tnef file open failed");
+						Utility.LogError("SetAttachments():ms-tnef file open failed");
 				}
 				else if(IsMIMEMailFile2(att))
 				{
-					m=att.DecodeAsMessage(true);
+					m=att.DecodeAsMessage(true,true);
 					for(int i=0;i<m.AttachmentCount;i++)
 					{
 						att=m.GetAttachment(i);
@@ -1085,11 +1076,6 @@ namespace OpenPOP.MIMEParser
 			indexOfAttachmentBoundry2Begin=strBuffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
 			if(indexOfAttachmentBoundry2Begin!=-1)
 			{
-				/*				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
-								indexOfAttachmentBoundry2End=strBuffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
-								if(indexOfAttachmentBoundry2Begin!=-1&&indexOfAttachmentBoundry2End!=-1)
-									_attachmentboundry2=strBuffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
-				*/
 				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=");
 				if(indexOfAttachmentBoundry2Begin!=-1)
 				{
@@ -1301,11 +1287,13 @@ namespace OpenPOP.MIMEParser
 					break;
 
 				case "FROM":
-					Utility.ParseEmailAddress(array[1],ref _from,ref _fromEmail);
+					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _from,false);
+					Utility.ParseEmailAddress(_from,ref _from,ref _fromEmail);
 					break;
 
 				case "REPLY-TO":
-					Utility.ParseEmailAddress(array[1],ref _replyTo,ref _replyToEmail);
+					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _replyTo,false);
+					Utility.ParseEmailAddress(_replyTo,ref _replyTo,ref _replyToEmail);
 					break;
 
 				case "KEYWORDS": //ms outlook keywords

@@ -180,7 +180,7 @@ namespace OpenPOP.MIMEParser
 			{
 				if(indexOfAB>0)
 				{
-					strUser=strUser.Substring(0,indexOfAB-1);
+					strUser=strUser.Substring(0,indexOfAB);//-1
 					//					strUser=strUser.Substring(0,indexOfAB-1).Trim('\"');
 					//					if(strUser.IndexOf("\"")>=0)
 					//					{
@@ -194,6 +194,7 @@ namespace OpenPOP.MIMEParser
 			strUser=strUser.Trim();
 			strUser=DecodeText(strUser);
 			strAddress=strAddress.Trim();
+			strAddress=DecodeText(strAddress);
 
 			return true;
 		}
