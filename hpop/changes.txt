@@ -1,3 +1,9 @@
+2004/5/31 14:22 GMT+8 by Unruled Boy
+	1.Fixed a bug in decoding Base64 text when using non-standard encoding
+
+2004/5/30 15:04 GMT+8 by Unruled Boy
+	1.Added all description to all functions
+
 2004/5/26 15:08 GMT+8 by Unruled Boy
 	1.Added copyrights regarding GPL/LPGL
 
@@ -51,7 +57,7 @@
 	3.Maybe we correct the HTML content type bug
 
 2004/4/23 20:29 GMT+8 by Unruled Boy
-	1.Separating OpenPOPSMTP.Mail into two independant libries: OpenPOPSMTP.Mail and MIMEParser
+	1.Separating OpenPOP into two independant libries: OpenPOP and MIMEParser
 	2.Modifies the construction for new Message in POPClient class
 	3.New Contructor of Message Class
 	4.Tidy up the codes to follow Hungarian Notation

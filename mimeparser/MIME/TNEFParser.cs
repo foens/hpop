@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	iOfficeMail.Net is free software; you can redistribute it and/or modify
+	OpenPOP.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	iOfficeMail.Net is distributed in the hope that it will be useful,
+	OpenPOP.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -20,8 +20,8 @@
 **********************************************************************/
 
 /*
-*Name:			iOfficeMail.MIMEParser.Message
-*Function:		Message Parser
+*Name:			OpenPOP.MIMEParser.TNEFParser
+*Function:		MS TNEF Parser
 *Author:		Thomas Boll(c version), Unruled Boy(c# version)
 *Created:		2004/3
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
@@ -35,10 +35,10 @@ using System.IO;
 using System.Text;
 using System.Collections;
 
-namespace iOfficeMail.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
-	/// iOfficeMail.MIMEParser.TNEFParser
+	/// OpenPOP.MIMEParser.TNEFParser
 	/// </summary>
 	public class TNEFParser
 	{
@@ -62,7 +62,7 @@ namespace iOfficeMail.MIMEParser
 		private TNEFAttachment _attachment=null;
 
 		private bool _verbose = false;
-		//private string _logFile="iOfficeMailSMTP.Mail.TNEF.log";
+		//private string _logFile="OpenPOP.TNEF.log";
 		private string _basePath=null;
 		private int _skipSignature = 0;
 		private bool _searchSignature = false;

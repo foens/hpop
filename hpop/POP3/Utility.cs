@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	iOfficeMail.Net is free software; you can redistribute it and/or modify
+	OpenPOP.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	iOfficeMail.Net is distributed in the hope that it will be useful,
+	OpenPOP.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			iOfficeMailSMTP.Mail.Utility
+*Name:			OpenPOP.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -30,7 +30,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 
-namespace iOfficeMail.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// Utility functions
@@ -45,7 +45,7 @@ namespace iOfficeMail.POP3
 		/// <summary>
 		/// The file name in which the logging will be done
 		/// </summary>
-		private static string m_strLogFile = "iOfficeMailSMTP.Mail.log";
+		private static string m_strLogFile = "OpenPOP.log";
 
 		/// <summary>
 		/// Turns file logging on and off.<font color="red"><h1>Change Property Name</h1></font>

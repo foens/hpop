@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	iOfficeMail.Net is free software; you can redistribute it and/or modify
+	OpenPOP.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	iOfficeMail.Net is distributed in the hope that it will be useful,
+	OpenPOP.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			iOfficeMail.MIMEParser.Message
+*Name:			OpenPOP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -60,7 +60,7 @@ using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace iOfficeMail.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -928,14 +928,14 @@ namespace iOfficeMail.MIMEParser
 					this.GetMessageBody(attItem.DecodeAsText());
 					da=Encoding.Default.GetBytes((string)this.MessageBody[this.MessageBody.Count-1]);
 				}
-				return Utility.SaveByteContentToFile(da,strFileName);
+				return Utility.SaveByteContentToFile(strFileName,da);
 			}
 			catch
 			{
 				/*Utility.LogError("SaveAttachment():"+e.Message);
 				return false;*/
 				da=Encoding.Default.GetBytes(attItem.RawAttachment);
-				return Utility.SaveByteContentToFile(da,strFileName);
+				return Utility.SaveByteContentToFile(strFileName,da);
 			}
 		}
 
@@ -998,7 +998,7 @@ namespace iOfficeMail.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "iOfficeMailSMTP.Mail.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
@@ -1225,7 +1225,7 @@ namespace iOfficeMail.MIMEParser
 		/// <param name="strLine">reference header line</param>
 		private void ParseHeader(StringBuilder sbdBuilder,StringReader srdReader,ref string strLine)
 		{
-			string []array=Regex.Split(strLine,":");//Utility.GetHeadersValue(strLine);
+			string []array=Utility.GetHeadersValue(strLine);//Regex.Split(strLine,":");
 
 			switch(array[0].ToUpper())
 			{
@@ -1283,7 +1283,12 @@ namespace iOfficeMail.MIMEParser
 
 				case "SUBJECT":
 				case "THREAD-TOPIC":
-					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _subject,false);
+					string strRet=null;
+					for(int i=1;i<array.Length;i++)
+					{
+						strRet+=array[i];
+					}
+					ParseStreamLines(sbdBuilder,srdReader,strRet,ref strLine,ref _subject,false);
 					break;
 
 				case "RETURN-PATH":

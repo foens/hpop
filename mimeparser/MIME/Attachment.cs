@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	iOfficeMail.Net is free software; you can redistribute it and/or modify
+	OpenPOP.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	iOfficeMail.Net is distributed in the hope that it will be useful,
+	OpenPOP.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -15,10 +15,9 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-
 /*
-*Name:			iOfficeMail.MIMEParser.Attachment
-*Function:		
+*Name:			OpenPOP.MIMEParser.Attachment
+*Function:		Attachment
 *Author:		Hamid Qureshi
 *Created:		2003/8
 *Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
@@ -47,12 +46,12 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace iOfficeMail.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Attachment.
 	/// </summary>
-	public class Attachment
+	public class Attachment : IComparable
 	{
 		#region Member Variables
 		private string _contentType=null;
@@ -351,7 +350,7 @@ namespace iOfficeMail.MIMEParser
 		/// <param name="strLine">header line</param>
 		private void ParseHeader(StringReader srReader,ref string strLine)
 		{
-			string []array=Regex.Split(strLine,":");//Utility.GetHeadersValue(strLine);
+			string []array=Utility.GetHeadersValue(strLine);//Regex.Split(strLine,":");
 			string []values=Regex.Split(array[1],";");//array[1].Split(';');
 			string strRet=null;
 
@@ -521,6 +520,11 @@ namespace iOfficeMail.MIMEParser
 			{
 				return null;
 			}
+		}
+
+		public int CompareTo(object attachment)
+		{
+			return (this.RawAttachment.CompareTo(((Attachment)(attachment)).RawAttachment));
 		}
 	}
 }

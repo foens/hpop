@@ -4,10 +4,6 @@
         ProductVersion = "7.10.3077"
         SchemaVersion = "2.0"
         ProjectGuid = "{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}"
-        SccProjectName = "SAK"
-        SccLocalPath = "SAK"
-        SccAuxPath = "SAK"
-        SccProvider = "SAK"
     >
         <Build>
             <Settings
@@ -98,11 +94,6 @@
                     Project = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
-                <Reference
-                    Name = "MIMEParser"
-                    Project = "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
             </References>
         </Build>
         <Files>
@@ -117,13 +108,13 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Form1.cs"
+                    RelPath = "frmTest.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Form1.resx"
-                    DependentUpon = "Form1.cs"
+                    RelPath = "frmTest.resx"
+                    DependentUpon = "frmTest.cs"
                     BuildAction = "EmbeddedResource"
                 />
             </Include>

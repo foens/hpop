@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	iOfficeMail.Net is free software; you can redistribute it and/or modify
+	OpenPOP.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	iOfficeMail.Net is distributed in the hope that it will be useful,
+	OpenPOP.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			iOfficeMail.POP3.POPClient
+*Name:			OpenPOP.POP3.POPClient
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -51,13 +51,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace iOfficeMail.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// POPClient
 	/// </summary>
 	public class POPClient
 	{
+		/// <summary>
+		/// Event that fires when begin to connect with target POP3 server.
+		/// </summary>
+		public event EventHandler CommunicationBegan;
 		/// <summary>
 		/// Event that fires when connected with target POP3 server.
 		/// </summary>
@@ -87,6 +91,12 @@ namespace iOfficeMail.POP3
 		/// Event that fires when message transfer has finished.
 		/// </summary>
 		public event EventHandler MessageTransferFinished;
+
+		internal void OnCommunicationBegan(EventArgs e)
+		{
+			if (CommunicationBegan != null)
+				CommunicationBegan(this, e);
+		}
 
 		internal void OnCommunicationOccured(EventArgs e)
 		{
@@ -141,7 +151,13 @@ namespace iOfficeMail.POP3
 		private int _receiveContentSleepInterval=100;
 		private string _aPOPTimestamp;
 		private string _lastCommandResponse;
+		private bool _connected=true;
 
+
+		public bool Connected
+		{
+			get{return _connected;}
+		}
 
 		public string APOPTimestamp
 		{
@@ -303,8 +319,9 @@ namespace iOfficeMail.POP3
 		/// Sends a command to the POP server.
 		/// </summary>
 		/// <param name="strCommand">command to send to server</param>
+		/// <param name="blnSilent">Do not give error</param>
 		/// <returns>true if server responded "+OK"</returns>
-		private bool SendCommand(string strCommand)
+		private bool SendCommand(string strCommand, bool blnSilent)
 		{
 			_lastCommandResponse = "";
 			try
@@ -317,10 +334,23 @@ namespace iOfficeMail.POP3
 			}
 			catch(Exception e)
 			{
-				_Error = strCommand + ":" +e.Message;
-				Utility.LogError(_Error);
+				if(!blnSilent)
+				{
+					_Error = strCommand + ":" +e.Message;
+					Utility.LogError(_Error);
+				}
 				return false;
 			}
+		}
+
+		/// <summary>
+		/// Sends a command to the POP server.
+		/// </summary>
+		/// <param name="strCommand">command to send to server</param>
+		/// <returns>true if server responded "+OK"</returns>
+		private bool SendCommand(string strCommand)
+		{
+			return SendCommand(strCommand,false);
 		}
 
 		/// <summary>
@@ -369,6 +399,8 @@ namespace iOfficeMail.POP3
 		/// <param name="intPort">pop3 port</param>
 		public void Connect(string strHost,int intPort)
 		{
+			OnCommunicationBegan(EventArgs.Empty);
+
 			clientSocket=new TcpClient();
 			clientSocket.ReceiveTimeout=_receiveTimeOut;
 			clientSocket.SendTimeout=_sendTimeOut;
@@ -397,6 +429,7 @@ namespace iOfficeMail.POP3
 			if(IsOkResponse(strResponse))
 			{
 				ExtractApopTimestamp(strResponse);
+				_connected=true;
 				OnCommunicationOccured(EventArgs.Empty);
 			}
 			else
@@ -414,7 +447,7 @@ namespace iOfficeMail.POP3
 		{
 			try
 			{				
-				QUIT();
+				SendCommand("QUIT",true);
 				reader.Close();
 				writer.Close();
 				clientSocket.GetStream().Close();
@@ -598,7 +631,7 @@ namespace iOfficeMail.POP3
 		/// <summary>
 		/// quit pop3 server
 		/// </summary>
-		public bool QUIT() 
+		public bool QUIT()
 		{
 			return SendCommand("QUIT");
 		}
