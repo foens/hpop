@@ -5,7 +5,12 @@
 	4.Tidy up the codes to follow Hungarian Notation
 
 2004/3/29 10:38 GMT+8 by Unruled Boy
-	1.removing bugs in decoding message
+	1. remove attachment/message parsing bugs;
+	2. formatting codes;
+	3. adding TNEF parsing sample project files.
+	4. adding descriptions for every class;
+	5. adding NOOP/RSET/USER commands
+
 2004/3/29 17:22 GMT+8 by Unruled Boy
 	1.adding support for reply message using ms-tnef 
 	2.adding support for all custom message headers
