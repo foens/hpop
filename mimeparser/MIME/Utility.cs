@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOP.Utility
+*Name:			OpenPOPSMTP.Mail.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -49,7 +49,7 @@ namespace OpenPOP.MIMEParser
 	public class Utility
 	{
 		private static bool m_blnLog=false;
-		private static string m_strLogFile = "OpenPOP.log";
+		private static string m_strLogFile = "OpenPOPSMTP.Mail.log";
 
 		public Utility()
 		{

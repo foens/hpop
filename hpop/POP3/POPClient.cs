@@ -376,7 +376,7 @@ namespace OpenPOP.POP3
 				throw new PopServerNotFoundException();
 			}
 
-			reader=new StreamReader(clientSocket.GetStream(),Encoding.Default,true);//'Encoding.GetEncoding("GB2312"),true);
+			reader=new StreamReader(clientSocket.GetStream(),Encoding.Default,true);
 			writer=new StreamWriter(clientSocket.GetStream());
 			writer.AutoFlush=true;
 		

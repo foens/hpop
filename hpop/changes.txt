@@ -51,7 +51,7 @@
 	3.Maybe we correct the HTML content type bug
 
 2004/4/23 20:29 GMT+8 by Unruled Boy
-	1.Separating iOfficeMailSMTP.Mail into two independant libries: iOfficeMailSMTP.Mail and MIMEParser
+	1.Separating OpenPOPSMTP.Mail into two independant libries: OpenPOPSMTP.Mail and MIMEParser
 	2.Modifies the construction for new Message in POPClient class
 	3.New Contructor of Message Class
 	4.Tidy up the codes to follow Hungarian Notation

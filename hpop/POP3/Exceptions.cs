@@ -44,7 +44,7 @@ namespace OpenPOP.POP3
 	{}
 
 	/// <summary>
-	/// Thrown when the attachment is not in a format supported by iOfficeMailSMTP.Mail.NET
+	/// Thrown when the attachment is not in a format supported by OpenPOPSMTP.Mail.NET
 	/// </summary>
 	/// <remarks>Supported attachment encodings are Base64,Quoted Printable,MS TNEF</remarks>
 	public class AttachmentEncodingNotSupportedException:Exception

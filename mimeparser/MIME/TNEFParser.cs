@@ -62,7 +62,7 @@ namespace OpenPOP.MIMEParser
 		private TNEFAttachment _attachment=null;
 
 		private bool _verbose = false;
-		//private string _logFile="OpenPOP.TNEF.log";
+		//private string _logFile="OpenPOPSMTP.Mail.TNEF.log";
 		private string _basePath=null;
 		private int _skipSignature = 0;
 		private bool _searchSignature = false;

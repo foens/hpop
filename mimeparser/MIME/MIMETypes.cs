@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOP.MIMETypes
+*Name:			OpenPOPSMTP.Mail.MIMETypes
 *Function:		MIME Types
 *Author:		Unruled Boy
 *Created:		2004/3/29

@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			iOfficeMailSMTP.Mail.Utility
+*Name:			OpenPOPSMTP.Mail.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -45,7 +45,7 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// The file name in which the logging will be done
 		/// </summary>
-		private static string m_strLogFile = "iOfficeMailSMTP.Mail.log";
+		private static string m_strLogFile = "OpenPOPSMTP.Mail.log";
 
 		/// <summary>
 		/// Turns file logging on and off.<font color="red"><h1>Change Property Name</h1></font>

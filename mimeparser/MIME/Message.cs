@@ -997,7 +997,7 @@ namespace OpenPOP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "OpenPOPSMTP.Mail.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
