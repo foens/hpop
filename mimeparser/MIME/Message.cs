@@ -6,6 +6,8 @@
 *Modified:		2004/3/29 17:22 GMT+8
 *Description	:
 *Changes:		
+*				2004/4/29 19:05 GMT+8 by Unruled Boy
+*					1.Fixed the bug parsing headers/boundary
 *				2004/4/28 19:06 GMT+8 by Unruled Boy
 *					1.Adding DateTimeInfo property
 *					2.Maybe we correct the HTML content type bug
@@ -307,7 +309,7 @@ namespace OpenPOP.MIMEParser
 			return (Attachment)_attachments[intAttachmentNumber];		
 		}
 
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
+		private bool NewMessage(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
 		{
 			StringReader srdReader=new StringReader(strMessage);
 			StringBuilder sbdBuilder=new StringBuilder();
@@ -370,6 +372,23 @@ namespace OpenPOP.MIMEParser
 			}
 
 			blnFinish=true;
+			return true;
+		}
+
+		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
+		{
+			string strMessage=null;
+			if(Utility.ReadPlainTextFromFile(strEMLFile,ref strMessage))
+			{
+				NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
+			}
+			else
+				blnFinish=true;
+		}
+
+		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
+		{
+			NewMessage(ref blnFinish,strBasePath,blnAutoDecodeMSTNEF,strMessage,blnOnlyHeader);
 		}
 
 		/// <summary>
@@ -821,10 +840,19 @@ namespace OpenPOP.MIMEParser
 			indexOfAttachmentBoundry2Begin=strBuffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
 			if(indexOfAttachmentBoundry2Begin!=-1)
 			{
-				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
+/*				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
 				indexOfAttachmentBoundry2End=strBuffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
 				if(indexOfAttachmentBoundry2Begin!=-1&&indexOfAttachmentBoundry2End!=-1)
 					_attachmentboundry2=strBuffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
+*/
+				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=");
+				if(indexOfAttachmentBoundry2Begin!=-1)
+				{
+					indexOfAttachmentBoundry2End=strBuffer.IndexOf("\r\n",indexOfAttachmentBoundry2Begin+9);
+					if(indexOfAttachmentBoundry2End==-1)
+						indexOfAttachmentBoundry2End=strBuffer.Length;
+					_attachmentboundry2=Utility.RemoveQuote(strBuffer.Substring(indexOfAttachmentBoundry2Begin+9,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-9));
+				}					
 			}
 			else
 			{
@@ -852,16 +880,29 @@ namespace OpenPOP.MIMEParser
 									  ,ArrayList alCollection)
 		{
 			string strFormmated;
+			int intLines=0;
 			alCollection.Add(strValue);
+
+			sbdBuilder.Append(strLine);
+
 			strLine=srdReader.ReadLine();
-			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+
+			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
 			{
-				strFormmated=" "+strLine.Substring(1);
+				strFormmated=strLine.Substring(1);
 				alCollection.Add(Utility.DecodeLine(strFormmated));
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
+				intLines++;
 			}
 			sbdBuilder.Append(strLine);
+
+			if(intLines==0)
+			{
+				strLine=srdReader.ReadLine();
+				sbdBuilder.Append(strLine);
+			}
+
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
@@ -883,17 +924,29 @@ namespace OpenPOP.MIMEParser
 		{
 			string strFormmated;
 			string strReturn=strValue;
+			int intLines=0;
+
+			sbdBuilder.Append(strLine);
+
 			strLine=srdReader.ReadLine();
-			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
 			{
-				strFormmated=" "+strLine.Substring(1);
+				strFormmated=strLine.Substring(1);
 				strReturn+=Utility.DecodeLine(strFormmated);
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
+				intLines++;
 			}
 			if(!hstCollection.ContainsKey(strName))
 				hstCollection.Add(strName,strReturn);
 			sbdBuilder.Append(strLine);
+
+			if(intLines==0)
+			{
+				strLine=srdReader.ReadLine();
+				sbdBuilder.Append(strLine);
+			}
+
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
@@ -914,18 +967,33 @@ namespace OpenPOP.MIMEParser
 									  ,bool blnLineDecode)
 		{
 			string strFormmated;
+			int intLines=0;
 			strReturn=strValue;
+
+			sbdBuilder.Append(strLine);
+
+			if(blnLineDecode==true)
+				strReturn=Utility.DecodeLine(strReturn);
+
 			strLine=srdReader.ReadLine();
-			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
 			{
-				strFormmated=" "+strLine.Substring(1);
+				strFormmated=strLine.Substring(1);
 				strReturn+=(blnLineDecode==true?Utility.DecodeLine(strFormmated):strFormmated);
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
+				intLines++;
 			}
 			sbdBuilder.Append(strLine);
+
+			if(intLines==0)
+			{
+				strLine=srdReader.ReadLine();
+				sbdBuilder.Append(strLine);
+			}
 			if(!blnLineDecode)
-				strReturn=Utility.DecodeLine(strReturn);				
+				strReturn=Utility.DecodeLine(strReturn);
+				
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
@@ -937,7 +1005,7 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">reference header line</param>
 		private void parseHeader(StringBuilder sbdBuilder,StringReader srdReader,ref string strLine)
 		{
-			string []array=Utility.getHeadersValue(strLine);
+			string []array=Utility.GetHeadersValue(strLine);
 
 			switch(array[0].ToUpper())
 			{
@@ -1100,7 +1168,7 @@ namespace OpenPOP.MIMEParser
 					}
 					if(_contentType=="text/plain")
 						return;
-					else if(_contentType.ToLower()=="text/html"||_contentType.ToLower()=="multipart/alternative")
+					else if(_contentType.ToLower()=="text/html"||_contentType.ToLower().IndexOf("multipart/")!=-1)
 						_html=true;
 
 					if(strLine.Trim().Length==_contentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
@@ -1122,6 +1190,7 @@ namespace OpenPOP.MIMEParser
 							_attachmentboundry=srdReader.ReadLine();
 							sbdBuilder.Append(_attachmentboundry);
 						}
+						_attachmentboundry=strLine;
 					}
 					else
 					{
@@ -1131,9 +1200,7 @@ namespace OpenPOP.MIMEParser
 							_attachmentboundry=strLine;
 					}
 
-					_attachmentboundry=strLine;
-
-					int indexOfQuote=_attachmentboundry.IndexOf("\"");
+/*					int indexOfQuote=_attachmentboundry.IndexOf("\"");
 					int lastIndexOfQuote=_attachmentboundry.LastIndexOf("\"");
 					if(indexOfQuote>=0&&lastIndexOfQuote>=0)
 					{
@@ -1141,7 +1208,13 @@ namespace OpenPOP.MIMEParser
 
 						_hasAttachment=true;
 					}
-					
+*/					
+					int intBound=_attachmentboundry.ToLower().IndexOf("boundary=");
+					if(intBound!=-1)
+						_attachmentboundry=_attachmentboundry.Substring(intBound+9);
+					_attachmentboundry=Utility.RemoveQuote(_attachmentboundry);
+					_hasAttachment=true;
+
 					break;
 
 				default:

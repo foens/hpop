@@ -6,6 +6,8 @@
 *Modified:		2004/3/29 12:25 GMT+8
 *Description:
 *Changes:		
+*				2004/4/29 19:05 GMT+8 by Unruled Boy
+*					1.Adding ReadPlainTextFromFile function
 *				2004/4/28 19:06 GMT+8 by Unruled Boy
 *					1.Rewriting the Decode method
 *				2004/3/29 12:25 GMT+8 by Unruled Boy
@@ -120,14 +122,14 @@ namespace OpenPOP.MIMEParser
 			return true;
 		}
 
-		public static bool SaveByteContentToFile(byte[] content,string strFile)
+		public static bool SaveByteContentToFile(byte[] bytContent,string strFile)
 		{
 			try
 			{
 				if(File.Exists(strFile))
 					File.Delete(strFile);
 				FileStream fs=File.Create(strFile);
-				fs.Write(content,0,content.Length);
+				fs.Write(bytContent,0,bytContent.Length);
 				fs.Close();
 				return true;
 			}
@@ -138,23 +140,36 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		public static bool ReadPlainTextFromFile(string strFile, ref string strText)
+		{
+			if(File.Exists(strFile))
+			{
+				StreamReader fs=new StreamReader(strFile);
+				strText=fs.ReadToEnd();
+				fs.Close();
+				return true;
+			}
+			else
+				return false;
+		}
+
 		/// <summary>
 		/// Sepearte header name and header value
 		/// </summary>
-		/// <param name="RawHeader"></param>
+		/// <param name="strRawHeader"></param>
 		/// <returns></returns>
-		public static string[] getHeadersValue(string RawHeader)
+		public static string[] GetHeadersValue(string strRawHeader)
 		{
-			if(RawHeader==null)
-				throw new ArgumentNullException("RawHeader","Argument was null");
+			if(strRawHeader==null)
+				throw new ArgumentNullException("strRawHeader","Argument was null");
 
 			string []array=new string[2]{"",""};
-			int indexOfColon=RawHeader.IndexOf(":");			
+			int indexOfColon=strRawHeader.IndexOf(":");			
 
 			try
 			{
-				array[0]=RawHeader.Substring(0,indexOfColon).Trim();
-				array[1]=RawHeader.Substring(indexOfColon+1).Trim();
+				array[0]=strRawHeader.Substring(0,indexOfColon).Trim();
+				array[1]=strRawHeader.Substring(indexOfColon+1).Trim();
 			}
 			catch(Exception){}
 
@@ -420,18 +435,18 @@ namespace OpenPOP.MIMEParser
 				return false;
 		}
 
-		public static string[] splitOnSemiColon(string objstring)
+		public static string[] SplitOnSemiColon(string strText)
 		{
-			if(objstring==null)
-				throw new ArgumentNullException("RawHeader","Argument was null");
+			if(strText==null)
+				throw new ArgumentNullException("strText","Argument was null");
 
 			string []array=null;
-			int indexOfColon=objstring.IndexOf(";");			
+			int indexOfColon=strText.IndexOf(";");			
 
 			if(indexOfColon<0)
 			{
 				array=new string[1];
-				array[0]=objstring;
+				array[0]=strText;
 				return array;
 			}
 			else
@@ -441,8 +456,8 @@ namespace OpenPOP.MIMEParser
 
 			try
 			{
-				array[0]=objstring.Substring(0,indexOfColon).Trim();
-				array[1]=objstring.Substring(indexOfColon+1).Trim();
+				array[0]=strText.Substring(0,indexOfColon).Trim();
+				array[1]=strText.Substring(indexOfColon+1).Trim();
 			}
 			catch(Exception){}
 

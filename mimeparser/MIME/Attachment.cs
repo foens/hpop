@@ -5,6 +5,8 @@
 *Created:		2003/8
 *Modified:		2004/3/29 17:32 GMT+8
 *Description	:
+*				2004/4/29 19:05 GMT+8 by Unruled Boy
+*					1.Hopefully we have handled the NotAttachment property correctly
 *Changes:		2004/3/29 10:28 GMT+8 by Unruled Boy
 *					1.removing bugs in decoding attachment
 *Changes:		2004/3/29 17:32 GMT+8 by Unruled Boy
@@ -77,7 +79,7 @@ namespace OpenPOP.MIMEParser
 					return true;
 				else
 					return (_contentFileName!="");*/
-				if (_contentType==null||_contentFileName=="")
+				if ((_contentType==null||_contentFileName=="")&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
 				else
 					return false;
@@ -225,7 +227,7 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">header line</param>
 		private void parseHeader(StringReader srReader,ref string strLine)
 		{
-			string []array=Utility.getHeadersValue(strLine);
+			string []array=Utility.GetHeadersValue(strLine);
 			string []values=array[1].Split(';');
 			string strRet=null;
 
@@ -267,10 +269,10 @@ namespace OpenPOP.MIMEParser
 					}
 					break;
 				case "CONTENT-TRANSFER-ENCODING":
-					_contentTransferEncoding=Utility.splitOnSemiColon(array[1])[0].Trim();
+					_contentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
 					break;
 				case "CONTENT-DESCRIPTION":
-					_contentDescription=Utility.DecodeText(Utility.splitOnSemiColon(array[1])[0].Trim());
+					_contentDescription=Utility.DecodeText(Utility.SplitOnSemiColon(array[1])[0].Trim());
 					break;
 				case "CONTENT-DISPOSITION":
 					if(values.Length>0)
@@ -285,7 +287,7 @@ namespace OpenPOP.MIMEParser
 					_contentFileName=Utility.DecodeText(_contentFileName);
 					break;
 				case "CONTENT-ID":
-					_contentID=Utility.splitOnSemiColon(array[1])[0].Trim('<').Trim('>');
+					_contentID=Utility.SplitOnSemiColon(array[1])[0].Trim('<').Trim('>');
 					break;
 			}
 		}
@@ -365,22 +367,22 @@ namespace OpenPOP.MIMEParser
 					decodedBytes=Encoding.Default.GetBytes(Utility.DecodeText(_rawAttachment));
 				else if(_contentTransferEncoding!=null)
 				{
-					string content=_rawAttachment;
+					string bytContent=_rawAttachment;
 
 					if(!IsEncoding("7bit"))
 					{
 						if(IsEncoding("8bit")&&_contentCharset!=null&_contentCharset!="")
-							content=Utility.Change(content,_contentCharset);
+							bytContent=Utility.Change(bytContent,_contentCharset);
 
 						if(Utility.IsQuotedPrintable(_contentTransferEncoding))
-							decodedBytes=Encoding.Default.GetBytes(DecodeQP.ConvertHexContent(content));
+							decodedBytes=Encoding.Default.GetBytes(DecodeQP.ConvertHexContent(bytContent));
 						else if(IsEncoding("8bit"))
-							decodedBytes=Encoding.Default.GetBytes(content);
+							decodedBytes=Encoding.Default.GetBytes(bytContent);
 						else
-							decodedBytes=Convert.FromBase64String(Utility.RemoveNonB64(content));
+							decodedBytes=Convert.FromBase64String(Utility.RemoveNonB64(bytContent));
 					}
 					else
-						decodedBytes=Encoding.Default.GetBytes(content);
+						decodedBytes=Encoding.Default.GetBytes(bytContent);
 				}
 				else if(_contentCharset!=null)
 					decodedBytes=Encoding.Default.GetBytes(Utility.Change(_rawAttachment,_contentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
