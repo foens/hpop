@@ -1,5 +1,5 @@
 /*
-*Name:			iOfficeMail.POP.MIMEParser
+*Name:			OpenPOP.POP.MIMEParser
 *Function:		Common definitions
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -10,7 +10,7 @@
 */
 using System;
 
-namespace iOfficeMail.POP.MIMEParser
+namespace OpenPOP.POP.MIMEParser
 {
 	/// <summary>
 	/// 3 message importance types defined by RFC

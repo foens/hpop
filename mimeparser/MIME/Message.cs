@@ -1,5 +1,5 @@
 /*
-*Name:			iOfficeMail.POP.MIMEParser.Message
+*Name:			OpenPOP.POP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -42,7 +42,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace iOfficeMail.POP.MIMEParser
+namespace OpenPOP.POP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.

@@ -13,7 +13,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 
-namespace iOfficeMail.POP.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// Utility functions

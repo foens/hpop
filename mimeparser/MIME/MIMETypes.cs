@@ -13,7 +13,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace iOfficeMail
+namespace OpenPOP
 {
 	/// <summary>
 	/// MIMETypes

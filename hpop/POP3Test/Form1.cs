@@ -5,9 +5,9 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
 using System.Threading;
-using iOfficeMail.POP;
-using iOfficeMail.POP.POP3;
-using iOfficeMail.POP.MIMEParser;
+using OpenPOP.POP;
+using OpenPOP.POP.POP3;
+using OpenPOP.POP.MIMEParser;
 
 namespace NET_Sample_App
 {
@@ -433,7 +433,7 @@ namespace NET_Sample_App
 
 		private void ReceiveMails()
 		{
-			iOfficeMail.POP.POP3.Utility.Log=true;
+			OpenPOP.POP.POP3.Utility.Log=true;
 			popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text));
 			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
@@ -448,7 +448,7 @@ namespace NET_Sample_App
 			for(int i=Count;i>=1;i-=1)
 			{
 				//int i=56;
-				iOfficeMail.POP.MIMEParser.Message m=popClient.GetMessage(i,false);
+				OpenPOP.POP.MIMEParser.Message m=popClient.GetMessage(i,false);
 				TreeNode node;
 				if(m!=null)
 				{
@@ -482,7 +482,7 @@ namespace NET_Sample_App
 
 		private void listMessages_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
-			iOfficeMail.POP.MIMEParser.Message m=(iOfficeMail.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			OpenPOP.POP.MIMEParser.Message m=(OpenPOP.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(m!=null)
 			{
 //				if (m.Attachments.Count>0)
@@ -554,7 +554,7 @@ namespace NET_Sample_App
 		private void listAttachments_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
 			Attachment att=(Attachment)listAttachments.SelectedNode.Tag;
-			iOfficeMail.POP.MIMEParser.Message m=(iOfficeMail.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			OpenPOP.POP.MIMEParser.Message m=(OpenPOP.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(att!=null && m!=null)// && att.ContentFileName.Length>0)
 			{
 				//saveFile.FileName=(att.ContentFileName==null||att.ContentFileName==""?att.DefaultFileName:att.ContentFileName);//+(m.HTML==true?".html":"");
@@ -568,7 +568,7 @@ namespace NET_Sample_App
 					result=MessageBox.Show(this,"COM.NET.MAIL.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 					if(result==DialogResult.Yes)
 					{
-						iOfficeMail.POP.MIMEParser.Message m2=att.DecodeAsMessage();
+						OpenPOP.POP.MIMEParser.Message m2=att.DecodeAsMessage();
 						string attachmentNames="";
 						bool blnRet=false;
 						if(m2.AttachmentCount>0)
@@ -637,8 +637,8 @@ namespace NET_Sample_App
 		{
 			bool ret=false;
 			string str="";
-			iOfficeMail.POP.MIMEParser.Utility.ReadPlainTextFromFile(@"E:\Documents and Settings\Administrator\×ÀÃæ\a.txt",ref str);
-			iOfficeMail.POP.MIMEParser.Message m=new iOfficeMail.POP.MIMEParser.Message(ref ret,str);
+			OpenPOP.POP.MIMEParser.Utility.ReadPlainTextFromFile(@"E:\Documents and Settings\Administrator\×ÀÃæ\a.txt",ref str);
+			OpenPOP.POP.MIMEParser.Message m=new OpenPOP.POP.MIMEParser.Message(ref ret,str);
 			MessageBox.Show(this,m.Subject);
 		}
 

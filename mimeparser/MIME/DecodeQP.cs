@@ -1,5 +1,5 @@
 /*
-*Name:			iOfficeMail.POP.MIMEParser.DecodeQP
+*Name:			OpenPOP.POP.MIMEParser.DecodeQP
 *Function:		Decoding Quoted-Printable text
 *Author:		
 *Created:		2003/8
@@ -11,7 +11,7 @@ using System;
 using System.Text;
 using System.Globalization;
 
-namespace iOfficeMail.POP.MIMEParser
+namespace OpenPOP.POP.MIMEParser
 {
 	/// <summary>
 	/// Decoding Quoted-Printable text

@@ -1,5 +1,5 @@
 /*
-*Name:			iOfficeMail.POP.POP3
+*Name:			OpenPOP.POP3
 *Function:		exceptions
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -12,7 +12,7 @@
 */
 using System;
 
-namespace iOfficeMail.POP.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// Thrown when the POP3 Server sends an error (-ERR) during intial handshake (HELO)
