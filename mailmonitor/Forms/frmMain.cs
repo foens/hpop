@@ -23,6 +23,11 @@ using System.Windows.Forms;
 using System.Data;
 using System.Threading;
 using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
+//using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.IO;
 using OpenPOP.POP3;
 
 namespace MailMonitor
@@ -63,20 +68,34 @@ namespace MailMonitor
 		private System.Windows.Forms.ToolBarButton btnGetInfo;
 		private System.Windows.Forms.ToolBarButton btnSettings;
 		private System.Windows.Forms.ToolBarButton btnSchedule;
-		private frmSettings settings;
 		private System.Windows.Forms.ListView lvwMailBoxes;
-		private frmMails mails;
 		private System.Windows.Forms.NotifyIcon nicPopup;
 		private System.Windows.Forms.ContextMenu cmuPopup;
 		private System.Windows.Forms.Timer tmrSchedule;
-		internal Settings _settings=new Settings();
-		private POPClient popClient=new POPClient();
 		private System.Windows.Forms.MenuItem mnuOpenEML;
 		private System.Windows.Forms.OpenFileDialog dlgOpen;
 		private System.Windows.Forms.MenuItem mnuHR7;
-		private Thread thread;
+		private System.Windows.Forms.StatusBarPanel sbpMain;
+		private System.Windows.Forms.MenuItem mnuShowMainWindow;
+		private System.Windows.Forms.MenuItem mnuHR8;
+		private System.Windows.Forms.MenuItem mnuExit2;
+		private System.Windows.Forms.MenuItem mnuCheckAll2;
+		private System.Windows.Forms.MenuItem mnuHR9;
+		private System.Windows.Forms.MenuItem mnuStopChecking2;
+		private System.Windows.Forms.MenuItem mnuSchedule2;
+		private System.Windows.Forms.MenuItem mnuOptions2;
+		private System.Windows.Forms.MenuItem mnuHR10;
+		private System.Windows.Forms.MenuItem mnuRunClient2;
+		private System.Windows.Forms.MenuItem mnuRunClient;
+		private frmMails _frmMails;
+		private Settings _settings=new Settings();
+		private frmSettings _frmSettings;
+		private POPClient _popClient=new POPClient();
+		private Thread _thread;
 		private bool _started;
 		private int _currentMailBox;
+		private string _path=Assembly.GetEntryAssembly().Location+".cfg";
+
 
 
 		#region Entry
@@ -90,19 +109,19 @@ namespace MailMonitor
 		{
 			InitializeComponent();
 
-			popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
-			popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
-			popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
-			popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
-			popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
-			popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
-			popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
+			_popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
+			_popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
+			_popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
+			_popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
+			_popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
+			_popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
+			_popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
 
 		}
 
 		protected override void Dispose( bool disposing )
-		{
-			_settings.Save();
+		{			
+			SaveSettings();
 
 			if( disposing )
 			{
@@ -155,11 +174,24 @@ namespace MailMonitor
 			this.mnuHR = new System.Windows.Forms.MenuItem();
 			this.mnuAbout = new System.Windows.Forms.MenuItem();
 			this.sbrMain = new System.Windows.Forms.StatusBar();
+			this.sbpMain = new System.Windows.Forms.StatusBarPanel();
 			this.lvwMailBoxes = new System.Windows.Forms.ListView();
 			this.nicPopup = new System.Windows.Forms.NotifyIcon(this.components);
 			this.cmuPopup = new System.Windows.Forms.ContextMenu();
+			this.mnuShowMainWindow = new System.Windows.Forms.MenuItem();
+			this.mnuRunClient2 = new System.Windows.Forms.MenuItem();
+			this.mnuHR8 = new System.Windows.Forms.MenuItem();
+			this.mnuCheckAll2 = new System.Windows.Forms.MenuItem();
+			this.mnuStopChecking2 = new System.Windows.Forms.MenuItem();
+			this.mnuHR9 = new System.Windows.Forms.MenuItem();
+			this.mnuSchedule2 = new System.Windows.Forms.MenuItem();
+			this.mnuOptions2 = new System.Windows.Forms.MenuItem();
+			this.mnuHR10 = new System.Windows.Forms.MenuItem();
+			this.mnuExit2 = new System.Windows.Forms.MenuItem();
 			this.tmrSchedule = new System.Windows.Forms.Timer(this.components);
 			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
+			this.mnuRunClient = new System.Windows.Forms.MenuItem();
+			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// tbrMain
@@ -209,6 +241,7 @@ namespace MailMonitor
 			// btnSchedule
 			// 
 			this.btnSchedule.ImageIndex = 4;
+			this.btnSchedule.Pushed = true;
 			this.btnSchedule.Tag = "Schedule";
 			this.btnSchedule.ToolTipText = "Schedule";
 			// 
@@ -244,6 +277,7 @@ namespace MailMonitor
 																					this.mnuOpenEML,
 																					this.mnuHR7,
 																					this.mnuGetInfo,
+																					this.mnuRunClient,
 																					this.mnuHR6,
 																					this.mnuExit});
 			this.mnuFile.Text = "&File";
@@ -299,12 +333,12 @@ namespace MailMonitor
 			// 
 			// mnuHR6
 			// 
-			this.mnuHR6.Index = 8;
+			this.mnuHR6.Index = 9;
 			this.mnuHR6.Text = "-";
 			// 
 			// mnuExit
 			// 
-			this.mnuExit.Index = 9;
+			this.mnuExit.Index = 10;
 			this.mnuExit.Text = "E&xit";
 			this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
 			// 
@@ -357,8 +391,9 @@ namespace MailMonitor
 			// 
 			this.mnuSchedule.Checked = true;
 			this.mnuSchedule.Index = 0;
-			this.mnuSchedule.Shortcut = System.Windows.Forms.Shortcut.ShiftF6;
+			this.mnuSchedule.Shortcut = System.Windows.Forms.Shortcut.F6;
 			this.mnuSchedule.Text = "Schedule &Checking";
+			this.mnuSchedule.Click += new System.EventHandler(this.mnuSchedule_Click);
 			// 
 			// mnuHR2
 			// 
@@ -408,10 +443,17 @@ namespace MailMonitor
 			// 
 			this.sbrMain.Location = new System.Drawing.Point(0, 223);
 			this.sbrMain.Name = "sbrMain";
+			this.sbrMain.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
+																					   this.sbpMain});
 			this.sbrMain.ShowPanels = true;
 			this.sbrMain.Size = new System.Drawing.Size(496, 22);
 			this.sbrMain.TabIndex = 1;
 			this.sbrMain.Text = "Welcome!";
+			// 
+			// sbpMain
+			// 
+			this.sbpMain.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Spring;
+			this.sbpMain.Width = 480;
 			// 
 			// lvwMailBoxes
 			// 
@@ -433,13 +475,93 @@ namespace MailMonitor
 			// 
 			// nicPopup
 			// 
-			this.nicPopup.Text = "5";
+			this.nicPopup.ContextMenu = this.cmuPopup;
+			this.nicPopup.Text = "Mail Monitor";
 			this.nicPopup.DoubleClick += new System.EventHandler(this.nicPopup_DoubleClick);
+			// 
+			// cmuPopup
+			// 
+			this.cmuPopup.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+																					 this.mnuShowMainWindow,
+																					 this.mnuRunClient2,
+																					 this.mnuHR8,
+																					 this.mnuCheckAll2,
+																					 this.mnuStopChecking2,
+																					 this.mnuHR9,
+																					 this.mnuSchedule2,
+																					 this.mnuOptions2,
+																					 this.mnuHR10,
+																					 this.mnuExit2});
+			// 
+			// mnuShowMainWindow
+			// 
+			this.mnuShowMainWindow.Index = 0;
+			this.mnuShowMainWindow.Text = "&Show Main Window";
+			this.mnuShowMainWindow.Click += new System.EventHandler(this.mnuShowMainWindow_Click);
+			// 
+			// mnuRunClient2
+			// 
+			this.mnuRunClient2.Index = 1;
+			this.mnuRunClient2.Text = "&Run Mail Client";
+			this.mnuRunClient2.Click += new System.EventHandler(this.mnuRunClient2_Click);
+			// 
+			// mnuHR8
+			// 
+			this.mnuHR8.Index = 2;
+			this.mnuHR8.Text = "-";
+			// 
+			// mnuCheckAll2
+			// 
+			this.mnuCheckAll2.Index = 3;
+			this.mnuCheckAll2.Text = "&Check All MailBoxes";
+			this.mnuCheckAll2.Click += new System.EventHandler(this.mnuCheckAll2_Click);
+			// 
+			// mnuStopChecking2
+			// 
+			this.mnuStopChecking2.Index = 4;
+			this.mnuStopChecking2.Text = "&Stop Checking";
+			this.mnuStopChecking2.Click += new System.EventHandler(this.mnuStopChecking2_Click);
+			// 
+			// mnuHR9
+			// 
+			this.mnuHR9.Index = 5;
+			this.mnuHR9.Text = "-";
+			// 
+			// mnuSchedule2
+			// 
+			this.mnuSchedule2.Index = 6;
+			this.mnuSchedule2.RadioCheck = true;
+			this.mnuSchedule2.Text = "&Schedule";
+			this.mnuSchedule2.Click += new System.EventHandler(this.mnuSchedule2_Click);
+			// 
+			// mnuOptions2
+			// 
+			this.mnuOptions2.Index = 7;
+			this.mnuOptions2.Text = "&Options";
+			this.mnuOptions2.Click += new System.EventHandler(this.mnuOptions2_Click);
+			// 
+			// mnuHR10
+			// 
+			this.mnuHR10.Index = 8;
+			this.mnuHR10.Text = "-";
+			// 
+			// mnuExit2
+			// 
+			this.mnuExit2.Index = 9;
+			this.mnuExit2.Text = "E&xit";
+			this.mnuExit2.Click += new System.EventHandler(this.mnuExit2_Click);
 			// 
 			// tmrSchedule
 			// 
-			this.tmrSchedule.Interval = 180000;
+			this.tmrSchedule.Enabled = true;
+			this.tmrSchedule.Interval = 60000;
 			this.tmrSchedule.Tick += new System.EventHandler(this.tmrSchedule_Tick);
+			// 
+			// mnuRunClient
+			// 
+			this.mnuRunClient.Index = 8;
+			this.mnuRunClient.Text = "&Run Mail Client";
+			this.mnuRunClient.Click += new System.EventHandler(this.mnuRunClient_Click);
 			// 
 			// frmMain
 			// 
@@ -454,6 +576,8 @@ namespace MailMonitor
 			this.Text = "Mail Monitor";
 			this.Load += new System.EventHandler(this.frmMain_Load);
 			this.Closed += new System.EventHandler(this.frmMain_Closed);
+			this.Resize+=new EventHandler(frmMain_Resize);
+			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -463,7 +587,15 @@ namespace MailMonitor
 
 		private void frmMain_Closed(object sender, EventArgs e)
 		{
+			SetSchedule(false);
 			Abort();
+		}
+
+		private void frmMain_Resize(object sender, EventArgs e)
+		{
+			_settings.MainWindow.State=this.WindowState;
+			_settings.MainWindow.Size=this.Size;
+			_settings.MainWindow.Location=this.Location;
 		}
 
 		private void mnuStopChecking_Click(object sender, System.EventArgs e)
@@ -494,6 +626,7 @@ namespace MailMonitor
 			}
 			catch(Exception ex)
 			{
+				Utilities.BeepIt();
 				MessageBox.Show(this,"Failed to send email because "+ex.Message);
 			}
 		}
@@ -518,12 +651,16 @@ namespace MailMonitor
 		private void frmMain_Load(object sender, System.EventArgs e)
 		{			
 			LoadMailBoxes();
+			this.WindowState=_settings.MainWindow.State;
+			if(this.WindowState!=FormWindowState.Maximized)
+				this.Size=_settings.MainWindow.Size;
+			GetMailInfoAllThread();
 		}
 
 		private void dgdMailBoxes_DoubleClick(object sender, EventArgs e)
 		{
-			mails.Settings=_settings;
-			mails.ShowDialog(this);
+			_frmMails.Settings=_settings;
+			_frmMails.ShowDialog(this);
 		}
 
 		private void lvwMailBoxes_DoubleClick(object sender, EventArgs e)
@@ -557,17 +694,7 @@ namespace MailMonitor
 
 		private void tmrSchedule_Tick(object sender, System.EventArgs e)
 		{
-			//
-		}
-
-		private void ShowSettings()
-		{
-			settings=new frmSettings();
-			settings.Settings=_settings;
-			settings.ShowDialog();
-			settings=null;
-			_settings.Load();
-			LoadMailBoxes();
+			GetMailInfoAllThread();
 		}
 
 		private void mnuOpenEML_Click(object sender, System.EventArgs e)
@@ -584,7 +711,7 @@ namespace MailMonitor
 
 		private void mnuCheckAll_Click(object sender, System.EventArgs e)
 		{
-			GetMailInfoAll();
+			GetMailInfoAllThread();
 		}
 
 		private void tbrMain_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
@@ -592,7 +719,7 @@ namespace MailMonitor
 			switch(e.Button.Tag.ToString())
 			{
 				case "CheckAllMailBoxes":
-					GetMailInfoAll();
+					GetMailInfoAllThread();
 					break;
 				case "CheckCurrentMailBox":
 					GetMailInfoThread();
@@ -603,12 +730,131 @@ namespace MailMonitor
 				case "Settings":
 					ShowSettings();
 					break;
+				case "Schedule":
+					e.Button.Pushed=!e.Button.Pushed;
+					SetSchedule(e.Button.Pushed);
+					break;
 			}
+		}
+
+		private void mnuSchedule_Click(object sender, System.EventArgs e)
+		{
+			mnuSchedule.Checked=!mnuSchedule.Checked;
+			SetSchedule(mnuSchedule.Checked);
+		}
+
+		private void mnuSchedule2_Click(object sender, System.EventArgs e)
+		{
+			mnuSchedule2.Checked=!mnuSchedule2.Checked;
+			SetSchedule(mnuSchedule2.Checked);
+		}
+
+		private void mnuOptions2_Click(object sender, System.EventArgs e)
+		{
+			ShowSettings();
+		}
+
+		private void mnuExit2_Click(object sender, System.EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void mnuShowMainWindow_Click(object sender, System.EventArgs e)
+		{
+			this.Visible=true;
+			nicPopup.Visible=false;
+		}
+
+		private void mnuRunClient_Click(object sender, System.EventArgs e)
+		{
+			RunMailClient();
+		}
+
+		private void mnuRunClient2_Click(object sender, System.EventArgs e)
+		{
+			RunMailClient();
+		}
+
+		private void mnuCheckAll2_Click(object sender, System.EventArgs e)
+		{
+			GetMailInfoAllThread();
+		}
+
+		private void mnuStopChecking2_Click(object sender, System.EventArgs e)
+		{
+			Abort();
 		}
 
 		#endregion
 
 		#region Functions
+
+		private void ShowSettings()
+		{
+			_frmSettings=new frmSettings();
+			_frmSettings.Settings=_settings;
+			_frmSettings.ShowDialog();
+			_settings=_frmSettings.Settings;
+			_frmSettings=null;
+			SaveSettings();
+			LoadSettings();
+			LoadMailBoxes();
+			GetMailInfoAllThread();
+		}
+
+		private void SaveSettings()
+		{	
+			try
+			{
+				IFormatter formatter = new BinaryFormatter();
+				Stream stream = new FileStream(_path, FileMode.Create, FileAccess.Write, FileShare.None);
+				formatter.Serialize(stream, _settings);
+				stream.Close();
+			}
+			catch {}
+		}
+
+		private void LoadSettings()
+		{
+			try
+			{
+				if(File.Exists(_path))
+				{
+					IFormatter formatter = new BinaryFormatter();
+					Stream stream = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read);
+					_settings = (Settings) formatter.Deserialize(stream);
+					stream.Close();
+				}
+				else
+				{
+					MessageBox.Show(this,"Configuration file not found. \r\nIt seems that this is the first time you use Mail Monitor, \r\nplease configure it before usage.");
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(this,ex.Message);
+			}
+
+			if(_settings.CheckInterval<1)
+				_settings.CheckInterval=1;
+			if(_settings.ServerTimeout<5)
+				_settings.ServerTimeout=5;
+
+			if(_settings.MainWindow.Size.Height<=0||_settings.MainWindow.Size.Width<=0)
+				_settings.MainWindow.Size=new Size(504,292);
+			if(_settings.MainWindow.State==FormWindowState.Minimized)
+				_settings.MainWindow.State=FormWindowState.Normal;
+
+			if(_settings.MailsWindow.Size.Height<=0||_settings.MailsWindow.Size.Width<=0)
+				_settings.MailsWindow.Size=new Size(504,272);
+			if(_settings.MailsWindow.State==FormWindowState.Minimized)
+				_settings.MailsWindow.State=FormWindowState.Normal;
+
+			if(_settings.MailWindow.Size.Height<=0||_settings.MailWindow.Size.Width<=0)
+				_settings.MailWindow.Size=new Size(512,304);
+			if(_settings.MailWindow.State==FormWindowState.Minimized)
+				_settings.MailWindow.State=FormWindowState.Normal;			
+		}
 
 		private void GetMailInfoThread()
 		{
@@ -617,15 +863,15 @@ namespace MailMonitor
 				if(lvwMailBoxes.SelectedItems.Count>0)
 				{
 					_currentMailBox=lvwMailBoxes.SelectedItems[0].Index;
-					thread=new Thread(new ThreadStart(GetMailInfo));
-					thread.Start();
+					_thread=new Thread(new ThreadStart(GetMailInfo));
+					_thread.Start();
 				}
 				else
 				{
 					MessageBox.Show(this,"Select one account first!");
 				}
 			}
-			else
+			else if (!_started)
 			{
 				MessageBox.Show(this,"Add your account first!");
 			}
@@ -635,10 +881,10 @@ namespace MailMonitor
 		{
 			try
 			{
-				thread.Abort();
-				thread=null;
-				popClient.Disconnect();
-				popClient=null;
+				_thread.Abort();
+				_thread=null;
+				_popClient.Disconnect();
+				_popClient=null;
 			}
 			catch
 			{}
@@ -646,37 +892,48 @@ namespace MailMonitor
 
 		private void LoadMailBoxes()
 		{
+			LoadSettings();
+			
+			tmrSchedule.Interval=_settings.CheckInterval*1000*60;
+
 			MailBox mailBox=new MailBox();
 			//			mailBox.Name="unruledboy@netease.com";
-			//			mailBox.Password="lovebell";
+			//			mailBox.Password="";
 			//			mailBox.Port=110;
 			//			mailBox.UserName="unruledboy";
 			//			mailBox.ServerAddress="pop3.netease.com";
 			//			_mailBoxes.Items.Add(mailBox);
 			//			_mailBoxes.Save();
-
-			_settings.Load();
 			lvwMailBoxes.AutoArrange=true;
 			lvwMailBoxes.Columns.Clear();
 			lvwMailBoxes.Columns.Add("Mail Box",180,HorizontalAlignment.Left);
-			lvwMailBoxes.Columns.Add("EMails",80,HorizontalAlignment.Right);
-			lvwMailBoxes.Columns.Add("Check Time",100,HorizontalAlignment.Center);
-			lvwMailBoxes.Columns.Add("Status",130,HorizontalAlignment.Left);
-			if(_settings.MailBoxes.Count==0 && !_started)
+			lvwMailBoxes.Columns.Add("Mails",45,HorizontalAlignment.Right);
+			lvwMailBoxes.Columns.Add("Checked Time",90,HorizontalAlignment.Center);
+			lvwMailBoxes.Columns.Add("Status",175,HorizontalAlignment.Left);
+			if(_settings!=null)
 			{
-				if(MessageBox.Show("There is no mailbox, would you like to add now?","Add Mailbox",MessageBoxButtons.YesNo)==DialogResult.Yes)
+				if(_settings.MailBoxes.Count==0 && !_started)
 				{
-					ShowSettings();
-					_started=true;
+					if(MessageBox.Show("There is no mailbox, would you like to add now?","Add Mailbox",MessageBoxButtons.YesNo)==DialogResult.Yes)
+					{
+						_started=true;
+						ShowSettings();
+					}
 				}
-			}
 
-			lvwMailBoxes.Items.Clear();
-			ListViewItem lvi=new ListViewItem();
-			for(int i=0;i<_settings.MailBoxes.Count;i++)
-			{				
-				lvi.Text=((MailBox)_settings.MailBoxes[i]).Name;
-				lvwMailBoxes.Items.Add(lvi);
+				lvwMailBoxes.Items.Clear();
+				ListViewItem lvi;
+
+				IDictionaryEnumerator ideMailBoxes=_settings.MailBoxes.GetEnumerator();
+	
+				MailBox mb;
+				while(ideMailBoxes.MoveNext())
+				{
+					lvi=new ListViewItem();
+					mb=(MailBox)ideMailBoxes.Value;
+					lvi.Text=mb.Name;
+					lvwMailBoxes.Items.Add(lvi);
+				}
 			}
 		}
 
@@ -684,13 +941,28 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems!=null)
 			{
-				mails=new frmMails();
-				mails.MailBox=((MailBox)_settings.MailBoxes[lvwMailBoxes.SelectedItems[0].Index]);
-				mails.Settings=_settings;
-				mails.ShowDialog(this);
-				mails.Dispose();
-				mails=null;
+				_frmMails=new frmMails();
+				_frmMails.MailBox=((MailBox)_settings.MailBoxes[lvwMailBoxes.SelectedItems[0].Index]);
+				_frmMails.Settings=_settings;
+				_frmMails.ShowDialog(this);
+				_frmMails.Dispose();
+				_frmMails=null;
 			}
+		}
+
+		private void SetSchedule(bool blnEnabled)
+		{
+			mnuSchedule.Checked=blnEnabled;
+			mnuSchedule2.Checked=blnEnabled;
+			tbrMain.Buttons[4].Pushed=blnEnabled;
+			tmrSchedule.Enabled=blnEnabled;
+		}
+
+		private void GetMailInfoAllThread()
+		{
+			_thread=new Thread(new ThreadStart(GetMailInfoAll));
+			_thread.IsBackground=true;
+			_thread.Start();
 		}
 
 		private void GetMailInfoAll()
@@ -699,9 +971,11 @@ namespace MailMonitor
 			{
 				for(int i=0;i<lvwMailBoxes.Items.Count;i++)
 				{
-					_currentMailBox=i;
-					thread=new Thread(new ThreadStart(GetMailInfo));
-					thread.Start();
+					//lock(this)
+					{
+						_currentMailBox=i;
+						GetMailInfo();
+					}
 				}
 			}
 			else
@@ -722,21 +996,68 @@ namespace MailMonitor
 				lvi.SubItems.Add("");
 
 				OpenPOP.POP3.Utility.Log=true;
-				popClient.Disconnect();
-				popClient.ReceiveContentSleepInterval=1;
-				popClient.WaitForResponseInterval=10;
-				popClient.Connect(mailBox.ServerAddress,mailBox.Port);
-				popClient.Authenticate(mailBox.UserName,mailBox.Password);
+				_popClient.Disconnect();
+				_popClient.ReceiveContentSleepInterval=1;
+				_popClient.WaitForResponseInterval=10;
+				_popClient.SendTimeOut=_settings.ServerTimeout*1000;
+				_popClient.ReceiveTimeOut=_settings.ServerTimeout*1000;
+				_popClient.Connect(mailBox.ServerAddress,mailBox.Port);
+				_popClient.Authenticate(mailBox.UserName,mailBox.Password);
 
-				lvi.SubItems[1].Text=popClient.GetMessageCount().ToString();
-				popClient.Disconnect();
+				int intCount=_popClient.GetMessageCount();
+				lvi.SubItems[1].Text=intCount.ToString();
+
+				string strMessageID;
+				int intNewMessages=0;
+				MailInfo mi;
+
+				for(int i=1;i<=intCount;i++)
+				{
+					strMessageID=_popClient.GetMessageUID(i);
+					if(!_settings.MessageIDs.ContainsKey(strMessageID))
+					{
+						intNewMessages+=1;
+						mi=new MailInfo();
+						mi.ID=strMessageID;
+						//_settings.MessageIDs.Add("MessageID"+_settings.MessageIDs.Count.ToString(),mi);
+						_settings.MessageIDs.Add(strMessageID,mi);
+					}
+				}
+				_popClient.Disconnect();
+
 				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
 				lvi.SubItems[3].Text="Checking Finished!";
+				
+				sbrMain.Panels[0].Text=intNewMessages.ToString() + " new mail(s).";
+				if(_settings.Beep)
+					Utilities.BeepIt();
+				if(intNewMessages>0)
+				{
+					if(_settings.ShowMainWindow)
+					{
+						this.Visible=true;
+						nicPopup.Visible=false;
+					}
+				}				
 			}
 			catch(Exception e)
 			{
-				MessageBox.Show(this,e.Message);
-			}				
+				//MessageBox.Show(this,e.Message);
+				Utilities.BeepIt();
+				sbrMain.Panels[0].Text=e.Message;
+			}
+		}
+
+		private void RunMailClient()
+		{
+			if(File.Exists(_settings.MailClient))
+			{
+				try
+				{
+					Process.Start(_settings.MailClient);
+				}
+				catch{}
+			}
 		}
 
 		#endregion
@@ -758,37 +1079,37 @@ namespace MailMonitor
 
 		private void popClient_CommunicationBegan(object sender, EventArgs e)
 		{
-			AddEvent("CommunicationBegan");
+			AddEvent("Communication Began");
 		}
 
 		private void popClient_CommunicationOccured(object sender, EventArgs e)
 		{
-			AddEvent("CommunicationOccured");
+			AddEvent("Communication Occured");
 		}
 
 		private void popClient_AuthenticationBegan(object sender, EventArgs e)
 		{
-			AddEvent("AuthenticationBegan");
+			AddEvent("Authentication Began");
 		}
 
 		private void popClient_AuthenticationFinished(object sender, EventArgs e)
 		{
-			AddEvent("AuthenticationFinished");
+			AddEvent("Authentication Finished");
 		}
 		
 		private void popClient_MessageTransferBegan(object sender, EventArgs e)
 		{
-			AddEvent("MessageTransferBegan");
+			AddEvent("MessageTransfer Began");
 		}
 
 		private void popClient_MessageTransferFinished(object sender, EventArgs e)
 		{
-			AddEvent("MessageTransferFinished");
+			AddEvent("MessageTransfer Finished");
 		}
 
 		private void popClient_CommunicationLost(object sender, EventArgs e)
 		{
-			AddEvent("CommunicationLost");
+			AddEvent("Communication Lost");
 		}
 		#endregion
 

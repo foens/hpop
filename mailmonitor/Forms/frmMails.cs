@@ -30,13 +30,7 @@ namespace MailMonitor
 	{
 		private System.Windows.Forms.ListView lvwMailBoxes;
 		private System.ComponentModel.Container components = null;
-		internal POPClient popClient=new POPClient();
-		private OpenPOP.MIMEParser.Message _msg;
-		private MailBox _mailBox;
-		private Thread _thread;
-		private int _count;
 		private System.Windows.Forms.Button cmdCancel;
-		private frmMail _mail;
 		private System.Windows.Forms.Button cmdPause;
 		private System.Windows.Forms.Button cmdGet;
 		private System.Windows.Forms.ContextMenu ctmMails;
@@ -46,26 +40,35 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblDescription;
 		private System.Windows.Forms.PictureBox picIcon;
 		private System.Windows.Forms.Label lblTitle;
-		internal Settings _settings;
+		private Settings _settings;
+		private POPClient _popClient=new POPClient();
+		private frmMail _mail;
+		private OpenPOP.MIMEParser.Message _msg;
+		private MailBox _mailBox;
+		private Thread _thread;
+		private System.Windows.Forms.SaveFileDialog dlgSave;
+		private int _count;
+
+
 
 		#region Entry
 		public frmMails()
 		{
 			InitializeComponent();
 
-			popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
-			popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
-			popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
-			popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
-			popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
-			popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
-			popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
+			_popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
+			_popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
+			_popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
+			_popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
+			_popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
+			_popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
+			_popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
 		}
 
 		protected override void Dispose( bool disposing )
 		{	
-			popClient.Disconnect();
-			popClient=null;
+			_popClient.Disconnect();
+			_popClient=null;
 
 			if( disposing )
 			{
@@ -79,6 +82,9 @@ namespace MailMonitor
 
 		private void frmMails_Load(object sender, System.EventArgs e)
 		{
+			this.WindowState=_settings.MailsWindow.State;
+			if(this.WindowState!=FormWindowState.Maximized)
+				this.Size=_settings.MailsWindow.Size;
 			InitEMails();
 		}
 
@@ -104,6 +110,7 @@ namespace MailMonitor
 			this.lblDescription = new System.Windows.Forms.Label();
 			this.picIcon = new System.Windows.Forms.PictureBox();
 			this.lblTitle = new System.Windows.Forms.Label();
+			this.dlgSave = new System.Windows.Forms.SaveFileDialog();
 			this.gbxHeader.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -170,6 +177,7 @@ namespace MailMonitor
 			// cmdGet
 			// 
 			this.cmdGet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.cmdGet.Enabled = false;
 			this.cmdGet.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.cmdGet.Location = new System.Drawing.Point(168, 216);
 			this.cmdGet.Name = "cmdGet";
@@ -232,10 +240,11 @@ namespace MailMonitor
 			this.Controls.Add(this.lvwMailBoxes);
 			this.Name = "frmMails";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "MailBox Info";
+			this.Text = "Mail Monitor - MailBox Info";
 			this.Load += new System.EventHandler(this.frmMails_Load);
 			this.Closed += new System.EventHandler(this.frmMails_Closed);
 			this.gbxHeader.ResumeLayout(false);
+			this.Resize+=new EventHandler(frmMails_Resize);
 			this.ResumeLayout(false);
 
 		}
@@ -257,13 +266,13 @@ namespace MailMonitor
 			try
 			{
 				OpenPOP.POP3.Utility.Log=true;
-				popClient.Disconnect();
-				popClient.ReceiveContentSleepInterval=1;
-				popClient.WaitForResponseInterval=10;
-				popClient.Connect(_mailBox.ServerAddress,_mailBox.Port);
-				popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
+				_popClient.Disconnect();
+				_popClient.ReceiveContentSleepInterval=1;
+				_popClient.WaitForResponseInterval=10;
+				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port);
+				_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
 
-				_count=popClient.GetMessageCount();
+				_count=_popClient.GetMessageCount();
 
 				//lvwMailBoxes.Visible=false;
 				lvwMailBoxes.SuspendLayout();
@@ -274,11 +283,10 @@ namespace MailMonitor
 				for(int i=1;i<_count;i++)
 				{
 					this.Text="MailBox Info("+i.ToString()+"/"+_count.ToString() + ")";
-					_msg=popClient.GetMessageHeader(i);
+					_msg=_popClient.GetMessageHeader(i);
 					if(_msg!=null)
 					{
 						lvi=lvwMailBoxes.Items.Add(_msg.From+"("+_msg.FromEmail+")");
-						lvi.Tag=i;
 						lvi.SubItems.Add(_msg.Subject);
 						lvi.SubItems.Add(_msg.Date);
 						lvi.SubItems.Add(_msg.ContentLength.ToString());
@@ -292,6 +300,7 @@ namespace MailMonitor
 			}
 			catch(Exception e)
 			{
+				Utilities.BeepIt();
 				MessageBox.Show(this,e.Message);
 			}
 		}
@@ -300,13 +309,16 @@ namespace MailMonitor
 		{
 			try
 			{
-				_thread.Abort();
-				_thread=null;
+				//_thread.Abort();
+				//_thread=null;
+				_thread.Suspend();
 			}
-			catch(ThreadAbortException ex)
-			{}
+			//catch(ThreadAbortException ex)
+			//{}
 			catch
 			{}
+			cmdCancel.Enabled=false;
+			cmdGet.Enabled=true;
 		}
 
 		private void Pause()
@@ -388,9 +400,9 @@ namespace MailMonitor
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
 				_mail=new frmMail();
-				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Tag;
+				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Index;
 				_mail.MailBox=_mailBox;
-				_mail.POPClient=popClient;
+				_mail.POPClient=_popClient;
 				_mail.Settings=_settings;
 				_mail.MessageID=lvwMailBoxes.SelectedItems[0].SubItems[4].Text;
 				_mail.ShowDialog(this);
@@ -401,7 +413,6 @@ namespace MailMonitor
 		{
 			Abort();
 		}
-		#endregion
 
 		private void cmdPause_Click(object sender, System.EventArgs e)
 		{
@@ -410,6 +421,8 @@ namespace MailMonitor
 
 		private void cmdGet_Click(object sender, System.EventArgs e)
 		{
+			cmdGet.Enabled=false;
+			cmdCancel.Enabled=true;
 			InitEMails();
 		}
 
@@ -417,14 +430,29 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				popClient.DeleteMessage(Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Tag));
+				_popClient.DeleteMessage(Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Index));
 				InitEMails();
 			}
 		}
 
 		private void mnuSaveAsEML_Click(object sender, System.EventArgs e)
 		{
-			//
+			if(lvwMailBoxes.SelectedItems.Count>0)
+			{
+				OpenPOP.MIMEParser.Message msg=_popClient.GetMessage(lvwMailBoxes.SelectedItems[0].Index,false);
+				dlgSave.FileName=_msg.Subject;
+				DialogResult result=dlgSave.ShowDialog();
+				if(result==DialogResult.OK)			
+					msg.SaveToMIMEEmailFile(dlgSave.FileName,true);
+			}
+		}
+		#endregion
+
+		private void frmMails_Resize(object sender, EventArgs e)
+		{
+			_settings.MailsWindow.State=this.WindowState;
+			_settings.MailsWindow.Size=this.Size;
+			_settings.MailsWindow.Location=this.Location;
 		}
 	}
 }

@@ -52,12 +52,15 @@ namespace MailMonitor
 		private System.Windows.Forms.ImageList imlToolbar;
 		private System.Windows.Forms.ToolBarButton btnEdit;
 		private System.Windows.Forms.ToolBarButton btnDel;
-		private frmMailBox _frmMailBox;
-		private MailBox _mailBox;
 		private System.Windows.Forms.GroupBox gbxHeader;
 		private System.Windows.Forms.Label lblDescription;
 		private System.Windows.Forms.PictureBox picIcon;
 		private System.Windows.Forms.Label lblTitle;
+		private System.Windows.Forms.OpenFileDialog dlgOpen;
+		private System.Windows.Forms.CheckBox chkBeep;
+		private System.Windows.Forms.CheckBox chkShowPopup;
+		private frmMailBox _frmMailBox;
+		private MailBox _mailBox;
 		private Settings _settings;
 
 
@@ -100,6 +103,7 @@ namespace MailMonitor
 			this.lblCheckInterval = new System.Windows.Forms.Label();
 			this.tpRemind = new System.Windows.Forms.TabPage();
 			this.gbRemind = new System.Windows.Forms.GroupBox();
+			this.chkBeep = new System.Windows.Forms.CheckBox();
 			this.chkShowMainWindow = new System.Windows.Forms.CheckBox();
 			this.tpMailBoxes = new System.Windows.Forms.TabPage();
 			this.tbrMailBoxes = new System.Windows.Forms.ToolBar();
@@ -112,6 +116,8 @@ namespace MailMonitor
 			this.lblDescription = new System.Windows.Forms.Label();
 			this.picIcon = new System.Windows.Forms.PictureBox();
 			this.lblTitle = new System.Windows.Forms.Label();
+			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
+			this.chkShowPopup = new System.Windows.Forms.CheckBox();
 			this.tcSettings.SuspendLayout();
 			this.tpNormal.SuspendLayout();
 			this.gbClient.SuspendLayout();
@@ -144,6 +150,7 @@ namespace MailMonitor
 			// 
 			// tcSettings
 			// 
+			this.tcSettings.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
 			this.tcSettings.Controls.Add(this.tpNormal);
 			this.tcSettings.Controls.Add(this.tpRemind);
 			this.tcSettings.Controls.Add(this.tpMailBoxes);
@@ -159,9 +166,9 @@ namespace MailMonitor
 			this.tpNormal.Controls.Add(this.chkAutoRun);
 			this.tpNormal.Controls.Add(this.gbClient);
 			this.tpNormal.Controls.Add(this.gbSchedule);
-			this.tpNormal.Location = new System.Drawing.Point(4, 21);
+			this.tpNormal.Location = new System.Drawing.Point(4, 24);
 			this.tpNormal.Name = "tpNormal";
-			this.tpNormal.Size = new System.Drawing.Size(400, 183);
+			this.tpNormal.Size = new System.Drawing.Size(400, 180);
 			this.tpNormal.TabIndex = 0;
 			this.tpNormal.Text = "Normal";
 			// 
@@ -195,6 +202,7 @@ namespace MailMonitor
 			this.cmdSelectClient.Size = new System.Drawing.Size(32, 21);
 			this.cmdSelectClient.TabIndex = 1;
 			this.cmdSelectClient.Text = "...";
+			this.cmdSelectClient.Click += new System.EventHandler(this.cmdSelectClient_Click);
 			// 
 			// txtClient
 			// 
@@ -257,21 +265,32 @@ namespace MailMonitor
 			// tpRemind
 			// 
 			this.tpRemind.Controls.Add(this.gbRemind);
-			this.tpRemind.Location = new System.Drawing.Point(4, 21);
+			this.tpRemind.Location = new System.Drawing.Point(4, 24);
 			this.tpRemind.Name = "tpRemind";
-			this.tpRemind.Size = new System.Drawing.Size(400, 207);
+			this.tpRemind.Size = new System.Drawing.Size(400, 180);
 			this.tpRemind.TabIndex = 1;
 			this.tpRemind.Text = "Remind";
 			// 
 			// gbRemind
 			// 
+			this.gbRemind.Controls.Add(this.chkShowPopup);
+			this.gbRemind.Controls.Add(this.chkBeep);
 			this.gbRemind.Controls.Add(this.chkShowMainWindow);
 			this.gbRemind.Location = new System.Drawing.Point(8, 8);
 			this.gbRemind.Name = "gbRemind";
-			this.gbRemind.Size = new System.Drawing.Size(384, 192);
+			this.gbRemind.Size = new System.Drawing.Size(384, 160);
 			this.gbRemind.TabIndex = 0;
 			this.gbRemind.TabStop = false;
 			this.gbRemind.Text = "Remind Methods";
+			// 
+			// chkBeep
+			// 
+			this.chkBeep.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+			this.chkBeep.Location = new System.Drawing.Point(16, 72);
+			this.chkBeep.Name = "chkBeep";
+			this.chkBeep.Size = new System.Drawing.Size(152, 16);
+			this.chkBeep.TabIndex = 1;
+			this.chkBeep.Text = "&Beep";
 			// 
 			// chkShowMainWindow
 			// 
@@ -286,9 +305,9 @@ namespace MailMonitor
 			// 
 			this.tpMailBoxes.Controls.Add(this.tbrMailBoxes);
 			this.tpMailBoxes.Controls.Add(this.lvwMailBoxes);
-			this.tpMailBoxes.Location = new System.Drawing.Point(4, 21);
+			this.tpMailBoxes.Location = new System.Drawing.Point(4, 24);
 			this.tpMailBoxes.Name = "tpMailBoxes";
-			this.tpMailBoxes.Size = new System.Drawing.Size(400, 207);
+			this.tpMailBoxes.Size = new System.Drawing.Size(400, 180);
 			this.tpMailBoxes.TabIndex = 2;
 			this.tpMailBoxes.Text = "Mail Boxes";
 			// 
@@ -303,7 +322,7 @@ namespace MailMonitor
 			this.tbrMailBoxes.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.tbrMailBoxes.DropDownArrows = true;
 			this.tbrMailBoxes.ImageList = this.imlToolbar;
-			this.tbrMailBoxes.Location = new System.Drawing.Point(0, 167);
+			this.tbrMailBoxes.Location = new System.Drawing.Point(0, 140);
 			this.tbrMailBoxes.Name = "tbrMailBoxes";
 			this.tbrMailBoxes.ShowToolTips = true;
 			this.tbrMailBoxes.Size = new System.Drawing.Size(400, 40);
@@ -346,6 +365,7 @@ namespace MailMonitor
 			this.lvwMailBoxes.Size = new System.Drawing.Size(384, 168);
 			this.lvwMailBoxes.TabIndex = 0;
 			this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
+			this.lvwMailBoxes.DoubleClick+=new EventHandler(lvwMailBoxes_DoubleClick);
 			// 
 			// gbxHeader
 			// 
@@ -390,6 +410,15 @@ namespace MailMonitor
 			this.lblTitle.TabIndex = 4;
 			this.lblTitle.Text = "Settings";
 			// 
+			// chkShowPopup
+			// 
+			this.chkShowPopup.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+			this.chkShowPopup.Location = new System.Drawing.Point(16, 48);
+			this.chkShowPopup.Name = "chkShowPopup";
+			this.chkShowPopup.Size = new System.Drawing.Size(232, 16);
+			this.chkShowPopup.TabIndex = 2;
+			this.chkShowPopup.Text = "Show &Popup(Notification Balloon)";
+			// 
 			// frmSettings
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -402,8 +431,8 @@ namespace MailMonitor
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "frmSettings";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Settings";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.Text = "Mail Monitor - Settings";
 			this.Load += new System.EventHandler(this.frmSettings_Load);
 			this.tcSettings.ResumeLayout(false);
 			this.tpNormal.ResumeLayout(false);
@@ -419,6 +448,11 @@ namespace MailMonitor
 		#endregion
 
 		#region Controls
+		private void lvwMailBoxes_DoubleClick(object sender, EventArgs e)
+		{
+			EditMailBox();
+		}
+
 		private void cmdCancel_Click(object sender, System.EventArgs e)
 		{
 			this.Close();
@@ -436,7 +470,7 @@ namespace MailMonitor
 			{
 				dudServerTimeout.Items.Add(i);
 			}
-			dudServerTimeout.SelectedIndex=5;
+			dudServerTimeout.SelectedIndex=1;
 
 			InitSettings();
 		}
@@ -460,11 +494,72 @@ namespace MailMonitor
 			extKey.Close();
 
 			_settings.MailClient=txtClient.Text;
+			_settings.ShowMainWindow=chkShowMainWindow.Checked;
+			_settings.Beep=chkBeep.Checked;
 			_settings.CheckInterval=Convert.ToInt32(dudCheckNew.Text);
 			_settings.ServerTimeout=Convert.ToInt32(dudServerTimeout.Text);
-			_settings.Save();
+			//Settings.Save(Assembly.GetEntryAssembly().Location+".cfg",_settings);
 
 			this.Close();
+		}
+
+		private void EditMailBox()
+		{
+			if(lvwMailBoxes.SelectedItems.Count>0 && lvwMailBoxes.SelectedItems.Count>0)
+			{
+				_frmMailBox=new frmMailBox();
+				int intIndex=Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Index);
+				_mailBox=(MailBox)_settings.MailBoxes[intIndex];
+				_frmMailBox.MailBox=_mailBox;
+				_frmMailBox.ShowDialog();
+				_settings.MailBoxes[intIndex]=_frmMailBox.MailBox;
+			}
+			else
+				MessageBox.Show(this,"Select mailbox first!");
+		}
+
+		private void tbrMailBoxes_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
+		{
+			switch(e.Button.Tag.ToString())
+			{
+				case "Add":
+					_mailBox=new MailBox();
+					_frmMailBox=new frmMailBox();
+					_frmMailBox.MailBox=_mailBox;
+					_frmMailBox.ShowDialog();
+					_settings.MailBoxes.Add(_settings.MailBoxes.Count,_frmMailBox.MailBox);
+					break;
+				case "Edit":
+					EditMailBox();
+					break;
+				case "Del":
+					if(_settings.MailBoxes.Count>0)
+					{
+						_settings.MailBoxes.Remove(lvwMailBoxes.SelectedItems[0].Index);
+					}
+					else
+						MessageBox.Show(this,"There is no mailbox!");
+					break;
+			}
+
+			//_settings.Save();
+
+			//_settings.Load();
+
+			InitMailBoxes();
+		}
+
+		private void cmdSelectClient_Click(object sender, System.EventArgs e)
+		{
+			dlgOpen.CheckFileExists=true;
+			dlgOpen.CheckPathExists=true;
+			dlgOpen.Filter="All Executables(*.exe;*.com;*.bat)|*.exe;*.com;*.bat";
+			dlgOpen.ReadOnlyChecked=false;
+			if(dlgOpen.ShowDialog()==DialogResult.OK)
+			{
+				txtClient.Text=dlgOpen.FileName;
+				_settings.MailClient=txtClient.Text;
+			}		
 		}
 
 		#endregion
@@ -473,6 +568,7 @@ namespace MailMonitor
 
 		public Settings Settings
 		{
+			get{return _settings;}
 			set{_settings=value;}
 		}
 
@@ -486,15 +582,18 @@ namespace MailMonitor
 			lvwMailBoxes.Items.Clear();
 			ListViewItem lvi;
 			MailBox mailBox;
-			for(int i=0;i<_settings.MailBoxes.Count;i++)
-			{				
-				mailBox=(MailBox)_settings.MailBoxes[i];
-				lvi=new ListViewItem();
-				lvi.Text=mailBox.Name;
-				lvi.SubItems.Add(mailBox.ServerAddress);
-				lvi.SubItems.Add(mailBox.UserName);
-				lvi.SubItems.Add(mailBox.Port.ToString());
-				lvwMailBoxes.Items.Add(lvi);
+			if(_settings!=null)
+			{
+				for(int i=0;i<_settings.MailBoxes.Count;i++)
+				{				
+					mailBox=(MailBox)_settings.MailBoxes[i];
+					lvi=new ListViewItem();
+					lvi.Text=mailBox.Name;
+					lvi.SubItems.Add(mailBox.ServerAddress);
+					lvi.SubItems.Add(mailBox.UserName);
+					lvi.SubItems.Add(mailBox.Port.ToString());
+					lvwMailBoxes.Items.Add(lvi);
+				}
 			}
 		}
 
@@ -511,53 +610,11 @@ namespace MailMonitor
 			txtClient.Text=_settings.MailClient;
 			dudCheckNew.Text=_settings.CheckInterval.ToString();
 			dudServerTimeout.Text=_settings.ServerTimeout.ToString();
+			chkShowMainWindow.Checked=_settings.ShowMainWindow;
+			chkBeep.Checked=_settings.Beep;
 
 		}
 		#endregion
-
-		private void tbrMailBoxes_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
-		{
-			switch(e.Button.Tag.ToString())
-			{
-				case "Add":
-					_mailBox=new MailBox();
-					_frmMailBox=new frmMailBox();
-					_frmMailBox.MailBox=_mailBox;
-					_frmMailBox.ShowDialog();
-					_settings.MailBoxes.Add(_frmMailBox.MailBox);
-					break;
-				case "Edit":
-					if(lvwMailBoxes.SelectedItems.Count>0)
-					{
-						_frmMailBox=new frmMailBox();
-						int intIndex=Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Tag);
-						_mailBox=(MailBox)_settings.MailBoxes[intIndex];
-						_frmMailBox.MailBox=_mailBox;
-						_frmMailBox.ShowDialog();
-						_settings.MailBoxes[intIndex]=_frmMailBox.MailBox;
-					}
-					else
-						MessageBox.Show(this,"Select mailbox first!");
-					break;
-				case "Del":
-					if(_settings.MailBoxes.Count>0)
-					{
-						_mailBox=(MailBox)_settings.MailBoxes[Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Tag)];
-						int intIndex=_settings.MailBoxes.IndexOf(_mailBox);
-						if(intIndex!=-1)
-							_settings.MailBoxes.Remove(((MailBox)_settings.MailBoxes[intIndex]));
-					}
-					else
-						MessageBox.Show(this,"There is no mailbox!");
-					break;
-			}
-
-			_settings.Save();
-
-			_settings.Load();
-
-			InitMailBoxes();
-		}
 
 	}
 }

@@ -39,15 +39,9 @@ namespace MailMonitor
 		private System.Windows.Forms.StatusBar sbrMain;
 		private System.Windows.Forms.StatusBarPanel sbpSize;
 		private System.Windows.Forms.StatusBarPanel sbpSentTime;
-		private POPClient popClient;
-		private Settings _settings;
-		private OpenPOP.MIMEParser.Message _msg;
-		private MailBox _mailBox;
 		private AxSHDocVw.AxWebBrowser wbBody;
-		private string _messageID;
 		private System.Windows.Forms.ImageList imlMessage;
 		private System.Windows.Forms.SaveFileDialog dlgSave;
-		private int _messageIndex;
 		private System.Windows.Forms.MainMenu mmuMail;
 		private System.Windows.Forms.MenuItem mnuFile;
 		private System.Windows.Forms.MenuItem mnuOpen;
@@ -56,7 +50,14 @@ namespace MailMonitor
 		private System.Windows.Forms.MenuItem mnuHR2;
 		private System.Windows.Forms.MenuItem mnuDelete;
 		private System.Windows.Forms.OpenFileDialog dlgOpen;
+		private POPClient _popClient;
+		private Settings _settings;
+		private OpenPOP.MIMEParser.Message _msg;
+		private MailBox _mailBox;
+		private int _messageIndex;
+		private string _messageID;
 		private string _file=null;
+
 
 
 		#region Entry
@@ -85,6 +86,9 @@ namespace MailMonitor
 
 		private void frmMail_Load(object sender, System.EventArgs e)
 		{
+			this.WindowState=_settings.MailsWindow.State;
+			if(this.WindowState!=FormWindowState.Maximized)
+				this.Size=_settings.MailsWindow.Size;
 			wbBody.CtlWidth=this.Width-wbBody.Left*2;
 			wbBody.Width=this.Width-wbBody.Left*2;
 			GetMailInfo();
@@ -294,11 +298,12 @@ namespace MailMonitor
 			this.Menu = this.mmuMail;
 			this.Name = "frmMail";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Message";
+			this.Text = "Mail Monitor - Message";
 			this.Load += new System.EventHandler(this.frmMail_Load);
 			((System.ComponentModel.ISupportInitialize)(this.wbBody)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.sbpSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.sbpSentTime)).EndInit();
+			this.Resize+=new EventHandler(frmMail_Resize);
 			this.ResumeLayout(false);
 
 		}
@@ -317,7 +322,7 @@ namespace MailMonitor
 
 		public POPClient POPClient
 		{
-			set{popClient=value;}
+			set{_popClient=value;}
 		}
 
 		public Settings Settings
@@ -337,15 +342,28 @@ namespace MailMonitor
 		
 		private bool FindLocalMessage(ref string strFile)
 		{
-			for(int i=0;i<_settings.MessageIDs.Count;i++)
+			IDictionaryEnumerator ideMessageIDs=_settings.MessageIDs.GetEnumerator();
+	
+			MailInfo mi;
+			while(ideMessageIDs.MoveNext())
+			{
+				mi=(MailInfo)ideMessageIDs.Value;				
+				if(mi.ID==_messageID)
+				{
+					strFile=_settings.GetMessageFile(_messageID);
+					return File.Exists(strFile);
+				}
+			}
+
+/*			for(int i=0;i<_settings.MessageIDs.Count;i++)
 			{
 				if(((MailInfo)_settings.MessageIDs[i]).ID==_messageID)
 				{
 					strFile=_settings.GetMessageFile(_messageID);
-					return true;
+					return File.Exists(strFile);
 				}
 			}
-
+*/
 			return false;
 		}
 
@@ -360,32 +378,32 @@ namespace MailMonitor
 				}
 				else
 				{
-					//if(!popClient.Connected)
+					//if(!_popClient.Connected)
 					//{
-						popClient.ReceiveContentSleepInterval=1;
-						popClient.WaitForResponseInterval=10;				
-						popClient.Connect(_mailBox.ServerAddress,_mailBox.Port);
-						popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
+						_popClient.ReceiveContentSleepInterval=1;
+						_popClient.WaitForResponseInterval=10;				
+						_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port);
+						_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
 					//}
-					_msg=popClient.GetMessage(_messageIndex,false);
-					MailInfo mi;
+					_msg=_popClient.GetMessage(_messageIndex,false);
+					MailInfo mi=new MailInfo();
 					mi.ID=_msg.MessageID;
 					mi.File=_settings.GetMessageFile(_msg.MessageID);
 					string strPath=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mails";
 					if(!Directory.Exists(strPath))
 						Directory.CreateDirectory(strPath);
-					_settings.MessageIDs.Add(mi);
+					if(!_settings.MessageIDs.ContainsKey(mi.ID))
+						_settings.MessageIDs.Add(mi.ID,mi);
 					_msg.SaveToMIMEEmailFile(_settings.GetMessageFile(_msg.MessageID),true);
 				}
 
 				txtSubject.Text=_msg.Subject;
-				txtSender.Text="\""+_msg.From+"\""+_msg.FromEmail;
+				txtSender.Text="\""+_msg.From+"\"<"+_msg.FromEmail+">";
 				lvwAttachments.Items.Clear();
 				ListViewItem lvi;
 				for(int i=0;i<_msg.Attachments.Count;i++)
 				{
 					lvi=lvwAttachments.Items.Add(_msg.GetAttachmentFileName(_msg.GetAttachment(i)),1);
-					lvi.Tag=i;
 				}
 
 				string strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
@@ -398,13 +416,14 @@ namespace MailMonitor
 			}
 			catch(Exception ex)
 			{
+				Utilities.BeepIt();
 				MessageBox.Show(this,ex.Message);
 			}		
 		}
 
 		private void SaveAttachment()
 		{
-			Attachment att=_msg.GetAttachment((int)lvwAttachments.SelectedItems[0].Tag);
+			Attachment att=_msg.GetAttachment((int)lvwAttachments.SelectedItems[0].Index);
 			if(att!=null && _msg!=null)
 			{
 				dlgSave.FileName=_msg.GetAttachmentFileName(att);
@@ -413,7 +432,7 @@ namespace MailMonitor
 				{
 					if(_msg.IsMIMEMailFile(att))
 					{
-						result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
+						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
 						{
 							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage();
@@ -449,7 +468,7 @@ namespace MailMonitor
 
 		private void mnuSaveAs_Click(object sender, System.EventArgs e)
 		{
-			dlgSave.FileName=_msg.Subject;
+			dlgSave.FileName=Utilities.ToNormalFileName(_msg.Subject);
 			DialogResult result=dlgSave.ShowDialog();
 			if(result==DialogResult.OK)			
 				_msg.SaveToMIMEEmailFile(dlgSave.FileName,true);
@@ -469,10 +488,16 @@ namespace MailMonitor
 
 		private void mnuDelete_Click(object sender, System.EventArgs e)
 		{
-			popClient.DeleteMessage(_messageIndex);
+			_popClient.DeleteMessage(_messageIndex);
 			this.Close();
 		}
 		#endregion
 
+		private void frmMail_Resize(object sender, EventArgs e)
+		{
+			_settings.MailWindow.State=this.WindowState;
+			_settings.MailWindow.Size=this.Size;
+			_settings.MailWindow.Location=this.Location;
+		}
 	}
 }

@@ -124,65 +124,67 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMail.cs"
+                    RelPath = "Classes\Settings.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Classes\Utilities.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <Folder RelPath = "Controls\" />
+                <File
+                    RelPath = "Forms\frmMail.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMail.resx"
+                    RelPath = "Forms\frmMail.resx"
                     DependentUpon = "frmMail.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmMailBox.cs"
+                    RelPath = "Forms\frmMailBox.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMailBox.resx"
+                    RelPath = "Forms\frmMailBox.resx"
                     DependentUpon = "frmMailBox.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmMails.cs"
+                    RelPath = "Forms\frmMails.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMails.resx"
+                    RelPath = "Forms\frmMails.resx"
                     DependentUpon = "frmMails.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmMain.cs"
+                    RelPath = "Forms\frmMain.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMain.resx"
+                    RelPath = "Forms\frmMain.resx"
                     DependentUpon = "frmMain.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmSettings.cs"
+                    RelPath = "Forms\frmSettings.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmSettings.resx"
+                    RelPath = "Forms\frmSettings.resx"
                     DependentUpon = "frmSettings.cs"
                     BuildAction = "EmbeddedResource"
                 />
-                <File
-                    RelPath = "IniHandler.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Settings.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
+                <Folder RelPath = "Resources\" />
             </Include>
         </Files>
     </CSHARP>
