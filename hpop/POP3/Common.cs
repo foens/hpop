@@ -5,6 +5,10 @@
 *Created:		2003/8
 *Modified:		2004/3/29 12:28 GMT-8
 *Description:
+Modified:		3rd May 1600 GMT+5
+*Description:
+*Changes:		3rd May 1600 GMT+5 by Hamid Qureshi
+*					1.Adding NDoc Comments
 */
 using System;
 
@@ -12,11 +16,26 @@ namespace OpenPOP.POP3
 {
 
 	/// <summary>
-	/// Possible responses when authenticating
+	/// Possible responses received from the server when performing an Authentication
 	/// </summary>
 	public enum  AuthenticationResponse
 	{
-		SUCCESS=0,INVALIDUSER=1,INVALIDPASSWORD=2,INVALIDUSERORPASSWORD=3
+		/// <summary>
+		/// Authentication succeeded
+		/// </summary>
+		SUCCESS=0,
+		/// <summary>
+		/// Login doesn't exist on the POP3 server
+		/// </summary>		
+		INVALIDUSER=1,
+		/// <summary>
+		/// Password is invalid for the give login
+		/// </summary>
+		INVALIDPASSWORD=2,
+		/// <summary>
+		/// Invalid login and/or password
+		/// </summary>
+		INVALIDUSERORPASSWORD=3
 	}		
 
 	/// <summary>
@@ -27,7 +46,18 @@ namespace OpenPOP.POP3
 	/// </remarks>
 	public enum  AuthenticationMethod
 	{
-		USERPASS=0,APOP=1,TRYBOTH=2
+		/// <summary>
+		/// Authenticate using the USER/PASS method. USER/PASS is secure but all POP3 servers may not support this method
+		/// </summary>
+		USERPASS=0,
+		/// <summary>
+		/// Authenticate using the APOP method
+		/// </summary>
+		APOP=1,
+		/// <summary>
+		/// Authenticate using USER/PASS. In case USER/PASS fails then revert to APOP
+		/// </summary>
+		TRYBOTH=2
 	}
 
 }
