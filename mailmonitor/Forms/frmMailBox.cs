@@ -53,6 +53,9 @@ namespace MailMonitor
 //		private bool _driven;
 
 
+
+		#region Entry
+
 		public frmMailBox()
 		{
 			InitializeComponent();
@@ -69,6 +72,30 @@ namespace MailMonitor
 			}
 			base.Dispose( disposing );
 		}
+
+		private void frmMailBox_Load(object sender, System.EventArgs e)
+		{
+			if(!_mailBox.Equals(null))
+			{
+				txtName.Text=_mailBox.Name;
+				txtServerAddress.Text=_mailBox.ServerAddress;
+				txtPort.Text=_mailBox.Port.ToString();
+				txtUserName.Text=_mailBox.UserName;
+				txtPassword.Text=_mailBox.Password;
+				txtDescription.Text=_mailBox.Desccription;
+				_new=true;
+			}
+			else
+			{
+				_mailBox=new MailBox();
+				_new=false;
+			}
+			_loaded=true;
+			//_auto=false;
+		}
+
+
+		#endregion
 
 		#region Windows
 		private void InitializeComponent()
@@ -317,32 +344,46 @@ namespace MailMonitor
 		}
 		#endregion
 
+		#region Functions
 		public MailBox MailBox
 		{
 			get{return _mailBox;}
 			set{_mailBox=value;}
 		}
 
-		private void frmMailBox_Load(object sender, System.EventArgs e)
+		private bool ApplySettings()
 		{
-			if(!_mailBox.Equals(null))
+			int intPort=Convert.ToInt32(txtPort.Text);
+			if(intPort>0 && intPort<65535)
 			{
-				txtName.Text=_mailBox.Name;
-				txtServerAddress.Text=_mailBox.ServerAddress;
-				txtPort.Text=_mailBox.Port.ToString();
-				txtUserName.Text=_mailBox.UserName;
-				txtPassword.Text=_mailBox.Password;
-				txtDescription.Text=_mailBox.Desccription;
-				_new=true;
+				_mailBox.Name=txtName.Text;
+				_mailBox.ServerAddress=txtServerAddress.Text;
+				_mailBox.Port=Convert.ToInt32(txtPort.Text);
+				_mailBox.UserName=txtUserName.Text;
+				_mailBox.Password=txtPassword.Text;
+				_mailBox.Desccription=txtDescription.Text;
+				_dirty=false;
+				//_new=false;
+				cmdApply.Enabled=false;
+				return true;
 			}
 			else
-			{
-				_mailBox=new MailBox();
-				_new=false;
-			}
-			_loaded=true;
-			//_auto=false;
+				return false;
 		}
+
+		private void CloseMe()
+		{
+			if(_dirty)
+			{
+				if(MessageBox.Show(this,"Something has been changed. Do you want save it before exit?","Save",MessageBoxButtons.YesNo)==DialogResult.Yes)
+					ApplySettings();
+			}
+			this.Close();
+		}
+
+		#endregion
+
+		#region Controls
 
 		private void cmdCancel_Click(object sender, System.EventArgs e)
 		{
@@ -385,36 +426,6 @@ namespace MailMonitor
 			}
 		}
 
-		private bool ApplySettings()
-		{
-			int intPort=Convert.ToInt32(txtPort.Text);
-			if(intPort>0 && intPort<65535)
-			{
-				_mailBox.Name=txtName.Text;
-				_mailBox.ServerAddress=txtServerAddress.Text;
-				_mailBox.Port=Convert.ToInt32(txtPort.Text);
-				_mailBox.UserName=txtUserName.Text;
-				_mailBox.Password=txtPassword.Text;
-				_mailBox.Desccription=txtDescription.Text;
-				_dirty=false;
-				//_new=false;
-				cmdApply.Enabled=false;
-				return true;
-			}
-			else
-				return false;
-		}
-
-		private void CloseMe()
-		{
-			if(_dirty)
-			{
-				if(MessageBox.Show(this,"Something has been changed. Do you want save it before exit?","Save",MessageBoxButtons.YesNo)==DialogResult.Yes)
-					ApplySettings();
-			}
-			this.Close();
-		}
-
 		private void cmdApply_Click(object sender, System.EventArgs e)
 		{
 			ApplySettings();
@@ -424,5 +435,8 @@ namespace MailMonitor
 		{
 			CloseMe();
 		}
+
+		#endregion
+
 	}
 }

@@ -996,7 +996,7 @@ namespace MailMonitor
 				lvi.SubItems.Add("");
 
 				OpenPOP.POP3.Utility.Log=true;
-				_popClient.Disconnect();
+				//_popClient.Disconnect();
 				_popClient.ReceiveContentSleepInterval=1;
 				_popClient.WaitForResponseInterval=10;
 				_popClient.SendTimeOut=_settings.ServerTimeout*1000;
@@ -1011,9 +1011,11 @@ namespace MailMonitor
 				int intNewMessages=0;
 				MailInfo mi;
 
-				for(int i=1;i<=intCount;i++)
+				ArrayList alUIDs=_popClient.GetMessageUIDs();
+
+				for(int i=0;i<intCount;i++)
 				{
-					strMessageID=_popClient.GetMessageUID(i);
+					strMessageID=(string)alUIDs[i];//_popClient.GetMessageUID(i);
 					if(!_settings.MessageIDs.ContainsKey(strMessageID))
 					{
 						intNewMessages+=1;

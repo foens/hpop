@@ -20,9 +20,11 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/17 14:20 GMT+8 by Unruled Boy
+*Modified:		2004/6/16 18:34 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/16 18:34 GMT+8 by Unruled Boy
+*					1.fixed a loop in message body decoding by .
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
 *					1.Again, fixed something but do not remember :(
 *				2004/5/11 17:00 GMT+8 by Unruled Boy
@@ -981,6 +983,7 @@ namespace OpenPOP.MIMEParser
 				if(indexOf_attachmentstart==indexOfAttachmentEnd-9)
 				{
 					indexOf_attachmentstart=0;
+					processed=true;
 				}
 
 				string strLine=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            

@@ -1,3 +1,9 @@
+2004/6/16 18:34 GMT+8 by Unruled Boy
+	1.fixed a loop in message body decoding by .
+
+2004/6/16 12:47 GMT+8 by Unruled Boy
+	1.Added new high performance WaitForResponse function;
+
 2004/5/31 14:22 GMT+8 by Unruled Boy
 	1.Fixed a bug in decoding Base64 text when using non-standard encoding
 

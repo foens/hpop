@@ -57,7 +57,7 @@ namespace MailMonitor
 		private int _messageIndex;
 		private string _messageID;
 		private string _file=null;
-
+		private string strBodyFile;
 
 
 		#region Entry
@@ -304,6 +304,7 @@ namespace MailMonitor
 			((System.ComponentModel.ISupportInitialize)(this.sbpSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.sbpSentTime)).EndInit();
 			this.Resize+=new EventHandler(frmMail_Resize);
+			this.Closed+=new EventHandler(frmMail_Closed);
 			this.ResumeLayout(false);
 
 		}
@@ -406,7 +407,7 @@ namespace MailMonitor
 					lvi=lvwAttachments.Items.Add(_msg.GetAttachmentFileName(_msg.GetAttachment(i)),1);
 				}
 
-				string strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
+				strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
 				string strBodyText=Utilities.ToFormattedHTML((string)_msg.MessageBody[_msg.MessageBody.Count-1]);
 				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
 				object o=null;
@@ -485,6 +486,12 @@ namespace MailMonitor
 				_file=dlgOpen.FileName;
 				GetMailInfo();
 			}
+		}
+
+		private void frmMail_Closed(object sender, EventArgs e)
+		{
+			if(File.Exists(strBodyFile))
+				File.Delete(strBodyFile);
 		}
 
 		private void frmMail_Resize(object sender, EventArgs e)

@@ -127,7 +127,6 @@ namespace MailMonitor
 			this.lvwMailBoxes.HoverSelection = true;
 			this.lvwMailBoxes.LabelWrap = false;
 			this.lvwMailBoxes.Location = new System.Drawing.Point(0, 48);
-			this.lvwMailBoxes.MultiSelect = false;
 			this.lvwMailBoxes.Name = "lvwMailBoxes";
 			this.lvwMailBoxes.Size = new System.Drawing.Size(496, 160);
 			this.lvwMailBoxes.TabIndex = 4;
@@ -161,6 +160,7 @@ namespace MailMonitor
 			this.cmdCancel.Size = new System.Drawing.Size(72, 24);
 			this.cmdCancel.TabIndex = 5;
 			this.cmdCancel.Text = "&Cancel";
+			this.cmdCancel.Visible = false;
 			this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
 			// 
 			// cmdPause
@@ -241,10 +241,10 @@ namespace MailMonitor
 			this.Name = "frmMails";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Mail Monitor - MailBox Info";
+			this.Resize += new System.EventHandler(this.frmMails_Resize);
 			this.Load += new System.EventHandler(this.frmMails_Load);
 			this.Closed += new System.EventHandler(this.frmMails_Closed);
 			this.gbxHeader.ResumeLayout(false);
-			this.Resize+=new EventHandler(frmMails_Resize);
 			this.ResumeLayout(false);
 
 		}
@@ -294,14 +294,19 @@ namespace MailMonitor
 					}
 					Thread.Sleep(50);
 				}
-				this.Text="MailBox Info";
 				//lvwMailBoxes.Visible=true;
 				lvwMailBoxes.Update();
+				this.Text="MailBox Info(" + _count.ToString() + " mails)";
 			}
 			catch(Exception e)
 			{
 				Utilities.BeepIt();
-				MessageBox.Show(this,e.Message);
+				try
+				{
+					MessageBox.Show(this,e.Message);
+				}
+				catch
+				{}
 			}
 		}
 
@@ -309,16 +314,17 @@ namespace MailMonitor
 		{
 			try
 			{
-				//_thread.Abort();
-				//_thread=null;
-				_thread.Suspend();
+				_thread.Resume();
+				_thread.Abort();
+				_thread=null;
+				//_thread.Suspend();
 			}
 			//catch(ThreadAbortException ex)
 			//{}
 			catch
 			{}
-			cmdCancel.Enabled=false;
-			cmdGet.Enabled=true;
+			//cmdCancel.Enabled=false;
+			//cmdGet.Enabled=true;
 		}
 
 		private void Pause()
@@ -326,10 +332,17 @@ namespace MailMonitor
 			try
 			{
 				if(_thread.ThreadState==ThreadState.Running)
+				{
 					_thread.Suspend();
+					cmdGet.Enabled=true;
+					cmdPause.Text="&Resume";
+				}
 				else if(_thread.ThreadState==ThreadState.Suspended)
+				{
 					_thread.Resume();
-				_thread=null;
+					cmdGet.Enabled=false;
+					cmdPause.Text="&Pause";
+				}
 			}
 			catch
 			{}
@@ -346,7 +359,7 @@ namespace MailMonitor
 			lvwMailBoxes.Columns.Add("MessageID",0,HorizontalAlignment.Left);
 
 			_thread=new Thread(new ThreadStart(DownloadEMails));
-			_thread.IsBackground=true;
+			//_thread.IsBackground=true;
 			_thread.Start();
 		}
 		#endregion
@@ -409,6 +422,13 @@ namespace MailMonitor
 			}
 		}
 
+		private void frmMails_Resize(object sender, EventArgs e)
+		{
+			_settings.MailsWindow.State=this.WindowState;
+			_settings.MailsWindow.Size=this.Size;
+			_settings.MailsWindow.Location=this.Location;
+		}
+
 		private void cmdCancel_Click(object sender, System.EventArgs e)
 		{
 			Abort();
@@ -430,7 +450,10 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				_popClient.DeleteMessage(Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Index));
+				for(int i=lvwMailBoxes.SelectedItems.Count-1;i>0;i--)
+				{
+					_popClient.DeleteMessage(Convert.ToInt32(lvwMailBoxes.SelectedItems[i].Index));
+				}
 				InitEMails();
 			}
 		}
@@ -448,11 +471,5 @@ namespace MailMonitor
 		}
 		#endregion
 
-		private void frmMails_Resize(object sender, EventArgs e)
-		{
-			_settings.MailsWindow.State=this.WindowState;
-			_settings.MailsWindow.Size=this.Size;
-			_settings.MailsWindow.Location=this.Location;
-		}
 	}
 }

@@ -20,7 +20,7 @@
 *Function:		Assembly
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/31 14:22 GMT+8 by Unruled Boy
+*Modified:		2004/6/16 18:34 GMT+8 by Unruled Boy
 *Description	:
 */
 using System.Reflection;
@@ -29,13 +29,13 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("OpenPOP")]
 [assembly: AssemblyDescription("POP3 Mail Library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("OpenPOP")]
+[assembly: AssemblyCompany("Hamid Qureshi and Unruled Boy")]
 [assembly: AssemblyProduct("OpenPOP")]
 [assembly: AssemblyCopyright("Hamid Qureshi and Unruled Boy")]
 [assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 
-[assembly: AssemblyVersion("2004.05.31.1423")]
+[assembly: AssemblyVersion("2004.06.16.1248")]
 
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]

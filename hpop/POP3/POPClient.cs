@@ -20,9 +20,11 @@
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/26 09:25 GMT+8 by Unruled Boy
+*Modified:		2004/6/16 12:47 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/16 12:47 GMT+8 by Unruled Boy
+*					1.Added new high performance WaitForResponse function;
 *				2004/5/26 09:25 GMT+8 by Unruled Boy
 *					1.Fixed some parameter description errors and tidy up some codes
 *				2004/5/21 00:00 by dteviot via Unruled Boy
@@ -271,6 +273,19 @@ namespace OpenPOP.POP3
 			}
 		}
 
+		private void WaitForResponse(ref StreamReader rdReader)
+		{
+			DateTime dtStart=DateTime.Now;
+			TimeSpan tsSpan;
+			while(!rdReader.BaseStream.CanRead)
+			{
+				tsSpan=DateTime.Now.Subtract(dtStart);
+				if(tsSpan.Milliseconds>_receiveTimeOut)
+					break;
+				Thread.Sleep(_waitForResponseInterval);
+			}
+		}
+
 		private void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
 		{
 			if(intInterval==0)
@@ -330,7 +345,8 @@ namespace OpenPOP.POP3
 				{
 					writer.WriteLine(strCommand);
 					writer.Flush();
-					WaitForResponse(ref reader,WaitForResponseInterval);
+					//WaitForResponse(ref reader,WaitForResponseInterval);
+					WaitForResponse(ref reader);
 					_lastCommandResponse = reader.ReadLine();				
 					return IsOkResponse(_lastCommandResponse);
 				}
@@ -400,8 +416,8 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// connect to remote server
 		/// </summary>
-		/// <param name="strHost">pop3 host</param>
-		/// <param name="intPort">pop3 port</param>
+		/// <param name="strHost">POP3 host</param>
+		/// <param name="intPort">POP3 port</param>
 		public void Connect(string strHost,int intPort)
 		{
 			OnCommunicationBegan(EventArgs.Empty);
@@ -446,7 +462,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Disconnect from pop3 server
+		/// Disconnect from POP3 server
 		/// </summary>
 		public void Disconnect()
 		{
@@ -638,7 +654,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// quit pop3 server
+		/// quit POP3 server
 		/// </summary>
 		public bool QUIT()
 		{
