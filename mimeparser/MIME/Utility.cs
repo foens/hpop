@@ -1,11 +1,13 @@
 /*
-*Name:			OpenPOP.Utility
+*Name:			iOfficeMailSMTP.Mail.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/17 14:20 GMT+8 by Unruled Boy
+*Modified:		2004/5/25 13:55 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/25 13:55 GMT+8 by Unruled Boy
+*					1.Rewrote the DecodeText function using Regular Expression
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
 *					1.Added ParseFileName
 *				2004/4/29 19:05 GMT+8 by Unruled Boy
@@ -20,8 +22,9 @@ using System;
 using System.Text;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Utility.
@@ -29,7 +32,7 @@ namespace OpenPOP.MIMEParser
 	public class Utility
 	{
 		private static bool m_blnLog=false;
-		private static string m_strLogFile = "OpenPOP.log";
+		private static string m_strLogFile = "iOfficeMailSMTP.Mail.log";
 
 		public Utility()
 		{
@@ -302,6 +305,81 @@ namespace OpenPOP.MIMEParser
 
 		public static string DecodeText(string strSrc)
 		{
+			/*try
+			{
+				string strRet="";
+				string strBody="";
+				MatchCollection mc=Regex.Matches(strSrc,@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=");
+
+				for(int i=0;i<mc.Count;i++)
+				{
+					if(mc[i].Success)
+					{
+						strBody=mc[i].Groups["Content"].Value;
+
+						switch(mc[i].Groups["Encoding"].Value.ToUpper())
+						{
+							case "B":
+								strBody=deCodeB64s(strBody,mc[i].Groups["Charset"].Value);
+								break;
+							case "Q":
+								strBody=DecodeQP.ConvertHexContent(strBody);//, m.Groups["Charset"].Value);
+								break;
+							default:
+								break;
+						}
+						strRet+=strBody;
+					}
+					else
+					{
+						strRet+=mc[i].Value;
+					}
+				}
+				return strRet;
+			}
+			catch
+			{return strSrc;}*/
+
+			try
+			{
+				string strRet="";
+				string[] strParts=Regex.Split(strSrc,"\r\n");
+				string strBody="";
+				const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=";
+				Match m=null;
+
+				for(int i=0;i<strParts.Length;i++)
+				{
+					m = Regex.Match(strParts[i], strRegEx);
+					if(m.Success)
+					{
+						strBody=m.Groups["Content"].Value;
+
+						switch(m.Groups["Encoding"].Value.ToUpper())
+						{
+							case "B":
+								strBody=deCodeB64s(strBody,m.Groups["Charset"].Value);
+								break;
+							case "Q":
+								strBody=DecodeQP.ConvertHexContent(strBody);//, m.Groups["Charset"].Value);
+								break;
+							default:
+								break;
+						}
+						strRet+=strBody;
+					}
+					else
+					{
+						strRet+=strParts[i];
+					}
+				}
+				return strRet;
+			}
+			catch(Exception e)
+			{return strSrc;}
+
+/*		
+		{
 			try
 			{
 				if(strSrc!=null&&strSrc!="")
@@ -337,8 +415,12 @@ namespace OpenPOP.MIMEParser
 									break;
 								default:
 									break;
-							}							
-							return strHead+strBody+strEnd;
+							}
+							strSrc=strHead+strBody+strEnd;
+							if(IsValidMIMEText(strSrc))
+								return DecodeText(strSrc);
+							else
+								return strSrc;
 						}
 						else
 						{return strSrc;}
@@ -350,59 +432,20 @@ namespace OpenPOP.MIMEParser
 				{return strSrc;}
 			}
 			catch
-			{return strSrc;}
-
-			//				if(strSrc==null)
-			//					return null;
-			//				int start=strSrc.IndexOf("=?GB2312?");
-			//				if (start==-1)
-			//				{
-			//					start=strSrc.IndexOf("=?gb2312?");
-			//				}
-			//				if(start>=0)
-			//				{
-			//					string strHead=strSrc.Substring(0,start);
-			//					string strMethod=strSrc.Substring(start+9,1);
-			//					strSrc=strSrc.Substring(start+11);
-			//					int end=strSrc.IndexOf("?=");
-			//					if (end==-1)
-			//					{
-			//						end=strSrc.Length;
-			//					}
-			//					string strFoot=strSrc.Substring(end+2,strSrc.Length-end-2);
-			//					strSrc=strSrc.Substring(0,end);
-			//					if(strMethod.ToUpper()=="B")
-			//						strSrc=strHead+deCodeB64s(strSrc)+strFoot;
-			//					else
-			//					{
-			//						if(strMethod.ToUpper()=="Q")
-			//							strSrc=strHead+DecodeQP.ConvertHexContent(strSrc)+strFoot;
-			//						else
-			//							strSrc=strHead+strSrc+strFoot;
-			//					}
-			//					start=strSrc.IndexOf("=?GB2312?");
-			//					if(start==-1)
-			//					{
-			//						start=strSrc.IndexOf("=?gb2312?");
-			//					}
-			//					if(start>=0)
-			//						strSrc=DecodeText(strSrc);
-			//				}
-			//				else
-			//				{
-			//					strSrc=QuotedCoding.Decode(strSrc);
-			//				}
-			//			}
-			//			catch
-			//			{
-			//			}
-			//
-			//			return strSrc;
+			{return strSrc;}*/
 		}
 		
 		public static string deCodeB64s(string strSrc)
 		{
 			return Encoding.Default.GetString(deCodeB64(strSrc));
+		}
+		
+		public static string deCodeB64s(string strSrc,string strEncoding)
+		{
+			if(strEncoding.ToLower()=="ISO-8859-1".ToLower())
+				return deCodeB64s(strSrc);
+			else
+				return Encoding.GetEncoding(strEncoding).GetString(deCodeB64(strSrc));				
 		}
 		
 		private static byte []deCodeB64(string strSrc)

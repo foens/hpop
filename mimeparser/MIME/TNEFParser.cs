@@ -3,7 +3,7 @@
 **********************************************************************/
 
 /*
-*Name:			OpenPOP.MIMEParser.Message
+*Name:			iOfficeMail.POP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Thomas Boll(c version), Unruled Boy(c# version)
 *Created:		2004/3
@@ -18,10 +18,10 @@ using System.IO;
 using System.Text;
 using System.Collections;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
-	/// OpenPOP.MIMEParser.TNEFParser
+	/// iOfficeMail.POP.MIMEParser.TNEFParser
 	/// </summary>
 	public class TNEFParser
 	{
@@ -45,7 +45,7 @@ namespace OpenPOP.MIMEParser
 		private TNEFAttachment _attachment=null;
 
 		private bool _verbose = false;
-		//private string _logFile="OpenPOP.TNEF.log";
+		//private string _logFile="iOfficeMailSMTP.Mail.TNEF.log";
 		private string _basePath=null;
 		private int _skipSignature = 0;
 		private bool _searchSignature = false;

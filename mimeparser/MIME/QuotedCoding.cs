@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.QuotedCoding
+*Name:			iOfficeMail.POP.MIMEParser.QuotedCoding
 *Function:		Quoted Coding
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -9,7 +9,7 @@
 using System;
 using System.Text;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Coding.

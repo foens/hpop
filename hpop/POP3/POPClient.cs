@@ -1,11 +1,13 @@
 /*
-*Name:			OpenPOP.POP3.POPClient
+*Name:			iOfficeMail.POP.POP3.POPClient
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/3 12:53 GMT+8 by Unruled Boy
+*Modified:		2004/5/26 09:25 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/26 09:25 GMT+8 by Unruled Boy
+*					1.Fixed some parameter description errors and tidy up some codes
 *				2004/5/21 00:00 by dteviot via Unruled Boy
 *					1.Added support for the LIST command
 *					2.Heavily refactored replicated code
@@ -32,7 +34,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace OpenPOP.POP3
+namespace iOfficeMail.POP.POP3
 {
 	/// <summary>
 	/// POPClient
@@ -246,15 +248,14 @@ namespace OpenPOP.POP3
 			}
 		}
 
-
 		/// <summary>
 		/// Examines string to see if it contains a timestamp to use with the APOP command
 		/// If it does, sets the ApopTimestamp property to this value
 		/// </summary>
-		/// <param name="response">string to examine</param>
-		private void ExtractApopTimestamp(string response)
+		/// <param name="strResponse">string to examine</param>
+		private void ExtractApopTimestamp(string strResponse)
 		{
-			Match match = Regex.Match(response, "<.+>");
+			Match match = Regex.Match(strResponse, "<.+>");
 			if (match.Success)
 			{
 				_aPOPTimestamp = match.Value;
@@ -264,24 +265,24 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Tests a string to see if it's a "+OK" string
 		/// </summary>
-		/// <param name="response">string to examine</param>
+		/// <param name="strResponse">string to examine</param>
 		/// <returns>true if response is an "+OK" string</returns>
-		private bool IsOkResponse(string response)
+		private bool IsOkResponse(string strResponse)
 		{
-			return (response.Substring(0, 3) == strOK);
+			return (strResponse.Substring(0, 3) == strOK);
 		}
 
 		/// <summary>
 		/// Sends a command to the POP server.
 		/// </summary>
-		/// <param name="response">command to send to server</param>
+		/// <param name="strCommand">command to send to server</param>
 		/// <returns>true if server responded "+OK"</returns>
-		private bool SendCommand(string cmd)
+		private bool SendCommand(string strCommand)
 		{
 			_lastCommandResponse = "";
 			try
 			{
-				writer.WriteLine(cmd);
+				writer.WriteLine(strCommand);
 				writer.Flush();
 				WaitForResponse(ref reader,WaitForResponseInterval);
 				_lastCommandResponse = reader.ReadLine();				
@@ -289,7 +290,7 @@ namespace OpenPOP.POP3
 			}
 			catch(Exception e)
 			{
-				_Error = cmd + ":" +e.Message;
+				_Error = strCommand + ":" +e.Message;
 				Utility.LogError(_Error);
 				return false;
 			}
@@ -298,12 +299,12 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Sends a command to the POP server, expects an integer reply in the response
 		/// </summary>
-		/// <param name="response">command to send to server</param>
+		/// <param name="strCommand">command to send to server</param>
 		/// <returns>integer value in the reply</returns>
-		private int SendCommandIntResponse(string cmd)
+		private int SendCommandIntResponse(string strCommand)
 		{
 			int retVal = 0;
-			if(SendCommand(cmd))
+			if(SendCommand(strCommand))
 			{
 				try
 				{
@@ -311,7 +312,7 @@ namespace OpenPOP.POP3
 				}
 				catch(Exception e)
 				{
-					Utility.LogError(cmd + ":" + e.Message);
+					Utility.LogError(strCommand + ":" + e.Message);
 				}
 			}
 			return retVal;
@@ -364,11 +365,11 @@ namespace OpenPOP.POP3
 		
 			WaitForResponse(ref reader,WaitForResponseInterval);
 
-			string response=reader.ReadLine();
+			string strResponse=reader.ReadLine();
 
-			if(IsOkResponse(response))
+			if(IsOkResponse(strResponse))
 			{
-				ExtractApopTimestamp(response);
+				ExtractApopTimestamp(strResponse);
 				OnCommunicationOccured(EventArgs.Empty);
 			}
 			else
@@ -476,7 +477,7 @@ namespace OpenPOP.POP3
 				throw new InvalidLoginException();
 			}
 			
-			WaitForResponse(ref writer,200);
+			WaitForResponse(ref writer,WaitForResponseInterval);
 			if(!SendCommand("PASS " + strPassword))	
 			{
 				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
@@ -549,7 +550,7 @@ namespace OpenPOP.POP3
 		/// <param name="intMessageIndex"> </param>
 		public bool DeleteMessage(int intMessageIndex) 
 		{
-			return SendCommand("DELE " + intMessageIndex);
+			return SendCommand("DELE " + intMessageIndex.ToString());
 		}
 
 		/// <summary>
@@ -608,7 +609,7 @@ namespace OpenPOP.POP3
 		{
 			OnMessageTransferBegan(EventArgs.Empty);
 
-			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber+" 0", true);
+			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber.ToString()+" 0", true);
 			
 			OnMessageTransferFinished(EventArgs.Empty);
 
@@ -637,11 +638,11 @@ namespace OpenPOP.POP3
 			ArrayList uids=new ArrayList();
 			if(SendCommand("UIDL"))
 			{
-				string response=reader.ReadLine();
-				while (response!=".")
+				string strResponse=reader.ReadLine();
+				while (strResponse!=".")
 				{
-					uids.Add(response.Split(' ')[1]);
-					response=reader.ReadLine();
+					uids.Add(strResponse.Split(' ')[1]);
+					strResponse=reader.ReadLine();
 				}
 				return uids;
 			}
@@ -661,11 +662,11 @@ namespace OpenPOP.POP3
 			ArrayList sizes=new ArrayList();
 			if(SendCommand("LIST"))
 			{
-				string response=reader.ReadLine();
-				while (response!=".")
+				string strResponse=reader.ReadLine();
+				while (strResponse!=".")
 				{
-					sizes.Add(int.Parse(response.Split(' ')[1]));
-					response=reader.ReadLine();
+					sizes.Add(int.Parse(strResponse.Split(' ')[1]));
+					strResponse=reader.ReadLine();
 				}
 				return sizes;
 			}
@@ -692,31 +693,31 @@ namespace OpenPOP.POP3
 		/// <returns>content</returns>
 		private string ReceiveContent(int intContentLength)
 		{
-			string response=null;
+			string strResponse=null;
 			StringBuilder builder = new StringBuilder();
 			
 			WaitForResponse(ref reader,WaitForResponseInterval);
 
-			response = reader.ReadLine();
+			strResponse = reader.ReadLine();
 			int intLines=0;
 			int intLen=0;
 
-			while (response!=".")// || (intLen<intContentLength)) //(response.IndexOf(".")==0 && intLen<intContentLength)
+			while (strResponse!=".")// || (intLen<intContentLength)) //(strResponse.IndexOf(".")==0 && intLen<intContentLength)
 			{
-				builder.Append(response + "\r\n");
+				builder.Append(strResponse + "\r\n");
 				intLines+=1;
-				intLen+=response.Length+"\r\n".Length;
+				intLen+=strResponse.Length+"\r\n".Length;
 				
 				WaitForResponse(ref reader,1);
 
-				response = reader.ReadLine();
+				strResponse = reader.ReadLine();
 				if((intLines % _receiveContentSleepInterval)==0) //make an interval pause to ensure response from server
 					Thread.Sleep(1);
 			}
 
-			builder.Append(response+ "\r\n");
+			builder.Append(strResponse+ "\r\n");
 
-			return builder.ToString();//.Substring(0,intContentLength);
+			return builder.ToString();
 
 		}
 
@@ -739,13 +740,13 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// fetches a message or a message header
 		/// </summary>
-		/// <param name="Cmd">Command to send to Pop server</param>
+		/// <param name="strCommand">Command to send to Pop server</param>
 		/// <param name="blnOnlyHeader">Only return message header?</param>
 		/// <returns>Message object</returns>
-		public MIMEParser.Message FetchMessage(string cmd, bool blnOnlyHeader)
+		public MIMEParser.Message FetchMessage(string strCommand, bool blnOnlyHeader)
 		{			
 			_receiveFinish=false;
-			if(!SendCommand(cmd))			
+			if(!SendCommand(strCommand))			
 				return null;
 
 			try
@@ -754,7 +755,7 @@ namespace OpenPOP.POP3
 
 				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
 
-				WaitForResponse(_receiveFinish,100);
+				WaitForResponse(_receiveFinish,WaitForResponseInterval);
 
 				return msg;
 			}

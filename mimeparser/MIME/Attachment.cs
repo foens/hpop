@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.Attachment
+*Name:			iOfficeMail.POP.MIMEParser.Attachment
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -26,7 +26,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Attachment.
@@ -97,7 +97,7 @@ namespace OpenPOP.MIMEParser
 									return true;
 								else
 									return (_contentFileName!="");*/
-				if ((_contentType==null||_contentFileName==""))//&&_contentType.ToLower().IndexOf("text/")!=-1)
+				if ((_contentType==null||_contentFileName=="") && _contentID==null)//&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
 				else
 					return false;
@@ -360,29 +360,6 @@ namespace OpenPOP.MIMEParser
 						if(_contentFileName=="")
 							ParseHeader(srReader,ref strRet);
 					}
-/*					if(_contentType.ToLower().IndexOf("name".ToLower())==-1)
-					{
-						strRet=srReader.ReadLine();
-						if(strRet.IndexOf("filename=\"")!=-1)
-						{
-							_contentFileName=Utility.GetQuotedValue(strRet,"=","filename");
-							_contentFileName=Utility.DecodeText(_contentFileName);
-						}
-						else if(strRet.IndexOf("name=\"")!=-1)
-						{
-							_contentFileName=Utility.GetQuotedValue(strRet,"=","name");
-							_contentFileName=Utility.DecodeText(_contentFileName);
-						}
-						else if(strRet=="")
-						{
-							strLine="";
-							break;
-						}
-						else
-						{
-							ParseHeader(srReader,ref strRet);
-						}
-					}*/
 					break;
 				case "CONTENT-TRANSFER-ENCODING":
 					_contentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();

@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.DecodeQP
+*Name:			iOfficeMail.POP.MIMEParser.DecodeQP
 *Function:		Decoding Quoted-Printable text
 *Author:		
 *Created:		2003/8
@@ -11,7 +11,7 @@ using System;
 using System.Text;
 using System.Globalization;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
 	/// Decoding Quoted-Printable text
@@ -29,7 +29,21 @@ namespace OpenPOP.MIMEParser
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method</param>
 		/// <returns>decoded string</returns>
-		private static string ConvertHexToString(string Hexstring,Encoding encode)
+		public static string ConvertHexToString(string Hexstring,string Encoding)
+		{
+			try
+			{return ConvertHexToString(Hexstring, System.Text.Encoding.GetEncoding(Encoding));}
+			catch
+			{return ConvertHexContent(Hexstring);}
+		}
+
+		/// <summary>
+		/// Decoding Quoted-Printable string
+		/// </summary>
+		/// <param name="Hexstring">Quoted-Printable encoded string</param>
+		/// <param name="encode">encoding method</param>
+		/// <returns>decoded string</returns>
+		public static string ConvertHexToString(string Hexstring,Encoding encode)
 		{			
 			try
 			{

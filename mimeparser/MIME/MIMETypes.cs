@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMETypes
+*Name:			iOfficeMailSMTP.Mail.MIMETypes
 *Function:		MIME Types
 *Author:		Unruled Boy
 *Created:		2004/3/29
@@ -13,7 +13,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace OpenPOP
+namespace iOfficeMail
 {
 	/// <summary>
 	/// MIMETypes

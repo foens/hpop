@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP3.MyMD5
+*Name:			iOfficeMail.POP.POP3.MyMD5
 *Function:		MD5
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -11,7 +11,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace OpenPOP.POP3
+namespace iOfficeMail.POP.POP3
 {
 	/// <summary>
 	/// Summary description for MyMD5.

@@ -5,16 +5,18 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
 using System.Threading;
-//using System.IO;
-using OpenPOP.POP3;
+using iOfficeMail.POP;
+using iOfficeMail.POP.POP3;
+using iOfficeMail.POP.MIMEParser;
 
-namespace OpenPOP.NET_Sample_App
+namespace NET_Sample_App
 {
 	/// <summary>
 	/// Summary description for Form1.
 	/// </summary>
 	public class mainForm : System.Windows.Forms.Form
 	{
+		private POPClient popClient=new POPClient();
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.TextBox txtPOPServer;
 		private System.Windows.Forms.Label label1;
@@ -47,10 +49,8 @@ namespace OpenPOP.NET_Sample_App
 		private System.Windows.Forms.ContextMenu ctmMessages;
 		private System.Windows.Forms.MenuItem mnuDeleteMessage;
 		private System.Windows.Forms.Button button2;
-		private POPClient popClient=new POPClient();
-		private System.Windows.Forms.TextBox txtEvents;
+		private System.Windows.Forms.Button button3;
 		private Hashtable msgs=new Hashtable();
-
 
 		public mainForm()
 		{
@@ -62,8 +62,6 @@ namespace OpenPOP.NET_Sample_App
 			//
 			// TODO: Add any constructor code after InitializeComponent call
 			//
-			popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
-			popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
 		}
 
 		/// <summary>
@@ -89,6 +87,7 @@ namespace OpenPOP.NET_Sample_App
 		private void InitializeComponent()
 		{
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.button3 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
 			this.txtTotalMessages = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
@@ -105,7 +104,6 @@ namespace OpenPOP.NET_Sample_App
 			this.gridHeaders = new System.Windows.Forms.DataGrid();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.panel4 = new System.Windows.Forms.Panel();
-			this.txtEvents = new System.Windows.Forms.TextBox();
 			this.txtMessage = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.panel5 = new System.Windows.Forms.Panel();
@@ -128,6 +126,7 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.button3);
 			this.panel1.Controls.Add(this.button2);
 			this.panel1.Controls.Add(this.txtTotalMessages);
 			this.panel1.Controls.Add(this.label6);
@@ -145,6 +144,15 @@ namespace OpenPOP.NET_Sample_App
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(804, 69);
 			this.panel1.TabIndex = 0;
+			// 
+			// button3
+			// 
+			this.button3.Location = new System.Drawing.Point(488, 24);
+			this.button3.Name = "button3";
+			this.button3.Size = new System.Drawing.Size(48, 24);
+			this.button3.TabIndex = 12;
+			this.button3.Text = "button3";
+			this.button3.Click += new System.EventHandler(this.button3_Click);
 			// 
 			// button2
 			// 
@@ -186,7 +194,8 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPassword.PasswordChar = '*';
 			this.txtPassword.Size = new System.Drawing.Size(153, 21);
 			this.txtPassword.TabIndex = 7;
-			this.txtPassword.Text = "";
+			this.txtPassword.Text = "lovebell";
+			this.txtPassword.TextChanged += new System.EventHandler(this.txtPassword_TextChanged);
 			// 
 			// label8
 			// 
@@ -202,7 +211,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtLogin.Name = "txtLogin";
 			this.txtLogin.Size = new System.Drawing.Size(153, 21);
 			this.txtLogin.TabIndex = 5;
-			this.txtLogin.Text = "";
+			this.txtLogin.Text = "wilsonchan";
 			// 
 			// button1
 			// 
@@ -244,7 +253,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPOPServer.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
 			this.txtPOPServer.Size = new System.Drawing.Size(153, 21);
 			this.txtPOPServer.TabIndex = 0;
-			this.txtPOPServer.Text = "";
+			this.txtPOPServer.Text = "pop3.netease.com";
 			// 
 			// panel2
 			// 
@@ -281,7 +290,6 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// panel4
 			// 
-			this.panel4.Controls.Add(this.txtEvents);
 			this.panel4.Controls.Add(this.txtMessage);
 			this.panel4.Controls.Add(this.label4);
 			this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -289,19 +297,6 @@ namespace OpenPOP.NET_Sample_App
 			this.panel4.Name = "panel4";
 			this.panel4.Size = new System.Drawing.Size(477, 177);
 			this.panel4.TabIndex = 6;
-			// 
-			// txtEvents
-			// 
-			this.txtEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.txtEvents.Location = new System.Drawing.Point(8, 152);
-			this.txtEvents.MaxLength = 999999999;
-			this.txtEvents.Multiline = true;
-			this.txtEvents.Name = "txtEvents";
-			this.txtEvents.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.txtEvents.Size = new System.Drawing.Size(458, 24);
-			this.txtEvents.TabIndex = 7;
-			this.txtEvents.Text = "";
 			// 
 			// txtMessage
 			// 
@@ -357,7 +352,7 @@ namespace OpenPOP.NET_Sample_App
 			// mnuDeleteMessage
 			// 
 			this.mnuDeleteMessage.Index = 0;
-			this.mnuDeleteMessage.Text = "Delete Mail";
+			this.mnuDeleteMessage.Text = "É¾³ýÓÊ¼þ";
 			this.mnuDeleteMessage.Click += new System.EventHandler(this.mnuDeleteMessage_Click);
 			// 
 			// label5
@@ -412,7 +407,7 @@ namespace OpenPOP.NET_Sample_App
 			this.Controls.Add(this.panel1);
 			this.Name = "mainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "OpenPOP.NET Sample Application";
+			this.Text = "COM.NET.MAIL.NET Sample Application";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.Load += new System.EventHandler(this.mainForm_Load);
 			this.panel1.ResumeLayout(false);
@@ -438,7 +433,7 @@ namespace OpenPOP.NET_Sample_App
 
 		private void ReceiveMails()
 		{
-			Utility.Log=true;
+			iOfficeMail.POP.POP3.Utility.Log=true;
 			popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text));
 			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
@@ -452,7 +447,8 @@ namespace OpenPOP.NET_Sample_App
 
 			for(int i=Count;i>=1;i-=1)
 			{
-				MIMEParser.Message m=popClient.GetMessage(i,false);
+				//int i=56;
+				iOfficeMail.POP.MIMEParser.Message m=popClient.GetMessage(i,false);
 				TreeNode node;
 				if(m!=null)
 				{
@@ -486,12 +482,12 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listMessages_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
-			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			iOfficeMail.POP.MIMEParser.Message m=(iOfficeMail.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(m!=null)
 			{
 //				if (m.Attachments.Count>0)
 //					{
-//						MIMEParser.Attachment at=m.GetAttachment(0);
+//						Attachment at=m.GetAttachment(0);
 //						if(at.NotAttachment)
 //							m.GetMessageBody(at.DecodeAttachment());						
 //						else
@@ -506,7 +502,7 @@ namespace OpenPOP.NET_Sample_App
 				listAttachments.Nodes.Clear();
 				for(int i=0;i<m.AttachmentCount;i++)
 				{
-					MIMEParser.Attachment att=m.GetAttachment(i);
+					Attachment att=m.GetAttachment(i);
 					//string name=att.ContentFileName;
 					//listAttachments.Nodes.Add(name==null||name==""?(m.IsMIMEMailFile(att)==true?att.DefaultMIMEFileName:att.DefaultFileName):name).Tag=m.GetAttachment(i);
 					listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag=att;
@@ -557,8 +553,8 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listAttachments_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
-			MIMEParser.Attachment att=(MIMEParser.Attachment)listAttachments.SelectedNode.Tag;
-			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
+			Attachment att=(Attachment)listAttachments.SelectedNode.Tag;
+			iOfficeMail.POP.MIMEParser.Message m=(iOfficeMail.POP.MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
 			if(att!=null && m!=null)// && att.ContentFileName.Length>0)
 			{
 				//saveFile.FileName=(att.ContentFileName==null||att.ContentFileName==""?att.DefaultFileName:att.ContentFileName);//+(m.HTML==true?".html":"");
@@ -569,16 +565,16 @@ namespace OpenPOP.NET_Sample_App
 
 				if(m.IsMIMEMailFile(att))
 				{
-					result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
+					result=MessageBox.Show(this,"COM.NET.MAIL.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 					if(result==DialogResult.Yes)
 					{
-						MIMEParser.Message m2=att.DecodeAsMessage();
+						iOfficeMail.POP.MIMEParser.Message m2=att.DecodeAsMessage();
 						string attachmentNames="";
 						bool blnRet=false;
 						if(m2.AttachmentCount>0)
 							for(int i=0;i<m2.AttachmentCount;i++)
 							{
-								MIMEParser.Attachment att2=m2.GetAttachment(i);
+								Attachment att2=m2.GetAttachment(i);
 								//string attachmentName=att2.ContentFileName;
 								//attachmentNames+=(attachmentName==null||attachmentName==""?att2.DefaultFileName:att2.ContentFileName)+"("+att2.ContentLength+")";
 								attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";
@@ -637,20 +633,18 @@ namespace OpenPOP.NET_Sample_App
 			}
 		}
 
-		private void AddEvent(string strEvent)
+		private void button3_Click(object sender, System.EventArgs e)
 		{
-			txtEvents.Text+=strEvent+"\r\n";
-			txtEvents.SelectionStart=txtEvents.Text.Length;
+			bool ret=false;
+			string str="";
+			iOfficeMail.POP.MIMEParser.Utility.ReadPlainTextFromFile(@"E:\Documents and Settings\Administrator\×ÀÃæ\a.txt",ref str);
+			iOfficeMail.POP.MIMEParser.Message m=new iOfficeMail.POP.MIMEParser.Message(ref ret,str);
+			MessageBox.Show(this,m.Subject);
 		}
 
-		private void popClient_AuthenticationBegan(object sender, EventArgs e)
+		private void txtPassword_TextChanged(object sender, System.EventArgs e)
 		{
-			AddEvent("AuthenticationBegan");
-		}
-
-		private void popClient_AuthenticationFinished(object sender, EventArgs e)
-		{
-			AddEvent("AuthenticationFinished");
+		
 		}
 	}
 }

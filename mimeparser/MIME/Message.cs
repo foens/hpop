@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.Message
+*Name:			iOfficeMail.POP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -42,7 +42,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.POP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -829,7 +829,7 @@ namespace OpenPOP.MIMEParser
 			}
 			string name=attItem.ContentFileName;
 			
-			return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):attItem.DefaultFileName):name);
+			return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):(attItem.ContentID!=null?attItem.ContentID:attItem.DefaultFileName)):name);
 		}
 
 		/// <summary>
@@ -980,7 +980,7 @@ namespace OpenPOP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "iOfficeMailSMTP.Mail.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
@@ -1174,7 +1174,7 @@ namespace OpenPOP.MIMEParser
 			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
 			{
 				strFormmated=strLine.Substring(1);
-				strReturn+=(blnLineDecode==true?Utility.DecodeLine(strFormmated):strFormmated);
+				strReturn+=(blnLineDecode==true?Utility.DecodeLine(strFormmated):"\r\n"+strFormmated);
 				sbdBuilder.Append(strLine + "\r\n");
 				strLine=srdReader.ReadLine();
 				intLines++;
@@ -1192,8 +1192,10 @@ namespace OpenPOP.MIMEParser
 				}
 
 			if(!blnLineDecode)
-				strReturn=Utility.DecodeLine(strReturn);
-				
+			{
+				strReturn=Utility.RemoveWhiteBlanks(Utility.DecodeText(strReturn));
+			}
+	
 			ParseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
@@ -1267,11 +1269,11 @@ namespace OpenPOP.MIMEParser
 					break;
 
 				case "RETURN-PATH":
-					_returnPath=array[1].Trim().Trim('>').Trim('<');//strLine.Split(':')[1].Trim().Trim('>').Trim('<');
+					_returnPath=array[1].Trim().Trim('>').Trim('<');
 					break;
 
 				case "MESSAGE-ID":
-					_messageID=array[1].Trim().Trim('>').Trim('<');//array[1].Trim().Trim('>').Trim('<');;
+					_messageID=array[1].Trim().Trim('>').Trim('<');
 					break;
 
 				case "DATE":

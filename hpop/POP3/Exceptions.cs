@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP3
+*Name:			iOfficeMail.POP.POP3
 *Function:		exceptions
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -12,7 +12,7 @@
 */
 using System;
 
-namespace OpenPOP.POP3
+namespace iOfficeMail.POP.POP3
 {
 	/// <summary>
 	/// Thrown when the POP3 Server sends an error (-ERR) during intial handshake (HELO)
@@ -27,7 +27,7 @@ namespace OpenPOP.POP3
 	{}
 
 	/// <summary>
-	/// Thrown when the attachment is not in a format supported by OpenPOP.NET
+	/// Thrown when the attachment is not in a format supported by iOfficeMailSMTP.Mail.NET
 	/// </summary>
 	/// <remarks>Supported attachment encodings are Base64,Quoted Printable,MS TNEF</remarks>
 	public class AttachmentEncodingNotSupportedException:Exception
