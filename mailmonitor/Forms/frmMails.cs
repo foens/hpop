@@ -280,7 +280,7 @@ namespace MailMonitor
 
 				ListViewItem lvi;
 
-				for(int i=1;i<_count;i++)
+				for(int i=1;i<=_count;i++)
 				{
 					this.Text="MailBox Info("+i.ToString()+"/"+_count.ToString() + ")";
 					_msg=_popClient.GetMessageHeader(i);

@@ -299,12 +299,12 @@ namespace MailMonitor
 			this.Name = "frmMail";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Mail Monitor - Message";
+			this.Resize += new System.EventHandler(this.frmMail_Resize);
 			this.Load += new System.EventHandler(this.frmMail_Load);
+			this.Closed += new System.EventHandler(this.frmMail_Closed);
 			((System.ComponentModel.ISupportInitialize)(this.wbBody)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.sbpSize)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.sbpSentTime)).EndInit();
-			this.Resize+=new EventHandler(frmMail_Resize);
-			this.Closed+=new EventHandler(frmMail_Closed);
 			this.ResumeLayout(false);
 
 		}
@@ -437,7 +437,7 @@ namespace MailMonitor
 						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
 						{
-							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage();
+							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage(true);
 							string attachmentNames="";
 							bool blnRet=false;
 							if(m2.AttachmentCount>0)

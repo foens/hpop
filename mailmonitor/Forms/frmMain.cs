@@ -95,7 +95,7 @@ namespace MailMonitor
 		private bool _started;
 		private int _currentMailBox;
 		private string _path=Assembly.GetEntryAssembly().Location+".cfg";
-
+		private bool _exit=false;
 
 
 		#region Entry
@@ -157,6 +157,7 @@ namespace MailMonitor
 			this.mnuOpenEML = new System.Windows.Forms.MenuItem();
 			this.mnuHR7 = new System.Windows.Forms.MenuItem();
 			this.mnuGetInfo = new System.Windows.Forms.MenuItem();
+			this.mnuRunClient = new System.Windows.Forms.MenuItem();
 			this.mnuHR6 = new System.Windows.Forms.MenuItem();
 			this.mnuExit = new System.Windows.Forms.MenuItem();
 			this.mnuView = new System.Windows.Forms.MenuItem();
@@ -190,7 +191,6 @@ namespace MailMonitor
 			this.mnuExit2 = new System.Windows.Forms.MenuItem();
 			this.tmrSchedule = new System.Windows.Forms.Timer(this.components);
 			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
-			this.mnuRunClient = new System.Windows.Forms.MenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -330,6 +330,12 @@ namespace MailMonitor
 			this.mnuGetInfo.Shortcut = System.Windows.Forms.Shortcut.F5;
 			this.mnuGetInfo.Text = "Get MailBox &Info";
 			this.mnuGetInfo.Click += new System.EventHandler(this.mnuGetInfo_Click);
+			// 
+			// mnuRunClient
+			// 
+			this.mnuRunClient.Index = 8;
+			this.mnuRunClient.Text = "&Run Mail Client";
+			this.mnuRunClient.Click += new System.EventHandler(this.mnuRunClient_Click);
 			// 
 			// mnuHR6
 			// 
@@ -557,12 +563,6 @@ namespace MailMonitor
 			this.tmrSchedule.Interval = 60000;
 			this.tmrSchedule.Tick += new System.EventHandler(this.tmrSchedule_Tick);
 			// 
-			// mnuRunClient
-			// 
-			this.mnuRunClient.Index = 8;
-			this.mnuRunClient.Text = "&Run Mail Client";
-			this.mnuRunClient.Click += new System.EventHandler(this.mnuRunClient_Click);
-			// 
 			// frmMain
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -570,13 +570,15 @@ namespace MailMonitor
 			this.Controls.Add(this.lvwMailBoxes);
 			this.Controls.Add(this.sbrMain);
 			this.Controls.Add(this.tbrMain);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Menu = this.mmMain;
 			this.Name = "frmMain";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Mail Monitor";
+			this.Resize += new System.EventHandler(this.frmMain_Resize);
+			this.Closing += new System.ComponentModel.CancelEventHandler(this.frmMain_Closing);
 			this.Load += new System.EventHandler(this.frmMain_Load);
 			this.Closed += new System.EventHandler(this.frmMain_Closed);
-			this.Resize+=new EventHandler(frmMain_Resize);
 			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).EndInit();
 			this.ResumeLayout(false);
 
@@ -648,6 +650,15 @@ namespace MailMonitor
 			ShowSettings();
 		}
 
+		private void frmMain_Closing(object sender, CancelEventArgs e)
+		{
+			if(!_exit)
+			{
+				HideWindow();
+				e.Cancel=true;
+			}
+		}
+
 		private void frmMain_Load(object sender, System.EventArgs e)
 		{			
 			LoadMailBoxes();
@@ -675,20 +686,20 @@ namespace MailMonitor
 
 		private void mnuHideWindow_Click(object sender, System.EventArgs e)
 		{
-			this.Visible=false;
-			nicPopup.Icon=this.Icon;
-			nicPopup.Text=this.Text;
-			nicPopup.Visible=true;
+			HideWindow();
 		}
 
 		private void nicPopup_DoubleClick(object sender, EventArgs e)
 		{
+			Bitmap bitmap=new Bitmap(imlToolBar.Images[7]);
+			this.Icon=Icon.FromHandle(bitmap.GetHicon());
 			this.Visible=true;
 			nicPopup.Visible=false;
 		}
 
 		private void mnuExit_Click(object sender, System.EventArgs e)
 		{
+			_exit=true;
 			this.Close();
 		}
 
@@ -756,6 +767,7 @@ namespace MailMonitor
 
 		private void mnuExit2_Click(object sender, System.EventArgs e)
 		{
+			_exit=true;
 			this.Close();
 		}
 
@@ -788,6 +800,14 @@ namespace MailMonitor
 		#endregion
 
 		#region Functions
+
+		private void HideWindow()
+		{
+			this.Visible=false;
+			nicPopup.Icon=this.Icon;
+			nicPopup.Text=this.Text;
+			nicPopup.Visible=true;		
+		}
 
 		private void ShowSettings()
 		{
@@ -1044,6 +1064,8 @@ namespace MailMonitor
 					Utilities.BeepIt();
 				if(intNewMessages>0)
 				{
+					Bitmap bitmap=new Bitmap(imlToolBar.Images[6]);
+					this.Icon=Icon.FromHandle(bitmap.GetHicon());
 					if(_settings.ShowMainWindow)
 					{
 						this.Visible=true;
