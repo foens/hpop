@@ -24,7 +24,7 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 
-namespace OpenPOP.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Utility.

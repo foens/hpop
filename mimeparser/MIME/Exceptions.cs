@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP.MIMEParser
+*Name:			OpenPOP.MIMEParser
 *Function:		exceptions
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -10,7 +10,7 @@
 */
 using System;
 
-namespace OpenPOP.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 
 }

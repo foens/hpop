@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP.MIMEParser.Attachment
+*Name:			OpenPOP.MIMEParser.Attachment
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -26,7 +26,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace OpenPOP.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Attachment.

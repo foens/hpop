@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP.MIMEParser.Message
+*Name:			OpenPOP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -42,7 +42,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace OpenPOP.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
