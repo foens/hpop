@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	OpenPOP.Net is free software; you can redistribute it and/or modify
+	iOfficeMail.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	OpenPOP.Net is distributed in the hope that it will be useful,
+	iOfficeMail.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOPSMTP.Mail.MIMETypes
+*Name:			iOfficeMailSMTP.Mail.MIMETypes
 *Function:		MIME Types
 *Author:		Unruled Boy
 *Created:		2004/3/29
@@ -30,7 +30,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace OpenPOP
+namespace iOfficeMail
 {
 	/// <summary>
 	/// MIMETypes

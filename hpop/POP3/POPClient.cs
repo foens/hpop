@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	OpenPOP.Net is free software; you can redistribute it and/or modify
+	iOfficeMail.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	OpenPOP.Net is distributed in the hope that it will be useful,
+	iOfficeMail.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOP.POP3.POPClient
+*Name:			iOfficeMail.POP3.POPClient
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -51,7 +51,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace OpenPOP.POP3
+namespace iOfficeMail.POP3
 {
 	/// <summary>
 	/// POPClient
@@ -124,8 +124,8 @@ namespace OpenPOP.POP3
 				MessageTransferFinished(this, e);
 		}
 
-		private static string strOK="+OK";
-		//private static string strERR="-ERR";
+		private const string RESPONSE_OK="+OK";
+		//private const string RESPONSE_ERR="-ERR";
 		private TcpClient clientSocket=null;		
 		private StreamReader reader;
 		private StreamWriter writer;
@@ -286,7 +286,17 @@ namespace OpenPOP.POP3
 		/// <returns>true if response is an "+OK" string</returns>
 		private bool IsOkResponse(string strResponse)
 		{
-			return (strResponse.Substring(0, 3) == strOK);
+			return (strResponse.Substring(0, 3) == RESPONSE_OK);
+		}
+
+		/// <summary>
+		/// get response content
+		/// </summary>
+		/// <param name="strResponse">string to examine</param>
+		/// <returns>response content</returns>
+		private string GetResponseContent()
+		{
+			return _lastCommandResponse.Substring(3);
 		}
 
 		/// <summary>
@@ -495,6 +505,7 @@ namespace OpenPOP.POP3
 			}
 			
 			WaitForResponse(ref writer,WaitForResponseInterval);
+
 			if(!SendCommand("PASS " + strPassword))	
 			{
 				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
@@ -504,7 +515,7 @@ namespace OpenPOP.POP3
 				}
 				else
 				{
-					Utility.LogError("AuthenticateUsingUSER():wrong password");
+					Utility.LogError("AuthenticateUsingUSER():wrong password or " + GetResponseContent());
 					throw new InvalidPasswordException();
 				}
 			}
@@ -530,7 +541,7 @@ namespace OpenPOP.POP3
 			OnAuthenticationFinished(EventArgs.Empty);
 		}
 
-		private string GetCommand(string input)
+/*		private string GetCommand(string input)
 		{			
 			try
 			{
@@ -541,7 +552,7 @@ namespace OpenPOP.POP3
 				Utility.LogError("GetCommand():"+e.Message);
 				return "";
 			}
-		}
+		}*/
 
 		private string[] GetParameters(string input)
 		{

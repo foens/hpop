@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	OpenPOP.Net is free software; you can redistribute it and/or modify
+	iOfficeMail.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	OpenPOP.Net is distributed in the hope that it will be useful,
+	iOfficeMail.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,7 +16,7 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOP.MIMEParser.Message
+*Name:			iOfficeMail.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -58,8 +58,9 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Text;
+using System.Text.RegularExpressions;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -997,7 +998,7 @@ namespace OpenPOP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "OpenPOPSMTP.Mail.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "iOfficeMailSMTP.Mail.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
@@ -1224,7 +1225,7 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">reference header line</param>
 		private void ParseHeader(StringBuilder sbdBuilder,StringReader srdReader,ref string strLine)
 		{
-			string []array=Utility.GetHeadersValue(strLine);
+			string []array=Regex.Split(strLine,":");//Utility.GetHeadersValue(strLine);
 
 			switch(array[0].ToUpper())
 			{

@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	OpenPOP.Net is free software; you can redistribute it and/or modify
+	iOfficeMail.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	OpenPOP.Net is distributed in the hope that it will be useful,
+	iOfficeMail.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -16,13 +16,15 @@
 /*******************************************************************************/
 
 /*
-*Name:			OpenPOPSMTP.Mail.Utility
+*Name:			iOfficeMailSMTP.Mail.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/25 13:55 GMT+8 by Unruled Boy
+*Modified:		2004/5/30 15:04 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/30 15:04 GMT+8 by Unruled Boy
+*					1.Added all description to all functions
 *				2004/5/25 13:55 GMT+8 by Unruled Boy
 *					1.Rewrote the DecodeText function using Regular Expression
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
@@ -41,7 +43,7 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Utility.
@@ -49,7 +51,7 @@ namespace OpenPOP.MIMEParser
 	public class Utility
 	{
 		private static bool m_blnLog=false;
-		private static string m_strLogFile = "OpenPOPSMTP.Mail.log";
+		private static string m_strLogFile = "iOfficeMail.log";
 
 		public Utility()
 		{
@@ -70,6 +72,11 @@ namespace OpenPOP.MIMEParser
 		//		}
 		//
 
+		/// <summary>
+		/// Verifies whether the file is of picture type or not
+		/// </summary>
+		/// <param name="strFile">File to be verified</param>
+		/// <returns>True if picture file, false if not</returns>
 		public static bool IsPictureFile(string strFile)
 		{
 			try
@@ -91,6 +98,11 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
+		/// <summary>
+		/// Parse date time info from MIME header
+		/// </summary>
+		/// <param name="strDate">Encoded MIME date time</param>
+		/// <returns>Decoded date time info</returns>
 		public static string ParseEmailDate(string strDate)
 		{
 			string strRet=strDate.Trim();
@@ -107,6 +119,12 @@ namespace OpenPOP.MIMEParser
 			return strRet.Trim();
 		}
 
+		/// <summary>
+		/// Quote the text according to a tag
+		/// </summary>
+		/// <param name="strText">Text to be quoted</param>
+		/// <param name="strTag">Quote tag</param>
+		/// <returns>Quoted Text</returns>
 		public static string QuoteText(string strText, string strTag)
 		{
 			int indexOfTag=strText.IndexOf(strTag);
@@ -116,20 +134,25 @@ namespace OpenPOP.MIMEParser
 				return strText;
 		}
 
-		public static string ParseFileName(string strFileName)
+		/// <summary>
+		/// Parse file name from MIME header
+		/// </summary>
+		/// <param name="strHeader">MIME header</param>
+		/// <returns>Decoded file name</returns>
+		public static string ParseFileName(string strHeader)
 		{
 			string strTag;
 			strTag="filename=";
-			int intPos=strFileName.ToLower().IndexOf(strTag);
+			int intPos=strHeader.ToLower().IndexOf(strTag);
 			if(intPos==-1)
 			{
 				strTag="name=";
-				intPos=strFileName.ToLower().IndexOf(strTag);
+				intPos=strHeader.ToLower().IndexOf(strTag);
 			}
 			string strRet;
 			if(intPos!=-1)
 			{
-				strRet=strFileName.Substring(intPos+strTag.Length);
+				strRet=strHeader.Substring(intPos+strTag.Length);
 				intPos=strRet.ToLower().IndexOf(";");
 				if(intPos!=-1)
 					strRet=strRet.Substring(1,intPos-1);
@@ -141,6 +164,13 @@ namespace OpenPOP.MIMEParser
 			return strRet;
 		}
 
+		/// <summary>
+		/// Parse email address from MIME header
+		/// </summary>
+		/// <param name="strEmailAddress">MIME header</param>
+		/// <param name="strUser">Decoded user name</param>
+		/// <param name="strAddress">Decoded email address</param>
+		/// <returns>True if decoding succeeded, false if failed</returns>
 		public static bool ParseEmailAddress(string strEmailAddress,ref string strUser, ref string strAddress)
 		{
 			int indexOfAB=strEmailAddress.Trim().LastIndexOf("<");
@@ -169,6 +199,12 @@ namespace OpenPOP.MIMEParser
 			return true;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bytContent"></param>
+		/// <param name="strFile"></param>
+		/// <returns></returns>
 		public static bool SaveByteContentToFile(byte[] bytContent,string strFile)
 		{
 			try
@@ -230,7 +266,7 @@ namespace OpenPOP.MIMEParser
 				return false;
 		}
 
-		/// <summary>
+/*		/// <summary>
 		/// Sepearte header name and header value
 		/// </summary>
 		/// <param name="strRawHeader"></param>
@@ -251,7 +287,7 @@ namespace OpenPOP.MIMEParser
 			catch(Exception){}
 
 			return array;
-		}
+		}*/
 
 		public static string GetQuotedValue(string strText, string strSplitter, string strTag)
 		{
@@ -279,6 +315,19 @@ namespace OpenPOP.MIMEParser
 				return array[1].Trim();
 			else
 				return null;
+
+/*			string []array=null;
+			try
+			{
+				array=Regex.Split(strText,strSplitter);
+				//return array;
+				if(array[0].ToLower()==strTag.ToLower())
+					return RemoveQuote(array[1].Trim());
+				else
+					return null;
+			}
+			catch
+			{return null;}*/
 		}
 
 		public static string Change(string strText,string charset)

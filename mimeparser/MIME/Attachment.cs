@@ -1,11 +1,11 @@
 /******************************************************************************
 	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
-	OpenPOP.Net is free software; you can redistribute it and/or modify
+	iOfficeMail.Net is free software; you can redistribute it and/or modify
 	it under the terms of the Lesser GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	OpenPOP.Net is distributed in the hope that it will be useful,
+	iOfficeMail.Net is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	Lesser GNU General Public License for more details.
@@ -17,13 +17,15 @@
 
 
 /*
-*Name:			OpenPOP.MIMEParser.Attachment
+*Name:			iOfficeMail.MIMEParser.Attachment
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Last Modified:	2004/5/17 14:20 GMT+8 by Unruled Boy
+*Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
+*					1.Fixed a bug in parsing ContentFileName @ https://sourceforge.net/forum/message.php?msg_id=2589759
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
 *					1.Fixed a bug in parsing FileName
 *				2004/5/8 17:00 GMT+8 by Unruled Boy
@@ -43,8 +45,9 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
-namespace OpenPOP.MIMEParser
+namespace iOfficeMail.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Attachment.
@@ -348,8 +351,8 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strLine">header line</param>
 		private void ParseHeader(StringReader srReader,ref string strLine)
 		{
-			string []array=Utility.GetHeadersValue(strLine);
-			string []values=array[1].Split(';');
+			string []array=Regex.Split(strLine,":");//Utility.GetHeadersValue(strLine);
+			string []values=Regex.Split(array[1],";");//array[1].Split(';');
 			string strRet=null;
 
 			switch(array[0].ToUpper())
@@ -389,11 +392,21 @@ namespace OpenPOP.MIMEParser
 					if(values.Length>0)
 						_contentDisposition=values[0].Trim();
 					
-					_contentFileName=values[1];
+					///<bug>reported by grandepuffo @ https://sourceforge.net/forum/message.php?msg_id=2589759
+					//_contentFileName=values[1];
+					if(values.Length>1) 
+					{
+						_contentFileName=values[1];
+					} 
+					else 
+					{
+						_contentFileName="";
+					}
 					
 					if(_contentFileName=="")
 						_contentFileName=srReader.ReadLine();
 
+					_contentFileName=_contentFileName.Replace("\t","");
 					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
 					_contentFileName=Utility.DecodeText(_contentFileName);
 					break;
