@@ -6,6 +6,8 @@
 *Modified:		2004/3/29 12:25 GMT+8
 *Description:
 *Changes:		
+*				2004/4/28 19:06 GMT+8 by Unruled Boy
+*					1.Rewriting the Decode method
 *				2004/3/29 12:25 GMT+8 by Unruled Boy
 *					1.GetMimeType support for MONO
 *					2.cleaning up the names of variants
@@ -77,6 +79,7 @@ namespace OpenPOP.MIMEParser
 			strRet=QuoteText(strRet,"+");
 			strRet=QuoteText(strRet,"-");
 			strRet=QuoteText(strRet,"GMT");
+			strRet=QuoteText(strRet,"CST");
 			return strRet.Trim();
 		}
 
@@ -111,7 +114,7 @@ namespace OpenPOP.MIMEParser
 				strAddress=strAddress.Substring(indexOfAB+1,indexOfEndAB-(indexOfAB+1));
 			}
 			strUser=strUser.Trim();
-			strUser=deCode(strUser);
+			strUser=DecodeText(strUser);
 			strAddress=strAddress.Trim();
 
 			return true;
@@ -145,7 +148,7 @@ namespace OpenPOP.MIMEParser
 			if(RawHeader==null)
 				throw new ArgumentNullException("RawHeader","Argument was null");
 
-			string []array=new String[2]{"",""};
+			string []array=new string[2]{"",""};
 			int indexOfColon=RawHeader.IndexOf(":");			
 
 			try
@@ -163,7 +166,7 @@ namespace OpenPOP.MIMEParser
 			if(strText==null)
 				throw new ArgumentNullException("strText","Argument was null");
 
-			string []array=new String[2]{"",""};
+			string []array=new string[2]{"",""};
 			int indexOfstrSplitter=strText.IndexOf(strSplitter);			
 
 			try
@@ -214,69 +217,123 @@ namespace OpenPOP.MIMEParser
 			return strRet;
 		}
 
-		public static string deCodeLine(string strSrc)
+		public static string DecodeLine(string strSrc)
 		{
-			return deCode(RemoveWhiteBlanks(strSrc));
+			return DecodeText(RemoveWhiteBlanks(strSrc));
 		}
 
-		public static String deCode(String strSrc)
+		private static bool IsValidMIMEText(string strSrc)
+		{
+			int intPos=strSrc.IndexOf("=?");
+			return (intPos!=-1&&strSrc.IndexOf("?=",intPos+6)!=-1&&strSrc.Length>7);
+		}
+
+		public static string DecodeText(string strSrc)
 		{
 			try
 			{
-				if(strSrc==null)
-					return null;
-				int start=strSrc.IndexOf("=?GB2312?");
-				if (start==-1)
+				if(strSrc!=null&&strSrc!="")
 				{
-					start=strSrc.IndexOf("=?gb2312?");
-				}
-				if(start>=0)
-				{
-					String strHead=strSrc.Substring(0,start);
-					String strMethod=strSrc.Substring(start+9,1);
-					strSrc=strSrc.Substring(start+11);
-					int end=strSrc.IndexOf("?=");
-					if (end==-1)
+					if(IsValidMIMEText(strSrc))
 					{
-						end=strSrc.Length;
-					}
-					String strFoot=strSrc.Substring(end+2,strSrc.Length-end-2);
-					strSrc=strSrc.Substring(0,end);
-					if(strMethod.ToUpper()=="B")
-						strSrc=strHead+deCodeB64s(strSrc)+strFoot;
-					else
-					{
-						if(strMethod.ToUpper()=="Q")
-							strSrc=strHead+DecodeQP.ConvertHexContent(strSrc)+strFoot;
+						//position at the end of charset
+						int intPos=strSrc.IndexOf("=?");
+						int intPos2=strSrc.IndexOf("?",intPos+2);
+						if(intPos2>3)
+						{
+							string strCharset=strSrc.Substring(2,intPos2-2);
+							string strEncoding=strSrc.Substring(intPos2+1,1);
+							int intPos3=strSrc.IndexOf("?=",intPos2+3);
+							string strBody=strSrc.Substring(intPos2+3,intPos3-intPos2-3);
+							string strHead="";
+							if(intPos>0)
+							{
+								strHead=strSrc.Substring(0,intPos-1);
+							}
+							string strEnd="";
+							if(intPos3<strSrc.Length-2)
+							{
+								strEnd=strSrc.Substring(intPos3+2);
+							}
+							switch(strEncoding.ToUpper())
+							{
+								case "B":
+									strBody=deCodeB64s(strBody);
+									break;
+								case "Q":
+									strBody=DecodeQP.ConvertHexContent(strBody);
+									break;
+								default:
+									break;
+							}							
+							return strHead+strBody+strEnd;
+						}
 						else
-							strSrc=strHead+strSrc+strFoot;
+						{return strSrc;}
 					}
-					start=strSrc.IndexOf("=?GB2312?");
-					if(start==-1)
-					{
-						start=strSrc.IndexOf("=?gb2312?");
-					}
-					if(start>=0)
-						strSrc=deCode(strSrc);
+					else
+					{return strSrc;}
 				}
 				else
-				{
-					strSrc=QuotedCoding.Decode(strSrc);
-				}
+				{return strSrc;}
 			}
 			catch
-			{
-			}
+			{return strSrc;}
 
-			return strSrc;
+//				if(strSrc==null)
+//					return null;
+//				int start=strSrc.IndexOf("=?GB2312?");
+//				if (start==-1)
+//				{
+//					start=strSrc.IndexOf("=?gb2312?");
+//				}
+//				if(start>=0)
+//				{
+//					string strHead=strSrc.Substring(0,start);
+//					string strMethod=strSrc.Substring(start+9,1);
+//					strSrc=strSrc.Substring(start+11);
+//					int end=strSrc.IndexOf("?=");
+//					if (end==-1)
+//					{
+//						end=strSrc.Length;
+//					}
+//					string strFoot=strSrc.Substring(end+2,strSrc.Length-end-2);
+//					strSrc=strSrc.Substring(0,end);
+//					if(strMethod.ToUpper()=="B")
+//						strSrc=strHead+deCodeB64s(strSrc)+strFoot;
+//					else
+//					{
+//						if(strMethod.ToUpper()=="Q")
+//							strSrc=strHead+DecodeQP.ConvertHexContent(strSrc)+strFoot;
+//						else
+//							strSrc=strHead+strSrc+strFoot;
+//					}
+//					start=strSrc.IndexOf("=?GB2312?");
+//					if(start==-1)
+//					{
+//						start=strSrc.IndexOf("=?gb2312?");
+//					}
+//					if(start>=0)
+//						strSrc=DecodeText(strSrc);
+//				}
+//				else
+//				{
+//					strSrc=QuotedCoding.Decode(strSrc);
+//				}
+//			}
+//			catch
+//			{
+//			}
+//
+//			return strSrc;
 		}
 		
-		public static String deCodeB64s(String strSrc)
+		public static string deCodeB64s(string strSrc)
 		{
 			return Encoding.Default.GetString(deCodeB64(strSrc));
 		}
 		
-		private static byte []deCodeB64(String strSrc)
+		private static byte []deCodeB64(string strSrc)
 		{
 			byte[] by=null;
 			try
@@ -363,29 +420,29 @@ namespace OpenPOP.MIMEParser
 				return false;
 		}
 
-		public static string[] splitOnSemiColon(string objString)
+		public static string[] splitOnSemiColon(string objstring)
 		{
-			if(objString==null)
+			if(objstring==null)
 				throw new ArgumentNullException("RawHeader","Argument was null");
 
 			string []array=null;
-			int indexOfColon=objString.IndexOf(";");			
+			int indexOfColon=objstring.IndexOf(";");			
 
 			if(indexOfColon<0)
 			{
-				array=new String[1];
-				array[0]=objString;
+				array=new string[1];
+				array[0]=objstring;
 				return array;
 			}
 			else
 			{
-				array=new String[2];
+				array=new string[2];
 			}
 
 			try
 			{
-				array[0]=objString.Substring(0,indexOfColon).Trim();
-				array[1]=objString.Substring(indexOfColon+1).Trim();
+				array[0]=objstring.Substring(0,indexOfColon).Trim();
+				array[1]=objstring.Substring(indexOfColon+1).Trim();
 			}
 			catch(Exception){}
 

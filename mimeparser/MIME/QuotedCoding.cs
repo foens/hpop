@@ -92,21 +92,21 @@ namespace OpenPOP.MIMEParser
 		/// <returns>"ala i Pawe?Kupis ma kota"</returns>
 		public static string Decode(string s)
 		{
-			StringBuilder retString=new StringBuilder();
+			StringBuilder retstring=new StringBuilder();
 			int old=0,start=0,stop;
 			for(;;)
 			{
 				start=s.IndexOf("=?",start);
 				if (start==-1)
 				{
-					retString.Append(s,old,s.Length-old);
-					return retString.ToString();
+					retstring.Append(s,old,s.Length-old);
+					return retstring.ToString();
 				}
 				stop=s.IndexOf("?=",start+2);
 				if (stop==-1) //blad w stringu
 					return s;
-				retString.Append(s,old,start-old);
-				retString.Append(DecodeOne(s.Substring(start,stop-start+2)));
+				retstring.Append(s,old,start-old);
+				retstring.Append(DecodeOne(s.Substring(start,stop-start+2)));
 				start=stop+2;
 				old=stop+2;
 			}

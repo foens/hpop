@@ -248,12 +248,12 @@ namespace OpenPOP.MIMEParser
 						if(strRet.IndexOf("filename=\"")!=-1)
 						{
 							_contentFileName=Utility.GetQuotedValue(strRet,"=","filename");
-							_contentFileName=Utility.deCode(_contentFileName);
+							_contentFileName=Utility.DecodeText(_contentFileName);
 						}
 						else if(strRet.IndexOf("name=\"")!=-1)
 						{
 							_contentFileName=Utility.GetQuotedValue(strRet,"=","name");
-							_contentFileName=Utility.deCode(_contentFileName);
+							_contentFileName=Utility.DecodeText(_contentFileName);
 						}
 						else if(strRet=="")
 						{
@@ -270,7 +270,7 @@ namespace OpenPOP.MIMEParser
 					_contentTransferEncoding=Utility.splitOnSemiColon(array[1])[0].Trim();
 					break;
 				case "CONTENT-DESCRIPTION":
-					_contentDescription=Utility.deCode(Utility.splitOnSemiColon(array[1])[0].Trim());
+					_contentDescription=Utility.DecodeText(Utility.splitOnSemiColon(array[1])[0].Trim());
 					break;
 				case "CONTENT-DISPOSITION":
 					if(values.Length>0)
@@ -282,7 +282,7 @@ namespace OpenPOP.MIMEParser
 						_contentFileName=srReader.ReadLine();
 
 					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
-					_contentFileName=Utility.deCode(_contentFileName);
+					_contentFileName=Utility.DecodeText(_contentFileName);
 					break;
 				case "CONTENT-ID":
 					_contentID=Utility.splitOnSemiColon(array[1])[0].Trim('<').Trim('>');
@@ -311,7 +311,7 @@ namespace OpenPOP.MIMEParser
 			try
 			{
 				if(_contentType.ToLower()=="message/rfc822".ToLower())
-					decodedAttachment=Utility.deCode(_rawAttachment);
+					decodedAttachment=Utility.DecodeText(_rawAttachment);
 				else if(_contentTransferEncoding!=null)
 				{
 					decodedAttachment=_rawAttachment;
@@ -362,7 +362,7 @@ namespace OpenPOP.MIMEParser
 				byte []decodedBytes=null;
 
 				if(_contentType!=null && _contentType.ToLower()=="message/rfc822".ToLower())
-					decodedBytes=Encoding.Default.GetBytes(Utility.deCode(_rawAttachment));
+					decodedBytes=Encoding.Default.GetBytes(Utility.DecodeText(_rawAttachment));
 				else if(_contentTransferEncoding!=null)
 				{
 					string content=_rawAttachment;

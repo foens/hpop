@@ -18,7 +18,7 @@ namespace OpenPOP.MIMEParser
 		private const int TNEF_SIGNATURE  =0x223e9f78;
 		private const int LVL_MESSAGE     =0x01;
 		private const int LVL_ATTACHMENT  =0x02;
-		private const int _STRING			=0x00010000;
+		private const int _string			=0x00010000;
 		private const int _BYTE			=0x00060000;
 		private const int _WORD			=0x00070000;
 		private const int _DWORD			=0x00080000;
@@ -26,7 +26,7 @@ namespace OpenPOP.MIMEParser
 		private const int AVERSION      =(_DWORD|0x9006);
 		private const int AMCLASS       =(_WORD|0x8008);
 		private const int ASUBJECT      =(_DWORD|0x8004);
-		private const int AFILENAME     =(_STRING|0x8010);
+		private const int AFILENAME     =(_string|0x8010);
 		private const int ATTACHDATA    =(_BYTE|0x800f);
 
 		private Stream fsTNEF;
@@ -295,7 +295,7 @@ namespace OpenPOP.MIMEParser
 					}
 					PrintResult("\n");
 					break;
-				case _STRING:
+				case _string:
 					StreamReadBytes(buf, len);
 
 					PrintResult("Attribute {0} = {1}\n", d&0xffff, Encoding.Default.GetString(buf));

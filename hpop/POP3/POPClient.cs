@@ -685,7 +685,7 @@ namespace OpenPOP.POP3
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("GetMessage():"+e.Message);
+				Utility.LogError("GetMessage():"+intNumber.ToString()+":"+e.Message);
 				return null;
 			}
 		}

@@ -6,6 +6,9 @@
 *Modified:		2004/3/29 17:22 GMT+8
 *Description	:
 *Changes:		
+*				2004/4/28 19:06 GMT+8 by Unruled Boy
+*					1.Adding DateTimeInfo property
+*					2.Maybe we correct the HTML content type bug
 *				2004/4/23 21:13 GMT+8 by Unruled Boy
 *					1.New Contructor
 *					2.Tidy up the codes to follow Hungarian Notation
@@ -45,6 +48,7 @@ namespace OpenPOP.MIMEParser
 		private string _from=null;
 		private string _fromEmail=null;
 		private string _date=null;
+		private string _dateTimeInfo=null;
 		private string _subject=null;
 		private string[] _to=new string[0];
 		private string[] _cc=new string[0];
@@ -220,6 +224,11 @@ namespace OpenPOP.MIMEParser
 		public string Date
 		{
 			get{return _date;}
+		}
+
+		public string DateTimeInfo
+		{
+			get{return _dateTimeInfo;}
 		}
 
 		public string From
@@ -848,7 +857,7 @@ namespace OpenPOP.MIMEParser
 			while(strLine.StartsWith("\t") && strLine.Trim()!="")
 			{
 				strFormmated=" "+strLine.Substring(1);
-				alCollection.Add(Utility.deCodeLine(strFormmated));
+				alCollection.Add(Utility.DecodeLine(strFormmated));
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
 			}
@@ -878,7 +887,7 @@ namespace OpenPOP.MIMEParser
 			while(strLine.StartsWith("\t") && strLine.Trim()!="")
 			{
 				strFormmated=" "+strLine.Substring(1);
-				strReturn+=Utility.deCodeLine(strFormmated);
+				strReturn+=Utility.DecodeLine(strFormmated);
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
 			}
@@ -910,13 +919,13 @@ namespace OpenPOP.MIMEParser
 			while(strLine.StartsWith("\t") && strLine.Trim()!="")
 			{
 				strFormmated=" "+strLine.Substring(1);
-				strReturn+=(blnLineDecode==true?Utility.deCodeLine(strFormmated):strFormmated);
+				strReturn+=(blnLineDecode==true?Utility.DecodeLine(strFormmated):strFormmated);
 				sbdBuilder.Append(strLine);
 				strLine=srdReader.ReadLine();
 			}
 			sbdBuilder.Append(strLine);
 			if(!blnLineDecode)
-				strReturn=Utility.deCodeLine(strReturn);				
+				strReturn=Utility.DecodeLine(strReturn);				
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
@@ -936,7 +945,7 @@ namespace OpenPOP.MIMEParser
 					_to=array[1].Split(',');
 					for(int i=0;i<_to.Length;i++)
 					{
-						_to[i]=Utility.deCodeLine(_to[i].Trim());
+						_to[i]=Utility.DecodeLine(_to[i].Trim());
 					}
 					break;
 
@@ -944,7 +953,7 @@ namespace OpenPOP.MIMEParser
 					_cc=array[1].Split(',');					
 					for(int i=0;i<_cc.Length;i++)
 					{
-						_cc[i]=Utility.deCodeLine(_cc[i].Trim());
+						_cc[i]=Utility.DecodeLine(_cc[i].Trim());
 					}
 					break;
 
@@ -952,7 +961,7 @@ namespace OpenPOP.MIMEParser
 					_bcc=array[1].Split(',');					
 					for(int i=0;i<_bcc.Length;i++)
 					{
-						_bcc[i]=Utility.deCodeLine(_bcc[i].Trim());
+						_bcc[i]=Utility.DecodeLine(_bcc[i].Trim());
 					}
 					break;
 
@@ -969,7 +978,7 @@ namespace OpenPOP.MIMEParser
 					strLine=srdReader.ReadLine();
 					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
 					{
-						_keywords.Add(Utility.deCodeLine(strLine));
+						_keywords.Add(Utility.DecodeLine(strLine));
 						sbdBuilder.Append(strLine);
 						strLine=srdReader.ReadLine();
 					}
@@ -983,7 +992,7 @@ namespace OpenPOP.MIMEParser
 					strLine=srdReader.ReadLine();
 					while(strLine.StartsWith("\t") && strLine.Trim()!="")
 					{
-						_received += Utility.deCodeLine(" "+strLine.Substring(1));
+						_received += Utility.DecodeLine(" "+strLine.Substring(1));
 						sbdBuilder.Append(strLine);
 						strLine=srdReader.ReadLine();
 					}
@@ -1014,7 +1023,7 @@ namespace OpenPOP.MIMEParser
 						sbdBuilder.Append(strLine);
 						strLine=srdReader.ReadLine();
 					}
-					_subject=Utility.deCodeLine(_subject);
+					_subject=Utility.DecodeLine(_subject);
 					sbdBuilder.Append(strLine);
 					parseHeader(sbdBuilder,srdReader,ref strLine);*/
 					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _subject,false);
@@ -1031,10 +1040,10 @@ namespace OpenPOP.MIMEParser
 				case "DATE":
 					for(int i=1;i<array.Length;i++)
 					{
-						_date+=array[i];
+						_dateTimeInfo+=array[i];
 					}
-					_date=_date.Trim();
-					_date=Utility.ParseEmailDate(_date);
+					_dateTimeInfo=_dateTimeInfo.Trim();
+					_date=Utility.ParseEmailDate(_dateTimeInfo);
 					break;
 
 				case "CONTENT-LENGTH":
@@ -1091,7 +1100,7 @@ namespace OpenPOP.MIMEParser
 					}
 					if(_contentType=="text/plain")
 						return;
-					else if(_contentType=="text/html")
+					else if(_contentType.ToLower()=="text/html"||_contentType.ToLower()=="multipart/alternative")
 						_html=true;
 
 					if(strLine.Trim().Length==_contentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)

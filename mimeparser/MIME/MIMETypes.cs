@@ -343,7 +343,7 @@ namespace OpenPOP
 		}
 
 		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
-		/// <returns>String MIME type (Example: \"text/plain\")</returns>
+		/// <returns>string MIME type (Example: \"text/plain\")</returns>
 		public static string GetMimeType(string strFileName)
 		{			
 			try

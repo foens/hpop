@@ -1,3 +1,8 @@
+2004/4/28 19:06 GMT+8 by Unruled Boy
+	1.Rewriting the Decode method
+	2.Adding DateTimeInfo property
+	3.Maybe we correct the HTML content type bug
+
 2004/4/23 20:29 GMT+8 by Unruled Boy
 	1.Separating OpenPOP into two independant libries: OpenPOP and MIMEParser
 	2.Modifies the construction for new Message in POPClient class

@@ -27,18 +27,18 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// Decoding Quoted-Printable string
 		/// </summary>
-		/// <param name="HexString">Quoted-Printable encoded string</param>
+		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method</param>
 		/// <returns>decoded string</returns>
-		private static string ConvertHexToString(string HexString,Encoding encode)
+		private static string ConvertHexToString(string Hexstring,Encoding encode)
 		{			
 			try
 			{
-				if(HexString==null||HexString.Equals("")) return "";
+				if(Hexstring==null||Hexstring.Equals("")) return "";
 
-				if(HexString.StartsWith("=")) HexString=HexString.Substring(1);
+				if(Hexstring.StartsWith("=")) Hexstring=Hexstring.Substring(1);
 			
-				string[] aHex= HexString.Split(new char[1]{'='});
+				string[] aHex= Hexstring.Split(new char[1]{'='});
 				byte[] abyte = new Byte[aHex.Length];
 			
 				for(int i=0;i<abyte.Length;i++)
@@ -50,20 +50,20 @@ namespace OpenPOP.MIMEParser
 			}
 			catch
 			{
-				return HexString;
+				return Hexstring;
 			}
 		}
 
 		/// <summary>
 		/// Decoding Quoted-Printable string at a position
 		/// </summary>
-		/// <param name="HexString">Quoted-Printable encoded string</param>
+		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method, "Default" is suggested</param>
 		/// <param name="nStart">position to start, normally 0</param>
 		/// <returns>decoded string</returns>
-		public static string ConvertHexContent(string HexString,Encoding encode,long nStart)
+		public static string ConvertHexContent(string Hexstring,Encoding encode,long nStart)
 		{			
-			if(nStart>=HexString.Length) return HexString;
+			if(nStart>=Hexstring.Length) return Hexstring;
 
 			//to hold string to be decoded
 			StringBuilder sbHex = new  StringBuilder();
@@ -76,19 +76,19 @@ namespace OpenPOP.MIMEParser
 			string temp;
 			int i = (int)nStart;
 
-			while(i<HexString.Length )
+			while(i<Hexstring.Length )
 			{
 				//init next loop
 				sbHex.Remove(0,sbHex.Length);
 				isBegin = false;
 				int count=0;
 
-				while(i<HexString.Length )
+				while(i<Hexstring.Length )
 				{
-					temp = HexString.Substring(i,1);//before reaching Quoted-Printable string, one char at a time
+					temp = Hexstring.Substring(i,1);//before reaching Quoted-Printable string, one char at a time
 					if(temp.StartsWith("=")) 
 					{
-						temp = HexString.Substring(i,3);//get 3 chars
+						temp = Hexstring.Substring(i,3);//get 3 chars
 						if(temp.EndsWith("\r\n"))//return char
 						{
 							if(isBegin&& (count % 2==0))
@@ -133,13 +133,13 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// Decoding Quoted-Printable string using default encoding and begin at 0
 		/// </summary>
-		/// <param name="HexString">Quoted-Printable encoded string</param>
+		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <returns>decoded string</returns>
-		public static string ConvertHexContent(string HexString)
+		public static string ConvertHexContent(string Hexstring)
 		{
-			if(HexString==null || HexString.Equals("")) return HexString;
+			if(Hexstring==null || Hexstring.Equals("")) return Hexstring;
 
-			return ConvertHexContent(HexString,Encoding.Default,0);
+			return ConvertHexContent(Hexstring,Encoding.Default,0);
 			
 		}
 	}
