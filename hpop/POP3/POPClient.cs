@@ -235,17 +235,28 @@ namespace OpenPOP.POP3
 			}
 		}
 
+		/// <summary>
+		/// Construct new POPClient
+		/// </summary>
 		public POPClient()
 		{
 			Utility.Log=false;
 		}		
 
 		/// <summary>
+		/// Construct new POPClient
+		/// </summary>
+		public POPClient(string strHost,int intPort,string strlogin,string strPassword,AuthenticationMethod authenticationMethod)
+		{
+			Connect(strHost, intPort);
+			Authenticate(strlogin,strPassword,authenticationMethod);
+		}
+
+		/// <summary>
 		/// connect to remote server
 		/// </summary>
 		/// <param name="strHost">pop3 host</param>
 		/// <param name="intPort">pop3 port</param>
-		/// <returns></returns>
 		public void Connect(string strHost,int intPort)
 		{
 				clientSocket=new TcpClient();
