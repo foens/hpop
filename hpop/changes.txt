@@ -1,3 +1,7 @@
+2004/5/21 00:00 by dteviot via Unruled Boy
+	1.Added support for the LIST command
+	2.Heavily refactored replicated code
+
 2004/5/17 14:20 GMT+8 by Unruled Boy
 	1.fixed something but do not remember :(
 	2.Fixed a bug in parsing FileName

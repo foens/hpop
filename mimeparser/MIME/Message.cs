@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.Message
+*Name:			COM.NET.MAIL.POP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -42,7 +42,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace OpenPOP.MIMEParser
+namespace COM.NET.MAIL.POP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -862,6 +862,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>true if save successfully, false if failed</returns>
 		public bool SaveAttachment(Attachment attItem, string strFileName)
 		{
+			byte[] da;
 			try
 			{
 				//				FileStream fs=File.Create(strFileName);
@@ -878,7 +879,6 @@ namespace OpenPOP.MIMEParser
 				//				fs.Write(da,0,da.Length);
 				//				fs.Close();
 				//				return true;
-				byte[] da;
 				if(attItem.InBytes)
 				{
 					da=attItem.RawBytes;
@@ -898,10 +898,12 @@ namespace OpenPOP.MIMEParser
 				}
 				return Utility.SaveByteContentToFile(da,strFileName);
 			}
-			catch(Exception e)
+			catch
 			{
-				Utility.LogError("SaveAttachment():"+e.Message);
-				return false;
+				/*Utility.LogError("SaveAttachment():"+e.Message);
+				return false;*/
+				da=Encoding.Default.GetBytes(attItem.RawAttachment);
+				return Utility.SaveByteContentToFile(da,strFileName);
 			}
 		}
 
@@ -944,10 +946,10 @@ namespace OpenPOP.MIMEParser
 				else
 					return;
 
-//				if(indexOf_attachmentstart==indexOfAttachmentEnd-9)
-//				{
-//					indexOf_attachmentstart=0;
-//				}
+				if(indexOf_attachmentstart==indexOfAttachmentEnd-9)
+				{
+					indexOf_attachmentstart=0;
+				}
 
 				string strLine=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            
 				bool isMSTNEF;
@@ -964,7 +966,7 @@ namespace OpenPOP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "COM.NET.MAIL.POP.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())

@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMETypes
+*Name:			COM.NET.MAIL.POP.MIMETypes
 *Function:		MIME Types
 *Author:		Unruled Boy
 *Created:		2004/3/29
@@ -13,7 +13,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace OpenPOP
+namespace COM.NET.MAIL.POP
 {
 	/// <summary>
 	/// MIMETypes
@@ -374,3 +374,4 @@ namespace OpenPOP
 
 	}
 }
+

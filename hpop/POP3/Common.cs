@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.POP3
+*Name:			COM.NET.MAIL.POP.POP3
 *Function:		Common definitions
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -10,7 +10,7 @@
 */
 using System;
 
-namespace OpenPOP.POP3
+namespace COM.NET.MAIL.POP.POP3
 {
 
 	/// <summary>

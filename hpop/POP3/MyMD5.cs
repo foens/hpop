@@ -1,31 +1,24 @@
 /*
-*Name:			OpenPOP.POP3.MyMD5
+*Name:			COM.NET.MAIL.POP.POP3.MyMD5
 *Function:		MD5
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		3 May 2004 0200 GMT+5 by Hamid Qureshi
-*Description:
-*Changes:		3 May 2004 0200 GMT+5 by Hamid Qureshi
-*					1.Adding NDoc Comments
-*Description:
+*Modified:		2004/3
+*Description	:
 */
+
 using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace OpenPOP.POP3
+namespace COM.NET.MAIL.POP.POP3
 {
 	/// <summary>
-	/// Implements wrapper for MD5CryptoServiceProvider
+	/// Summary description for MyMD5.
 	/// </summary>
 	public class MyMD5
 	{
-		/// <summary>
-		/// Get the MD5 hash of a string 
-		/// </summary>
-		/// <param name="input">The string for which the MD5 hash is required</param>
-		/// <returns>The MD5 hash of the input string</returns>
-		public static string GetMD5Hash(string input)
+		public static string GetMD5Hash(String input)
 		{
 			MD5 md5=new MD5CryptoServiceProvider();
 			//the GetBytes method returns byte array equavalent of a string
@@ -37,12 +30,7 @@ namespace OpenPOP.POP3
 			return new String(temp);
 		}
 
-		/// <summary>
-		/// Get the MD5 hash of a string in hexadecimal format
-		/// </summary>
-		/// <param name="input">The string for which the MD5 hash in hexadecimal is required</param>
-		/// <returns>The MD5 hash in hexadecimal fromat of the input string</returns>
-		public static string GetMD5HashHex(string input)
+		public static string GetMD5HashHex(String input)
 		{
 			MD5 md5=new MD5CryptoServiceProvider();
 			DES des=new DESCryptoServiceProvider();
@@ -59,8 +47,9 @@ namespace OpenPOP.POP3
 			returnThis=returnThis.ToLower();
 
 			return returnThis;
+
+
 		}
 
 	}
-
 }

@@ -1,11 +1,14 @@
 /*
-*Name:			OpenPOP.POP3.POPClient
+*Name:			COM.NET.MAIL.POP.POP3.POPClient
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
 *Modified:		2004/5/3 12:53 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/21 00:00 by dteviot via Unruled Boy
+*					1.Added support for the LIST command
+*					2.Heavily refactored replicated code
 *				2004/5/4 20:52 GMT+8 by Unruled Boy
 *					1.Renamed DeleteMessages to DeleteAllMessages
 *				2004/5/3 12:53 GMT+8 by Unruled Boy
@@ -26,9 +29,10 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace OpenPOP.POP3
+namespace COM.NET.MAIL.POP.POP3
 {
 	/// <summary>
 	/// POPClient
@@ -116,7 +120,14 @@ namespace OpenPOP.POP3
 		private bool _autoDecodeMSTNEF=true;
 		private int _waitForResponseInterval=200;
 		private int _receiveContentSleepInterval=100;
+		private string _aPOPTimestamp;
+		private string _lastCommandResponse;
 
+
+		public string APOPTimestamp
+		{
+			get{return _aPOPTimestamp;}
+		}
 
 		/// <summary>
 		/// receive content sleep interval
@@ -235,6 +246,77 @@ namespace OpenPOP.POP3
 			}
 		}
 
+
+		/// <summary>
+		/// Examines string to see if it contains a timestamp to use with the APOP command
+		/// If it does, sets the ApopTimestamp property to this value
+		/// </summary>
+		/// <param name="response">string to examine</param>
+		private void ExtractApopTimestamp(string response)
+		{
+			Match match = Regex.Match(response, "<.+>");
+			if (match.Success)
+			{
+				_aPOPTimestamp = match.Value;
+			}
+		}
+
+		/// <summary>
+		/// Tests a string to see if it's a "+OK" string
+		/// </summary>
+		/// <param name="response">string to examine</param>
+		/// <returns>true if response is an "+OK" string</returns>
+		private bool IsOkResponse(string response)
+		{
+			return (response.Substring(0, 3) == strOK);
+		}
+
+		/// <summary>
+		/// Sends a command to the POP server.
+		/// </summary>
+		/// <param name="response">command to send to server</param>
+		/// <returns>true if server responded "+OK"</returns>
+		private bool SendCommand(string cmd)
+		{
+			_lastCommandResponse = "";
+			try
+			{
+				writer.WriteLine(cmd);
+				writer.Flush();
+				WaitForResponse(ref reader,WaitForResponseInterval);
+				_lastCommandResponse = reader.ReadLine();				
+				return IsOkResponse(_lastCommandResponse);
+			}
+			catch(Exception e)
+			{
+				_Error = cmd + ":" +e.Message;
+				Utility.LogError(_Error);
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Sends a command to the POP server, expects an integer reply in the response
+		/// </summary>
+		/// <param name="response">command to send to server</param>
+		/// <returns>integer value in the reply</returns>
+		private int SendCommandIntResponse(string cmd)
+		{
+			int retVal = 0;
+			if(SendCommand(cmd))
+			{
+				try
+				{
+					retVal = int.Parse(_lastCommandResponse.Split(' ')[1]);
+				}
+				catch(Exception e)
+				{
+					Utility.LogError(cmd + ":" + e.Message);
+				}
+			}
+			return retVal;
+		}
+
 		/// <summary>
 		/// Construct new POPClient
 		/// </summary>
@@ -259,41 +341,42 @@ namespace OpenPOP.POP3
 		/// <param name="intPort">pop3 port</param>
 		public void Connect(string strHost,int intPort)
 		{
-				clientSocket=new TcpClient();
-				clientSocket.ReceiveTimeout=_receiveTimeOut;
-				clientSocket.SendTimeout=_sendTimeOut;
-				clientSocket.ReceiveBufferSize=_receiveBufferSize;
-				clientSocket.SendBufferSize=_sendBufferSize;
+			clientSocket=new TcpClient();
+			clientSocket.ReceiveTimeout=_receiveTimeOut;
+			clientSocket.SendTimeout=_sendTimeOut;
+			clientSocket.ReceiveBufferSize=_receiveBufferSize;
+			clientSocket.SendBufferSize=_sendBufferSize;
 
-				try
-				{
-					clientSocket.Connect(strHost,intPort);				
-				}
-				catch(SocketException e)
-				{				
-					Disconnect();
-					Utility.LogError("Connect():"+e.Message);
-					throw new PopServerNotFoundException();
-				}
+			try
+			{
+				clientSocket.Connect(strHost,intPort);				
+			}
+			catch(SocketException e)
+			{				
+				Disconnect();
+				Utility.LogError("Connect():"+e.Message);
+				throw new PopServerNotFoundException();
+			}
 
-				reader=new StreamReader(clientSocket.GetStream(),Encoding.Default,true);//'Encoding.GetEncoding("GB2312"),true);
-				writer=new StreamWriter(clientSocket.GetStream());
-				writer.AutoFlush=true;
+			reader=new StreamReader(clientSocket.GetStream(),Encoding.Default,true);//'Encoding.GetEncoding("GB2312"),true);
+			writer=new StreamWriter(clientSocket.GetStream());
+			writer.AutoFlush=true;
 		
-				WaitForResponse(ref reader,WaitForResponseInterval);
+			WaitForResponse(ref reader,WaitForResponseInterval);
 
-				string response=reader.ReadLine();
+			string response=reader.ReadLine();
 
-				if(GetCommand(response)!=strOK)
-				{
-					Disconnect();
-					Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
-					throw new PopServerNotAvailableException();
-				}
-				else
-				{
-					OnCommunicationOccured(EventArgs.Empty);
-				}
+			if(IsOkResponse(response))
+			{
+				ExtractApopTimestamp(response);
+				OnCommunicationOccured(EventArgs.Empty);
+			}
+			else
+			{
+				Disconnect();
+				Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
+				throw new PopServerNotAvailableException();
+			}
 		}
 
 		/// <summary>
@@ -387,33 +470,16 @@ namespace OpenPOP.POP3
 		{				
 			OnAuthenticationBegan(EventArgs.Empty);
 
-			writer.WriteLine("USER " + strlogin);
-
-			//writer.Flush();
-
-			WaitForResponse(ref reader,WaitForResponseInterval);
-			
-			string response=reader.ReadLine();				
-            
-			if(GetCommand(response)!=strOK)
+			if(!SendCommand("USER " + strlogin))
 			{
 				Utility.LogError("AuthenticateUsingUSER():wrong user");
 				throw new InvalidLoginException();
 			}
 			
-			WaitForResponse(ref writer,WaitForResponseInterval);
-			
-			writer.WriteLine("PASS " + strPassword);
-
-			//writer.Flush();
-
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-			response=reader.ReadLine();
-
-			if(GetCommand(response)!=strOK)		
+			WaitForResponse(ref writer,200);
+			if(!SendCommand("PASS " + strPassword))	
 			{
-				if(response.ToLower().IndexOf("lock")!=-1)
+				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
 				{
 					Utility.LogError("AuthenticateUsingUSER():maildrop is locked");
 					throw new PopServerLockException();			
@@ -424,7 +490,7 @@ namespace OpenPOP.POP3
 					throw new InvalidPasswordException();
 				}
 			}
-
+			
 			OnAuthenticationFinished(EventArgs.Empty);
 		}
 
@@ -437,17 +503,12 @@ namespace OpenPOP.POP3
 		{
 			OnAuthenticationBegan(EventArgs.Empty);
 
-			writer.WriteLine("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword));
-			
-			WaitForResponse(ref reader,WaitForResponseInterval);
-			
-			string response=reader.ReadLine();
-		
-			if(GetCommand(response)!=strOK)
+			if(!SendCommand("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword)))
 			{
 				Utility.LogError("AuthenticateUsingAPOP():wrong user or password");
 				throw new InvalidLoginOrPasswordException();		
 			}
+
 			OnAuthenticationFinished(EventArgs.Empty);
 		}
 
@@ -479,24 +540,7 @@ namespace OpenPOP.POP3
 		/// <returns>message count</returns>
 		public int GetMessageCount()
 		{			
-			writer.WriteLine("STAT");
-
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-			string response=reader.ReadLine();			
-
-			if(GetCommand(response)!=strOK)			
-				return 0;			
-			
-			try
-			{
-				return Convert.ToInt32(GetParameters(response)[0]);
-			}
-			catch(Exception e)
-			{
-				Utility.LogError("GetMessageCount():"+e.Message);
-				return 0;
-			}
+			return SendCommandIntResponse("STAT");
 		}
 
 		/// <summary>
@@ -505,35 +549,7 @@ namespace OpenPOP.POP3
 		/// <param name="intMessageIndex"> </param>
 		public bool DeleteMessage(int intMessageIndex) 
 		{
-			try
-			{
-				if(intMessageIndex >0)
-				{
-					string strCmd = "DELE ";
-					strCmd += intMessageIndex.ToString();
-					writer.WriteLine(strCmd);
-
-					WaitForResponse(ref reader,WaitForResponseInterval);
-					
-					string response=reader.ReadLine();
-
-					return (GetCommand(response)==strOK);
-				}
-				else
-					return false;
-			}
-			catch(Exception e)
-			{
-				_Error ="DeleteMessage():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not delete message at index ";
-				_Error += intMessageIndex.ToString();
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-
-				return false;
-			}
-
+			return SendCommand("DELE " + intMessageIndex);
 		}
 
 		/// <summary>
@@ -541,31 +557,13 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public bool DeleteAllMessages() 
 		{
-			try
+			int messageCount=GetMessageCount();
+			for(int messageItem=messageCount;messageItem>0;messageItem--)
 			{
-				int messageCount=GetMessageCount();
-				string strCmd="";
-				for(int messageItem=messageCount;messageItem>0;messageItem--)
-				{
-					strCmd = "DELE "+messageItem.ToString();
-					writer.WriteLine(strCmd);
-
-					WaitForResponse(ref reader,WaitForResponseInterval);
-
-					string response=reader.ReadLine();
-				}
-				return true;
+				if (!DeleteMessage(messageItem))
+					return false;
 			}
-			catch(Exception e)
-			{
-				_Error ="DeleteAllMessages():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not delete messages";
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-				return false;
-			}
-
+			return true;
 		}
 
 		/// <summary>
@@ -573,27 +571,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public bool QUIT() 
 		{
-			try
-			{
-				string strCmd = "QUIT";
-				writer.WriteLine(strCmd);
-
-				WaitForResponse(ref reader,WaitForResponseInterval);
-
-				string response=reader.ReadLine();
-
-				return (GetCommand(response)==strOK);
-			}
-			catch(Exception e)
-			{
-				_Error ="QUIT():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not quit server";
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-				return false;
-			}
-
+			return SendCommand("QUIT");
 		}
 
 		/// <summary>
@@ -601,27 +579,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public bool NOOP()
 		{
-			try
-			{
-				string strCmd = "NOOP";
-				writer.WriteLine(strCmd);
-
-				WaitForResponse(ref reader,WaitForResponseInterval);
-
-				string response=reader.ReadLine();
-
-				return (GetCommand(response)==strOK);
-			}
-			catch(Exception e)
-			{
-				_Error ="Noop():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not get response";
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-				return false;
-			}
-
+			return SendCommand("NOOP");
 		}
 
 		/// <summary>
@@ -629,27 +587,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public bool RSET()
 		{
-			try
-			{
-				string strCmd = "RSET";
-				writer.WriteLine(strCmd);
-
-				WaitForResponse(ref reader,WaitForResponseInterval);
-
-				string response=reader.ReadLine();
-
-				return (GetCommand(response)==strOK);
-			}
-			catch(Exception e)
-			{
-				_Error ="RSET():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not get response";
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-				return false;
-			}
-
+			return SendCommand("RSET");
 		}
 
 		/// <summary>
@@ -657,26 +595,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public bool USER()
 		{
-			try
-			{
-				string strCmd = "USER";
-				writer.WriteLine(strCmd);
-
-				WaitForResponse(ref reader,WaitForResponseInterval);
-
-				string response=reader.ReadLine();
-
-				return (GetCommand(response)==strOK);
-			}
-			catch(Exception e)
-			{
-				_Error ="USER():"+e.Message;
-				_Error += "\n";
-				_Error += "Could not get response";
-				//TRACE(strErr);
-				Utility.LogError(_Error);
-				return false;
-			}
+			return SendCommand("USER");
 
 		}
 
@@ -689,16 +608,8 @@ namespace OpenPOP.POP3
 		{
 			OnMessageTransferBegan(EventArgs.Empty);
 
-			_receiveFinish=false;
-
-			writer.WriteLine("TOP "+intMessageNumber+" 0");
-
-			string receivedContent=ReceiveContent(-1).Substring(3);
-
-			MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,true);
+			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber+" 0", true);
 			
-			WaitForResponse(_receiveFinish,WaitForResponseInterval);
-
 			OnMessageTransferFinished(EventArgs.Empty);
 
 			return msg;
@@ -710,21 +621,12 @@ namespace OpenPOP.POP3
 		/// <param name="intMessageNumber">message number</param>
 		public string GetMessageUID(int intMessageNumber)
 		{
-			writer.WriteLine("UIDL "+intMessageNumber);
-
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-			string response=reader.ReadLine();
-			
-			if(GetCommand(response)==strOK)
+			string[] strValues=null;
+			if(SendCommand("UIDL " + intMessageNumber.ToString()))
 			{
-				response=reader.ReadLine();
-				return response.Substring(2);
+				strValues = GetParameters(_lastCommandResponse);
 			}
-			else
-			{
-				return "";
-			}
+			return strValues[1];			
 		}
 
 		/// <summary>
@@ -733,18 +635,12 @@ namespace OpenPOP.POP3
 		public ArrayList GetMessageUIDs()
 		{
 			ArrayList uids=new ArrayList();
-
-			writer.WriteLine("UIDL");
-			
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-			string response=reader.ReadLine();
-			if(GetCommand(response)==strOK)
+			if(SendCommand("UIDL"))
 			{
-				response=reader.ReadLine();
-				while (response!="." && GetCommand(response)!=strERR)
+				string response=reader.ReadLine();
+				while (response!=".")
 				{
-					uids.Add(response.Substring(2));
+					uids.Add(response.Split(' ')[1]);
 					response=reader.ReadLine();
 				}
 				return uids;
@@ -753,6 +649,40 @@ namespace OpenPOP.POP3
 			{
 				return null;
 			}
+		}
+
+		/// <summary>
+		/// Get the sizes of all the messages
+		/// CAUTION:  Assumes no messages have been deleted
+		/// </summary>
+		/// <returns>Size of each message</returns>
+		public ArrayList LIST()
+		{
+			ArrayList sizes=new ArrayList();
+			if(SendCommand("LIST"))
+			{
+				string response=reader.ReadLine();
+				while (response!=".")
+				{
+					sizes.Add(int.Parse(response.Split(' ')[1]));
+					response=reader.ReadLine();
+				}
+				return sizes;
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// get the size of a message
+		/// </summary>
+		/// <param name="intMessageNumber">message number</param>
+		/// <returns>Size of message</returns>
+		public int LIST(int intMessageNumber)
+		{
+			return SendCommandIntResponse("LIST " + intMessageNumber.ToString());
 		}
 
 		/// <summary>
@@ -799,39 +729,42 @@ namespace OpenPOP.POP3
 		{			
 			OnMessageTransferBegan(EventArgs.Empty);
 
-			_receiveFinish=false;
-
-			writer.WriteLine("RETR " + intNumber);
-
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-			string response=reader.ReadLine();
-			int messageSize=0;
-			MIMEParser.Message msg;
-
-			if(GetCommand(response)==strOK)
-				try
-				{
-					//messageSize=Convert.ToInt32(GetParameters(response)[0]);
-					string receivedContent=ReceiveContent(messageSize);
-
-					msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
-
-					WaitForResponse(_receiveFinish,WaitForResponseInterval);
-				}
-				catch(Exception e)
-				{
-					Utility.LogError("GetMessage():"+intNumber.ToString()+":"+e.Message);
-					msg=null;
-				}
-			else
-			{
-				msg=null;
-			}
+			MIMEParser.Message msg=FetchMessage("RETR " + intNumber.ToString(), blnOnlyHeader);
 
 			OnMessageTransferFinished(EventArgs.Empty);
 
 			return msg;
 		}
+
+		/// <summary>
+		/// fetches a message or a message header
+		/// </summary>
+		/// <param name="Cmd">Command to send to Pop server</param>
+		/// <param name="blnOnlyHeader">Only return message header?</param>
+		/// <returns>Message object</returns>
+		public MIMEParser.Message FetchMessage(string cmd, bool blnOnlyHeader)
+		{			
+			_receiveFinish=false;
+			if(!SendCommand(cmd))			
+				return null;
+
+			try
+			{
+				string receivedContent=ReceiveContent(-1);
+
+				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
+
+				WaitForResponse(_receiveFinish,100);
+
+				return msg;
+			}
+			catch(Exception e)
+			{
+				Utility.LogError("FetchMessage():"+e.Message);
+				return null;
+			}
+		}
+
 	}
 }
+

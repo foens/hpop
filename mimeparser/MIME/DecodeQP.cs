@@ -1,5 +1,5 @@
 /*
-*Name:			OpenPOP.MIMEParser.DecodeQP
+*Name:			COM.NET.MAIL.POP.MIMEParser.DecodeQP
 *Function:		Decoding Quoted-Printable text
 *Author:		
 *Created:		2003/8
@@ -11,7 +11,7 @@ using System;
 using System.Text;
 using System.Globalization;
 
-namespace OpenPOP.MIMEParser
+namespace COM.NET.MAIL.POP.MIMEParser
 {
 	/// <summary>
 	/// Decoding Quoted-Printable text
@@ -143,3 +143,4 @@ namespace OpenPOP.MIMEParser
 		}
 	}
 }
+
