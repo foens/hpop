@@ -6,6 +6,8 @@
 *Modified:		2004/5/3 12:53 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/4 20:52 GMT+8 by Unruled Boy
+*					1.Renamed DeleteMessages to DeleteAllMessages
 *				2004/5/3 12:53 GMT+8 by Unruled Boy
 *					1.Adding ReceiveContentSleepInterval property
 *					2.Adding WaitForResponseInterval property
@@ -526,7 +528,7 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Deletes messages
 		/// </summary>
-		public bool DeleteMessages() 
+		public bool DeleteAllMessages() 
 		{
 			try
 			{
@@ -545,7 +547,7 @@ namespace OpenPOP.POP3
 			}
 			catch(Exception e)
 			{
-				_Error ="DeleteMessages():"+e.Message;
+				_Error ="DeleteAllMessages():"+e.Message;
 				_Error += "\n";
 				_Error += "Could not delete messages";
 				//TRACE(strErr);
