@@ -4,7 +4,10 @@
 *Author:		Unruled Boy
 *Created:		2004/3/29
 *Modified:		2004/3/29 15:00 GMT-8
-*Description	:
+*Description:
+*Changes:		
+*				2004/3/29 12:28 GMT-8 by Unruled Boy
+*					1.Adding full list of MIME Types
 */
 
 using System;

@@ -5,9 +5,6 @@
 *Created:		2003/8
 *Modified:		2004/3/29 12:28 GMT-8
 *Description:
-*Changes:		
-*				2004/3/29 12:28 GMT-8 by Unruled Boy
-*					1.Adding full list of MIME Types
 */
 
 using System;
