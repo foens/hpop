@@ -3,9 +3,11 @@
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:25 GMT+8
+*Modified:		2004/5/17 14:20 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/5/17 14:20 GMT+8 by Unruled Boy
+*					1.Added ParseFileName
 *				2004/4/29 19:05 GMT+8 by Unruled Boy
 *					1.Adding ReadPlainTextFromFile function
 *				2004/4/28 19:06 GMT+8 by Unruled Boy
@@ -36,17 +38,17 @@ namespace OpenPOP.MIMEParser
 			//
 		}
 
-//		public static string[] SplitText(string strText, string strSplitter)
-//		{
-//			string []segments=new string[0];
-//			int indexOfstrSplitter=strText.IndexOf(strSplitter);
-//			if(indexOfstrSplitter!=-1)
-//			{
-//
-//			}
-//			return segments;
-//		}
-//
+		//		public static string[] SplitText(string strText, string strSplitter)
+		//		{
+		//			string []segments=new string[0];
+		//			int indexOfstrSplitter=strText.IndexOf(strSplitter);
+		//			if(indexOfstrSplitter!=-1)
+		//			{
+		//
+		//			}
+		//			return segments;
+		//		}
+		//
 
 		public static bool IsPictureFile(string strFile)
 		{
@@ -94,6 +96,31 @@ namespace OpenPOP.MIMEParser
 				return strText;
 		}
 
+		public static string ParseFileName(string strFileName)
+		{
+			string strTag;
+			strTag="filename=";
+			int intPos=strFileName.ToLower().IndexOf(strTag);
+			if(intPos==-1)
+			{
+				strTag="name=";
+				intPos=strFileName.ToLower().IndexOf(strTag);
+			}
+			string strRet;
+			if(intPos!=-1)
+			{
+				strRet=strFileName.Substring(intPos+strTag.Length);
+				intPos=strRet.ToLower().IndexOf(";");
+				if(intPos!=-1)
+					strRet=strRet.Substring(1,intPos-1);
+				strRet=RemoveQuote(strRet);
+			}
+			else
+				strRet="";
+
+			return strRet;
+		}
+
 		public static bool ParseEmailAddress(string strEmailAddress,ref string strUser, ref string strAddress)
 		{
 			int indexOfAB=strEmailAddress.Trim().LastIndexOf("<");
@@ -105,11 +132,11 @@ namespace OpenPOP.MIMEParser
 				if(indexOfAB>0)
 				{
 					strUser=strUser.Substring(0,indexOfAB-1);
-//					strUser=strUser.Substring(0,indexOfAB-1).Trim('\"');
-//					if(strUser.IndexOf("\"")>=0)
-//					{
-//						strUser=strUser.Substring(1,strUser.Length-1);
-//					}
+					//					strUser=strUser.Substring(0,indexOfAB-1).Trim('\"');
+					//					if(strUser.IndexOf("\"")>=0)
+					//					{
+					//						strUser=strUser.Substring(1,strUser.Length-1);
+					//					}
 				}
 				strUser=strUser.Trim();
 				strUser=strUser.Trim('\"');
@@ -325,52 +352,52 @@ namespace OpenPOP.MIMEParser
 			catch
 			{return strSrc;}
 
-//				if(strSrc==null)
-//					return null;
-//				int start=strSrc.IndexOf("=?GB2312?");
-//				if (start==-1)
-//				{
-//					start=strSrc.IndexOf("=?gb2312?");
-//				}
-//				if(start>=0)
-//				{
-//					string strHead=strSrc.Substring(0,start);
-//					string strMethod=strSrc.Substring(start+9,1);
-//					strSrc=strSrc.Substring(start+11);
-//					int end=strSrc.IndexOf("?=");
-//					if (end==-1)
-//					{
-//						end=strSrc.Length;
-//					}
-//					string strFoot=strSrc.Substring(end+2,strSrc.Length-end-2);
-//					strSrc=strSrc.Substring(0,end);
-//					if(strMethod.ToUpper()=="B")
-//						strSrc=strHead+deCodeB64s(strSrc)+strFoot;
-//					else
-//					{
-//						if(strMethod.ToUpper()=="Q")
-//							strSrc=strHead+DecodeQP.ConvertHexContent(strSrc)+strFoot;
-//						else
-//							strSrc=strHead+strSrc+strFoot;
-//					}
-//					start=strSrc.IndexOf("=?GB2312?");
-//					if(start==-1)
-//					{
-//						start=strSrc.IndexOf("=?gb2312?");
-//					}
-//					if(start>=0)
-//						strSrc=DecodeText(strSrc);
-//				}
-//				else
-//				{
-//					strSrc=QuotedCoding.Decode(strSrc);
-//				}
-//			}
-//			catch
-//			{
-//			}
-//
-//			return strSrc;
+			//				if(strSrc==null)
+			//					return null;
+			//				int start=strSrc.IndexOf("=?GB2312?");
+			//				if (start==-1)
+			//				{
+			//					start=strSrc.IndexOf("=?gb2312?");
+			//				}
+			//				if(start>=0)
+			//				{
+			//					string strHead=strSrc.Substring(0,start);
+			//					string strMethod=strSrc.Substring(start+9,1);
+			//					strSrc=strSrc.Substring(start+11);
+			//					int end=strSrc.IndexOf("?=");
+			//					if (end==-1)
+			//					{
+			//						end=strSrc.Length;
+			//					}
+			//					string strFoot=strSrc.Substring(end+2,strSrc.Length-end-2);
+			//					strSrc=strSrc.Substring(0,end);
+			//					if(strMethod.ToUpper()=="B")
+			//						strSrc=strHead+deCodeB64s(strSrc)+strFoot;
+			//					else
+			//					{
+			//						if(strMethod.ToUpper()=="Q")
+			//							strSrc=strHead+DecodeQP.ConvertHexContent(strSrc)+strFoot;
+			//						else
+			//							strSrc=strHead+strSrc+strFoot;
+			//					}
+			//					start=strSrc.IndexOf("=?GB2312?");
+			//					if(start==-1)
+			//					{
+			//						start=strSrc.IndexOf("=?gb2312?");
+			//					}
+			//					if(start>=0)
+			//						strSrc=DecodeText(strSrc);
+			//				}
+			//				else
+			//				{
+			//					strSrc=QuotedCoding.Decode(strSrc);
+			//				}
+			//			}
+			//			catch
+			//			{
+			//			}
+			//
+			//			return strSrc;
 		}
 		
 		public static string deCodeB64s(string strSrc)
@@ -532,3 +559,4 @@ namespace OpenPOP.MIMEParser
 
 	}
 }
+

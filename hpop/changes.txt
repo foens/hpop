@@ -1,3 +1,7 @@
+2004/5/17 14:20 GMT+8 by Unruled Boy
+	1.fixed something but do not remember :(
+	2.Fixed a bug in parsing FileName
+
 2004/5/11 17:00 GMT+8 by Unruled Boy
 	1.Fixed a bug in parsing ContentCharset
 	2.Fixed a bug in ParseStreamLines

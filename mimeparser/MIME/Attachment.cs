@@ -3,8 +3,11 @@
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
+*Last Modified:	2004/5/17 14:20 GMT+8 by Unruled Boy
 *Description:
+*Changes:		
+*				2004/5/17 14:20 GMT+8 by Unruled Boy
+*					1.Fixed a bug in parsing FileName
 *				2004/5/8 17:00 GMT+8 by Unruled Boy
 *					1.Again, hopefully we have handled the NotAttachment property correctly
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
@@ -12,9 +15,9 @@
 *					2.Adding descriptions to every public functions/property/void
 *				2004/4/29 19:05 GMT+8 by Unruled Boy
 *					1.Hopefully we have handled the NotAttachment property correctly
-*Changes:		2004/3/29 10:28 GMT+8 by Unruled Boy
+*				2004/3/29 10:28 GMT+8 by Unruled Boy
 *					1.removing bugs in decoding attachment
-*Changes:		2004/3/29 17:32 GMT+8 by Unruled Boy
+*				2004/3/29 17:32 GMT+8 by Unruled Boy
 *					1.support for reply message using ms-tnef 
 *					2.adding detail description for every function
 *					3.cleaning up the codes
@@ -86,14 +89,14 @@ namespace OpenPOP.MIMEParser
 		{
 			get
 			{
-/*				if (_contentDisposition==null||_contentType==null)
-					return true;
-				else
-					return (_contentDisposition.IndexOf("attachment")==-1 && _contentType.IndexOf("text/plain")!=-1); */
-/*				if (_contentType==null)
-					return true;
-				else
-					return (_contentFileName!="");*/
+				/*				if (_contentDisposition==null||_contentType==null)
+									return true;
+								else
+									return (_contentDisposition.IndexOf("attachment")==-1 && _contentType.IndexOf("text/plain")!=-1); */
+				/*				if (_contentType==null)
+									return true;
+								else
+									return (_contentFileName!="");*/
 				if ((_contentType==null||_contentFileName==""))//&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
 				else
@@ -299,7 +302,7 @@ namespace OpenPOP.MIMEParser
 				string strLine=srReader.ReadLine();
 				while(Utility.IsNotNullTextEx(strLine))
 				{
-					parseHeader(srReader,ref strLine);
+					ParseHeader(srReader,ref strLine);
 					if(Utility.IsOrNullTextEx(strLine))
 						break;
 					else
@@ -316,7 +319,7 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		/// <param name="srReader">string reader</param>
 		/// <param name="strLine">header line</param>
-		private void parseHeader(StringReader srReader,ref string strLine)
+		private void ParseHeader(StringReader srReader,ref string strLine)
 		{
 			string []array=Utility.GetHeadersValue(strLine);
 			string []values=array[1].Split(';');
@@ -326,7 +329,7 @@ namespace OpenPOP.MIMEParser
 			{
 				case "CONTENT-TYPE":
 					if(values.Length>0)
-						_contentType=values[0].Trim();
+						_contentType=values[0].Trim();					
 					if(values.Length>1)
 					{
 						_contentCharset=Utility.GetQuotedValue(values[1],"=","charset");
@@ -335,7 +338,20 @@ namespace OpenPOP.MIMEParser
 					{
 						_contentFormat=Utility.GetQuotedValue(values[2],"=","format");
 					}
-					if(_contentType.ToLower().IndexOf("name".ToLower())==-1)
+					_contentFileName=Utility.ParseFileName(strLine);
+					if(_contentFileName=="")
+					{
+						strRet=srReader.ReadLine();
+						if(strRet=="")
+						{
+							strLine="";
+							break;
+						}
+						_contentFileName=Utility.ParseFileName(strLine);
+						if(_contentFileName=="")
+							ParseHeader(srReader,ref strRet);
+					}
+/*					if(_contentType.ToLower().IndexOf("name".ToLower())==-1)
 					{
 						strRet=srReader.ReadLine();
 						if(strRet.IndexOf("filename=\"")!=-1)
@@ -355,9 +371,9 @@ namespace OpenPOP.MIMEParser
 						}
 						else
 						{
-							parseHeader(srReader,ref strRet);
+							ParseHeader(srReader,ref strRet);
 						}
-					}
+					}*/
 					break;
 				case "CONTENT-TRANSFER-ENCODING":
 					_contentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
@@ -489,3 +505,4 @@ namespace OpenPOP.MIMEParser
 		}
 	}
 }
+

@@ -280,7 +280,7 @@ namespace OpenPOP.MIMEParser
 
 		private void decode_attribute (int d) 
 		{
-			byte[] buf=new byte[4000];
+			byte[] buf=new byte[4096];
 			int len;
 			int v;
 			int i;
