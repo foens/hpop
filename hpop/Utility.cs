@@ -1,8 +1,19 @@
+/*
+*Name:			OpenPOP.Utility
+*Function:		Utility
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3/27 12:25 GMT-8
+*Description:
+*Changes:		
+*				2004/3/27 12:25 GMT-8 by Unruled Boy
+*					1.getMimeType support for MONO
+*					2.cleaning up the names of variants
+*/
 using System;
 using System.Text;
 using System.IO;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace OpenPOP
 {
@@ -12,8 +23,8 @@ namespace OpenPOP
 	public class Utility
 	{
 		private const string tag_Content_Transfer_Encoding="Content-Transfer-Encoding";
-		private static bool m_bLog=false;
-		internal static string m_strLogFile = "OpenPOP.log";
+		private static bool m_blnLog=false;
+		private static string m_strLogFile = "OpenPOP.log";
 
 		public Utility()
 		{
@@ -306,11 +317,11 @@ namespace OpenPOP
 		{
 			get
 			{
-				return m_bLog;
+				return m_blnLog;
 			}
 			set
 			{
-				m_bLog = value;
+				m_blnLog = value;
 			}
 		}
 
@@ -397,17 +408,27 @@ namespace OpenPOP
 
 		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
 		/// <returns>String MIME type (Example: \"text/plain\")</returns>
-		public static string getMimeType(string fileName)
-		{
+		public static string getMimeType(string strFileName)
+		{			
 			try
 			{
-				string fileExtension=new FileInfo(fileName).Extension;
-				RegistryKey extKey = Registry.ClassesRoot.OpenSubKey(fileExtension);
-				string contentType = (string)extKey.GetValue("Content Type");
+				string strFileExtension=new FileInfo(strFileName).Extension;
+				string strContentType=null;
+				bool MONO=false;
 
-				if (contentType.ToString() != null)
+				if(MONO)
+				{
+					strContentType=POP3.MIMETypes.ContentType(strFileExtension);
+				}
+				else
+				{
+					Microsoft.Win32.RegistryKey extKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(strFileExtension);
+					strContentType = (string)extKey.GetValue("Content Type");
+				}
+
+				if (strContentType.ToString() != null)
 				{	
-					return contentType.ToString(); 
+					return strContentType.ToString(); 
 				}
 				else
 				{ return "application/octet-stream"; }

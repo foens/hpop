@@ -1,3 +1,12 @@
+/*
+*Name:			OpenPOP.POP3.MyMD5
+*Function:		MD5
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3
+*Description	:
+*/
+
 using System;
 using System.Security.Cryptography;
 using System.Text;

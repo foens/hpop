@@ -1,3 +1,14 @@
+/*
+*Name:			OpenPOP.POP3.Attachment
+*Function:		
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3/27 12:33 GMT-8
+*Description	:
+*Changes:		2004/3/27 12:28 GMT-8 by Unruled Boy
+*					1.removing bugs in decoding attachment
+*/
+
 using System;
 using System.IO;
 using System.Text;
@@ -219,23 +230,23 @@ namespace OpenPOP.POP3
 			_contentType=strContentType;
 		}
 
-		public Attachment(string sAttachment)
+		public Attachment(string strAttachment)
 		{	
 			_inBytes=false;
 
-			if(sAttachment==null)
-				throw new ArgumentNullException("sAttachment");
+			if(strAttachment==null)
+				throw new ArgumentNullException("strAttachment");
 
-			StringReader sr=new StringReader(sAttachment);
+			StringReader sr=new StringReader(strAttachment);
 
-			string temp=sr.ReadLine();
-			while(temp!=null & temp!="")
+			string strLine=sr.ReadLine();
+			while(strLine!=null & strLine!="")
 			{
-				parseHeader(sr,ref temp);
-				if(temp==null || temp=="")
+				parseHeader(sr,ref strLine);
+				if(strLine==null || strLine=="")
 					break;
 				else
-					temp=sr.ReadLine();
+					strLine=sr.ReadLine();
 			}
 
 			this._rawAttachment=sr.ReadToEnd();
@@ -247,10 +258,10 @@ namespace OpenPOP.POP3
 		/// Parse header fields and set member variables
 		/// </summary>
 		/// <param name="sr">string reader</param>
-		/// <param name="temp">header line</param>
-		private void parseHeader(StringReader sr,ref string temp)
+		/// <param name="strLine">header line</param>
+		private void parseHeader(StringReader sr,ref string strLine)
 		{
-			string []array=Utility.getHeadersValue(temp);
+			string []array=Utility.getHeadersValue(strLine);
 			string []values=array[1].Split(";".ToCharArray());
 			string strRet=null;
 
@@ -287,7 +298,7 @@ namespace OpenPOP.POP3
 						}
 						else if(strRet=="")
 						{
-							temp="";
+							strLine="";
 							break;
 						}
 						else

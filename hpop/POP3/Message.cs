@@ -1,3 +1,14 @@
+/*
+*Name:			OpenPOP.POP3.Message
+*Function:		Message Parser
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3/27 12:38 GMT-8
+*Description	:
+*Changes:		2004/3/27 12:38 GMT-8 by Unruled Boy
+*					1.removing bugs in decoding message
+*/
+
 using System;
 using System.IO;
 using System.Collections;
@@ -413,22 +424,22 @@ namespace OpenPOP.POP3
 			_rawMessage=wMessage;
 			StringReader reader=new StringReader(wMessage);
 			StringBuilder builder=new StringBuilder();
-//			string temp=reader.ReadLine();
-//			while( temp!=".")
+//			string strLine=reader.ReadLine();
+//			while( strLine!=".")
 //			{	
-//				builder.Append(temp);
-//				parseHeader(builder,reader,temp);
-//				temp=reader.ReadLine();
+//				builder.Append(strLine);
+//				parseHeader(builder,reader,strLine);
+//				strLine=reader.ReadLine();
 //			}
-			string temp=reader.ReadLine();
-			while(temp!=null && temp.Trim()!="")
+			string strLine=reader.ReadLine();
+			while(strLine!=null && strLine.Trim()!="")
 			{	
-				builder.Append(temp);
-				parseHeader(builder,reader,ref temp);
-				if(temp==null || temp.Trim()=="")
+				builder.Append(strLine);
+				parseHeader(builder,reader,ref strLine);
+				if(strLine==null || strLine.Trim()=="")
 					break;
 				else
-					temp=reader.ReadLine();
+					strLine=reader.ReadLine();
 			}
 
 			_rawHeader=builder.ToString();
@@ -454,7 +465,7 @@ namespace OpenPOP.POP3
 							this.GetMessageBody(at.DecodeAsText());
 						else
 						{}
-						if(this.Attachments.Count>1)
+						if(this.Attachments.Count>1&&!this.IsReport())
 						{
 							at=this.GetAttachment(1);
 							if(at!=null&&at.NotAttachment)
@@ -863,8 +874,8 @@ namespace OpenPOP.POP3
 				else
 					return;
 
-				string temp=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            
-				att=new Attachment(temp.Trim());
+				string strLine=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            
+				att=new Attachment(strLine.Trim());
 
 				//ms-tnef format might contain multiple attachments
 				if(att.ContentType.ToLower() == "application/ms-tnef".ToLower() && AutoDecodeMSTNEF) 
@@ -939,12 +950,11 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Parse the headers populating respective member fields
 		/// </summary>
-		/// <param name="temp"></param>
+		/// <param name="strLine"></param>
 		/// 
-		private void parseHeader(StringBuilder builder,StringReader reader,ref string temp)
+		private void parseHeader(StringBuilder builder,StringReader reader,ref string strLine)
 		{
-			string []array=Utility.getHeadersValue(temp);		
-			string line="";
+			string []array=Utility.getHeadersValue(strLine);		
 
 			switch(array[0].ToUpper())
 			{
@@ -1001,40 +1011,48 @@ namespace OpenPOP.POP3
 
 				case "KEYWORDS":
 					_keywords.Add(array[1].Trim());
-					line=reader.ReadLine();
-					while(line.IndexOf(":")==-1 && line.Trim()!="")
+					strLine=reader.ReadLine();
+					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
 					{
-						_keywords.Add(Utility.deCodeLine(line));
-						builder.Append(line);
-						line=reader.ReadLine();
+						_keywords.Add(Utility.deCodeLine(strLine));
+						builder.Append(strLine);
+						strLine=reader.ReadLine();
 					}
-					builder.Append(line);
-					temp=line;
-					parseHeader(builder,reader,ref line);
+					builder.Append(strLine);
+					parseHeader(builder,reader,ref strLine);
 					break;
 
 				case "RECEIVED":
-					_received=array[1].Trim();//temp.Split(':')[1].Trim();
+					_received=array[1].Trim();//strLine.Split(':')[1].Trim();
+					strLine=reader.ReadLine();
+					while(strLine.StartsWith("\t") && strLine.Trim()!="")
+					{
+						_received += Utility.deCodeLine(" "+strLine.Substring(1));
+						builder.Append(strLine);
+						strLine=reader.ReadLine();
+					}
+					builder.Append(strLine);
+					parseHeader(builder,reader,ref strLine);
 					break;
 
 				case "X-ORIGINATING-IP":
-					_xOriginatingIP=array[1].Trim();//temp.Split(':')[1].Trim();
+					_xOriginatingIP=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "X-PRIORITY":
-					_xPriority=array[1].Trim();//temp.Split(':')[1].Trim();
+					_xPriority=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "X-MSMAIL-PRIORITY":
-					_xMSMailPriority=array[1].Trim();//temp.Split(':')[1].Trim();
+					_xMSMailPriority=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "IMPORTANCE":
-					_importance=array[1].Trim();//temp.Split(':')[1].Trim();
+					_importance=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "X-MAILER":
-					_xMailer=array[1].Trim();//temp.Split(':')[1].Trim();
+					_xMailer=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "DISPOSITION-NOTIFICATION-TO":
@@ -1042,32 +1060,31 @@ namespace OpenPOP.POP3
 					break;
 
 				case "MIME-VERSION":
-					_mimeVersion=array[1].Trim();//temp.Split(':')[1].Trim();
+					_mimeVersion=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "X-OriginalArrivalTime":
-					_xOriginalArrivalTime=array[1].Trim();//temp.Split(':')[1].Trim();
+					_xOriginalArrivalTime=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "SUBJECT":
 				case "THREAD-TOPIC":
-					_subject=array[1].Trim();//temp.Split(':')[1].Trim();
+					_subject=array[1].Trim();//strLine.Split(':')[1].Trim();
 
-					line=reader.ReadLine();
-					while(line.IndexOf(":")==-1 && line.Trim()!="")
+					strLine=reader.ReadLine();
+					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
 					{
-						_subject+=line;
-						builder.Append(line);
-						line=reader.ReadLine();
+						_subject+=strLine;
+						builder.Append(strLine);
+						strLine=reader.ReadLine();
 					}
 					_subject=Utility.deCodeLine(_subject);
-					builder.Append(line);
-					temp=line;
-					parseHeader(builder,reader,ref line);
+					builder.Append(strLine);
+					parseHeader(builder,reader,ref strLine);
 					break;
 				
 				case "RETURN-PATH":
-					_returnPath=array[1].Trim().Trim('>').Trim('<');//temp.Split(':')[1].Trim().Trim('>').Trim('<');
+					_returnPath=array[1].Trim().Trim('>').Trim('<');//strLine.Split(':')[1].Trim().Trim('>').Trim('<');
 					break;
 
 				case "MESSAGE-ID":
@@ -1096,43 +1113,42 @@ namespace OpenPOP.POP3
 					if(_contentType!=null)
 						return;
 
-					temp=array[1];
+					strLine=array[1];
 
-					_contentType=temp.Split(';')[0];
+					_contentType=strLine.Split(';')[0];
 					_contentType=_contentType.Trim();
 
-					int intCharset=temp.IndexOf("charset=");
+					int intCharset=strLine.IndexOf("charset=");
 					if(intCharset!=-1)
 					{
-						//int intPos=temp.IndexOf("\"",intCharset+9);
-						//_contentCharset=temp.Substring(intCharset+9,intPos-intCharset-9);
-						_contentCharset=temp.Substring(intCharset+8);
+						//int intPos=strLine.IndexOf("\"",intCharset+9);
+						//_contentCharset=strLine.Substring(intCharset+9,intPos-intCharset-9);
+						_contentCharset=strLine.Substring(intCharset+8);
 						_contentCharset=Utility.RemoveQuote(_contentCharset);
 					}
 					else 
 					{
-						intCharset=temp.ToLower().IndexOf("report-type=".ToLower());
+						intCharset=strLine.ToLower().IndexOf("report-type=".ToLower());
 						if(intCharset!=-1)
 						{
-							int intPos=temp.IndexOf(";",intCharset+13);
-							_reportType=temp.Substring(intCharset+12,intPos-intCharset-13);
+							int intPos=strLine.IndexOf(";",intCharset+13);
+							_reportType=strLine.Substring(intCharset+12,intPos-intCharset-13);
 						}
-						else if(temp.ToLower().IndexOf("boundary=".ToLower())==-1)
+						else if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 						{
-							temp=reader.ReadLine();
-							intCharset=temp.ToLower().IndexOf("charset=".ToLower());
+							strLine=reader.ReadLine();
+							intCharset=strLine.ToLower().IndexOf("charset=".ToLower());
 							if(intCharset!=-1)
-								_contentCharset=temp.Substring(intCharset+9,temp.Length-intCharset-10);
-							else if(temp.IndexOf(":")!=-1)
+								_contentCharset=strLine.Substring(intCharset+9,strLine.Length-intCharset-10);
+							else if(strLine.IndexOf(":")!=-1)
 							{
-								builder.Append(temp);
-								temp=line;
-								parseHeader(builder,reader,ref line);
+								builder.Append(strLine);
+								parseHeader(builder,reader,ref strLine);
 								return;						
 							}
 							else
 							{
-								builder.Append(temp);
+								builder.Append(strLine);
 							}
 						}
 					}
@@ -1141,22 +1157,21 @@ namespace OpenPOP.POP3
 					else if(_contentType=="text/html")
 						_html=true;
 
-					if(temp.Trim().Length==_contentType.Length+1 || temp.ToLower().IndexOf("boundary=".ToLower())==-1)
+					if(strLine.Trim().Length==_contentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 					{
-						temp=reader.ReadLine();
-						if(temp==null||temp==""||temp.IndexOf(":")!=-1)
+						strLine=reader.ReadLine();
+						if(strLine==null||strLine==""||strLine.IndexOf(":")!=-1)
 						{
-							builder.Append(temp);
-							temp=line;
-							parseHeader(builder,reader,ref line);
+							builder.Append(strLine);
+							parseHeader(builder,reader,ref strLine);
 							return;
 						}
 						else
 						{
-							builder.Append(temp);
+							builder.Append(strLine);
 						}
 
-						if(temp.ToLower().IndexOf("boundary=".ToLower())==-1)
+						if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 						{
 							_attachmentboundry=reader.ReadLine();
 							builder.Append(_attachmentboundry);
@@ -1164,13 +1179,13 @@ namespace OpenPOP.POP3
 					}
 					else
 					{
-						if(temp.IndexOf(";")!=-1)
-							_attachmentboundry=temp.Split(';')[1];
+						if(strLine.IndexOf(";")!=-1)
+							_attachmentboundry=strLine.Split(';')[1];
 						else
-							_attachmentboundry=temp;
+							_attachmentboundry=strLine;
 					}
 
-					_attachmentboundry=temp;
+					_attachmentboundry=strLine;
 
 					int indexOfQuote=_attachmentboundry.IndexOf("\"");
 					int lastIndexOfQuote=_attachmentboundry.LastIndexOf("\"");

@@ -1,3 +1,13 @@
+/*
+*Name:			OpenPOP.POP3.DecodeQP
+*Function:		Decoding Quoted-Printable text
+*Author:		
+*Created:		2003/8
+*Modified:		2004/3/27 12:33 GMT-8
+*Description	:
+*Changes:		
+*/
+
 using System;
 using System.Text;
 using System.Globalization;
@@ -5,7 +15,7 @@ using System.Globalization;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Decoding Quoted-Printable
+	/// Decoding Quoted-Printable text
 	/// 
 	/// </summary>
 	public class DecodeQP

@@ -1,3 +1,11 @@
+/*
+*Name:			Assembly
+*Function:		Assembly
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3/27 11:46 GMT-8
+*Description	:
+*/
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -10,8 +18,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 
-
-[assembly: AssemblyVersion("2004.03.24.*")]
+[assembly: AssemblyVersion("2004.03.27.1232")]
 
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]

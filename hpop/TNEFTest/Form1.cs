@@ -4,7 +4,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
-using COM.NET.MAIL.TNEF;
+using OpenPOP.TNEF;
 
 namespace TNEFTest
 {

@@ -1,3 +1,12 @@
+/*
+*Name:			OpenPOP.POP3.POPClient
+*Function:		POP Client
+*Author:		Hamid Qureshi
+*Created:		2003/8
+*Modified:		2004/3/27 12:39
+*Description	:
+*/
+
 using System;
 using System.Net.Sockets;
 using System.IO;
@@ -25,18 +34,10 @@ namespace OpenPOP.POP3
 		private string _basePath=null;
 		internal bool _receiveFinish=false;
 		private bool _autoDecodeMSTNEF=true;
-		private const string systemGUID="http://ioffice.net.2003";
-		internal string	userGUID=null;
 		private TcpClient clientSocket=null;		
 		private StreamReader reader;
 		private StreamWriter writer;
 
-
-		public string GUID
-		{
-			get { return userGUID; }
-			set { userGUID=value; }
-		}
 		
 		public bool AutoDecodeMSTNEF
 		{
@@ -142,8 +143,6 @@ namespace OpenPOP.POP3
 		/// <returns></returns>
 		public void Connect(string host,int port)
 		{
-			if(userGUID==systemGUID)
-			{
 				clientSocket=new TcpClient();
 				clientSocket.ReceiveTimeout=_receiveTimeOut;
 				clientSocket.SendTimeout=_sendTimeOut;
@@ -177,11 +176,6 @@ namespace OpenPOP.POP3
 					Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
 					throw new PopServerNotAvailableException();
 				}
-			}
-			else
-			{
-				throw new Exception("wrong user id");
-			}
 		}
 
 		/// <summary>

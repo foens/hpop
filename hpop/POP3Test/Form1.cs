@@ -181,7 +181,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPassword.PasswordChar = '*';
 			this.txtPassword.Size = new System.Drawing.Size(153, 21);
 			this.txtPassword.TabIndex = 7;
-			this.txtPassword.Text = "lovebell";
+			this.txtPassword.Text = "wantgirl";
 			// 
 			// label8
 			// 
@@ -197,7 +197,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtLogin.Name = "txtLogin";
 			this.txtLogin.Size = new System.Drawing.Size(153, 21);
 			this.txtLogin.TabIndex = 5;
-			this.txtLogin.Text = "wilsonchan";
+			this.txtLogin.Text = "unruledboy";
 			// 
 			// button1
 			// 
@@ -420,7 +420,6 @@ namespace OpenPOP.NET_Sample_App
 		private void ReceiveMails()
 		{
 			Utility.Log=true;
-			popClient.GUID="http://ioffice.net.2003";
 			popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text));
 			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
