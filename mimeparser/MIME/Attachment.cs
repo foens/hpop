@@ -23,6 +23,8 @@
 *Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/23 09:02 GMT+8 by grandepuffo via Unruled Boy
+*					1.Fixed a bug in verifying the null return line @ http://sourceforge.net/tracker/index.php?func=detail&aid=975232&group_id=92166&atid=599778
 *				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
 *					1.Fixed a bug in parsing ContentFileName @ https://sourceforge.net/forum/message.php?msg_id=2589759
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
@@ -371,7 +373,7 @@ namespace OpenPOP.MIMEParser
 					if(_contentFileName=="")
 					{
 						strRet=srReader.ReadLine();
-						if(strRet=="")
+						if(Utility.IsOrNullTextEx(strRet))
 						{
 							strLine="";
 							break;
