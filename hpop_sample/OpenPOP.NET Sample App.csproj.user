@@ -1,0 +1,48 @@
+<VisualStudioProject>
+    <CSHARP>
+        <Build>
+            <Settings ReferencePath = "C:\Documents and Settings\Administrator\Desktop\OpenPOP.NET-src-1.0.0\bin\Debug\;C:\Documents and Settings\Administrator\Desktop\OpenPOP.NET-src-1.0.0\bin\Release\;C:\Documents and Settings\hamid.PRO\My Documents\Visual Studio Projects\OpenPOP.NET\bin\Debug\" >
+                <Config
+                    Name = "Debug"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Project"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = ""
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "true"
+                />
+                <Config
+                    Name = "Release"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Project"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = ""
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "true"
+                />
+            </Settings>
+        </Build>
+        <OtherProjectSettings
+            CopyProjectDestinationFolder = ""
+            CopyProjectUncPath = ""
+            CopyProjectOption = "0"
+            ProjectView = "ProjectFiles"
+            ProjectTrust = "0"
+        />
+    </CSHARP>
+</VisualStudioProject>
+
