@@ -6,9 +6,6 @@
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
-*				2004/5/11 17:00 GMT+8 by Unruled Boy
-*					1.Fixed a bug in parsing ContentCharset
-*					2.Fixed a bug in ParseStreamLines
 *				2004/5/8 17:00 GMT+8 by Unruled Boy
 *					1.Fixed a bug in parsing boundary
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
@@ -1057,13 +1054,13 @@ namespace COM.NET.MAIL.POP.MIMEParser
 			if(strLine!="")
 			{
 				sbdBuilder.Append(strLine);
-
+			}
+			else
 				if(intLines==0)
 				{
 					strLine=srdReader.ReadLine();
 					sbdBuilder.Append(strLine);
 				}
-			}
 
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
@@ -1105,13 +1102,13 @@ namespace COM.NET.MAIL.POP.MIMEParser
 			if(strLine!="")
 			{
 				sbdBuilder.Append(strLine);
-
+			}
+			else
 				if(intLines==0)
 				{
 					strLine=srdReader.ReadLine();
 					sbdBuilder.Append(strLine);
 				}
-			}
 
 			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
@@ -1154,13 +1151,13 @@ namespace COM.NET.MAIL.POP.MIMEParser
 			if(strLine!="")
 			{
 				sbdBuilder.Append(strLine);
-
+			}
+			else
 				if(intLines==0)
 				{
 					strLine=srdReader.ReadLine();
 					sbdBuilder.Append(strLine);
 				}
-			}
 
 			if(!blnLineDecode)
 				strReturn=Utility.DecodeLine(strReturn);
