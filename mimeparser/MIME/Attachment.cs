@@ -3,11 +3,11 @@
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 17:32 GMT-8
+*Modified:		2004/3/29 17:32 GMT+8
 *Description	:
-*Changes:		2004/3/29 10:28 GMT-8 by Unruled Boy
+*Changes:		2004/3/29 10:28 GMT+8 by Unruled Boy
 *					1.removing bugs in decoding attachment
-*Changes:		2004/3/29 17:32 GMT-8 by Unruled Boy
+*Changes:		2004/3/29 17:32 GMT+8 by Unruled Boy
 *					1.support for reply message using ms-tnef 
 *					2.adding detail description for every function
 *					3.cleaning up the codes
@@ -199,31 +199,31 @@ namespace OpenPOP.MIMEParser
 			if(strAttachment==null)
 				throw new ArgumentNullException("strAttachment");
 
-			StringReader sr=new StringReader(strAttachment);
+			StringReader srReader=new StringReader(strAttachment);
 
 			if(blnParseHeader)
 			{
-				string strLine=sr.ReadLine();
+				string strLine=srReader.ReadLine();
 				while(Utility.IsNotNullTextEx(strLine))
 				{
-					parseHeader(sr,ref strLine);
+					parseHeader(srReader,ref strLine);
 					if(Utility.IsOrNullTextEx(strLine))
 						break;
 					else
-						strLine=sr.ReadLine();
+						strLine=srReader.ReadLine();
 				}
 			}
 
-			this._rawAttachment=sr.ReadToEnd();
+			this._rawAttachment=srReader.ReadToEnd();
 			_contentLength=this._rawAttachment.Length;
 		}
 
 		/// <summary>
 		/// Parse header fields and set member variables
 		/// </summary>
-		/// <param name="sr">string reader</param>
+		/// <param name="srReader">string reader</param>
 		/// <param name="strLine">header line</param>
-		private void parseHeader(StringReader sr,ref string strLine)
+		private void parseHeader(StringReader srReader,ref string strLine)
 		{
 			string []array=Utility.getHeadersValue(strLine);
 			string []values=array[1].Split(';');
@@ -244,7 +244,7 @@ namespace OpenPOP.MIMEParser
 					}
 					if(_contentType.ToLower().IndexOf("name".ToLower())==-1)
 					{
-						strRet=sr.ReadLine();
+						strRet=srReader.ReadLine();
 						if(strRet.IndexOf("filename=\"")!=-1)
 						{
 							_contentFileName=Utility.GetQuotedValue(strRet,"=","filename");
@@ -262,7 +262,7 @@ namespace OpenPOP.MIMEParser
 						}
 						else
 						{
-							parseHeader(sr,ref strRet);
+							parseHeader(srReader,ref strRet);
 						}
 					}
 					break;
@@ -279,7 +279,7 @@ namespace OpenPOP.MIMEParser
 					_contentFileName=values[1];
 					
 					if(_contentFileName=="")
-						_contentFileName=sr.ReadLine();
+						_contentFileName=srReader.ReadLine();
 
 					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
 					_contentFileName=Utility.deCode(_contentFileName);

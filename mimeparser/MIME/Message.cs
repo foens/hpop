@@ -3,17 +3,21 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 17:22 GMT-8
+*Modified:		2004/3/29 17:22 GMT+8
 *Description	:
-*Changes:		2004/3/29 10:38 GMT-8 by Unruled Boy
+*Changes:		
+*				2004/4/23 21:13 GMT+8 by Unruled Boy
+*					1.New Contructor
+*					2.Tidy up the codes to follow Hungarian Notation
+*				2004/3/29 10:38 GMT+8 by Unruled Boy
 *					1.removing bugs in decoding message
-*				2004/3/29 17:22 GMT-8 by Unruled Boy
+*				2004/3/29 17:22 GMT+8 by Unruled Boy
 *					1.adding support for reply message using ms-tnef 
 *					2.adding support for all custom headers
 *					3.rewriting the header parser(adding 3 ParseStreamLines)
 *					4.adding detail description for every function
 *					5.cleaning up the codes
-*				2004/3/30 09:15 GMT-8 by Unruled Boy
+*				2004/3/30 09:15 GMT+8 by Unruled Boy
 *					1.Adding ImportanceType
 */
 
@@ -282,26 +286,26 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// get valid attachment
 		/// </summary>
-		/// <param name="attachmentNumber">attachment index in the attachments collection</param>
+		/// <param name="intAttachmentNumber">attachment index in the attachments collection</param>
 		/// <returns>attachment</returns>
-		public Attachment GetAttachment(int attachmentNumber)
+		public Attachment GetAttachment(int intAttachmentNumber)
 		{
-			if(attachmentNumber<0 || attachmentNumber>_attachmentCount || attachmentNumber>_attachments.Count)
+			if(intAttachmentNumber<0 || intAttachmentNumber>_attachmentCount || intAttachmentNumber>_attachments.Count)
 			{
 				Utility.LogError("GetAttachment():attachment not exist");
-				throw new ArgumentOutOfRangeException("attachmentNumber");	
+				throw new ArgumentOutOfRangeException("intAttachmentNumber");	
 			}
-			return (Attachment)_attachments[attachmentNumber];		
+			return (Attachment)_attachments[intAttachmentNumber];		
 		}
 
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string wMessage, bool onlyHeader)
+		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
 		{
-			StringReader srdReader=new StringReader(wMessage);
+			StringReader srdReader=new StringReader(strMessage);
 			StringBuilder sbdBuilder=new StringBuilder();
 			_basePath=strBasePath;
 			_autoDecodeMSTNEF=blnAutoDecodeMSTNEF;
 
-			_rawMessage=wMessage;
+			_rawMessage=strMessage;
 
 			string strLine=srdReader.ReadLine();
 			while(Utility.IsNotNullTextEx(strLine))
@@ -319,9 +323,9 @@ namespace OpenPOP.MIMEParser
 			SetAttachmentBoundry2(_rawHeader);
 
 			if(_contentLength==0)
-				_contentLength=wMessage.Length;//_rawMessageBody.Length;
+				_contentLength=strMessage.Length;//_rawMessageBody.Length;
 
-			if(onlyHeader==false)
+			if(blnOnlyHeader==false)
 			{
 				_rawMessageBody=srdReader.ReadToEnd().Trim();
 

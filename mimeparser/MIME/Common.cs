@@ -3,9 +3,9 @@
 *Function:		Common definitions
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:28 GMT-8
+*Modified:		2004/3/29 12:28 GMT+8
 *Description:
-*				2004/3/30 09:15 GMT-8 by Unruled Boy
+*				2004/3/30 09:15 GMT+8 by Unruled Boy
 *					1.Adding ImportanceType
 */
 

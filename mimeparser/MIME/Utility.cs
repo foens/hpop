@@ -3,10 +3,10 @@
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:25 GMT-8
+*Modified:		2004/3/29 12:25 GMT+8
 *Description:
 *Changes:		
-*				2004/3/29 12:25 GMT-8 by Unruled Boy
+*				2004/3/29 12:25 GMT+8 by Unruled Boy
 *					1.GetMimeType support for MONO
 *					2.cleaning up the names of variants
 */
