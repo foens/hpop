@@ -1,9 +1,27 @@
+/******************************************************************************
+	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
+	OpenPOP.Net is free software; you can redistribute it and/or modify
+	it under the terms of the Lesser GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	OpenPOP.Net is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	Lesser GNU General Public License for more details.
+
+	You should have received a copy of the Lesser GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*******************************************************************************/
+
 using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Security.Permissions;
 using Microsoft.Win32;
 
 namespace MailMonitor
@@ -36,6 +54,10 @@ namespace MailMonitor
 		private System.Windows.Forms.ToolBarButton btnDel;
 		private frmMailBox _frmMailBox;
 		private MailBox _mailBox;
+		private System.Windows.Forms.GroupBox gbxHeader;
+		private System.Windows.Forms.Label lblDescription;
+		private System.Windows.Forms.PictureBox picIcon;
+		private System.Windows.Forms.Label lblTitle;
 		private Settings _settings;
 
 
@@ -86,6 +108,10 @@ namespace MailMonitor
 			this.btnDel = new System.Windows.Forms.ToolBarButton();
 			this.imlToolbar = new System.Windows.Forms.ImageList(this.components);
 			this.lvwMailBoxes = new System.Windows.Forms.ListView();
+			this.gbxHeader = new System.Windows.Forms.GroupBox();
+			this.lblDescription = new System.Windows.Forms.Label();
+			this.picIcon = new System.Windows.Forms.PictureBox();
+			this.lblTitle = new System.Windows.Forms.Label();
 			this.tcSettings.SuspendLayout();
 			this.tpNormal.SuspendLayout();
 			this.gbClient.SuspendLayout();
@@ -93,12 +119,13 @@ namespace MailMonitor
 			this.tpRemind.SuspendLayout();
 			this.gbRemind.SuspendLayout();
 			this.tpMailBoxes.SuspendLayout();
+			this.gbxHeader.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// cmdOK
 			// 
 			this.cmdOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdOK.Location = new System.Drawing.Point(240, 248);
+			this.cmdOK.Location = new System.Drawing.Point(240, 272);
 			this.cmdOK.Name = "cmdOK";
 			this.cmdOK.Size = new System.Drawing.Size(80, 24);
 			this.cmdOK.TabIndex = 0;
@@ -108,7 +135,7 @@ namespace MailMonitor
 			// cmdCancel
 			// 
 			this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdCancel.Location = new System.Drawing.Point(328, 248);
+			this.cmdCancel.Location = new System.Drawing.Point(328, 272);
 			this.cmdCancel.Name = "cmdCancel";
 			this.cmdCancel.Size = new System.Drawing.Size(80, 24);
 			this.cmdCancel.TabIndex = 1;
@@ -121,10 +148,10 @@ namespace MailMonitor
 			this.tcSettings.Controls.Add(this.tpRemind);
 			this.tcSettings.Controls.Add(this.tpMailBoxes);
 			this.tcSettings.HotTrack = true;
-			this.tcSettings.Location = new System.Drawing.Point(8, 8);
+			this.tcSettings.Location = new System.Drawing.Point(8, 54);
 			this.tcSettings.Name = "tcSettings";
 			this.tcSettings.SelectedIndex = 0;
-			this.tcSettings.Size = new System.Drawing.Size(408, 232);
+			this.tcSettings.Size = new System.Drawing.Size(408, 208);
 			this.tcSettings.TabIndex = 2;
 			// 
 			// tpNormal
@@ -134,7 +161,7 @@ namespace MailMonitor
 			this.tpNormal.Controls.Add(this.gbSchedule);
 			this.tpNormal.Location = new System.Drawing.Point(4, 21);
 			this.tpNormal.Name = "tpNormal";
-			this.tpNormal.Size = new System.Drawing.Size(400, 207);
+			this.tpNormal.Size = new System.Drawing.Size(400, 183);
 			this.tpNormal.TabIndex = 0;
 			this.tpNormal.Text = "Normal";
 			// 
@@ -143,7 +170,7 @@ namespace MailMonitor
 			this.chkAutoRun.Checked = true;
 			this.chkAutoRun.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.chkAutoRun.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.chkAutoRun.Location = new System.Drawing.Point(8, 168);
+			this.chkAutoRun.Location = new System.Drawing.Point(8, 160);
 			this.chkAutoRun.Name = "chkAutoRun";
 			this.chkAutoRun.Size = new System.Drawing.Size(248, 16);
 			this.chkAutoRun.TabIndex = 2;
@@ -276,10 +303,10 @@ namespace MailMonitor
 			this.tbrMailBoxes.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.tbrMailBoxes.DropDownArrows = true;
 			this.tbrMailBoxes.ImageList = this.imlToolbar;
-			this.tbrMailBoxes.Location = new System.Drawing.Point(0, 181);
+			this.tbrMailBoxes.Location = new System.Drawing.Point(0, 167);
 			this.tbrMailBoxes.Name = "tbrMailBoxes";
 			this.tbrMailBoxes.ShowToolTips = true;
-			this.tbrMailBoxes.Size = new System.Drawing.Size(400, 26);
+			this.tbrMailBoxes.Size = new System.Drawing.Size(400, 40);
 			this.tbrMailBoxes.TabIndex = 1;
 			this.tbrMailBoxes.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.tbrMailBoxes_ButtonClick);
 			this.tbrMailBoxes.DoubleClick += new System.EventHandler(this.tbrMailBoxes_DoubleClick);
@@ -311,6 +338,7 @@ namespace MailMonitor
 			// lvwMailBoxes
 			// 
 			this.lvwMailBoxes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.lvwMailBoxes.FullRowSelect = true;
 			this.lvwMailBoxes.GridLines = true;
 			this.lvwMailBoxes.HoverSelection = true;
 			this.lvwMailBoxes.Location = new System.Drawing.Point(8, 8);
@@ -319,10 +347,54 @@ namespace MailMonitor
 			this.lvwMailBoxes.TabIndex = 0;
 			this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
 			// 
+			// gbxHeader
+			// 
+			this.gbxHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.gbxHeader.BackColor = System.Drawing.Color.White;
+			this.gbxHeader.Controls.Add(this.lblDescription);
+			this.gbxHeader.Controls.Add(this.picIcon);
+			this.gbxHeader.Controls.Add(this.lblTitle);
+			this.gbxHeader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.gbxHeader.Location = new System.Drawing.Point(0, -8);
+			this.gbxHeader.Name = "gbxHeader";
+			this.gbxHeader.Size = new System.Drawing.Size(496, 48);
+			this.gbxHeader.TabIndex = 9;
+			this.gbxHeader.TabStop = false;
+			// 
+			// lblDescription
+			// 
+			this.lblDescription.AutoSize = true;
+			this.lblDescription.Location = new System.Drawing.Point(128, 24);
+			this.lblDescription.Name = "lblDescription";
+			this.lblDescription.Size = new System.Drawing.Size(184, 17);
+			this.lblDescription.TabIndex = 6;
+			this.lblDescription.Text = "Personalize your Mail Monitor";
+			// 
+			// picIcon
+			// 
+			this.picIcon.Image = ((System.Drawing.Image)(resources.GetObject("picIcon.Image")));
+			this.picIcon.Location = new System.Drawing.Point(8, 12);
+			this.picIcon.Name = "picIcon";
+			this.picIcon.Size = new System.Drawing.Size(32, 32);
+			this.picIcon.TabIndex = 5;
+			this.picIcon.TabStop = false;
+			// 
+			// lblTitle
+			// 
+			this.lblTitle.AutoSize = true;
+			this.lblTitle.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.lblTitle.Location = new System.Drawing.Point(44, 8);
+			this.lblTitle.Name = "lblTitle";
+			this.lblTitle.Size = new System.Drawing.Size(81, 26);
+			this.lblTitle.TabIndex = 4;
+			this.lblTitle.Text = "Settings";
+			// 
 			// frmSettings
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-			this.ClientSize = new System.Drawing.Size(424, 279);
+			this.ClientSize = new System.Drawing.Size(424, 303);
+			this.Controls.Add(this.gbxHeader);
 			this.Controls.Add(this.tcSettings);
 			this.Controls.Add(this.cmdCancel);
 			this.Controls.Add(this.cmdOK);
@@ -340,6 +412,7 @@ namespace MailMonitor
 			this.tpRemind.ResumeLayout(false);
 			this.gbRemind.ResumeLayout(false);
 			this.tpMailBoxes.ResumeLayout(false);
+			this.gbxHeader.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -375,11 +448,14 @@ namespace MailMonitor
 
 		private void cmdOK_Click(object sender, System.EventArgs e)
 		{
-			RegistryKey extKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+//			RegistryPermission f = new RegistryPermission(RegistryPermissionAccess.AllAccess,@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+//			f.Demand();
+			RegistryKey extKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",true);
 			if(chkAutoRun.Checked)
 				extKey.SetValue("Mail Monitor.NET",Assembly.GetEntryAssembly().Location);
 			else
-				extKey.DeleteValue("Mail Monitor.NET");
+				if(extKey.GetValue("Mail Monitor.NET")!=null)
+					extKey.DeleteValue("Mail Monitor.NET");
 			
 			extKey.Close();
 
@@ -387,6 +463,8 @@ namespace MailMonitor
 			_settings.CheckInterval=Convert.ToInt32(dudCheckNew.Text);
 			_settings.ServerTimeout=Convert.ToInt32(dudServerTimeout.Text);
 			_settings.Save();
+
+			this.Close();
 		}
 
 		#endregion
@@ -442,24 +520,24 @@ namespace MailMonitor
 			switch(e.Button.Tag.ToString())
 			{
 				case "Add":
+					_mailBox=new MailBox();
 					_frmMailBox=new frmMailBox();
 					_frmMailBox.MailBox=_mailBox;
 					_frmMailBox.ShowDialog();
-					_settings.MailBoxes.Add(_mailBox);
+					_settings.MailBoxes.Add(_frmMailBox.MailBox);
 					break;
 				case "Edit":
 					if(lvwMailBoxes.SelectedItems.Count>0)
 					{
 						_frmMailBox=new frmMailBox();
-						_mailBox=(MailBox)_settings.MailBoxes[Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Tag)];
+						int intIndex=Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Tag);
+						_mailBox=(MailBox)_settings.MailBoxes[intIndex];
 						_frmMailBox.MailBox=_mailBox;
 						_frmMailBox.ShowDialog();
-						int intIndex=_settings.MailBoxes.IndexOf(_mailBox);
-						if(intIndex!=-1)
-							_settings.MailBoxes[intIndex]=_mailBox;
+						_settings.MailBoxes[intIndex]=_frmMailBox.MailBox;
 					}
 					else
-						MessageBox.Show(this,"There is no mail boxes!");
+						MessageBox.Show(this,"Select mailbox first!");
 					break;
 				case "Del":
 					if(_settings.MailBoxes.Count>0)
@@ -470,9 +548,13 @@ namespace MailMonitor
 							_settings.MailBoxes.Remove(((MailBox)_settings.MailBoxes[intIndex]));
 					}
 					else
-						MessageBox.Show(this,"There is no mail boxes!");
+						MessageBox.Show(this,"There is no mailbox!");
 					break;
 			}
+
+			_settings.Save();
+
+			_settings.Load();
 
 			InitMailBoxes();
 		}

@@ -1,3 +1,20 @@
+/******************************************************************************
+	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
+	OpenPOP.Net is free software; you can redistribute it and/or modify
+	it under the terms of the Lesser GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	OpenPOP.Net is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	Lesser GNU General Public License for more details.
+
+	You should have received a copy of the Lesser GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*******************************************************************************/
+
 using System;
 using System.Drawing;
 using System.Collections;
@@ -5,8 +22,8 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
-using iOfficeMail.POP3;
-using iOfficeMail.MIMEParser;
+using OpenPOP.POP3;
+using OpenPOP.MIMEParser;
 
 namespace MailMonitor
 {
@@ -24,7 +41,7 @@ namespace MailMonitor
 		private System.Windows.Forms.StatusBarPanel sbpSentTime;
 		private POPClient popClient;
 		private Settings _settings;
-		private iOfficeMail.MIMEParser.Message _msg;
+		private OpenPOP.MIMEParser.Message _msg;
 		private MailBox _mailBox;
 		private AxSHDocVw.AxWebBrowser wbBody;
 		private string _messageID;
@@ -95,8 +112,8 @@ namespace MailMonitor
 			this.mmuMail = new System.Windows.Forms.MainMenu();
 			this.mnuFile = new System.Windows.Forms.MenuItem();
 			this.mnuOpen = new System.Windows.Forms.MenuItem();
-			this.mnuSaveAs = new System.Windows.Forms.MenuItem();
 			this.mnuHR = new System.Windows.Forms.MenuItem();
+			this.mnuSaveAs = new System.Windows.Forms.MenuItem();
 			this.mnuHR2 = new System.Windows.Forms.MenuItem();
 			this.mnuDelete = new System.Windows.Forms.MenuItem();
 			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
@@ -188,12 +205,12 @@ namespace MailMonitor
 			this.wbBody.Enabled = true;
 			this.wbBody.Location = new System.Drawing.Point(8, 88);
 			this.wbBody.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("wbBody.OcxState")));
-			this.wbBody.Size = new System.Drawing.Size(488, 160);
+			this.wbBody.Size = new System.Drawing.Size(488, 164);
 			this.wbBody.TabIndex = 8;
 			// 
 			// sbrMain
 			// 
-			this.sbrMain.Location = new System.Drawing.Point(0, 231);
+			this.sbrMain.Location = new System.Drawing.Point(0, 235);
 			this.sbrMain.Name = "sbrMain";
 			this.sbrMain.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
 																					   this.sbpSize,
@@ -238,17 +255,17 @@ namespace MailMonitor
 			this.mnuOpen.Text = "&Open";
 			this.mnuOpen.Click += new System.EventHandler(this.mnuOpen_Click);
 			// 
+			// mnuHR
+			// 
+			this.mnuHR.Index = 1;
+			this.mnuHR.Text = "-";
+			// 
 			// mnuSaveAs
 			// 
 			this.mnuSaveAs.Index = 2;
 			this.mnuSaveAs.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
 			this.mnuSaveAs.Text = "&Save As";
 			this.mnuSaveAs.Click += new System.EventHandler(this.mnuSaveAs_Click);
-			// 
-			// mnuHR
-			// 
-			this.mnuHR.Index = 1;
-			this.mnuHR.Text = "-";
 			// 
 			// mnuHR2
 			// 
@@ -265,7 +282,7 @@ namespace MailMonitor
 			// frmMail
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-			this.ClientSize = new System.Drawing.Size(504, 253);
+			this.ClientSize = new System.Drawing.Size(504, 257);
 			this.Controls.Add(this.lvwAttachments);
 			this.Controls.Add(this.sbrMain);
 			this.Controls.Add(this.lblAttachments);
@@ -339,7 +356,7 @@ namespace MailMonitor
 				if(File.Exists(_file)||FindLocalMessage(ref _file))
 				{
 					bool blnRet=false;
-					_msg=new iOfficeMail.MIMEParser.Message(ref blnRet,"",true,false,_file);
+					_msg=new OpenPOP.MIMEParser.Message(ref blnRet,"",true,false,_file);
 				}
 				else
 				{
@@ -372,7 +389,7 @@ namespace MailMonitor
 				}
 
 				string strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
-				iOfficeMail.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,(string)_msg.MessageBody[_msg.MessageBody.Count-1],true);
+				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,(string)_msg.MessageBody[_msg.MessageBody.Count-1],true);
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
 				
@@ -396,10 +413,10 @@ namespace MailMonitor
 				{
 					if(_msg.IsMIMEMailFile(att))
 					{
-						result=MessageBox.Show(this,"iOfficeMail.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
+						result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
 						{
-							iOfficeMail.MIMEParser.Message  m2=att.DecodeAsMessage();
+							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage();
 							string attachmentNames="";
 							bool blnRet=false;
 							if(m2.AttachmentCount>0)

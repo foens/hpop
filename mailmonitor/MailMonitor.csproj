@@ -106,7 +106,7 @@
                     WrapperTool = "aximp"
                 />
                 <Reference
-                    Name = "iOfficeMail"
+                    Name = "OpenPOP"
                     Project = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />

@@ -1,3 +1,20 @@
+/******************************************************************************
+	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
+	OpenPOP.Net is free software; you can redistribute it and/or modify
+	it under the terms of the Lesser GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	OpenPOP.Net is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	Lesser GNU General Public License for more details.
+
+	You should have received a copy of the Lesser GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*******************************************************************************/
+
 using System;
 using System.Drawing;
 using System.Collections;
@@ -136,6 +153,7 @@ namespace MailMonitor
 			this.txtPassword.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.txtPassword.Location = new System.Drawing.Point(72, 136);
 			this.txtPassword.Name = "txtPassword";
+			this.txtPassword.PasswordChar = '*';
 			this.txtPassword.Size = new System.Drawing.Size(216, 21);
 			this.txtPassword.TabIndex = 9;
 			this.txtPassword.Text = "";
@@ -195,6 +213,7 @@ namespace MailMonitor
 
 		public MailBox MailBox
 		{
+			get{return _mailBox;}
 			set{_mailBox=value;}
 		}
 
@@ -214,7 +233,7 @@ namespace MailMonitor
 
 		private void cmdCancel_Click(object sender, System.EventArgs e)
 		{
-			if(MessageBox.Show(this,"Are you sure to exit without saving?","Exit",MessageBoxButtons.YesNo)==DialogResult.OK)
+			if(MessageBox.Show(this,"Are you sure to exit without saving?","Exit",MessageBoxButtons.YesNo)==DialogResult.Yes)
 				this.Close();
 		}
 

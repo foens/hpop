@@ -1,11 +1,28 @@
+/******************************************************************************
+	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
+	OpenPOP.Net is free software; you can redistribute it and/or modify
+	it under the terms of the Lesser GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	OpenPOP.Net is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	Lesser GNU General Public License for more details.
+
+	You should have received a copy of the Lesser GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*******************************************************************************/
+
 using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Threading;
-using iOfficeMail.POP3;
-using iOfficeMail.MIMEParser;
+using OpenPOP.POP3;
+using OpenPOP.MIMEParser;
 
 namespace MailMonitor
 {
@@ -14,7 +31,7 @@ namespace MailMonitor
 		private System.Windows.Forms.ListView lvwMailBoxes;
 		private System.ComponentModel.Container components = null;
 		internal POPClient popClient=new POPClient();
-		private iOfficeMail.MIMEParser.Message _msg;
+		private OpenPOP.MIMEParser.Message _msg;
 		private MailBox _mailBox;
 		private Thread _thread;
 		private int _count;
@@ -25,6 +42,10 @@ namespace MailMonitor
 		private System.Windows.Forms.ContextMenu ctmMails;
 		private System.Windows.Forms.MenuItem mnuDelete;
 		private System.Windows.Forms.MenuItem mnuSaveAsEML;
+		private System.Windows.Forms.GroupBox gbxHeader;
+		private System.Windows.Forms.Label lblDescription;
+		private System.Windows.Forms.PictureBox picIcon;
+		private System.Windows.Forms.Label lblTitle;
 		internal Settings _settings;
 
 		#region Entry
@@ -71,13 +92,19 @@ namespace MailMonitor
 		#region Windows
 		private void InitializeComponent()
 		{
+			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMails));
 			this.lvwMailBoxes = new System.Windows.Forms.ListView();
 			this.ctmMails = new System.Windows.Forms.ContextMenu();
 			this.mnuDelete = new System.Windows.Forms.MenuItem();
+			this.mnuSaveAsEML = new System.Windows.Forms.MenuItem();
 			this.cmdCancel = new System.Windows.Forms.Button();
 			this.cmdPause = new System.Windows.Forms.Button();
 			this.cmdGet = new System.Windows.Forms.Button();
-			this.mnuSaveAsEML = new System.Windows.Forms.MenuItem();
+			this.gbxHeader = new System.Windows.Forms.GroupBox();
+			this.lblDescription = new System.Windows.Forms.Label();
+			this.picIcon = new System.Windows.Forms.PictureBox();
+			this.lblTitle = new System.Windows.Forms.Label();
+			this.gbxHeader.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lvwMailBoxes
@@ -92,10 +119,10 @@ namespace MailMonitor
 			this.lvwMailBoxes.HideSelection = false;
 			this.lvwMailBoxes.HoverSelection = true;
 			this.lvwMailBoxes.LabelWrap = false;
-			this.lvwMailBoxes.Location = new System.Drawing.Point(0, 0);
+			this.lvwMailBoxes.Location = new System.Drawing.Point(0, 48);
 			this.lvwMailBoxes.MultiSelect = false;
 			this.lvwMailBoxes.Name = "lvwMailBoxes";
-			this.lvwMailBoxes.Size = new System.Drawing.Size(552, 224);
+			this.lvwMailBoxes.Size = new System.Drawing.Size(496, 160);
 			this.lvwMailBoxes.TabIndex = 4;
 			this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
 			this.lvwMailBoxes.DoubleClick += new System.EventHandler(this.lvwMailBoxes_DoubleClick);
@@ -112,11 +139,17 @@ namespace MailMonitor
 			this.mnuDelete.Text = "&Delete Selected Mails";
 			this.mnuDelete.Click += new System.EventHandler(this.mnuDelete_Click);
 			// 
+			// mnuSaveAsEML
+			// 
+			this.mnuSaveAsEML.Index = 1;
+			this.mnuSaveAsEML.Text = "&Save As EML File";
+			this.mnuSaveAsEML.Click += new System.EventHandler(this.mnuSaveAsEML_Click);
+			// 
 			// cmdCancel
 			// 
 			this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdCancel.Location = new System.Drawing.Point(8, 232);
+			this.cmdCancel.Location = new System.Drawing.Point(8, 216);
 			this.cmdCancel.Name = "cmdCancel";
 			this.cmdCancel.Size = new System.Drawing.Size(72, 24);
 			this.cmdCancel.TabIndex = 5;
@@ -127,7 +160,7 @@ namespace MailMonitor
 			// 
 			this.cmdPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.cmdPause.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdPause.Location = new System.Drawing.Point(88, 232);
+			this.cmdPause.Location = new System.Drawing.Point(88, 216);
 			this.cmdPause.Name = "cmdPause";
 			this.cmdPause.Size = new System.Drawing.Size(72, 24);
 			this.cmdPause.TabIndex = 6;
@@ -138,23 +171,61 @@ namespace MailMonitor
 			// 
 			this.cmdGet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.cmdGet.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdGet.Location = new System.Drawing.Point(168, 232);
+			this.cmdGet.Location = new System.Drawing.Point(168, 216);
 			this.cmdGet.Name = "cmdGet";
 			this.cmdGet.Size = new System.Drawing.Size(72, 24);
 			this.cmdGet.TabIndex = 7;
 			this.cmdGet.Text = "&Get";
 			this.cmdGet.Click += new System.EventHandler(this.cmdGet_Click);
 			// 
-			// mnuSaveAsEML
+			// gbxHeader
 			// 
-			this.mnuSaveAsEML.Index = 1;
-			this.mnuSaveAsEML.Text = "&Save As EML File";
-			this.mnuSaveAsEML.Click += new System.EventHandler(this.mnuSaveAsEML_Click);
+			this.gbxHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.gbxHeader.BackColor = System.Drawing.Color.White;
+			this.gbxHeader.Controls.Add(this.lblDescription);
+			this.gbxHeader.Controls.Add(this.picIcon);
+			this.gbxHeader.Controls.Add(this.lblTitle);
+			this.gbxHeader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.gbxHeader.Location = new System.Drawing.Point(0, -8);
+			this.gbxHeader.Name = "gbxHeader";
+			this.gbxHeader.Size = new System.Drawing.Size(496, 48);
+			this.gbxHeader.TabIndex = 8;
+			this.gbxHeader.TabStop = false;
+			// 
+			// lblDescription
+			// 
+			this.lblDescription.AutoSize = true;
+			this.lblDescription.Location = new System.Drawing.Point(104, 24);
+			this.lblDescription.Name = "lblDescription";
+			this.lblDescription.Size = new System.Drawing.Size(202, 17);
+			this.lblDescription.TabIndex = 6;
+			this.lblDescription.Text = "Get mails from remote pop server";
+			// 
+			// picIcon
+			// 
+			this.picIcon.Image = ((System.Drawing.Image)(resources.GetObject("picIcon.Image")));
+			this.picIcon.Location = new System.Drawing.Point(8, 12);
+			this.picIcon.Name = "picIcon";
+			this.picIcon.Size = new System.Drawing.Size(32, 32);
+			this.picIcon.TabIndex = 5;
+			this.picIcon.TabStop = false;
+			// 
+			// lblTitle
+			// 
+			this.lblTitle.AutoSize = true;
+			this.lblTitle.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.lblTitle.Location = new System.Drawing.Point(44, 8);
+			this.lblTitle.Name = "lblTitle";
+			this.lblTitle.Size = new System.Drawing.Size(53, 26);
+			this.lblTitle.TabIndex = 4;
+			this.lblTitle.Text = "Mails";
 			// 
 			// frmMails
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-			this.ClientSize = new System.Drawing.Size(552, 261);
+			this.ClientSize = new System.Drawing.Size(496, 245);
+			this.Controls.Add(this.gbxHeader);
 			this.Controls.Add(this.cmdGet);
 			this.Controls.Add(this.cmdPause);
 			this.Controls.Add(this.cmdCancel);
@@ -164,6 +235,7 @@ namespace MailMonitor
 			this.Text = "MailBox Info";
 			this.Load += new System.EventHandler(this.frmMails_Load);
 			this.Closed += new System.EventHandler(this.frmMails_Closed);
+			this.gbxHeader.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -184,7 +256,7 @@ namespace MailMonitor
 		{
 			try
 			{
-				iOfficeMail.POP3.Utility.Log=true;
+				OpenPOP.POP3.Utility.Log=true;
 				popClient.Disconnect();
 				popClient.ReceiveContentSleepInterval=1;
 				popClient.WaitForResponseInterval=10;

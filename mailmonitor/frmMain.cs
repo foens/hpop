@@ -1,3 +1,20 @@
+/******************************************************************************
+	Copyright 2003-2004 Hamid Qureshi and Unruled Boy 
+	OpenPOP.Net is free software; you can redistribute it and/or modify
+	it under the terms of the Lesser GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	OpenPOP.Net is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	Lesser GNU General Public License for more details.
+
+	You should have received a copy of the Lesser GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*******************************************************************************/
+
 using System;
 using System.Drawing;
 using System.Collections;
@@ -6,7 +23,7 @@ using System.Windows.Forms;
 using System.Data;
 using System.Threading;
 using System.Diagnostics;
-using iOfficeMail.POP3;
+using OpenPOP.POP3;
 
 namespace MailMonitor
 {
@@ -54,11 +71,12 @@ namespace MailMonitor
 		private System.Windows.Forms.Timer tmrSchedule;
 		internal Settings _settings=new Settings();
 		private POPClient popClient=new POPClient();
-		private int _currentItem;
 		private System.Windows.Forms.MenuItem mnuOpenEML;
 		private System.Windows.Forms.OpenFileDialog dlgOpen;
 		private System.Windows.Forms.MenuItem mnuHR7;
 		private Thread thread;
+		private bool _started;
+		private int _currentMailBox;
 
 
 		#region Entry
@@ -118,6 +136,7 @@ namespace MailMonitor
 			this.mnuStopChecking = new System.Windows.Forms.MenuItem();
 			this.mnuHR5 = new System.Windows.Forms.MenuItem();
 			this.mnuOpenEML = new System.Windows.Forms.MenuItem();
+			this.mnuHR7 = new System.Windows.Forms.MenuItem();
 			this.mnuGetInfo = new System.Windows.Forms.MenuItem();
 			this.mnuHR6 = new System.Windows.Forms.MenuItem();
 			this.mnuExit = new System.Windows.Forms.MenuItem();
@@ -141,7 +160,6 @@ namespace MailMonitor
 			this.cmuPopup = new System.Windows.Forms.ContextMenu();
 			this.tmrSchedule = new System.Windows.Forms.Timer(this.components);
 			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
-			this.mnuHR7 = new System.Windows.Forms.MenuItem();
 			this.SuspendLayout();
 			// 
 			// tbrMain
@@ -235,6 +253,7 @@ namespace MailMonitor
 			this.mnuCheckAll.Index = 0;
 			this.mnuCheckAll.Shortcut = System.Windows.Forms.Shortcut.F2;
 			this.mnuCheckAll.Text = "Check &All Mail Boxes";
+			this.mnuCheckAll.Click += new System.EventHandler(this.mnuCheckAll_Click);
 			// 
 			// mnuCheckCurrent
 			// 
@@ -265,6 +284,11 @@ namespace MailMonitor
 			this.mnuOpenEML.Index = 5;
 			this.mnuOpenEML.Text = "&Open EML File";
 			this.mnuOpenEML.Click += new System.EventHandler(this.mnuOpenEML_Click);
+			// 
+			// mnuHR7
+			// 
+			this.mnuHR7.Index = 6;
+			this.mnuHR7.Text = "-";
 			// 
 			// mnuGetInfo
 			// 
@@ -417,11 +441,6 @@ namespace MailMonitor
 			this.tmrSchedule.Interval = 180000;
 			this.tmrSchedule.Tick += new System.EventHandler(this.tmrSchedule_Tick);
 			// 
-			// mnuHR7
-			// 
-			this.mnuHR7.Index = 6;
-			this.mnuHR7.Text = "-";
-			// 
 			// frmMain
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -459,7 +478,7 @@ namespace MailMonitor
 
 		private void mnuAbout_Click(object sender, System.EventArgs e)
 		{
-			MessageBox.Show(this,"Mail Monitor and iOfficeMail.NET are copyrights of Hamid Qureshi and Unruled Boy");
+			MessageBox.Show(this,"Mail Monitor and OpenPOP.NET are copyrights of Hamid Qureshi and Unruled Boy");
 		}
 
 		private void mnuWebsite_Click(object sender, System.EventArgs e)
@@ -547,6 +566,25 @@ namespace MailMonitor
 			settings.Settings=_settings;
 			settings.ShowDialog();
 			settings=null;
+			_settings.Load();
+			LoadMailBoxes();
+		}
+
+		private void mnuOpenEML_Click(object sender, System.EventArgs e)
+		{
+			dlgOpen.CheckFileExists=true;
+			dlgOpen.CheckPathExists=true;
+			dlgOpen.ReadOnlyChecked=false;
+			if(dlgOpen.ShowDialog()==DialogResult.OK)
+			{
+				frmMail mail=new frmMail(dlgOpen.FileName);
+				mail.ShowDialog();
+			}
+		}
+
+		private void mnuCheckAll_Click(object sender, System.EventArgs e)
+		{
+			GetMailInfoAll();
 		}
 
 		private void tbrMain_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
@@ -554,6 +592,7 @@ namespace MailMonitor
 			switch(e.Button.Tag.ToString())
 			{
 				case "CheckAllMailBoxes":
+					GetMailInfoAll();
 					break;
 				case "CheckCurrentMailBox":
 					GetMailInfoThread();
@@ -573,9 +612,25 @@ namespace MailMonitor
 
 		private void GetMailInfoThread()
 		{
-			thread=new Thread(new ThreadStart(GetMailInfo));
-			thread.Start();
+			if(lvwMailBoxes.Items.Count>0)
+			{
+				if(lvwMailBoxes.SelectedItems.Count>0)
+				{
+					_currentMailBox=lvwMailBoxes.SelectedItems[0].Index;
+					thread=new Thread(new ThreadStart(GetMailInfo));
+					thread.Start();
+				}
+				else
+				{
+					MessageBox.Show(this,"Select one account first!");
+				}
+			}
+			else
+			{
+				MessageBox.Show(this,"Add your account first!");
+			}
 		}
+
 		private void Abort()
 		{
 			try
@@ -607,19 +662,21 @@ namespace MailMonitor
 			lvwMailBoxes.Columns.Add("EMails",80,HorizontalAlignment.Right);
 			lvwMailBoxes.Columns.Add("Check Time",100,HorizontalAlignment.Center);
 			lvwMailBoxes.Columns.Add("Status",130,HorizontalAlignment.Left);
-			if(_settings.MailBoxes.Count>0)
-			{
-				ListViewItem lvi=new ListViewItem();
-				for(int i=0;i<_settings.MailBoxes.Count;i++)
-				{				
-					lvi.Text=((MailBox)_settings.MailBoxes[i]).Name;
-					lvwMailBoxes.Items.Add(lvi);
-				}
-			}
-			else
+			if(_settings.MailBoxes.Count==0 && !_started)
 			{
 				if(MessageBox.Show("There is no mailbox, would you like to add now?","Add Mailbox",MessageBoxButtons.YesNo)==DialogResult.Yes)
+				{
 					ShowSettings();
+					_started=true;
+				}
+			}
+
+			lvwMailBoxes.Items.Clear();
+			ListViewItem lvi=new ListViewItem();
+			for(int i=0;i<_settings.MailBoxes.Count;i++)
+			{				
+				lvi.Text=((MailBox)_settings.MailBoxes[i]).Name;
+				lvwMailBoxes.Items.Add(lvi);
 			}
 		}
 
@@ -636,48 +693,50 @@ namespace MailMonitor
 			}
 		}
 
-		private void GetMailInfo()
+		private void GetMailInfoAll()
 		{
 			if(lvwMailBoxes.Items.Count>0)
 			{
-				if(lvwMailBoxes.SelectedItems.Count>0)
+				for(int i=0;i<lvwMailBoxes.Items.Count;i++)
 				{
-					try
-					{
-						_currentItem=lvwMailBoxes.SelectedItems[0].Index;
-						MailBox mailBox=((MailBox)_settings.MailBoxes[_currentItem]);
-
-						ListViewItem lvi=lvwMailBoxes.Items[_currentItem];
-						lvi.SubItems.Add("");
-						lvi.SubItems.Add("");
-						lvi.SubItems.Add("");
-
-						iOfficeMail.POP3.Utility.Log=true;
-						popClient.Disconnect();
-						popClient.ReceiveContentSleepInterval=1;
-						popClient.WaitForResponseInterval=10;
-						popClient.Connect(mailBox.ServerAddress,mailBox.Port);
-						popClient.Authenticate(mailBox.UserName,mailBox.Password);
-
-						lvi.SubItems[1].Text=popClient.GetMessageCount().ToString();
-						popClient.Disconnect();
-						lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
-						lvi.SubItems[3].Text="Checking Finished!";
-					}
-					catch(Exception e)
-					{
-						MessageBox.Show(this,e.Message);
-					}				
-				}
-				else
-				{
-					MessageBox.Show(this,"Select one account first!");
+					_currentMailBox=i;
+					thread=new Thread(new ThreadStart(GetMailInfo));
+					thread.Start();
 				}
 			}
 			else
 			{
 				MessageBox.Show(this,"Add your account first!");
 			}
+		}
+
+		private void GetMailInfo()
+		{
+			try
+			{
+				MailBox mailBox=((MailBox)_settings.MailBoxes[_currentMailBox]);
+
+				ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
+				lvi.SubItems.Add("");
+				lvi.SubItems.Add("");
+				lvi.SubItems.Add("");
+
+				OpenPOP.POP3.Utility.Log=true;
+				popClient.Disconnect();
+				popClient.ReceiveContentSleepInterval=1;
+				popClient.WaitForResponseInterval=10;
+				popClient.Connect(mailBox.ServerAddress,mailBox.Port);
+				popClient.Authenticate(mailBox.UserName,mailBox.Password);
+
+				lvi.SubItems[1].Text=popClient.GetMessageCount().ToString();
+				popClient.Disconnect();
+				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
+				lvi.SubItems[3].Text="Checking Finished!";
+			}
+			catch(Exception e)
+			{
+				MessageBox.Show(this,e.Message);
+			}				
 		}
 
 		#endregion
@@ -688,7 +747,7 @@ namespace MailMonitor
 		{
 			try
 			{
-				ListViewItem lvi=lvwMailBoxes.Items[_currentItem];
+				ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
 				lvi.SubItems[3].Text=strEvent;
 				//lvwMailBoxes.ResumeLayout(true);
 				Thread.Sleep(10);
@@ -732,18 +791,6 @@ namespace MailMonitor
 			AddEvent("CommunicationLost");
 		}
 		#endregion
-
-		private void mnuOpenEML_Click(object sender, System.EventArgs e)
-		{
-			dlgOpen.CheckFileExists=true;
-			dlgOpen.CheckPathExists=true;
-			dlgOpen.ReadOnlyChecked=false;
-			if(dlgOpen.ShowDialog()==DialogResult.OK)
-			{
-				frmMail mail=new frmMail(dlgOpen.FileName);
-				mail.ShowDialog();
-			}
-		}
 
 	}
 }

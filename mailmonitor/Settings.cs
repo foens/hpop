@@ -73,7 +73,7 @@ namespace MailMonitor
 			MailBox mailBox=new MailBox();
 			if(!File.Exists(_path))
 			{
-				iOfficeMail.MIMEParser.Utility.SavePlainTextToFile(_path,"[Settings]",false);
+				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(_path,"[Settings]",false);
 			}
 			inis=IniStructure.ReadIni(_path);
 			_mailBoxes.Clear();
@@ -109,30 +109,28 @@ namespace MailMonitor
 		public bool Save()
 		{
 			inis.AddCategory("MailBoxes");
-			if(!inis.AddValue("MailBoxes","MailBoxCount",_mailBoxes.Count.ToString()))
-				inis.ModifyValue("MailBoxes","MailBoxCount",_mailBoxes.Count.ToString());
+			inis.AddValueEx("MailBoxes","MailBoxCount",_mailBoxes.Count.ToString());
 			for(int i=0;i<_mailBoxes.Count;i++)
 			{
-				inis.AddValue("MailBoxes","MailBox"+(i+1).ToString()+"Name",((MailBox)_mailBoxes[i]).Name);
-				inis.AddValue("MailBoxes","MailBox"+(i+1).ToString()+"ServerAddress",((MailBox)_mailBoxes[i]).ServerAddress);
-				inis.AddValue("MailBoxes","MailBox"+(i+1).ToString()+"Port",((MailBox)_mailBoxes[i]).Port.ToString());
-				inis.AddValue("MailBoxes","MailBox"+(i+1).ToString()+"UserName",((MailBox)_mailBoxes[i]).UserName);
-				inis.AddValue("MailBoxes","MailBox"+(i+1).ToString()+"Password",((MailBox)_mailBoxes[i]).Password);
+				inis.AddValueEx("MailBoxes","MailBox"+(i+1).ToString()+"Name",((MailBox)_mailBoxes[i]).Name);
+				inis.AddValueEx("MailBoxes","MailBox"+(i+1).ToString()+"ServerAddress",((MailBox)_mailBoxes[i]).ServerAddress);
+				inis.AddValueEx("MailBoxes","MailBox"+(i+1).ToString()+"Port",((MailBox)_mailBoxes[i]).Port.ToString());
+				inis.AddValueEx("MailBoxes","MailBox"+(i+1).ToString()+"UserName",((MailBox)_mailBoxes[i]).UserName);
+				inis.AddValueEx("MailBoxes","MailBox"+(i+1).ToString()+"Password",((MailBox)_mailBoxes[i]).Password);
 			}
 
 			inis.AddCategory("MessageIDs");
-			if(!inis.AddValue("MessageIDs","MessageIDCount",_messageIDs.Count.ToString()))
-				inis.ModifyValue("MessageIDs","MessageIDCount",_messageIDs.Count.ToString());
+			inis.AddValueEx("MessageIDs","MessageIDCount",_messageIDs.Count.ToString());
 			for(int i=0;i<_messageIDs.Count;i++)
 			{
-				inis.AddValue("MessageIDs","Mail"+(i+1).ToString()+"ID",((MailInfo)_messageIDs[i]).ID);
-				inis.AddValue("MessageIDs","Mail"+(i+1).ToString()+"File",((MailInfo)_messageIDs[i]).File);
+				inis.AddValueEx("MessageIDs","Mail"+(i+1).ToString()+"ID",((MailInfo)_messageIDs[i]).ID);
+				inis.AddValueEx("MessageIDs","Mail"+(i+1).ToString()+"File",((MailInfo)_messageIDs[i]).File);
 			}
 
 			inis.AddCategory("Settings");
-			inis.ModifyValue("Settings","MailClient",_mailClient);
-			inis.ModifyValue("Settings","CheckInterval",_checkInterval.ToString());
-			inis.ModifyValue("Settings","ServerTimeout",_serverTimeout.ToString());
+			//inis.AddValueEx("Settings","MailClient",_mailClient);
+			inis.AddValueEx("Settings","CheckInterval",_checkInterval.ToString());
+			inis.AddValueEx("Settings","ServerTimeout",_serverTimeout.ToString());
 
 			IniStructure.WriteIni(inis,_path,"Mail Monitor Settings");
 			return true;

@@ -187,6 +187,33 @@ namespace MailMonitor
 			Category.Add(Key, Value);
 			return true;
 		}
+		
+		/// <summary>
+		/// Adds a key-value pair to a specified category
+		/// </summary>
+		/// <param name="CategoryName">Name of the category</param>
+		/// <param name="Key">New name of the key</param>
+		/// <param name="Value">Associated value</param>
+		public bool AddValueEx(string CategoryName, string Key, string Value)
+		{
+			if (CategoryName == "" | Key == "")
+				return false;
+			if (Key.IndexOf('=') != -1
+				| Key.IndexOf('[') != -1
+				| Key.IndexOf(']') != -1	// these chars are not allowed for keynames
+				| Key.IndexOf(';') != -1
+				| Key.IndexOf('#') != -1
+				)
+				return false;
+			if (!Categories.ContainsKey(CategoryName))
+				return false;
+			SortedList Category = (SortedList)(Categories[CategoryName]);
+			if (!Category.ContainsKey(Key))
+				Category.Add(Key, Value);
+			else
+				ModifyValue(CategoryName,Key,Value);
+			return true;
+		}
 
 		/// <summary>
 		/// Returns the value of a key-value pair in a specified category by specifying the key
