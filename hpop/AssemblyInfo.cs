@@ -31,7 +31,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenPOP")]
 [assembly: AssemblyProduct("OpenPOP")]
-[assembly: AssemblyCopyright("Hamid Qureshi and Unruled Boy ")]
+[assembly: AssemblyCopyright("Hamid Qureshi and Unruled Boy")]
 [assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 

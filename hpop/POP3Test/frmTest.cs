@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
 using System.Threading;
+//using System.IO;
 using OpenPOP.POP3;
 
 namespace OpenPOP.NET_Sample_App
