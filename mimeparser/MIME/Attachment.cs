@@ -308,30 +308,34 @@ namespace OpenPOP.MIMEParser
 		{
 			string decodedAttachment=null;
 
-			if(_contentType.ToLower()=="message/rfc822".ToLower())
-				decodedAttachment=Utility.deCode(_rawAttachment);
-			else if(_contentTransferEncoding!=null)
+			try
 			{
-				decodedAttachment=_rawAttachment;
-
-				if(!IsEncoding("7bit"))
+				if(_contentType.ToLower()=="message/rfc822".ToLower())
+					decodedAttachment=Utility.deCode(_rawAttachment);
+				else if(_contentTransferEncoding!=null)
 				{
-					if(IsEncoding("8bit")&&_contentCharset!=null&_contentCharset!="")
-						decodedAttachment=Utility.Change(decodedAttachment,_contentCharset);
+					decodedAttachment=_rawAttachment;
 
-					if(Utility.IsQuotedPrintable(_contentTransferEncoding))
-						decodedAttachment=DecodeQP.ConvertHexContent(decodedAttachment);
-					else if(IsEncoding("8bit"))
-						decodedAttachment=decodedAttachment;
-					else
-						decodedAttachment=Utility.deCodeB64s(Utility.RemoveNonB64(decodedAttachment));
+					if(!IsEncoding("7bit"))
+					{
+						if(IsEncoding("8bit")&&_contentCharset!=null&_contentCharset!="")
+							decodedAttachment=Utility.Change(decodedAttachment,_contentCharset);
+
+						if(Utility.IsQuotedPrintable(_contentTransferEncoding))
+							decodedAttachment=DecodeQP.ConvertHexContent(decodedAttachment);
+						else if(IsEncoding("8bit"))
+							decodedAttachment=decodedAttachment;
+						else
+							decodedAttachment=Utility.deCodeB64s(Utility.RemoveNonB64(decodedAttachment));
+					}
 				}
+				else if(_contentCharset!=null)
+					decodedAttachment=Utility.Change(_rawAttachment,_contentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
+				else
+					decodedAttachment=_rawAttachment;
 			}
-			else if(_contentCharset!=null)
-				decodedAttachment=Utility.Change(_rawAttachment,_contentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
-			else
-				decodedAttachment=_rawAttachment;
-
+			catch
+			{}
 			return decodedAttachment;
 		}
 
