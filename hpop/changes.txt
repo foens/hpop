@@ -1,3 +1,7 @@
+2004/5/3 12:53 GMT+8 by Unruled Boy
+	1.Adding ReceiveContentSleepInterval property
+	2.Adding WaitForResponseInterval property
+
 2004/5/1 14:13 GMT+8 by Unruled Boy
 	1.Now with 6 events in POPClient class!
 	2.Adding descriptions to every public functions/property/void of every class

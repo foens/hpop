@@ -4,7 +4,7 @@
 *Author:		Hamid Qureshi
 *Created:		2003/8
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
-*Description	:
+*Description:
 */
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -18,7 +18,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 
-[assembly: AssemblyVersion("2004.05.01.12")]
+[assembly: AssemblyVersion("2004.05.03.13")]
 
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]

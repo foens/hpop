@@ -3,7 +3,7 @@
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:25 GMT-8
+*Modified:		2004/3/29 12:25 GMT+8
 *Description:
 *Changes:		
 */
@@ -15,22 +15,22 @@ using System.Threading;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Utility functions
+	/// Summary description for Utility.
 	/// </summary>
 	public class Utility
 	{
-		/// <summary>
-		/// Weather auto loggin is on or off
-		/// </summary>
 		private static bool m_blnLog=false;
-
-		/// <summary>
-		/// The file name in which the logging will be done
-		/// </summary>
 		private static string m_strLogFile = "OpenPOP.log";
 
+		public Utility()
+		{
+			//
+			// TODO: Add constructor logic here
+			//
+		}
+
 		/// <summary>
-		/// Turns file logging on and off.<font color="red"><h1>Change Property Name</h1></font>
+		/// Turns file logging on and off.
 		/// </summary>
 		/// <remarks>Comming soon.</remarks>
 		public static bool Log
@@ -45,10 +45,6 @@ namespace OpenPOP.POP3
 			}
 		}
 
-		/// <summary>
-		/// Log an error to the log file
-		/// </summary>
-		/// <param name="strText">The error text to log</param>
 		internal static void LogError(string strText) 
 		{
 			//Log=true;

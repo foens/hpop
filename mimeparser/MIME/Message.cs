@@ -4,7 +4,7 @@
 *Author:		Hamid Qureshi
 *Created:		2003/8
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
-*Description	:
+*Description:
 *Changes:		
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
 *					1.Adding three more constructors

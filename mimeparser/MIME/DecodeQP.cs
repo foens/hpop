@@ -4,7 +4,7 @@
 *Author:		
 *Created:		2003/8
 *Modified:		2004/3/29 12:33 GMT+8
-*Description	:
+*Description:
 *Changes:		
 */
 using System;

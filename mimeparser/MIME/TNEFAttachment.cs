@@ -8,7 +8,7 @@
 *Author:		Thomas Boll(c version), Unruled Boy(c# version)
 *Created:		2004/3
 *Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
-*Description	:
+*Description:
 *Changes:		
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
 *					1.Adding descriptions to every public functions/property/void
