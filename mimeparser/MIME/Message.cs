@@ -1,5 +1,5 @@
 /*
-*Name:			COM.NET.MAIL.POP.MIMEParser.Message
+*Name:			OpenPOP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -42,7 +42,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 
-namespace COM.NET.MAIL.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
@@ -966,7 +966,7 @@ namespace COM.NET.MAIL.POP.MIMEParser
 				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
-					//tnef.LogFilePath=this.BasePath + "COM.NET.MAIL.POP.TNEF.log";
+					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())

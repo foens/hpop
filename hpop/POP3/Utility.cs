@@ -1,5 +1,5 @@
 /*
-*Name:			COM.NET.MAIL.POP.Utility
+*Name:			OpenPOP.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -13,7 +13,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 
-namespace COM.NET.MAIL.POP.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// Utility functions
@@ -28,7 +28,7 @@ namespace COM.NET.MAIL.POP.POP3
 		/// <summary>
 		/// The file name in which the logging will be done
 		/// </summary>
-		private static string m_strLogFile = "COM.NET.MAIL.POP.log";
+		private static string m_strLogFile = "OpenPOP.log";
 
 		/// <summary>
 		/// Turns file logging on and off.<font color="red"><h1>Change Property Name</h1></font>

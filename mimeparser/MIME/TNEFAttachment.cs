@@ -3,7 +3,7 @@
 **********************************************************************/
 
 /*
-*Name:			COM.NET.MAIL.POP.MIMEParser.Message
+*Name:			OpenPOP.MIMEParser.Message
 *Function:		Message Parser
 *Author:		Thomas Boll(c version), Unruled Boy(c# version)
 *Created:		2004/3
@@ -15,7 +15,7 @@
 */
 using System;
 
-namespace COM.NET.MAIL.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// TNEFAttachment

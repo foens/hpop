@@ -1,5 +1,5 @@
 /*
-*Name:			COM.NET.MAIL.POP.POP3.POPClient
+*Name:			OpenPOP.POP3.POPClient
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -32,7 +32,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace COM.NET.MAIL.POP.POP3
+namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// POPClient

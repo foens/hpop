@@ -1,5 +1,5 @@
 /*
-*Name:			COM.NET.MAIL.POP.Utility
+*Name:			OpenPOP.Utility
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
@@ -21,7 +21,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 
-namespace COM.NET.MAIL.POP.MIMEParser
+namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Summary description for Utility.
@@ -29,7 +29,7 @@ namespace COM.NET.MAIL.POP.MIMEParser
 	public class Utility
 	{
 		private static bool m_blnLog=false;
-		private static string m_strLogFile = "COM.NET.MAIL.POP.log";
+		private static string m_strLogFile = "OpenPOP.log";
 
 		public Utility()
 		{
