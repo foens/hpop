@@ -1,3 +1,6 @@
+2004/6/20 18:38 GMT+8 by Unruled Boy
+	1.fixed a bug in decoding forwared emails
+
 2004/6/17 17:20 GMT+8 by Unruled Boy
 	1.Fixed a bug in parsing file name
 

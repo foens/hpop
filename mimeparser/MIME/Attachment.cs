@@ -20,11 +20,9 @@
 *Function:		Attachment
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Last Modified:	2004/6/17 17:20 GMT+8 by Unruled Boy
+*Last Modified:	2004/5/28 10:19 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
-*				2004/6/17 17:20 GMT+8 by Unruled Boy
-*					1.Fixed a bug in parsing file name
 *				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
 *					1.Fixed a bug in parsing ContentFileName @ https://sourceforge.net/forum/message.php?msg_id=2589759
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
@@ -405,7 +403,10 @@ namespace OpenPOP.MIMEParser
 					}
 					
 					if(_contentFileName=="")
+					{
 						_contentFileName=srReader.ReadLine();
+						strLine=_contentFileName;
+					}
 
 					_contentFileName=_contentFileName.Replace("\t","");
 					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
@@ -472,9 +473,15 @@ namespace OpenPOP.MIMEParser
 		/// decode attachment to be a message object
 		/// </summary>
 		/// <returns>message</returns>
-		public Message DecodeAsMessage()
+		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine)
 		{
 			bool blnRet=false;
+			if(blnRemoveHeaderBlankLine)
+			{
+				int intPos=_rawAttachment.IndexOf("\r\n");
+				if(intPos!=-1)
+					_rawAttachment=_rawAttachment.Substring(intPos+2,_rawAttachment.Length-intPos-2);
+			}
 			return new Message(ref blnRet,"",false ,_rawAttachment,false);
 		}
 

@@ -20,11 +20,13 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/6/16 18:34 GMT+8 by Unruled Boy
+*Modified:		2004/6/20 18:38 GMT+8 by Unruled Boy
 *Description:
 *Changes:		
+*				2004/6/20 18:38 GMT+8 by Unruled Boy
+*					1.fixed a bug in decoding forwared emails
 *				2004/6/16 18:34 GMT+8 by Unruled Boy
-*					1.fixed a loop in message body decoding by .
+*					1.fixed an endless-loop in message body decoding
 *				2004/5/17 14:20 GMT+8 by Unruled Boy
 *					1.Again, fixed something but do not remember :(
 *				2004/5/11 17:00 GMT+8 by Unruled Boy
@@ -756,11 +758,24 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				return (attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower()) || attItem.ContentType.ToLower()=="message/rfc822".ToLower());
+				return (attItem.ContentType.ToLower()=="message/rfc822".ToLower() || attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower()));
 			}
 			catch(Exception e)
 			{
 				Utility.LogError("IsMIMEMailFile():"+e.Message);
+				return false;
+			}
+		}
+
+		public bool IsMIMEMailFile2(Attachment attItem)
+		{
+			try
+			{
+				return (attItem.ContentType.ToLower()=="multipart/related".ToLower() && attItem.ContentFileName=="");
+			}
+			catch(Exception e)
+			{
+				Utility.LogError("IsMIMEMailFile2():"+e.Message);
 				return false;
 			}
 		}
@@ -849,7 +864,27 @@ namespace OpenPOP.MIMEParser
 			}
 			string name=attItem.ContentFileName;
 			
-			return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):(attItem.ContentID!=null?attItem.ContentID:attItem.DefaultFileName)):name);
+			//return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):(attItem.ContentID!=null?attItem.ContentID:attItem.DefaultFileName)):name);
+			if(name==null||name=="")
+				if(IsReport()==true)
+				{
+					if(this.IsMIMEMailFile(attItem)==true)
+						return attItem.DefaultMIMEFileName;
+					else
+						return attItem.DefaultReportFileName;
+				}
+				else
+				{
+					if(this.IsMIMEMailFile(attItem)==true)
+						return attItem.DefaultMIMEFileName;
+					else if(attItem.ContentID!=null)
+						return attItem.ContentID;
+					else
+						return attItem.DefaultFileName;
+				}
+			else
+				return name;
+
 		}
 
 		/// <summary>
@@ -946,10 +981,12 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		private void set_attachments()
 		{
-			int indexOf_attachmentstart=0;
+			int indexOfAttachmentStart=0;
 			int indexOfAttachmentEnd=0;
 			bool processed=false;
-
+			string strLine;
+			bool isMSTNEF;
+			Message m;
 			Attachment att=null;
 
 			SetAttachmentBoundry2(_rawMessageBody);
@@ -958,10 +995,10 @@ namespace OpenPOP.MIMEParser
 			{
 				if(Utility.IsNotNullText(_attachmentboundry))
 				{
-					indexOf_attachmentstart=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart)+_attachmentboundry.Length;
-					if(_rawMessageBody==""||indexOf_attachmentstart<0)return;
+					indexOfAttachmentStart=_rawMessageBody.IndexOf(_attachmentboundry,indexOfAttachmentStart)+_attachmentboundry.Length;
+					if(_rawMessageBody==""||indexOfAttachmentStart<0)return;
 					
-					indexOfAttachmentEnd=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart+1);				
+					indexOfAttachmentEnd=_rawMessageBody.IndexOf(_attachmentboundry,indexOfAttachmentStart+1);				
 				}
 				else
 				{
@@ -980,14 +1017,13 @@ namespace OpenPOP.MIMEParser
 				else
 					return;
 
-				if(indexOf_attachmentstart==indexOfAttachmentEnd-9)
+				if(indexOfAttachmentStart==indexOfAttachmentEnd-9)
 				{
-					indexOf_attachmentstart=0;
+					indexOfAttachmentStart=0;
 					processed=true;
 				}
 
-				string strLine=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            
-				bool isMSTNEF;
+				strLine=_rawMessageBody.Substring(indexOfAttachmentStart,(indexOfAttachmentEnd-indexOfAttachmentStart-2));            
 				isMSTNEF=MIMETypes.IsMSTNEF(_contentType);
 				att=new Attachment(strLine.Trim(),_contentType,!isMSTNEF);
 
@@ -1020,13 +1056,23 @@ namespace OpenPOP.MIMEParser
 					else
 						Utility.LogError("set_attachments():ms-tnef file open failed");
 				}
+				else if(IsMIMEMailFile2(att))
+				{
+					m=att.DecodeAsMessage(true);
+					for(int i=0;i<m.AttachmentCount;i++)
+					{
+						att=m.GetAttachment(i);
+						_attachmentCount++;
+						_attachments.Add(att);
+					}
+				}
 				else
 				{
 					_attachmentCount++;
 					_attachments.Add(att);
 				}
 
-				indexOf_attachmentstart++;
+				indexOfAttachmentStart++;
 			}
 		}
 
