@@ -50,7 +50,6 @@ namespace OpenPOP.MIMEParser
 	public class Message
 	{
 		#region Member Variables
-		//public const string ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";		
 		private ArrayList _attachments=new ArrayList();
 		private string _rawHeader=null;
 		private string _rawMessage=null;
@@ -419,6 +418,21 @@ namespace OpenPOP.MIMEParser
 		}
 		#endregion
 
+
+		/// <summary>
+		/// release all objects
+		/// </summary>
+		~Message()
+		{
+			_attachments.Clear();
+			_attachments=null;
+			_keywords.Clear();
+			_keywords=null;
+			_messageBody.Clear();
+			_messageBody=null;
+			_customHeaders.Clear();
+			_customHeaders=null;
+		}
 
 		/// <summary>
 		/// New Message
@@ -1228,35 +1242,15 @@ namespace OpenPOP.MIMEParser
 					break;
 
 				case "KEYWORDS": //ms outlook keywords
-					/*_keywords.Add(array[1].Trim());
-					strLine=srdReader.ReadLine();
-					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
-					{
-						_keywords.Add(Utility.DecodeLine(strLine));
-						sbdBuilder.Append(strLine);
-						strLine=srdReader.ReadLine();
-					}
-					sbdBuilder.Append(strLine);
-					ParseHeader(sbdBuilder,srdReader,ref strLine);*/
 					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,_keywords);
 					break;
 
 				case "RECEIVED":
-					/*_received=array[1].Trim();//strLine.Split(':')[1].Trim();
-					strLine=srdReader.ReadLine();
-					while(strLine.StartsWith("\t") && strLine.Trim()!="")
-					{
-						_received += Utility.DecodeLine(" "+strLine.Substring(1));
-						sbdBuilder.Append(strLine);
-						strLine=srdReader.ReadLine();
-					}
-					sbdBuilder.Append(strLine);
-					ParseHeader(sbdBuilder,srdReader,ref strLine);*/
 					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _received,true);
 					break;
 
 				case "IMPORTANCE":
-					_importance=array[1].Trim();//strLine.Split(':')[1].Trim();
+					_importance=array[1].Trim();
 					break;
 
 				case "DISPOSITION-NOTIFICATION-TO":
@@ -1264,22 +1258,11 @@ namespace OpenPOP.MIMEParser
 					break;
 
 				case "MIME-VERSION":
-					_mimeVersion=array[1].Trim();//strLine.Split(':')[1].Trim();
+					_mimeVersion=array[1].Trim();
 					break;
 
 				case "SUBJECT":
 				case "THREAD-TOPIC":
-					/*_subject=array[1].Trim();//strLine.Split(':')[1].Trim();
-					strLine=srdReader.ReadLine();
-					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
-					{
-						_subject+=strLine;
-						sbdBuilder.Append(strLine);
-						strLine=srdReader.ReadLine();
-					}
-					_subject=Utility.DecodeLine(_subject);
-					sbdBuilder.Append(strLine);
-					ParseHeader(sbdBuilder,srdReader,ref strLine);*/
 					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _subject,false);
 					break;
 

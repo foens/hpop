@@ -106,7 +106,7 @@ namespace OpenPOP.POP3
 		}
 
 		private static string strOK="+OK";
-		private static string strERR="-ERR";
+		//private static string strERR="-ERR";
 		private TcpClient clientSocket=null;		
 		private StreamReader reader;
 		private StreamWriter writer;

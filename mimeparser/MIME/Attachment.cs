@@ -228,6 +228,15 @@ namespace OpenPOP.MIMEParser
 
 
 		/// <summary>
+		/// release all objects
+		/// </summary>
+		~Attachment()
+		{
+			_rawBytes=null;
+			_rawAttachment=null;
+		}
+
+		/// <summary>
 		/// New Attachment
 		/// </summary>
 		/// <param name="bytAttachment">attachment bytes content</param>
