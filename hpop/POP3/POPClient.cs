@@ -185,7 +185,7 @@ namespace OpenPOP.POP3
 		{
 			try
 			{				
-				Quit();
+				QUIT();
 				reader.Close();
 				writer.Close();
 				clientSocket.GetStream().Close();
@@ -424,7 +424,7 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// quit pop3 server
 		/// </summary>
-		public bool Quit() 
+		public bool QUIT() 
 		{
 			try
 			{
@@ -439,9 +439,93 @@ namespace OpenPOP.POP3
 			}
 			catch(Exception e)
 			{
-				_Error ="Quit():"+e.Message;
+				_Error ="QUIT():"+e.Message;
 				_Error += "\n";
 				_Error += "Could not quit server";
+				//TRACE(strErr);
+				Utility.LogError(_Error);
+				return false;
+			}
+
+		}
+
+		/// <summary>
+		/// keep server active
+		/// </summary>
+		public bool NOOP()
+		{
+			try
+			{
+				string strCmd = "NOOP";
+				writer.WriteLine(strCmd);
+
+				WaitForResponse(reader.BaseStream.CanRead,200);
+
+				string response=reader.ReadLine();
+
+				return (GetCommand(response)==strOK);
+			}
+			catch(Exception e)
+			{
+				_Error ="Noop():"+e.Message;
+				_Error += "\n";
+				_Error += "Could not get response";
+				//TRACE(strErr);
+				Utility.LogError(_Error);
+				return false;
+			}
+
+		}
+
+		/// <summary>
+		/// keep server active
+		/// </summary>
+		public bool RSET()
+		{
+			try
+			{
+				string strCmd = "RSET";
+				writer.WriteLine(strCmd);
+
+				WaitForResponse(reader.BaseStream.CanRead,200);
+
+				string response=reader.ReadLine();
+
+				return (GetCommand(response)==strOK);
+			}
+			catch(Exception e)
+			{
+				_Error ="RSET():"+e.Message;
+				_Error += "\n";
+				_Error += "Could not get response";
+				//TRACE(strErr);
+				Utility.LogError(_Error);
+				return false;
+			}
+
+		}
+
+		/// <summary>
+		/// identify user
+		/// </summary>
+		public bool USER()
+		{
+			try
+			{
+				string strCmd = "USER";
+				writer.WriteLine(strCmd);
+
+				WaitForResponse(reader.BaseStream.CanRead,200);
+
+				string response=reader.ReadLine();
+
+				return (GetCommand(response)==strOK);
+			}
+			catch(Exception e)
+			{
+				_Error ="USER():"+e.Message;
+				_Error += "\n";
+				_Error += "Could not get response";
 				//TRACE(strErr);
 				Utility.LogError(_Error);
 				return false;
