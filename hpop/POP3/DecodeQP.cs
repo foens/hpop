@@ -3,7 +3,7 @@
 *Function:		Decoding Quoted-Printable text
 *Author:		
 *Created:		2003/8
-*Modified:		2004/3/27 12:33 GMT-8
+*Modified:		2004/3/29 12:33 GMT-8
 *Description	:
 *Changes:		
 */

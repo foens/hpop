@@ -6,13 +6,13 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("COM.NET.MAIL.NET")]
+[assembly: AssemblyTitle("OpenPOP.NET")]
 [assembly: AssemblyDescription("POP3 Mail Library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("COM.NET.MAIL")]
-[assembly: AssemblyProduct("COM.NET.MAIL")]
-[assembly: AssemblyCopyright("COM.NET.MAIL")]
-[assembly: AssemblyTrademark("COM.NET.MAIL")]
+[assembly: AssemblyCompany("OpenPOP")]
+[assembly: AssemblyProduct("OpenPOP")]
+[assembly: AssemblyCopyright("OpenPOP")]
+[assembly: AssemblyTrademark("OpenPOP")]
 [assembly: AssemblyCulture("")]		
 
 //

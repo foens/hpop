@@ -1,0 +1,11 @@
+2004/3/29 10:38 GMT-8 by Unruled Boy
+	1.removing bugs in decoding message
+2004/3/29 17:22 GMT-8 by Unruled Boy
+	1.adding support for reply message using ms-tnef 
+	2.adding support for all custom message headers
+	3.rewriting the message header parser(adding 3 ParseStreamLines)
+	4.adding detail description for every function of the message class
+	5.cleaning up the codes of the message class
+	6.adding MIMETypes class
+	7.adding detail description for every function of the attachment class
+	8.cleaning up the codes of the attachment class

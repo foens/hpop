@@ -3,10 +3,16 @@
 *Function:		Message Parser
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/27 12:38 GMT-8
+*Modified:		2004/3/29 17:22 GMT-8
 *Description	:
-*Changes:		2004/3/27 12:38 GMT-8 by Unruled Boy
+*Changes:		2004/3/29 10:38 GMT-8 by Unruled Boy
 *					1.removing bugs in decoding message
+*				2004/3/29 17:22 GMT-8 by Unruled Boy
+*					1.adding support for reply message using ms-tnef 
+*					2.adding support for all custom headers
+*					3.rewriting the header parser(adding 3 ParseStreamLines)
+*					4.adding detail description for every function
+*					5.cleaning up the codes
 */
 
 using System;
@@ -17,7 +23,7 @@ using System.Text;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Summary description for MessageParser.
+	/// Message Parser.
 	/// </summary>
 	public class Message
 	{
@@ -48,12 +54,7 @@ namespace OpenPOP.POP3
 		private string _returnPath=null;
 		private string _mimeVersion=null;
 		private string _received=null;
-		private string _xMailer=null;
-		private string _xOriginatingIP=null;
-		private string _xPriority=null;
-		private string _xMSMailPriority=null;
 		private string _importance=null;
-		private string _xOriginalArrivalTime=null;
 		private string _messageID=null;
 		private string _attachmentboundry=null;		
 		private string _attachmentboundry2=null;		
@@ -62,9 +63,16 @@ namespace OpenPOP.POP3
 		private ArrayList _messageBody=new ArrayList();
 		private string _basePath=null;
 		private bool _autoDecodeMSTNEF=false;
+		private Hashtable _customHeaders=new Hashtable();
 		#endregion
 
 		#region Properties
+		public Hashtable CustomHeaders
+		{
+			get{return _customHeaders;}
+			set{_customHeaders=value;}
+		}
+
 		public bool AutoDecodeMSTNEF
 		{
 			get{return _autoDecodeMSTNEF;}
@@ -90,323 +98,170 @@ namespace OpenPOP.POP3
 		}
 		public ArrayList Keywords
 		{
-			get
-			{
-				return _keywords;
-			}
+			get{return _keywords;}
 		}
 
 		public string DispositionNotificationTo
 		{
-			get
-			{
-				return _dispositionNotificationTo;
-			}
+			get{return _dispositionNotificationTo;}
 		}
 
 		public string Received
 		{
-			get
-			{
-				return _received;
-			}
-		}
-
-		public string XMailer
-		{
-			get
-			{
-				return _xMailer;
-			}
-		}
-
-		public string XOriginatingIP
-		{
-			get
-			{
-				return _xOriginatingIP;
-			}
-		}
-
-		public string XPriority
-		{
-			get
-			{
-				return _xPriority;
-			}
-		}
-
-		public string XMSMailPriority
-		{
-			get
-			{
-				return _xMSMailPriority;
-			}
+			get{return _received;}
 		}
 
 		public string Importance
 		{
-			get
-			{
-				return _importance;
-			}
-		}
-
-		public string XOriginalArrivalTime
-		{
-			get
-			{
-				return _xOriginalArrivalTime;
-			}
+			get{return _importance;}
 		}
 
 		public string ContentCharset
 		{
-			get
-			{
-				return _contentCharset;
-			}
+			get{return _contentCharset;}
 		}
 
 		public string ContentTransferEncoding
 		{
-			get
-			{
-				return _contentTransferEncoding;
-			}
+			get{return _contentTransferEncoding;}
 		}
 
 		public ArrayList MessageBody
 		{
-			get
-			{
-				return _messageBody;
-			}
+			get{return _messageBody;}
 		}
 
 		public string AttachmentBoundry
 		{
-			get
-			{
-				return _attachmentboundry;
-			}
+			get{return _attachmentboundry;}
 		}
 
 		public string AttachmentBoundry2
 		{
-			get
-			{
-				return _attachmentboundry2;
-			}
+			get{return _attachmentboundry2;}
 		}
-
 
 		public int AttachmentCount
 		{
-			get
-			{
-				return _attachmentCount;
-			}
+			get{return _attachmentCount;}
 		}
-
 
 		public ArrayList Attachments
 		{
-			get
-			{
-				return _attachments;
-			}
+			get{return _attachments;}
 		}
 		
-
 		public string[] CC
 		{
-			get
-			{
-				return _cc;
-			}
+			get{return _cc;}
 		}
-
 
 		public string[] BCC
 		{
-			get
-			{
-				return _bcc;
-			}
+			get{return _bcc;}
 		}
-
 
 		public string[] TO
 		{
-			get
-			{
-				return _to;
-			}
+			get{return _to;}
 		}
-
 
 		public string ContentEncoding
 		{
-			get
-			{
-				return _contentEncoding;
-			}
+			get{return _contentEncoding;}
 		}
-
 
 		public long ContentLength
 		{
-			get
-			{
-				return _contentLength;
-			}
+			get{return _contentLength;}
 		}
-
 
 		public string ContentType
 		{
-			get
-			{
-				return _contentType;
-			}
+			get{return _contentType;}
 		}
 
 		public string ReportType
 		{
-			get
-			{
-				return _reportType;
-			}
+			get{return _reportType;}
 		}
 
 		public bool HTML
 		{
-			get
-			{
-				return _html;
-			}
+			get{return _html;}
 		}
 
 		public string Date
 		{
-			get
-			{
-				return _date;
-			}
+			get{return _date;}
 		}
-
 
 		public string From
 		{
-			get
-			{
-				return _from;
-			}
+			get{return _from;}
 		}
-
 
 		public string FromEmail
 		{
-			get
-			{
-				return _fromEmail;
-			}
+			get{return _fromEmail;}
 		}
-
 
 		public string ReplyTo
 		{
-			get
-			{
-				return _replyTo;
-			}
+			get{return _replyTo;}
 		}
-
 
 		public string ReplyToEmail
 		{
-			get
-			{
-				return _replyToEmail;
-			}
+			get{return _replyToEmail;}
 		}
-
 
 		public bool HasAttachment
 		{
-			get
-			{
-				return _hasAttachment;
-			}
+			get{return _hasAttachment;}
 		}
-
 
 		public string RawMessageBody
 		{
-			get
-			{
-				return _rawMessageBody;
-			}
+			get{return _rawMessageBody;}
 		}
-
 
 		public string MessageID
 		{
-			get
-			{
-				return _messageID;
-			}
+			get{return _messageID;}
 		}
-
 
 		public string MimeVersion
 		{
-			get
-			{
-				return _mimeVersion;
-			}
+			get{return _mimeVersion;}
 		}
-
 
 		public string RawHeader
 		{
-			get
-			{
-				return _rawHeader;
-			}
+			get{return _rawHeader;}
 		}
-
 
 		public string RawMessage
 		{
-			get
-			{
-				return _rawMessage;
-			}
+			get{return _rawMessage;}
 		}
-
 
 		public string ReturnPath
 		{
-			get
-			{
-				return _returnPath;
-			}
+			get{return _returnPath;}
 		}
-
 
 		public string Subject
 		{
-			get
-			{
-				return _subject;
-			}
-		}		
-		
-
+			get{return _subject;}
+		}
 		#endregion
 
+		/// <summary>
+		/// get valid attachment
+		/// </summary>
+		/// <param name="attachmentNumber">attachment index in the attachments collection</param>
+		/// <returns>attachment</returns>
 		public Attachment GetAttachment(int attachmentNumber)
 		{
 			if(attachmentNumber<0 || attachmentNumber>_attachmentCount || attachmentNumber>_attachments.Count)
@@ -421,28 +276,23 @@ namespace OpenPOP.POP3
 		{
 			BasePath=pop.BasePath;
 			AutoDecodeMSTNEF=pop.AutoDecodeMSTNEF;
+			StringReader srdReader=new StringReader(wMessage);
+			StringBuilder sbdBuilder=new StringBuilder();
+
 			_rawMessage=wMessage;
-			StringReader reader=new StringReader(wMessage);
-			StringBuilder builder=new StringBuilder();
-//			string strLine=reader.ReadLine();
-//			while( strLine!=".")
-//			{	
-//				builder.Append(strLine);
-//				parseHeader(builder,reader,strLine);
-//				strLine=reader.ReadLine();
-//			}
-			string strLine=reader.ReadLine();
-			while(strLine!=null && strLine.Trim()!="")
+
+			string strLine=srdReader.ReadLine();
+			while(Utility.IsNotNullTextEx(strLine))
 			{	
-				builder.Append(strLine);
-				parseHeader(builder,reader,ref strLine);
-				if(strLine==null || strLine.Trim()=="")
+				sbdBuilder.Append(strLine);
+				parseHeader(sbdBuilder,srdReader,ref strLine);
+				if(Utility.IsOrNullTextEx(strLine))
 					break;
 				else
-					strLine=reader.ReadLine();
+					strLine=srdReader.ReadLine();
 			}
 
-			_rawHeader=builder.ToString();
+			_rawHeader=sbdBuilder.ToString();
 			
 			SetAttachmentBoundry2(_rawHeader);
 
@@ -451,20 +301,21 @@ namespace OpenPOP.POP3
 
 			if(onlyHeader==false)
 			{
-				_rawMessageBody=reader.ReadToEnd().Trim();
+				_rawMessageBody=srdReader.ReadToEnd().Trim();
 
-				if(_hasAttachment==true && _attachmentboundry!=null)
+				//the auto reply mail by outlook uses ms-tnef format
+				if((_hasAttachment==true && _attachmentboundry!=null)||MIMETypes.IsMSTNEF(_contentType))
 				{
-					//set_attachmentCount();
 					set_attachments();
 
 					if (this.Attachments.Count>0)
 					{
 						Attachment at=this.GetAttachment(0);
-						if(at.NotAttachment)
+						if(at!=null&&at.NotAttachment)
 							this.GetMessageBody(at.DecodeAsText());
 						else
 						{}
+						//in case body parts as text[0] html[1]
 						if(this.Attachments.Count>1&&!this.IsReport())
 						{
 							at=this.GetAttachment(1);
@@ -479,7 +330,6 @@ namespace OpenPOP.POP3
 				}
 				else
 				{
-					//_messageBody=GetTextMessage(_rawMessage);
 					GetMessageBody(_rawMessageBody);
 				}
 			}
@@ -488,15 +338,24 @@ namespace OpenPOP.POP3
 				pop._receiveFinish=true;
 		}
 
-		public string GetTextBody(string Buffer)
+		/// <summary>
+		/// parse message body
+		/// </summary>
+		/// <param name="strBuffer">raw message body</param>
+		/// <returns>message body</returns>
+		public string GetTextBody(string strBuffer)
 		{
-			if(Buffer.EndsWith("\r\n."))
-				return Buffer.Substring(0,Buffer.Length-"\r\n.".Length);
+			if(strBuffer.EndsWith("\r\n."))
+				return strBuffer.Substring(0,strBuffer.Length-"\r\n.".Length);
 			else
-				return Buffer;
+				return strBuffer;
 		}
 
-		public void GetMessageBody(string Buffer)
+        /// <summary>
+        /// parse message body
+        /// </summary>
+        /// <param name="strBuffer">raw message body</param>
+		public void GetMessageBody(string strBuffer)
 		{
 			int end, begin;
 			string body;
@@ -507,22 +366,21 @@ namespace OpenPOP.POP3
 
 			try
 			{
-				if(_contentType==null||_contentType=="")
+				if(Utility.IsOrNullTextEx(strBuffer))
+					return;
+				else if(Utility.IsOrNullTextEx(_contentType))
 				{
-					_messageBody.Add(GetTextBody(Buffer));
+					_messageBody.Add(GetTextBody(strBuffer));
 				}
 				else if(_contentType.IndexOf("digest") >= 0)
 				{
 					// this is a digest method
-					//ParseDigestMessage(Buffer);
-					_messageBody.Add(GetTextBody(Buffer));
+					//ParseDigestMessage(strBuffer);
+					_messageBody.Add(GetTextBody(strBuffer));
 				}
 				else if(_attachmentboundry2==null)
 				{					
-//					body=Buffer;
-//					if(body.EndsWith("\r\n."))
-//						body=body.Substring(0,body.Length-"\r\n.".Length);
-					body=GetTextBody(Buffer);
+					body=GetTextBody(strBuffer);
 
 					if(Utility.IsQuotedPrintable(_contentTransferEncoding))
 					{
@@ -532,7 +390,7 @@ namespace OpenPOP.POP3
 					{
 						body=Utility.deCodeB64s(Utility.RemoveNonB64(body));
 					}
-					else if(_contentCharset!=""&&_contentCharset!=null)
+					else if(Utility.IsNotNullText(_contentCharset))
 					{
 						body=Encoding.GetEncoding(_contentCharset).GetString(Encoding.Default.GetBytes(body));
 					}
@@ -541,21 +399,19 @@ namespace OpenPOP.POP3
 				else
 				{
 					begin =0;
-					//int intBodies=0;
+
 					while(begin!=-1)
 					{
 						// find "\r\n\r\n" denoting end of header
-						begin = Buffer.IndexOf("--" + _attachmentboundry2,begin);
+						begin = strBuffer.IndexOf("--" + _attachmentboundry2,begin);
 						if(begin!=-1)
 						{
-							encoding=Utility.GetContentTransferEncoding(Buffer,begin);
+							encoding=MIMETypes.GetContentTransferEncoding(strBuffer,begin);
 
-							begin = Buffer.IndexOf("\r\n\r\n",begin+1);//Buffer.LastIndexOfAny(ALPHABET.ToCharArray());
-							//if((end = Buffer.LastIndexOfAny(NON_WHITE.ToCharArray())) < 0)
+							begin = strBuffer.IndexOf("\r\n\r\n",begin+1);//strBuffer.LastIndexOfAny(ALPHABET.ToCharArray());
 							
-							end = Buffer.IndexOf("--" + _attachmentboundry2,begin+1);
 							// find end of text
-							//end = Buffer.IndexOf("\r\n--" + _attachmentboundry2,begin+1);//Buffer.LastIndexOfAny(ALPHABET.ToCharArray());
+							end = strBuffer.IndexOf("--" + _attachmentboundry2,begin+1);
 
 							if(begin!=-1)
 							{
@@ -565,22 +421,13 @@ namespace OpenPOP.POP3
 									if(begin>=end)
 										continue;
 									else if (this._contentEncoding!=null && this._contentEncoding.IndexOf("8bit")!=-1)
-										body=Utility.Change(Buffer.Substring(begin, end - begin-2 ),_contentCharset);
+										body=Utility.Change(strBuffer.Substring(begin, end - begin-2 ),_contentCharset);
 									else
-										body=Buffer.Substring(begin, end - begin-2);
-					
-									//intBodies++;
-									// find "\r\n\r\n" denoting end of header
-									//								begin = Buffer.IndexOf("\r\n\r\n",begin);
-									//								// find end of text
-									//								if(begin!=-1)
-									//									end = Buffer.IndexOf("\r\n--" + _attachmentboundry2,begin+1);
-									//								else
-									//									break;
+										body=strBuffer.Substring(begin, end - begin-2);
 								}
 								else
 								{
-									body=Buffer.Substring(begin);
+									body=strBuffer.Substring(begin);
 								}
 
 								if(Utility.IsQuotedPrintable(encoding))
@@ -605,17 +452,14 @@ namespace OpenPOP.POP3
 							}
 							else
 							{
-								//_messageBody[0]=Buffer;
 								break;
 							}
 						}
 						else
 						{
-							//_messageBody[0]=Buffer;
 							if(_messageBody.Count==0)
 							{
-								//_messageBody.Add(Utility.deCodeB64s(Buffer));
-								_messageBody.Add(Buffer);
+								_messageBody.Add(strBuffer);
 							}
 							break;
 						}
@@ -625,37 +469,30 @@ namespace OpenPOP.POP3
 			catch(Exception e)
 			{
 				Utility.LogError("GetMessageBody():"+e.Message);
-				_messageBody.Add(Utility.deCodeB64s(Buffer));
+				_messageBody.Add(Utility.deCodeB64s(strBuffer));
 			}
+
 			if(_messageBody.Count>1)
 				_html=true;
 		}
 
-//		public string GetTextMessage(string buffer) 
-//		{
-//			// find "\r\n\r\n" denoting end of header
-//			int start=buffer.IndexOf("\r\n\r\n")+4;
-//			int end=buffer.LastIndexOf("\r\n.\r\n");
-//			//change charset if contentTransferEncoding is 8bit
-//			if(start!=-1&&end!=-1)
-//			{
-//				if (this._contentEncoding!=null && this._contentEncoding.IndexOf("8bit")!=-1)
-//					return Utility.Change(buffer.Substring(start,end-start),_contentCharset);
-//				else
-//					return buffer.Substring(start,end-start);			
-//			}
-//			else
-//				return buffer;
-//		}
-
+		/// <summary>
+		/// verify if the message is a report
+		/// </summary>
+		/// <returns>if it is a report message, return true, else, false</returns>
 		public bool IsReport()
 		{
-			if(_contentType!=null)
+			if(Utility.IsNotNullText(_contentType))
 				return (_contentType.ToLower().IndexOf("report".ToLower())!=-1);
 			else
 				return false;
 		}
 
+		/// <summary>
+		/// verify if the attachment is MIME Email file
+		/// </summary>
+		/// <param name="attItem">attachment</param>
+		/// <returns>if MIME Email file, return true, else, false</returns>
 		public bool IsMIMEMailFile(Attachment attItem)
 		{
 			try
@@ -669,6 +506,12 @@ namespace OpenPOP.POP3
 			}
 		}
 
+		/// <summary>
+		/// translate pictures url within the body
+		/// </summary>
+		/// <param name="strBody">message body</param>
+		/// <param name="hsbFiles">pictures collection</param>
+		/// <returns>translated message body</returns>
 		public string TranslateHTMLPictureFiles(string strBody, Hashtable hsbFiles)
 		{
 			try
@@ -678,7 +521,7 @@ namespace OpenPOP.POP3
 					Attachment att=this.GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName)==true)
 					{
-						if(att.ContentID!=null && att.ContentID!="")
+						if(Utility.IsNotNullText(att.ContentID))
 							//support for embedded pictures
 							strBody=strBody.Replace("cid:"+att.ContentID,hsbFiles[att.ContentFileName].ToString());
 
@@ -693,6 +536,12 @@ namespace OpenPOP.POP3
 			return strBody;
 		}
 
+		/// <summary>
+		/// translate pictures url within the body
+		/// </summary>
+		/// <param name="strBody">message body</param>
+		/// <param name="strPath">path of the pictures</param>
+		/// <returns>translated message body</returns>
 		public string TranslateHTMLPictureFiles(string strBody, string strPath)
 		{
 			try
@@ -706,7 +555,7 @@ namespace OpenPOP.POP3
 					Attachment att=this.GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName)==true)
 					{
-						if(att.ContentID!=null && att.ContentID!="")
+						if(Utility.IsNotNullText(att.ContentID))
 							//support for embedded pictures
 							strBody=strBody.Replace("cid:"+att.ContentID,strPath+att.ContentFileName);
 						strBody=strBody.Replace(att.ContentFileName,strPath+att.ContentFileName);
@@ -720,12 +569,17 @@ namespace OpenPOP.POP3
 			return strBody;
 		}
 
+		/// <summary>
+		/// Get the proper attachment file name
+		/// </summary>
+		/// <param name="attItem">attachment</param>
+		/// <returns>propery attachment file name</returns>
 		public string GetAttachmentFileName(Attachment attItem)
 		{
 			
-			//bool duplicated=false;
 			int items=0;
 
+			//return unique body file names
 			for(int i=0;i<_attachments.Count;i++)
 			{
 				if(attItem.ContentFileName==attItem.DefaultFileName)
@@ -733,22 +587,20 @@ namespace OpenPOP.POP3
 					items++;
 					attItem.ContentFileName=attItem.DefaultFileName2.Replace("*",items.ToString());
 				}
-//				if(items>1)
-//					duplicated=true;
-//				if(duplicated==true)
-//				{
-//					attItem.ContentFileName=attItem.DefaultFileName2;
-//					break;
-//				}
 			}
 			string name=attItem.ContentFileName;
 			
 			return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):attItem.DefaultFileName):name);
 		}
 
+		/// <summary>
+		/// save attachments to a defined path
+		/// </summary>
+		/// <param name="strPath">path to have attachments to be saved to</param>
+		/// <returns>true if save successfully, false if failed</returns>
 		public bool SaveAttachments(string strPath)
 		{
-			if(strPath!=null&&strPath!="")
+			if(Utility.IsNotNullText(strPath))
 			{
 				try
 				{
@@ -782,7 +634,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="attItem">Attachment</param>
 		/// <param name="strFileName">File to be saved to</param>
-		/// <returns></returns>
+		/// <returns>true if save successfully, false if failed</returns>
 		public bool SaveAttachment(Attachment attItem, string strFileName)
 		{
 			try
@@ -855,13 +707,21 @@ namespace OpenPOP.POP3
 			Attachment att=null;
 
 			SetAttachmentBoundry2(_rawMessageBody);
-			
-			while(true)
-			{
-				indexOf_attachmentstart=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart+1)+_attachmentboundry.Length;
-				if(indexOf_attachmentstart<0)return;
 
-				indexOfAttachmentEnd=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart+1);				
+			while(!processed)
+			{
+				if(Utility.IsNotNullText(_attachmentboundry))
+				{
+					indexOf_attachmentstart=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart+1)+_attachmentboundry.Length;
+					if(indexOf_attachmentstart<0)return;
+
+					indexOfAttachmentEnd=_rawMessageBody.IndexOf(_attachmentboundry,indexOf_attachmentstart+1);				
+				}
+				else
+				{
+					indexOfAttachmentEnd=-1;
+				}
+
 				//if(indexOfAttachmentEnd<0)return;
 				if(indexOfAttachmentEnd!=-1)
 				{
@@ -875,16 +735,18 @@ namespace OpenPOP.POP3
 					return;
 
 				string strLine=_rawMessageBody.Substring(indexOf_attachmentstart,(indexOfAttachmentEnd-indexOf_attachmentstart-2));            
-				att=new Attachment(strLine.Trim());
+				bool isMSTNEF;
+				isMSTNEF=MIMETypes.IsMSTNEF(_contentType);
+				att=new Attachment(strLine.Trim(),_contentType,!isMSTNEF);
 
 				//ms-tnef format might contain multiple attachments
-				if(att.ContentType.ToLower() == "application/ms-tnef".ToLower() && AutoDecodeMSTNEF) 
+				if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF && !isMSTNEF) 
 				{
 					Utility.LogError("set_attachments():found ms-tnef file");
 					TNEF.TNEFParser tnef=new OpenPOP.TNEF.TNEFParser();
 					TNEF.TNEFAttachment tatt=new OpenPOP.TNEF.TNEFAttachment();
 					Attachment attNew=null;
-					
+				
 					tnef.Verbose=false;
 					tnef.BasePath=this.BasePath;
 					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
@@ -895,7 +757,7 @@ namespace OpenPOP.POP3
 							for (IDictionaryEnumerator i = tnef.Attachments().GetEnumerator(); i.MoveNext();)
 							{
 								tatt=(TNEF.TNEFAttachment)i.Value;
-								attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,Utility.getMimeType(tatt.FileName));
+								attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,Utility.GetMimeType(tatt.FileName));
 								_attachmentCount++;
 								_attachments.Add(attNew);
 							}
@@ -914,27 +776,21 @@ namespace OpenPOP.POP3
 			}
 		}
 
-
-//		private void setMail(string rawData)
-//		{			
-//
-//		}
-
 		/// <summary>
 		/// Set alternative attachment boundry
 		/// </summary>
-		/// <param name="buffer">raw message</param>
-		private void SetAttachmentBoundry2(string buffer)
+		/// <param name="strBuffer">raw message</param>
+		private void SetAttachmentBoundry2(string strBuffer)
 		{
 			int indexOfAttachmentBoundry2Begin=0;
 			int indexOfAttachmentBoundry2End=0;
-			indexOfAttachmentBoundry2Begin=buffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
+			indexOfAttachmentBoundry2Begin=strBuffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
 			if(indexOfAttachmentBoundry2Begin!=-1)
 			{
-				indexOfAttachmentBoundry2Begin=buffer.IndexOf("boundary=\"");
-				indexOfAttachmentBoundry2End=buffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
+				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=\"");
+				indexOfAttachmentBoundry2End=strBuffer.IndexOf("\"",indexOfAttachmentBoundry2Begin+10);
 				if(indexOfAttachmentBoundry2Begin!=-1&&indexOfAttachmentBoundry2End!=-1)
-					_attachmentboundry2=buffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
+					_attachmentboundry2=strBuffer.Substring(indexOfAttachmentBoundry2Begin+10,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-10).Trim();
 			}
 			else
 			{
@@ -942,19 +798,112 @@ namespace OpenPOP.POP3
 			}
 		}
 
-		public bool SaveToMIMEEmailFile(string file)
+		public bool SaveToMIMEEmailFile(string strFile)
 		{
-			return Utility.SaveByteContentToFile(Encoding.Default.GetBytes(_rawMessage),file);
+			return Utility.SaveByteContentToFile(Encoding.Default.GetBytes(_rawMessage),strFile);
+		}
+
+		/// <summary>
+		/// parse multi-line header
+		/// </summary>
+		/// <param name="sbdBuilder">string builder to hold header content</param>
+		/// <param name="srdReader">string reader to get each line of the header</param>
+		/// <param name="strValue">first line content</param>
+		/// <param name="strLine">reference header line</param>
+		/// <param name="alCollection">collection to hold every content line</param>
+		private void ParseStreamLines(StringBuilder sbdBuilder
+									  ,StringReader srdReader
+									  ,string strValue
+									  ,ref string strLine
+									  ,ArrayList alCollection)
+		{
+			string strFormmated;
+			alCollection.Add(strValue);
+			strLine=srdReader.ReadLine();
+			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+			{
+				strFormmated=" "+strLine.Substring(1);
+				alCollection.Add(Utility.deCodeLine(strFormmated));
+				sbdBuilder.Append(strLine);
+				strLine=srdReader.ReadLine();
+			}
+			sbdBuilder.Append(strLine);
+			parseHeader(sbdBuilder,srdReader,ref strLine);
+		}
+
+		/// <summary>
+		/// parse multi-line header
+		/// </summary>
+		/// <param name="sbdBuilder">string builder to hold header content</param>
+		/// <param name="srdReader">string reader to get each line of the header</param>
+		/// <param name="strName">collection key</param>
+		/// <param name="strValue">first line content</param>
+		/// <param name="strLine">reference header line</param>
+		/// <param name="hstCollection">collection to hold every content line</param>
+		private void ParseStreamLines(StringBuilder sbdBuilder
+									  ,StringReader srdReader
+									  ,string strName
+									  ,string strValue
+									  ,ref string strLine
+									  ,Hashtable hstCollection)
+		{
+			string strFormmated;
+			string strReturn=strValue;
+			strLine=srdReader.ReadLine();
+			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+			{
+				strFormmated=" "+strLine.Substring(1);
+				strReturn+=Utility.deCodeLine(strFormmated);
+				sbdBuilder.Append(strLine);
+				strLine=srdReader.ReadLine();
+			}
+			if(!hstCollection.ContainsKey(strName))
+				hstCollection.Add(strName,strReturn);
+			sbdBuilder.Append(strLine);
+			parseHeader(sbdBuilder,srdReader,ref strLine);
+		}
+
+		/// <summary>
+		/// parse multi-line header
+		/// </summary>
+		/// <param name="sbdBuilder">string builder to hold header content</param>
+		/// <param name="srdReader">string reader to get each line of the header</param>
+		/// <param name="strValue">first line content</param>
+		/// <param name="strLine">reference header line</param>
+		/// <param name="strReturn">return value</param>
+		/// <param name="blnLineDecode">decode each line</param>
+		private void ParseStreamLines(StringBuilder sbdBuilder
+									  ,StringReader srdReader
+									  ,string strValue
+									  ,ref string strLine
+									  ,ref string strReturn
+									  ,bool blnLineDecode)
+		{
+			string strFormmated;
+			strReturn=strValue;
+			strLine=srdReader.ReadLine();
+			while(strLine.StartsWith("\t") && strLine.Trim()!="")
+			{
+				strFormmated=" "+strLine.Substring(1);
+				strReturn+=(blnLineDecode==true?Utility.deCodeLine(strFormmated):strFormmated);
+				sbdBuilder.Append(strLine);
+				strLine=srdReader.ReadLine();
+			}
+			sbdBuilder.Append(strLine);
+			if(!blnLineDecode)
+				strReturn=Utility.deCodeLine(strReturn);				
+			parseHeader(sbdBuilder,srdReader,ref strLine);
 		}
 
 		/// <summary>
 		/// Parse the headers populating respective member fields
 		/// </summary>
-		/// <param name="strLine"></param>
-		/// 
-		private void parseHeader(StringBuilder builder,StringReader reader,ref string strLine)
+		/// <param name="sbdBuilder">string builder to hold the header content</param>
+		/// <param name="srdReader">string reader to get each line of the header</param>
+		/// <param name="strLine">reference header line</param>
+		private void parseHeader(StringBuilder sbdBuilder,StringReader srdReader,ref string strLine)
 		{
-			string []array=Utility.getHeadersValue(strLine);		
+			string []array=Utility.getHeadersValue(strLine);
 
 			switch(array[0].ToUpper())
 			{
@@ -984,75 +933,42 @@ namespace OpenPOP.POP3
 
 				case "FROM":
 					Utility.ParseEmailAddress(array[1],ref _from,ref _fromEmail);
-//					int indexOfAB=array[1].Trim().LastIndexOf("<");
-//					int indexOfEndAB=array[1].Trim().LastIndexOf(">");
-//					_from=array[1];
-//					_fromEmail=array[1];
-//					if(indexOfAB>=0&&indexOfEndAB>=0)
-//						{
-//						if(indexOfAB>0)
-//						{
-//							_from=_from.Substring(0,indexOfAB-1);					
-//							if(_from.IndexOf("\"")>=0)
-//							{
-//								_from=_from.Substring(1,_from.Length-2);
-//							}
-//						}
-//						_fromEmail=_fromEmail.Substring(indexOfAB+1,indexOfEndAB-(indexOfAB+1));
-//					}
-//					_from=_from.Trim();
-//					_from=Utility.deCodeLine(_from);
-//					_fromEmail=_fromEmail.Trim();					
 					break;
 
 				case "REPLY-TO":
 					Utility.ParseEmailAddress(array[1],ref _replyTo,ref _replyToEmail);
 					break;
 
-				case "KEYWORDS":
-					_keywords.Add(array[1].Trim());
-					strLine=reader.ReadLine();
+				case "KEYWORDS": //ms outlook keywords
+					/*_keywords.Add(array[1].Trim());
+					strLine=srdReader.ReadLine();
 					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
 					{
 						_keywords.Add(Utility.deCodeLine(strLine));
-						builder.Append(strLine);
-						strLine=reader.ReadLine();
+						sbdBuilder.Append(strLine);
+						strLine=srdReader.ReadLine();
 					}
-					builder.Append(strLine);
-					parseHeader(builder,reader,ref strLine);
+					sbdBuilder.Append(strLine);
+					parseHeader(sbdBuilder,srdReader,ref strLine);*/
+					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,_keywords);
 					break;
 
 				case "RECEIVED":
-					_received=array[1].Trim();//strLine.Split(':')[1].Trim();
-					strLine=reader.ReadLine();
+					/*_received=array[1].Trim();//strLine.Split(':')[1].Trim();
+					strLine=srdReader.ReadLine();
 					while(strLine.StartsWith("\t") && strLine.Trim()!="")
 					{
 						_received += Utility.deCodeLine(" "+strLine.Substring(1));
-						builder.Append(strLine);
-						strLine=reader.ReadLine();
+						sbdBuilder.Append(strLine);
+						strLine=srdReader.ReadLine();
 					}
-					builder.Append(strLine);
-					parseHeader(builder,reader,ref strLine);
-					break;
-
-				case "X-ORIGINATING-IP":
-					_xOriginatingIP=array[1].Trim();//strLine.Split(':')[1].Trim();
-					break;
-
-				case "X-PRIORITY":
-					_xPriority=array[1].Trim();//strLine.Split(':')[1].Trim();
-					break;
-
-				case "X-MSMAIL-PRIORITY":
-					_xMSMailPriority=array[1].Trim();//strLine.Split(':')[1].Trim();
+					sbdBuilder.Append(strLine);
+					parseHeader(sbdBuilder,srdReader,ref strLine);*/
+					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _received,true);
 					break;
 
 				case "IMPORTANCE":
 					_importance=array[1].Trim();//strLine.Split(':')[1].Trim();
-					break;
-
-				case "X-MAILER":
-					_xMailer=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
 				case "DISPOSITION-NOTIFICATION-TO":
@@ -1063,26 +979,22 @@ namespace OpenPOP.POP3
 					_mimeVersion=array[1].Trim();//strLine.Split(':')[1].Trim();
 					break;
 
-				case "X-OriginalArrivalTime":
-					_xOriginalArrivalTime=array[1].Trim();//strLine.Split(':')[1].Trim();
-					break;
-
 				case "SUBJECT":
 				case "THREAD-TOPIC":
-					_subject=array[1].Trim();//strLine.Split(':')[1].Trim();
-
-					strLine=reader.ReadLine();
+					/*_subject=array[1].Trim();//strLine.Split(':')[1].Trim();
+					strLine=srdReader.ReadLine();
 					while(strLine.IndexOf(":")==-1 && strLine.Trim()!="")
 					{
 						_subject+=strLine;
-						builder.Append(strLine);
-						strLine=reader.ReadLine();
+						sbdBuilder.Append(strLine);
+						strLine=srdReader.ReadLine();
 					}
 					_subject=Utility.deCodeLine(_subject);
-					builder.Append(strLine);
-					parseHeader(builder,reader,ref strLine);
+					sbdBuilder.Append(strLine);
+					parseHeader(sbdBuilder,srdReader,ref strLine);*/
+					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _subject,false);
 					break;
-				
+
 				case "RETURN-PATH":
 					_returnPath=array[1].Trim().Trim('>').Trim('<');//strLine.Split(':')[1].Trim().Trim('>').Trim('<');
 					break;
@@ -1136,19 +1048,19 @@ namespace OpenPOP.POP3
 						}
 						else if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 						{
-							strLine=reader.ReadLine();
+							strLine=srdReader.ReadLine();
 							intCharset=strLine.ToLower().IndexOf("charset=".ToLower());
 							if(intCharset!=-1)
 								_contentCharset=strLine.Substring(intCharset+9,strLine.Length-intCharset-10);
 							else if(strLine.IndexOf(":")!=-1)
 							{
-								builder.Append(strLine);
-								parseHeader(builder,reader,ref strLine);
+								sbdBuilder.Append(strLine);
+								parseHeader(sbdBuilder,srdReader,ref strLine);
 								return;						
 							}
 							else
 							{
-								builder.Append(strLine);
+								sbdBuilder.Append(strLine);
 							}
 						}
 					}
@@ -1159,22 +1071,22 @@ namespace OpenPOP.POP3
 
 					if(strLine.Trim().Length==_contentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 					{
-						strLine=reader.ReadLine();
+						strLine=srdReader.ReadLine();
 						if(strLine==null||strLine==""||strLine.IndexOf(":")!=-1)
 						{
-							builder.Append(strLine);
-							parseHeader(builder,reader,ref strLine);
+							sbdBuilder.Append(strLine);
+							parseHeader(sbdBuilder,srdReader,ref strLine);
 							return;
 						}
 						else
 						{
-							builder.Append(strLine);
+							sbdBuilder.Append(strLine);
 						}
 
 						if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 						{
-							_attachmentboundry=reader.ReadLine();
-							builder.Append(_attachmentboundry);
+							_attachmentboundry=srdReader.ReadLine();
+							sbdBuilder.Append(_attachmentboundry);
 						}
 					}
 					else
@@ -1196,6 +1108,17 @@ namespace OpenPOP.POP3
 						_hasAttachment=true;
 					}
 					
+					break;
+
+				default:
+					if(array.Length>1) //here we parse all custom headers
+					{
+						string headerName=array[0].Trim();
+						if(headerName.ToUpper().StartsWith("X")) //every custom header starts with "X"
+						{
+							ParseStreamLines(sbdBuilder,srdReader,headerName,array[1].Trim(),ref strLine,_customHeaders);
+						}
+					}
 					break;
 			}
 		}

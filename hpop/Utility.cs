@@ -3,11 +3,11 @@
 *Function:		Utility
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/27 12:25 GMT-8
+*Modified:		2004/3/29 12:25 GMT-8
 *Description:
 *Changes:		
-*				2004/3/27 12:25 GMT-8 by Unruled Boy
-*					1.getMimeType support for MONO
+*				2004/3/29 12:25 GMT-8 by Unruled Boy
+*					1.GetMimeType support for MONO
 *					2.cleaning up the names of variants
 */
 using System;
@@ -22,7 +22,6 @@ namespace OpenPOP
 	/// </summary>
 	public class Utility
 	{
-		private const string tag_Content_Transfer_Encoding="Content-Transfer-Encoding";
 		private static bool m_blnLog=false;
 		private static string m_strLogFile = "OpenPOP.log";
 
@@ -33,11 +32,11 @@ namespace OpenPOP
 			//
 		}
 
-//		public static string[] SplitText(string text, string splitter)
+//		public static string[] SplitText(string strText, string strSplitter)
 //		{
 //			string []segments=new string[0];
-//			int indexOfSplitter=text.IndexOf(splitter);
-//			if(indexOfSplitter!=-1)
+//			int indexOfstrSplitter=strText.IndexOf(strSplitter);
+//			if(indexOfstrSplitter!=-1)
 //			{
 //
 //			}
@@ -159,18 +158,18 @@ namespace OpenPOP
 			return array;
 		}
 
-		public static string GetQuotedValue(string text, string splitter, string tag)
+		public static string GetQuotedValue(string strText, string strSplitter, string strTag)
 		{
-			if(text==null)
-				throw new ArgumentNullException("text","Argument was null");
+			if(strText==null)
+				throw new ArgumentNullException("strText","Argument was null");
 
 			string []array=new String[2]{"",""};
-			int indexOfSplitter=text.IndexOf(splitter);			
+			int indexOfstrSplitter=strText.IndexOf(strSplitter);			
 
 			try
 			{
-				array[0]=text.Substring(0,indexOfSplitter).Trim();
-				array[1]=text.Substring(indexOfSplitter+1).Trim();
+				array[0]=strText.Substring(0,indexOfstrSplitter).Trim();
+				array[1]=strText.Substring(indexOfstrSplitter+1).Trim();
 				int pos=array[1].IndexOf("\"");
 				if(pos!=-1)
 				{
@@ -181,46 +180,33 @@ namespace OpenPOP
 			catch(Exception){}
 
 			//return array;
-			if(array[0].ToLower()==tag.ToLower())
+			if(array[0].ToLower()==strTag.ToLower())
 				return array[1].Trim();
 			else
 				return null;
 		}
 
-		public static string Change(string text,string charset)
+		public static string Change(string strText,string charset)
 		{
 			if (charset==null || charset=="")
-				return text;
-			byte[] b=Encoding.Default.GetBytes(text);
+				return strText;
+			byte[] b=Encoding.Default.GetBytes(strText);
 			return new string(Encoding.GetEncoding(charset).GetChars(b));
 		}
 
-		public static string GetContentTransferEncoding(string buffer, int pos)
+		public static string RemoveNonB64(string strBuffer)
 		{
-			int begin=0,end=0;
-			begin=buffer.ToLower().IndexOf(tag_Content_Transfer_Encoding.ToLower(),pos);
-			if(begin!=-1)
-			{
-				end=buffer.ToLower().IndexOf("\r\n".ToLower(),begin+1);
-				return buffer.Substring(begin+tag_Content_Transfer_Encoding.Length+1,end-begin-tag_Content_Transfer_Encoding.Length).Trim();
-			}
-			else
-				return "";
+			return strBuffer.Replace("\0","");
 		}
 
-		public static string RemoveNonB64(string buffer)
+		public static string RemoveWhiteBlanks(string strBuffer)
 		{
-			return buffer.Replace("\0","");
+			return strBuffer.Replace("\0","").Replace("\r\n","");
 		}
 
-		public static string RemoveWhiteBlanks(string buffer)
+		public static string RemoveQuote(string strBuffer)			
 		{
-			return buffer.Replace("\0","").Replace("\r\n","");
-		}
-
-		public static string RemoveQuote(string buffer)			
-		{
-			string strRet=buffer;
+			string strRet=strBuffer;
 			if(strRet.StartsWith("\""))
 				strRet=strRet.Substring(1);
 			if(strRet.EndsWith("\""))
@@ -325,9 +311,9 @@ namespace OpenPOP
 			}
 		}
 
-		internal static void LogError(string text) 
+		internal static void LogError(string strText) 
 		{
-			Log=false;
+			//Log=true;
 			if(Log)
 			{
 				FileInfo file = null;
@@ -340,7 +326,7 @@ namespace OpenPOP
 					//fs = new FileStream(m_strLogFile, FileMode.OpenOrCreate, FileAccess.Write);
 					//sw = new StreamWriter(fs);
 					sw.WriteLine(DateTime.Now);
-					sw.WriteLine(text);
+					sw.WriteLine(strText);
 					sw.WriteLine("\r\n");
 					sw.Flush();
 				}
@@ -406,9 +392,45 @@ namespace OpenPOP
 			return array;
 		}
 
+		public static bool IsNotNullText(string strText)
+		{
+			try
+			{
+				return (strText!=null&&strText!="");
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		public static bool IsNotNullTextEx(string strText)
+		{
+			try
+			{
+				return (strText!=null&&strText.Trim()!="");
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		public static bool IsOrNullTextEx(string strText)
+		{
+			try
+			{
+				return (strText==null||strText.Trim()=="");
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
 		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
 		/// <returns>String MIME type (Example: \"text/plain\")</returns>
-		public static string getMimeType(string strFileName)
+		public static string GetMimeType(string strFileName)
 		{			
 			try
 			{
@@ -418,7 +440,7 @@ namespace OpenPOP
 
 				if(MONO)
 				{
-					strContentType=POP3.MIMETypes.ContentType(strFileExtension);
+					strContentType=MIMETypes.ContentType(strFileExtension);
 				}
 				else
 				{

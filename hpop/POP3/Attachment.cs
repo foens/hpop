@@ -3,10 +3,14 @@
 *Function:		
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/27 12:33 GMT-8
+*Modified:		2004/3/29 17:32 GMT-8
 *Description	:
-*Changes:		2004/3/27 12:28 GMT-8 by Unruled Boy
+*Changes:		2004/3/29 10:28 GMT-8 by Unruled Boy
 *					1.removing bugs in decoding attachment
+*Changes:		2004/3/29 17:32 GMT-8 by Unruled Boy
+*					1.support for reply message using ms-tnef 
+*					2.adding detail description for every function
+*					3.cleaning up the codes
 */
 
 using System;
@@ -32,6 +36,7 @@ namespace OpenPOP.POP3
 		private string _defaultFileName2="body*.htm";
 		private string _defaultReportFileName="report.htm";
 		private string _defaultMIMEFileName="body.eml";
+		private string _defaultMSTNEFFileName="winmail.dat";
 		private string _contentID=null;
 		private long _contentLength=0;
 		private string _rawAttachment=null;
@@ -42,36 +47,24 @@ namespace OpenPOP.POP3
 		#region Properties
 		public byte[] RawBytes
 		{
-			get
-			{
-				return _rawBytes;
-			}
-			set
-			{
-				_rawBytes=value;
-			}
+			get{return _rawBytes;}
+			set{_rawBytes=value;}
 		}
 
 		public bool InBytes
 		{
-			get
-			{
-				return _inBytes;
-			}
-			set
-			{
-				_inBytes=value;
-			}
+			get{return _inBytes;}
+			set{_inBytes=value;}
 		}
 
 		public long ContentLength
 		{
-			get
-			{
-				return _contentLength;
-			}
+			get{return _contentLength;}
 		}
 
+		/// <summary>
+		/// verify the attachment whether it is a real attachment or not
+		/// </summary>
 		public bool NotAttachment
 		{
 			get
@@ -84,7 +77,7 @@ namespace OpenPOP.POP3
 					return true;
 				else
 					return (_contentFileName!="");*/
-				if (_contentType==null||_contentFileName==""||_contentFileName==null)
+				if (_contentType==null||_contentFileName=="")
 					return true;
 				else
 					return false;
@@ -94,118 +87,69 @@ namespace OpenPOP.POP3
 
 		public string ContentFormat
 		{
-			get
-			{
-				return _contentFormat;
-			}
+			get{return _contentFormat;}
 		}
 
 		public string ContentCharset
 		{
-			get
-			{
-				return _contentCharset;
-			}
+			get{return _contentCharset;}
 		}
 
 		public string DefaultFileName
 		{
-			get
-			{
-				return _defaultFileName;
-			}
+			get{return _defaultFileName;}
 		}
 
 		public string DefaultFileName2
 		{
-			get
-			{
-				return _defaultFileName2;
-			}
+			get{return _defaultFileName2;}
 		}
 
 		public string DefaultReportFileName
 		{
-			get
-			{
-				return _defaultReportFileName;
-			}
+			get{return _defaultReportFileName;}
 		}
 
 		public string DefaultMIMEFileName
 		{
-			get
-			{
-				return _defaultMIMEFileName;
-			}
+			get{return _defaultMIMEFileName;}
 		}
 
 		public string ContentType
 		{
-			get
-			{
-				return _contentType;
-			}
+			get{return _contentType;}
 		}
-
 
 		public string ContentTransferEncoding
 		{
-			get
-			{
-				return _contentTransferEncoding;
-			}
+			get{return _contentTransferEncoding;}
 		}
-
 
 		public string ContentDescription
 		{
-			get
-			{
-				return _contentDescription;
-			}
+			get{return _contentDescription;}
 		}
-
 
 		public string ContentFileName
 		{
-			get
-			{
-				return _contentFileName;
-			}
-			set
-			{
-				_contentFileName=value;
-			}
+			get{return _contentFileName;}
+			set{_contentFileName=value;}
 		}
-
 
 		public string ContentDisposition
 		{
-			get
-			{
-				return _contentDisposition;
-			}
+			get{return _contentDisposition;}
 		}
-
 
 		public string ContentID
 		{
-			get
-			{
-				return _contentID;
-			}
+			get{return _contentID;}
 		}
-
 
 		public string RawAttachment
 		{
-			get
-			{
-				return _rawAttachment;
-			}
+			get{return _rawAttachment;}
 		}
-
 
 		/// <summary>
 		/// decoded attachment in bytes
@@ -217,8 +161,6 @@ namespace OpenPOP.POP3
 				return DecodedAsBytes();
 			}
 		}
-
-
 		#endregion
 
 		public Attachment(byte[] bytAttachment, long lngFileLength, string strFileName, string strContentType)
@@ -230,8 +172,28 @@ namespace OpenPOP.POP3
 			_contentType=strContentType;
 		}
 
+		public Attachment(string strAttachment,string strContentType, bool blnParseHeader)
+		{
+			if(!blnParseHeader)
+			{
+				_contentFileName=_defaultMSTNEFFileName;
+				_contentType=strContentType;
+			}
+			this.NewAttachment(strAttachment,blnParseHeader);
+		}
+
 		public Attachment(string strAttachment)
 		{	
+			this.NewAttachment(strAttachment,true);
+		}
+
+		/// <summary>
+		/// create attachment
+		/// </summary>
+		/// <param name="strAttachment"></param>
+		/// <param name="blnParseHeader"></param>
+		private void NewAttachment(string strAttachment, bool blnParseHeader)
+		{
 			_inBytes=false;
 
 			if(strAttachment==null)
@@ -239,20 +201,22 @@ namespace OpenPOP.POP3
 
 			StringReader sr=new StringReader(strAttachment);
 
-			string strLine=sr.ReadLine();
-			while(strLine!=null & strLine!="")
+			if(blnParseHeader)
 			{
-				parseHeader(sr,ref strLine);
-				if(strLine==null || strLine=="")
-					break;
-				else
-					strLine=sr.ReadLine();
+				string strLine=sr.ReadLine();
+				while(Utility.IsNotNullTextEx(strLine))
+				{
+					parseHeader(sr,ref strLine);
+					if(Utility.IsOrNullTextEx(strLine))
+						break;
+					else
+						strLine=sr.ReadLine();
+				}
 			}
 
 			this._rawAttachment=sr.ReadToEnd();
 			_contentLength=this._rawAttachment.Length;
 		}
-
 
 		/// <summary>
 		/// Parse header fields and set member variables
@@ -266,12 +230,8 @@ namespace OpenPOP.POP3
 			string strRet=null;
 
 			switch(array[0].ToUpper())
-			{				
+			{
 				case "CONTENT-TYPE":
-					//_contentType=Utility.splitOnSemiColon(array[1])[0].Trim();
-					//if(array[1].ToLower().IndexOf("charset".ToLower())!=-1)
-					//	_contentCharset=Utility.splitOnSemiColon(array[1])[1].Trim();
-					//break;
 					if(values.Length>0)
 						_contentType=values[0].Trim();
 					if(values.Length>1)
@@ -282,7 +242,6 @@ namespace OpenPOP.POP3
 					{
 						_contentFormat=Utility.GetQuotedValue(values[2],"=","format");
 					}
-					//if(_contentType.ToLower().IndexOf("image".ToLower())!=-1&&_contentType.ToLower().IndexOf("name".ToLower())==-1)
 					if(_contentType.ToLower().IndexOf("name".ToLower())==-1)
 					{
 						strRet=sr.ReadLine();
@@ -314,9 +273,6 @@ namespace OpenPOP.POP3
 					_contentDescription=Utility.deCode(Utility.splitOnSemiColon(array[1])[0].Trim());
 					break;
 				case "CONTENT-DISPOSITION":
-					//_contentDisposition=Utility.splitOnSemiColon(array[1])[0].Trim();
-//					_contentFileName=Utility.splitOnSemiColon(array[1])[1].Trim();
-//					_contentFileName=_contentFileName.Substring(10,_contentFileName.Length-11);
 					if(values.Length>0)
 						_contentDisposition=values[0].Trim();
 					
@@ -369,7 +325,6 @@ namespace OpenPOP.POP3
 						decodedAttachment=decodedAttachment;
 					else
 						decodedAttachment=Utility.deCodeB64s(Utility.RemoveNonB64(decodedAttachment));
-					//decodedAttachment=Encoding.Default.GetString(Convert.FromBase64String(Utility.RemoveNonB64(decodedAttachment)));
 				}
 			}
 			else if(_contentCharset!=null)
@@ -380,6 +335,10 @@ namespace OpenPOP.POP3
 			return decodedAttachment;
 		}
 
+		/// <summary>
+		/// decode attachment to be a message object
+		/// </summary>
+		/// <returns>message</returns>
 		public Message DecodeAsMessage()
 		{
 			return new Message(null,_rawAttachment,false);
@@ -394,8 +353,6 @@ namespace OpenPOP.POP3
 			if(_rawAttachment==null)
 				return null;
 			if(_contentFileName!="")
-				//return Convert.FromBase64String(Utility.RemoveNonB64(_rawAttachment));
-				//return Encoding.Default.GetBytes(DecodeAttachment());
 			{
 				byte []decodedBytes=null;
 

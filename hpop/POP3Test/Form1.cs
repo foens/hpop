@@ -197,7 +197,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtLogin.Name = "txtLogin";
 			this.txtLogin.Size = new System.Drawing.Size(153, 21);
 			this.txtLogin.TabIndex = 5;
-			this.txtLogin.Text = "unruledboy";
+			this.txtLogin.Text = "wilsonchan";
 			// 
 			// button1
 			// 
@@ -239,7 +239,7 @@ namespace OpenPOP.NET_Sample_App
 			this.txtPOPServer.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
 			this.txtPOPServer.Size = new System.Drawing.Size(153, 21);
 			this.txtPOPServer.TabIndex = 0;
-			this.txtPOPServer.Text = "pop3.netease.com";
+			this.txtPOPServer.Text = "pop.163.net";
 			// 
 			// panel2
 			// 
@@ -521,16 +521,12 @@ namespace OpenPOP.NET_Sample_App
 				ds.Tables[0].Rows.Add(new object[]{"Received",m.Received});
 				ds.Tables[0].Rows.Add(new object[]{"HTML",m.HTML});
 				ds.Tables[0].Rows.Add(new object[]{"Importance",m.Importance});
-				ds.Tables[0].Rows.Add(new object[]{"X-Mailer",m.XMailer});
-				ds.Tables[0].Rows.Add(new object[]{"X-MSMail-Priority",m.XMSMailPriority});
-				ds.Tables[0].Rows.Add(new object[]{"X-Original-Arrival-Time",m.XOriginalArrivalTime});
-				ds.Tables[0].Rows.Add(new object[]{"X-Originating-IP",m.XOriginatingIP});
-				ds.Tables[0].Rows.Add(new object[]{"X-Priority",m.XPriority});
 				ds.Tables[0].Rows.Add(new object[]{"ReplyTo",m.ReplyTo});
 				ds.Tables[0].Rows.Add(new object[]{"ReplyToEmail",m.ReplyToEmail});
 				for(int j=0;j<m.Keywords.Count;j++)
-					ds.Tables[0].Rows.Add(new object[]{"Keyword",(string)m.Keywords[j]});
-
+					ds.Tables[0].Rows.Add(new object[]{"Keyword",(string)m.Keywords[j]});				
+				for(IDictionaryEnumerator i=m.CustomHeaders.GetEnumerator();i.MoveNext();)
+					ds.Tables[0].Rows.Add(new object[]{(string)i.Entry.Key,(string)i.Entry.Value});				
 				gridHeaders.DataMember=ds.Tables[0].TableName;
 				gridHeaders.DataSource=ds;			
 			}
