@@ -428,36 +428,5 @@ namespace OpenPOP
 			}
 		}
 
-		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
-		/// <returns>String MIME type (Example: \"text/plain\")</returns>
-		public static string GetMimeType(string strFileName)
-		{			
-			try
-			{
-				string strFileExtension=new FileInfo(strFileName).Extension;
-				string strContentType=null;
-				bool MONO=false;
-
-				if(MONO)
-				{
-					strContentType=MIMETypes.ContentType(strFileExtension);
-				}
-				else
-				{
-					Microsoft.Win32.RegistryKey extKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(strFileExtension);
-					strContentType = (string)extKey.GetValue("Content Type");
-				}
-
-				if (strContentType.ToString() != null)
-				{	
-					return strContentType.ToString(); 
-				}
-				else
-				{ return "application/octet-stream"; }
-			}
-			catch(System.Exception)
-			{ return "application/octet-stream"; }
-		}
-
 	}
 }

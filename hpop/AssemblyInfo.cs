@@ -3,7 +3,7 @@
 *Function:		Assembly
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 11:57 GMT-8
+*Modified:		2004/3/29 20:13 GMT-8
 *Description	:
 */
 using System.Reflection;

@@ -757,7 +757,7 @@ namespace OpenPOP.POP3
 							for (IDictionaryEnumerator i = tnef.Attachments().GetEnumerator(); i.MoveNext();)
 							{
 								tatt=(TNEF.TNEFAttachment)i.Value;
-								attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,Utility.GetMimeType(tatt.FileName));
+								attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,MIMETypes.GetMimeType(tatt.FileName));
 								_attachmentCount++;
 								_attachments.Add(attNew);
 							}

@@ -190,8 +190,8 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// create attachment
 		/// </summary>
-		/// <param name="strAttachment"></param>
-		/// <param name="blnParseHeader"></param>
+		/// <param name="strAttachment">raw attachment text</param>
+		/// <param name="blnParseHeader">parse header</param>
 		private void NewAttachment(string strAttachment, bool blnParseHeader)
 		{
 			_inBytes=false;
@@ -226,7 +226,7 @@ namespace OpenPOP.POP3
 		private void parseHeader(StringReader sr,ref string strLine)
 		{
 			string []array=Utility.getHeadersValue(strLine);
-			string []values=array[1].Split(";".ToCharArray());
+			string []values=array[1].Split(';');
 			string strRet=null;
 
 			switch(array[0].ToUpper())
@@ -285,7 +285,7 @@ namespace OpenPOP.POP3
 					_contentFileName=Utility.deCode(_contentFileName);
 					break;
 				case "CONTENT-ID":
-					_contentID=Utility.splitOnSemiColon(array[1])[0].Trim("<".ToCharArray()).Trim(">".ToCharArray());
+					_contentID=Utility.splitOnSemiColon(array[1])[0].Trim('<').Trim('>');
 					break;
 			}
 		}

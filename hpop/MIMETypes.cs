@@ -6,11 +6,12 @@
 *Modified:		2004/3/29 15:00 GMT-8
 *Description:
 *Changes:		
-*				2004/3/29 12:28 GMT-8 by Unruled Boy
+*				2004/3/29 20:15 GMT-8 by Unruled Boy
 *					1.Adding full list of MIME Types
 */
 
 using System;
+using System.IO;
 using System.Collections;
 
 namespace OpenPOP
@@ -340,5 +341,37 @@ namespace OpenPOP
 			_MIMETypeList.Add(".z","application/x-compress");
 			_MIMETypeList.Add(".zip","application/x-zip-compressed");
 		}
+
+		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
+		/// <returns>String MIME type (Example: \"text/plain\")</returns>
+		public static string GetMimeType(string strFileName)
+		{			
+			try
+			{
+				string strFileExtension=new FileInfo(strFileName).Extension;
+				string strContentType=null;
+				bool MONO=false;
+
+				if(MONO)
+				{
+					strContentType=MIMETypes.ContentType(strFileExtension);
+				}
+				else
+				{
+					Microsoft.Win32.RegistryKey extKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(strFileExtension);
+					strContentType = (string)extKey.GetValue("Content Type");
+				}
+
+				if (strContentType.ToString() != null)
+				{	
+					return strContentType.ToString(); 
+				}
+				else
+				{ return "application/octet-stream"; }
+			}
+			catch(System.Exception)
+			{ return "application/octet-stream"; }
+		}
+
 	}
 }

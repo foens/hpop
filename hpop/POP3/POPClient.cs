@@ -3,7 +3,7 @@
 *Function:		POP Client
 *Author:		Hamid Qureshi
 *Created:		2003/8
-*Modified:		2004/3/29 12:39
+*Modified:		2004/3/29 20:13
 *Description	:
 */
 
@@ -16,7 +16,6 @@ using System.Collections;
 
 namespace OpenPOP.POP3
 {
-
 	/// <summary>
 	/// POPClient
 	/// </summary>
@@ -346,9 +345,9 @@ namespace OpenPOP.POP3
 		{
 			try
 			{
-				string strCmd = "DELE ";
 				if(MessageIndex >0)
 				{
+					string strCmd = "DELE ";
 					strCmd += MessageIndex.ToString();
 					writer.WriteLine(strCmd);
 
@@ -599,15 +598,8 @@ namespace OpenPOP.POP3
 		/// <returns>content</returns>
 		private string ReceiveContent(int contentLength)
 		{
-			//			char []temp=new char[contentLength];
-			//			reader.ReadBlock(temp,0,contentLength);
-			//			response=new string(temp);
-			//			reader.ReadLine();
-			//			return new Message(response);
 			string response=null;
 			StringBuilder builder = new StringBuilder();
-			//builder.EnsureCapacity(contentLength*2);
-			//reader.ReadToEnd();
 			WaitForResponse(reader.BaseStream.CanRead);
 			response = reader.ReadLine();
 			int intLines=0;
