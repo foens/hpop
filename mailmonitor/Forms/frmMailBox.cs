@@ -48,6 +48,7 @@ namespace MailMonitor
 		private MailBox _mailBox;
 		private bool _loaded;
 		private bool _dirty;
+		private System.Windows.Forms.CheckBox chkUse;
 		private bool _new;
 //		private bool _auto;
 //		private bool _driven;
@@ -83,6 +84,7 @@ namespace MailMonitor
 				txtUserName.Text=_mailBox.UserName;
 				txtPassword.Text=_mailBox.Password;
 				txtDescription.Text=_mailBox.Desccription;
+				chkUse.Checked=_mailBox.Use;
 				_new=true;
 			}
 			else
@@ -120,6 +122,7 @@ namespace MailMonitor
 			this.picIcon = new System.Windows.Forms.PictureBox();
 			this.lblTitle = new System.Windows.Forms.Label();
 			this.cmdApply = new System.Windows.Forms.Button();
+			this.chkUse = new System.Windows.Forms.CheckBox();
 			this.gbxHeader.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -225,7 +228,7 @@ namespace MailMonitor
 			this.cmdSave.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.cmdSave.Location = new System.Drawing.Point(288, 144);
 			this.cmdSave.Name = "cmdSave";
-			this.cmdSave.TabIndex = 12;
+			this.cmdSave.TabIndex = 14;
 			this.cmdSave.Text = "Sa&ve";
 			this.cmdSave.Click += new System.EventHandler(this.cmdSave_Click);
 			// 
@@ -234,7 +237,7 @@ namespace MailMonitor
 			this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.cmdCancel.Location = new System.Drawing.Point(368, 144);
 			this.cmdCancel.Name = "cmdCancel";
-			this.cmdCancel.TabIndex = 13;
+			this.cmdCancel.TabIndex = 15;
 			this.cmdCancel.Text = "&Cancel";
 			this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
 			// 
@@ -306,14 +309,26 @@ namespace MailMonitor
 			this.cmdApply.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.cmdApply.Location = new System.Drawing.Point(208, 144);
 			this.cmdApply.Name = "cmdApply";
-			this.cmdApply.TabIndex = 15;
+			this.cmdApply.TabIndex = 13;
 			this.cmdApply.Text = "&Apply";
 			this.cmdApply.Click += new System.EventHandler(this.cmdApply_Click);
+			// 
+			// chkUse
+			// 
+			this.chkUse.Checked = true;
+			this.chkUse.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkUse.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+			this.chkUse.Location = new System.Drawing.Point(8, 144);
+			this.chkUse.Name = "chkUse";
+			this.chkUse.Size = new System.Drawing.Size(80, 16);
+			this.chkUse.TabIndex = 12;
+			this.chkUse.Text = "Us&e";
 			// 
 			// frmMailBox
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
 			this.ClientSize = new System.Drawing.Size(458, 175);
+			this.Controls.Add(this.chkUse);
 			this.Controls.Add(this.cmdApply);
 			this.Controls.Add(this.gbxHeader);
 			this.Controls.Add(this.txtDescription);
@@ -337,7 +352,7 @@ namespace MailMonitor
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Mail Monitor - Mail Box";
 			this.Load += new System.EventHandler(this.frmMailBox_Load);
-			this.Closed+=new EventHandler(frmMailBox_Closed);
+			this.Closed += new System.EventHandler(this.frmMailBox_Closed);
 			this.gbxHeader.ResumeLayout(false);
 			this.ResumeLayout(false);
 
@@ -362,6 +377,7 @@ namespace MailMonitor
 				_mailBox.UserName=txtUserName.Text;
 				_mailBox.Password=txtPassword.Text;
 				_mailBox.Desccription=txtDescription.Text;
+				_mailBox.Use=chkUse.Checked;
 				_dirty=false;
 				//_new=false;
 				cmdApply.Enabled=false;

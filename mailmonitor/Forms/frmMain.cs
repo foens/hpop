@@ -922,15 +922,21 @@ namespace MailMonitor
 				}
 
 				lvwMailBoxes.Items.Clear();
-				ListViewItem lvi;
-
-				IDictionaryEnumerator ideMailBoxes=_settings.MailBoxes.GetEnumerator();
-	
+				ListViewItem lvi;	
 				MailBox mb;
-				while(ideMailBoxes.MoveNext())
+
+//				IDictionaryEnumerator ideMailBoxes=_settings.MailBoxes.GetEnumerator();
+//				while(ideMailBoxes.MoveNext())
+//				{
+//					lvi=new ListViewItem();
+//					mb=(MailBox)ideMailBoxes.Value;
+//					lvi.Text=mb.Name;
+//					lvwMailBoxes.Items.Add(lvi);
+//				}
+				for(int i=0;i<_settings.MailBoxes.Count;i++)
 				{
 					lvi=new ListViewItem();
-					mb=(MailBox)ideMailBoxes.Value;
+					mb=(MailBox)_settings.MailBoxes[i];
 					lvi.Text=mb.Name;
 					lvwMailBoxes.Items.Add(lvi);
 				}
@@ -973,8 +979,11 @@ namespace MailMonitor
 				{
 					//lock(this)
 					{
-						_currentMailBox=i;
-						GetMailInfo();
+						if(((MailBox)_settings.MailBoxes[i]).Use)
+						{
+							_currentMailBox=i;
+							GetMailInfo();
+						}
 					}
 				}
 			}
@@ -986,14 +995,15 @@ namespace MailMonitor
 
 		private void GetMailInfo()
 		{
+			MailBox mailBox=((MailBox)_settings.MailBoxes[_currentMailBox]);
+
+			ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
+			lvi.SubItems.Add("");
+			lvi.SubItems.Add("");
+			lvi.SubItems.Add("");
+
 			try
 			{
-				MailBox mailBox=((MailBox)_settings.MailBoxes[_currentMailBox]);
-
-				ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
-				lvi.SubItems.Add("");
-				lvi.SubItems.Add("");
-				lvi.SubItems.Add("");
 
 				OpenPOP.POP3.Utility.Log=true;
 				//_popClient.Disconnect();
@@ -1028,7 +1038,6 @@ namespace MailMonitor
 				_popClient.Disconnect();
 
 				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
-				lvi.SubItems[3].Text="Checking Finished!";
 				
 				sbrMain.Panels[0].Text=intNewMessages.ToString() + " new mail(s).";
 				if(_settings.Beep)
@@ -1044,10 +1053,25 @@ namespace MailMonitor
 			}
 			catch(Exception e)
 			{
-				//MessageBox.Show(this,e.Message);
 				Utilities.BeepIt();
-				sbrMain.Panels[0].Text=e.Message;
+				//MessageBox.Show(this,e.Message);
+				string strRet;
+				if(e is InvalidPasswordException)
+					strRet="Invlaid password";
+				else if(e is InvalidLoginException)
+					strRet="Invlaid user";
+				else if(e is PopServerNotAvailableException)
+					strRet="POP server error";
+				else if(e is PopServerNotFoundException)
+					strRet="POP server not found";
+				else if(e is PopServerLockException)
+					strRet="POP server is locked";
+				else
+					strRet=e.Message;
+				sbrMain.Panels[0].Text=strRet;
 			}
+
+			lvi.SubItems[3].Text="Checking Finished!";
 		}
 
 		private void RunMailClient()

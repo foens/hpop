@@ -20,6 +20,7 @@ namespace MailMonitor
 		private string _userName;
 		private string _password;
 		private string _desccription;
+		private bool _use;
 
 
 		public MailBox()
@@ -64,6 +65,12 @@ namespace MailMonitor
 		{
 			get{return _desccription;}
 			set{_desccription=value;}
+		}
+
+		public bool Use
+		{
+			get{return _use;}
+			set{_use=value;}
 		}
 
 	}
