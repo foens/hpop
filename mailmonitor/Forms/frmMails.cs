@@ -42,7 +42,7 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblTitle;
 		private Settings _settings;
 		private POPClient _popClient=new POPClient();
-		private frmMail _mail;
+		private frmMessage _mail;
 		private OpenPOP.MIMEParser.Message _msg;
 		private MailBox _mailBox;
 		private Thread _thread;
@@ -287,6 +287,7 @@ namespace MailMonitor
 					if(_msg!=null)
 					{
 						lvi=lvwMailBoxes.Items.Add(_msg.From+"("+_msg.FromEmail+")");
+						lvi.Tag=i;
 						lvi.SubItems.Add(_msg.Subject);
 						lvi.SubItems.Add(_msg.Date);
 						lvi.SubItems.Add(_msg.ContentLength.ToString());
@@ -412,13 +413,15 @@ namespace MailMonitor
 		{	
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				_mail=new frmMail();
-				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Index;
+				_mail=new frmMessage();
+				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Tag;
 				_mail.MailBox=_mailBox;
 				_mail.POPClient=_popClient;
 				_mail.Settings=_settings;
 				_mail.MessageID=lvwMailBoxes.SelectedItems[0].SubItems[4].Text;
 				_mail.ShowDialog(this);
+//				frmMessage f =new frmMessage();
+//				f.ShowDialog(this);
 			}
 		}
 
@@ -452,7 +455,7 @@ namespace MailMonitor
 			{
 				for(int i=lvwMailBoxes.SelectedItems.Count-1;i>0;i--)
 				{
-					_popClient.DeleteMessage(Convert.ToInt32(lvwMailBoxes.SelectedItems[i].Index));
+					_popClient.DeleteMessage((int)(lvwMailBoxes.SelectedItems[i].Tag));
 				}
 				InitEMails();
 			}
@@ -462,7 +465,7 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				OpenPOP.MIMEParser.Message msg=_popClient.GetMessage(lvwMailBoxes.SelectedItems[0].Index,false);
+				OpenPOP.MIMEParser.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag,false);
 				dlgSave.FileName=_msg.Subject;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)			

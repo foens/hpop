@@ -37,8 +37,6 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblAttachments;
 		private System.Windows.Forms.ListView lvwAttachments;
 		private System.Windows.Forms.StatusBar sbrMain;
-		private System.Windows.Forms.StatusBarPanel sbpSize;
-		private System.Windows.Forms.StatusBarPanel sbpSentTime;
 		private AxSHDocVw.AxWebBrowser wbBody;
 		private System.Windows.Forms.ImageList imlMessage;
 		private System.Windows.Forms.SaveFileDialog dlgSave;
@@ -110,8 +108,6 @@ namespace MailMonitor
 			this.imlMessage = new System.Windows.Forms.ImageList(this.components);
 			this.wbBody = new AxSHDocVw.AxWebBrowser();
 			this.sbrMain = new System.Windows.Forms.StatusBar();
-			this.sbpSize = new System.Windows.Forms.StatusBarPanel();
-			this.sbpSentTime = new System.Windows.Forms.StatusBarPanel();
 			this.dlgSave = new System.Windows.Forms.SaveFileDialog();
 			this.mmuMail = new System.Windows.Forms.MainMenu();
 			this.mnuFile = new System.Windows.Forms.MenuItem();
@@ -122,8 +118,6 @@ namespace MailMonitor
 			this.mnuDelete = new System.Windows.Forms.MenuItem();
 			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.wbBody)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.sbpSize)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.sbpSentTime)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// lblSender
@@ -216,25 +210,10 @@ namespace MailMonitor
 			// 
 			this.sbrMain.Location = new System.Drawing.Point(0, 235);
 			this.sbrMain.Name = "sbrMain";
-			this.sbrMain.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
-																					   this.sbpSize,
-																					   this.sbpSentTime});
 			this.sbrMain.ShowPanels = true;
 			this.sbrMain.Size = new System.Drawing.Size(504, 22);
 			this.sbrMain.TabIndex = 9;
 			this.sbrMain.Text = "Welcome!";
-			// 
-			// sbpSize
-			// 
-			this.sbpSize.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Contents;
-			this.sbpSize.MinWidth = 120;
-			this.sbpSize.Width = 120;
-			// 
-			// sbpSentTime
-			// 
-			this.sbpSentTime.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Spring;
-			this.sbpSentTime.MinWidth = 120;
-			this.sbpSentTime.Width = 368;
 			// 
 			// mmuMail
 			// 
@@ -303,8 +282,6 @@ namespace MailMonitor
 			this.Load += new System.EventHandler(this.frmMail_Load);
 			this.Closed += new System.EventHandler(this.frmMail_Closed);
 			((System.ComponentModel.ISupportInitialize)(this.wbBody)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.sbpSize)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.sbpSentTime)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -413,8 +390,7 @@ namespace MailMonitor
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
 				
-				sbrMain.Panels[0].Text=_msg.ContentLength.ToString();
-				sbrMain.Panels[1].Text=_msg.DateTimeInfo;
+				sbrMain.Text="Size:"+_msg.ContentLength.ToString() + "  Sent Time:" + _msg.DateTimeInfo;
 			}
 			catch(Exception ex)
 			{
@@ -437,7 +413,7 @@ namespace MailMonitor
 						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
 						{
-							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage(true);
+							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage(true,false);
 							string attachmentNames="";
 							bool blnRet=false;
 							if(m2.AttachmentCount>0)

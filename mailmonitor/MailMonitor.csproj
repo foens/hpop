@@ -106,13 +106,13 @@
                     WrapperTool = "aximp"
                 />
                 <Reference
-                    Name = "MIMEParser"
-                    Project = "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
+                    Name = "OpenPOP"
+                    Project = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
                 <Reference
-                    Name = "OpenPOP"
-                    Project = "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
+                    Name = "MIMEParser"
+                    Project = "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
             </References>
@@ -177,6 +177,16 @@
                 <File
                     RelPath = "Forms\frmMain.resx"
                     DependentUpon = "frmMain.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\frmMessage.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\frmMessage.resx"
+                    DependentUpon = "frmMessage.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File

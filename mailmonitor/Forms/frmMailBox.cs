@@ -49,7 +49,7 @@ namespace MailMonitor
 		private bool _loaded;
 		private bool _dirty;
 		private System.Windows.Forms.CheckBox chkUse;
-		private bool _new;
+		private bool _new=false;
 //		private bool _auto;
 //		private bool _driven;
 
