@@ -269,7 +269,7 @@ namespace MailMonitor
 				_popClient.Disconnect();
 				_popClient.ReceiveContentSleepInterval=1;
 				_popClient.WaitForResponseInterval=10;
-				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port);
+				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port, _mailBox.UseSsl);
 				_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
 
 				_count=_popClient.GetMessageCount();

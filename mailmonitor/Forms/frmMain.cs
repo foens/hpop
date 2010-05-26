@@ -1031,7 +1031,7 @@ namespace MailMonitor
 				_popClient.WaitForResponseInterval=10;
 				_popClient.SendTimeOut=_settings.ServerTimeout*1000;
 				_popClient.ReceiveTimeOut=_settings.ServerTimeout*1000;
-				_popClient.Connect(mailBox.ServerAddress,mailBox.Port);
+				_popClient.Connect(mailBox.ServerAddress,mailBox.Port,  mailBox.UseSsl);
 				_popClient.Authenticate(mailBox.UserName,mailBox.Password);
 
 				int intCount=_popClient.GetMessageCount();

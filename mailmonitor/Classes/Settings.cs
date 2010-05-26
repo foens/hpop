@@ -21,6 +21,7 @@ namespace MailMonitor
 		private string _password;
 		private string _desccription;
 		private bool _use;
+	    private bool _useSsl;
 
 
 		public MailBox()
@@ -72,6 +73,12 @@ namespace MailMonitor
 			get{return _use;}
 			set{_use=value;}
 		}
+
+        public bool UseSsl
+        {
+            get { return _useSsl; }
+            set { _useSsl = value; }
+        }
 
 	}
 
