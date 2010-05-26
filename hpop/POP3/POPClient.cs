@@ -64,78 +64,38 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Event that fires when begin to connect with target POP3 server.
 		/// </summary>
-		public event EventHandler CommunicationBegan;
+		// Using delegate { } there is no need for null checking
+        // which produces much cleaner code
+		public event EventHandler CommunicationBegan = delegate { };
 		/// <summary>
 		/// Event that fires when connected with target POP3 server.
 		/// </summary>
-		public event EventHandler CommunicationOccured;
+		public event EventHandler CommunicationOccured = delegate { };
 
 		/// <summary>
 		/// Event that fires when disconnected with target POP3 server.
 		/// </summary>
-		public event EventHandler CommunicationLost;
+        public event EventHandler CommunicationLost = delegate { };
 
 		/// <summary>
 		/// Event that fires when authentication began with target POP3 server.
 		/// </summary>
-		public event EventHandler AuthenticationBegan;
+        public event EventHandler AuthenticationBegan = delegate { };
 
 		/// <summary>
 		/// Event that fires when authentication finished with target POP3 server.
 		/// </summary>
-		public event EventHandler AuthenticationFinished;
+        public event EventHandler AuthenticationFinished = delegate { };
 
 		/// <summary>
 		/// Event that fires when message transfer has begun.
 		/// </summary>		
-		public event EventHandler MessageTransferBegan;
+        public event EventHandler MessageTransferBegan = delegate { };
 		
 		/// <summary>
 		/// Event that fires when message transfer has finished.
 		/// </summary>
-		public event EventHandler MessageTransferFinished;
-
-		internal void OnCommunicationBegan(EventArgs e)
-		{
-			if (CommunicationBegan != null)
-				CommunicationBegan(this, e);
-		}
-
-		internal void OnCommunicationOccured(EventArgs e)
-		{
-			if (CommunicationOccured != null)
-				CommunicationOccured(this, e);
-		}
-
-		internal void OnCommunicationLost(EventArgs e)
-		{
-			if (CommunicationLost != null)
-				CommunicationLost(this, e);
-		}
-
-		internal void OnAuthenticationBegan(EventArgs e)
-		{
-			if (AuthenticationBegan != null)
-				AuthenticationBegan(this, e);
-		}
-
-		internal void OnAuthenticationFinished(EventArgs e)
-		{
-			if (AuthenticationFinished != null)
-				AuthenticationFinished(this, e);
-		}
-
-		internal void OnMessageTransferBegan(EventArgs e)
-		{
-			if (MessageTransferBegan != null)
-				MessageTransferBegan(this, e);
-		}
-		
-		internal void OnMessageTransferFinished(EventArgs e)
-		{
-			if (MessageTransferFinished != null)
-				MessageTransferFinished(this, e);
-		}
+        public event EventHandler MessageTransferFinished = delegate { };
 
 		private const string RESPONSE_OK="+OK";
 		//private const string RESPONSE_ERR="-ERR";
@@ -143,16 +103,9 @@ namespace OpenPOP.POP3
 		private StreamReader reader;
 		private StreamWriter writer;
 		private string _Error = "";
-		private int _receiveTimeOut=60000;
-		private int _sendTimeOut=60000;
-		private int _receiveBufferSize=4090;
-		private int _sendBufferSize=4090;
-		private string _basePath=null;
+	    private string _basePath=null;
 		private bool _receiveFinish=false;
-		private bool _autoDecodeMSTNEF=true;
-		private int _waitForResponseInterval=200;
-		private int _receiveContentSleepInterval=100;
-		private string _aPOPTimestamp;
+	    private string _aPOPTimestamp;
 		private string _lastCommandResponse;
 		private bool _connected=true;
 
@@ -167,34 +120,22 @@ namespace OpenPOP.POP3
 			get{return _aPOPTimestamp;}
 		}
 
-		/// <summary>
-		/// receive content sleep interval
-		/// </summary>
-		public int ReceiveContentSleepInterval
-		{
-			get{return _receiveContentSleepInterval;}
-			set{_receiveContentSleepInterval=value;}
-		}
+	    /// <summary>
+	    /// receive content sleep interval
+	    /// </summary>
+	    public int ReceiveContentSleepInterval { get; set; }
 
-		/// <summary>
-		/// wait for response interval
-		/// </summary>
-		public int WaitForResponseInterval
-		{
-			get{return _waitForResponseInterval;}
-			set{_waitForResponseInterval=value;}
-		}
+	    /// <summary>
+	    /// wait for response interval
+	    /// </summary>
+	    public int WaitForResponseInterval { get; set; }
 
-		/// <summary>
-		/// whether auto decoding MS-TNEF attachment files
-		/// </summary>
-		public bool AutoDecodeMSTNEF
-		{
-			get{return _autoDecodeMSTNEF;}
-			set{_autoDecodeMSTNEF=value;}
-		}
+	    /// <summary>
+	    /// whether auto decoding MS-TNEF attachment files
+	    /// </summary>
+	    public bool AutoDecodeMSTNEF { get; set; }
 
-		/// <summary>
+	    /// <summary>
 		/// path to extract MS-TNEF attachment files
 		/// </summary>
 		public string BasePath
@@ -209,55 +150,40 @@ namespace OpenPOP.POP3
 					else
 						_basePath=value+"\\";
 				}
-				catch
+				catch (Exception)
 				{
+                    // Why is there a catch here???
 				}
 			}
 		}
 
-		/// <summary>
-		/// Receive timeout for the connection to the SMTP server in milliseconds.
-		/// The default value is 60000 milliseconds.
-		/// </summary>
-		public int ReceiveTimeOut
-		{
-			get{return _receiveTimeOut;}
-			set{_receiveTimeOut=value;}
-		}
+	    /// <summary>
+	    /// Receive timeout for the connection to the SMTP server in milliseconds.
+	    /// The default value is 60000 milliseconds.
+	    /// </summary>
+	    public int ReceiveTimeOut { get; set; }
 
-		/// <summary>
-		/// Send timeout for the connection to the SMTP server in milliseconds.
-		/// The default value is 60000 milliseconds.
-		/// </summary>
-		public int SendTimeOut
-		{
-			get{return _sendTimeOut;}
-			set{_sendTimeOut=value;}
-		}
+	    /// <summary>
+	    /// Send timeout for the connection to the SMTP server in milliseconds.
+	    /// The default value is 60000 milliseconds.
+	    /// </summary>
+	    public int SendTimeOut { get; set; }
 
-		/// <summary>
-		/// Receive buffer size
-		/// </summary>
-		public int ReceiveBufferSize
-		{
-			get{return _receiveBufferSize;}
-			set{_receiveBufferSize=value;}
-		}
+	    /// <summary>
+	    /// Receive buffer size
+	    /// </summary>
+	    public int ReceiveBufferSize { get; set; }
 
-		/// <summary>
-		/// Send buffer size
-		/// </summary>
-		public int SendBufferSize
-		{
-			get{return _sendBufferSize;}
-			set{_sendBufferSize=value;}
-		}
+	    /// <summary>
+	    /// Send buffer size
+	    /// </summary>
+	    public int SendBufferSize { get; set; }
 
-		private void WaitForResponse(bool blnCondiction, int intInterval)
+	    private void WaitForResponse(bool blnCondiction, int intInterval)
 		{
 			if(intInterval==0)
 				intInterval=WaitForResponseInterval;
-			while(!blnCondiction==true)
+			while(!blnCondiction)
 			{
 				Thread.Sleep(intInterval);
 			}
@@ -281,9 +207,9 @@ namespace OpenPOP.POP3
 			while(!rdReader.BaseStream.CanRead)
 			{
 				tsSpan=DateTime.Now.Subtract(dtStart);
-				if(tsSpan.Milliseconds>_receiveTimeOut)
+				if(tsSpan.Milliseconds>ReceiveTimeOut)
 					break;
-				Thread.Sleep(_waitForResponseInterval);
+				Thread.Sleep(WaitForResponseInterval);
 			}
 		}
 
@@ -316,7 +242,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="strResponse">string to examine</param>
 		/// <returns>true if response is an "+OK" string</returns>
-		private bool IsOkResponse(string strResponse)
+		private static bool IsOkResponse(string strResponse)
 		{
 			return (strResponse.Substring(0, 3) == RESPONSE_OK);
 		}
@@ -324,7 +250,6 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// get response content
 		/// </summary>
-		/// <param name="strResponse">string to examine</param>
 		/// <returns>response content</returns>
 		private string GetResponseContent()
 		{
@@ -351,8 +276,8 @@ namespace OpenPOP.POP3
 					_lastCommandResponse = reader.ReadLine();				
 					return IsOkResponse(_lastCommandResponse);
 				}
-				else
-					return false;
+				
+				return false;
 			}
 			catch(Exception e)
 			{
@@ -402,22 +327,21 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public POPClient()
 		{
-			Utility.Log=false;
-		}		
-
-		/// <summary>
-		/// Construct new POPClient
-		/// </summary>
-		public POPClient(string strHost,int intPort,string strlogin,string strPassword,AuthenticationMethod authenticationMethod)
-		{
-			Connect(strHost, intPort, false);
-			Authenticate(strlogin,strPassword,authenticationMethod);
+		    SendBufferSize = 4090;
+		    ReceiveBufferSize = 4090;
+		    SendTimeOut = 60000;
+		    ReceiveTimeOut = 60000;
+		    AutoDecodeMSTNEF = true;
+		    WaitForResponseInterval = 200;
+		    ReceiveContentSleepInterval = 100;
+		    Utility.Log=false;
 		}
 
         /// <summary>
-        /// Construct new POPClient
+        /// Construct new POPClient, connects to the server and authenticates the user
         /// </summary>
         public POPClient(string strHost, int intPort, string strlogin, string strPassword, AuthenticationMethod authenticationMethod, bool useSsl)
+            : this()
         {
             Connect(strHost, intPort, useSsl);
             Authenticate(strlogin, strPassword, authenticationMethod);
@@ -431,13 +355,13 @@ namespace OpenPOP.POP3
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
 		public void Connect(string strHost,int intPort, bool useSsl)
 		{
-            OnCommunicationBegan(EventArgs.Empty);
+            CommunicationBegan(this, EventArgs.Empty);
 
             clientSocket = new TcpClient();
-            clientSocket.ReceiveTimeout = _receiveTimeOut;
-            clientSocket.SendTimeout = _sendTimeOut;
-            clientSocket.ReceiveBufferSize = _receiveBufferSize;
-            clientSocket.SendBufferSize = _sendBufferSize;
+            clientSocket.ReceiveTimeout = ReceiveTimeOut;
+            clientSocket.SendTimeout = SendTimeOut;
+            clientSocket.ReceiveBufferSize = ReceiveBufferSize;
+            clientSocket.SendBufferSize = SendBufferSize;
 
             try
             {
@@ -485,7 +409,7 @@ namespace OpenPOP.POP3
             {
                 ExtractApopTimestamp(strResponse);
                 _connected = true;
-                OnCommunicationOccured(EventArgs.Empty);
+                CommunicationOccured(this, EventArgs.Empty);
             }
             else
             {
@@ -505,16 +429,17 @@ namespace OpenPOP.POP3
 				clientSocket.ReceiveTimeout=500;
 				clientSocket.SendTimeout=500;
 				SendCommand("QUIT",true);
-				clientSocket.ReceiveTimeout=_receiveTimeOut;
-				clientSocket.SendTimeout=_sendTimeOut;
+				clientSocket.ReceiveTimeout=ReceiveTimeOut;
+				clientSocket.SendTimeout=SendTimeOut;
 				reader.Close();
 				writer.Close();
 				clientSocket.GetStream().Close();
 				clientSocket.Close();
 			}
-			catch
+			catch (Exception)
 			{
-				//Utility.LogError("Disconnect():"+e.Message);
+                // We don't care about errors in disconnect
+			    //Utility.LogError("Disconnect():"+e.Message);
 			}
 			finally
 			{
@@ -522,7 +447,7 @@ namespace OpenPOP.POP3
 				writer=null;
 				clientSocket=null;
 			}
-			OnCommunicationLost(EventArgs.Empty);
+			CommunicationLost(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -588,7 +513,7 @@ namespace OpenPOP.POP3
 		/// <param name="strPassword">password</param>
 		private void AuthenticateUsingUSER(string strlogin,string strPassword)
 		{				
-			OnAuthenticationBegan(EventArgs.Empty);
+			AuthenticationBegan(this, EventArgs.Empty);
 
 			if(!SendCommand("USER " + strlogin))
 			{
@@ -605,14 +530,12 @@ namespace OpenPOP.POP3
 					Utility.LogError("AuthenticateUsingUSER():maildrop is locked");
 					throw new PopServerLockException();			
 				}
-				else
-				{
-					Utility.LogError("AuthenticateUsingUSER():wrong password or " + GetResponseContent());
-					throw new InvalidPasswordException();
-				}
+
+			    Utility.LogError("AuthenticateUsingUSER():wrong password or " + GetResponseContent());
+			    throw new InvalidPasswordException();
 			}
 			
-			OnAuthenticationFinished(EventArgs.Empty);
+			AuthenticationFinished(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -622,7 +545,7 @@ namespace OpenPOP.POP3
 		/// <param name="strPassword">password</param>
 		private void AuthenticateUsingAPOP(string strlogin,string strPassword)
 		{
-			OnAuthenticationBegan(EventArgs.Empty);
+			AuthenticationBegan(this, EventArgs.Empty);
 
 			if(!SendCommand("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword)))
 			{
@@ -630,7 +553,7 @@ namespace OpenPOP.POP3
 				throw new InvalidLoginOrPasswordException();		
 			}
 
-			OnAuthenticationFinished(EventArgs.Empty);
+			AuthenticationFinished(this, EventArgs.Empty);
 		}
 
 /*		private string GetCommand(string input)
@@ -646,7 +569,7 @@ namespace OpenPOP.POP3
 			}
 		}*/
 
-		private string[] GetParameters(string input)
+		private static string[] GetParameters(string input)
 		{
 			string []temp=input.Split(' ');
 			string []retStringArray=new string[temp.Length-1];
@@ -670,7 +593,7 @@ namespace OpenPOP.POP3
 		/// <param name="intMessageIndex"> </param>
 		public bool DeleteMessage(int intMessageIndex) 
 		{
-			return SendCommand("DELE " + intMessageIndex.ToString());
+			return SendCommand("DELE " + intMessageIndex);
 		}
 
 		/// <summary>
@@ -727,11 +650,11 @@ namespace OpenPOP.POP3
 		/// <returns>Message object</returns>
 		public MIMEParser.Message GetMessageHeader(int intMessageNumber)
 		{
-			OnMessageTransferBegan(EventArgs.Empty);
+			MessageTransferBegan(this, EventArgs.Empty);
 
-			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber.ToString()+" 0", true);
+			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber+" 0", true);
 			
-			OnMessageTransferFinished(EventArgs.Empty);
+			MessageTransferFinished(this, EventArgs.Empty);
 
 			return msg;
 		}
@@ -743,7 +666,7 @@ namespace OpenPOP.POP3
 		public string GetMessageUID(int intMessageNumber)
 		{
 			string[] strValues=null;
-			if(SendCommand("UIDL " + intMessageNumber.ToString()))
+			if(SendCommand("UIDL " + intMessageNumber))
 			{
 				strValues = GetParameters(_lastCommandResponse);
 			}
@@ -766,10 +689,8 @@ namespace OpenPOP.POP3
 				}
 				return uids;
 			}
-			else
-			{
-				return null;
-			}
+			
+            return null;
 		}
 
 		/// <summary>
@@ -790,10 +711,8 @@ namespace OpenPOP.POP3
 				}
 				return sizes;
 			}
-			else
-			{
-				return null;
-			}
+			
+			return null;
 		}
 
 		/// <summary>
@@ -809,29 +728,28 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// read stream content
 		/// </summary>
-		/// <param name="intContentLength">length of content to read</param>
+		///// <param name="intContentLength">length of content to read</param>
 		/// <returns>content</returns>
-		private string ReceiveContent(int intContentLength)
+		private string ReceiveContent(/*int intContentLength*/)
 		{
-			string strResponse=null;
-			StringBuilder builder = new StringBuilder();
+		    StringBuilder builder = new StringBuilder();
 			
 			WaitForResponse(ref reader,WaitForResponseInterval);
 
-			strResponse = reader.ReadLine();
+			string strResponse = reader.ReadLine();
 			int intLines=0;
-			int intLen=0;
+			//int intLen=0;
 
 			while (strResponse!=".")// || (intLen<intContentLength)) //(strResponse.IndexOf(".")==0 && intLen<intContentLength)
 			{
 				builder.Append(strResponse + "\r\n");
 				intLines+=1;
-				intLen+=strResponse.Length+"\r\n".Length;
+				//intLen+=strResponse.Length+"\r\n".Length;
 				
 				WaitForResponse(ref reader,1);
 
 				strResponse = reader.ReadLine();
-				if((intLines % _receiveContentSleepInterval)==0) //make an interval pause to ensure response from server
+				if((intLines % ReceiveContentSleepInterval)==0) //make an interval pause to ensure response from server
 					Thread.Sleep(1);
 			}
 
@@ -845,14 +763,15 @@ namespace OpenPOP.POP3
 		/// get message info
 		/// </summary>
 		/// <param name="number">message number on server</param>
+        /// <param name="blnOnlyHeader">Only return message header?</param>
 		/// <returns>Message object</returns>
-		public MIMEParser.Message GetMessage(int intNumber, bool blnOnlyHeader)
+		public MIMEParser.Message GetMessage(int number, bool blnOnlyHeader)
 		{			
-			OnMessageTransferBegan(EventArgs.Empty);
+			MessageTransferBegan(this, EventArgs.Empty);
 
-			MIMEParser.Message msg=FetchMessage("RETR " + intNumber.ToString(), blnOnlyHeader);
+			MIMEParser.Message msg=FetchMessage("RETR " + number, blnOnlyHeader);
 
-			OnMessageTransferFinished(EventArgs.Empty);
+			MessageTransferFinished(this, EventArgs.Empty);
 
 			return msg;
 		}
@@ -871,9 +790,9 @@ namespace OpenPOP.POP3
 
 			try
 			{
-				string receivedContent=ReceiveContent(-1);
+				string receivedContent=ReceiveContent( /* -1 */);
 
-				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,_autoDecodeMSTNEF,receivedContent,blnOnlyHeader);
+				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,AutoDecodeMSTNEF,receivedContent,blnOnlyHeader);
 
 				WaitForResponse(_receiveFinish,WaitForResponseInterval);
 
@@ -888,4 +807,3 @@ namespace OpenPOP.POP3
 
 	}
 }
-
