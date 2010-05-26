@@ -471,6 +471,12 @@ namespace OpenPOP.POP3
 
             writer.AutoFlush = true;
 
+            // Specify that LineEndings are \r\n, which is described in the
+            // POP3 RFC: http://www.ietf.org/rfc/rfc1939.txt
+            // This would otherwise work fine on Windows, as the default is \r\n,
+            // but it would not work on Linux (Mono)
+		    writer.NewLine = "\r\n";
+
             WaitForResponse(ref reader, WaitForResponseInterval);
 
             string strResponse = reader.ReadLine();
