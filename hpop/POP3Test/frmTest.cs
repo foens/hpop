@@ -586,7 +586,7 @@ namespace OpenPOP.NET_Sample_App
 					result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 					if(result==DialogResult.Yes)
 					{
-						MIMEParser.Message m2=att.DecodeAsMessage();
+						MIMEParser.Message m2=att.DecodeAsMessage(true, false);
 						string attachmentNames="";
 						bool blnRet=false;
 						if(m2.AttachmentCount>0)

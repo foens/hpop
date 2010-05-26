@@ -42,7 +42,7 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblTitle;
 		private Settings _settings;
 		private POPClient _popClient=new POPClient();
-		private frmMessage _mail;
+		private frmMail _mail;
 		private OpenPOP.MIMEParser.Message _msg;
 		private MailBox _mailBox;
 		private Thread _thread;
@@ -413,15 +413,13 @@ namespace MailMonitor
 		{	
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				_mail=new frmMessage();
-				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Tag;
+				_mail=new frmMail();
+				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Index;
 				_mail.MailBox=_mailBox;
 				_mail.POPClient=_popClient;
 				_mail.Settings=_settings;
 				_mail.MessageID=lvwMailBoxes.SelectedItems[0].SubItems[4].Text;
 				_mail.ShowDialog(this);
-//				frmMessage f =new frmMessage();
-//				f.ShowDialog(this);
 			}
 		}
 
