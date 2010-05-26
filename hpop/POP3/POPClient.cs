@@ -46,6 +46,7 @@
 *					2.added handling for PopServerLockException
 */
 using System;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
@@ -409,56 +410,83 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public POPClient(string strHost,int intPort,string strlogin,string strPassword,AuthenticationMethod authenticationMethod)
 		{
-			Connect(strHost, intPort);
+			Connect(strHost, intPort, false);
 			Authenticate(strlogin,strPassword,authenticationMethod);
 		}
+
+        /// <summary>
+        /// Construct new POPClient
+        /// </summary>
+        public POPClient(string strHost, int intPort, string strlogin, string strPassword, AuthenticationMethod authenticationMethod, bool useSsl)
+        {
+            Connect(strHost, intPort, useSsl);
+            Authenticate(strlogin, strPassword, authenticationMethod);
+        }
 
 		/// <summary>
 		/// connect to remote server
 		/// </summary>
 		/// <param name="strHost">POP3 host</param>
 		/// <param name="intPort">POP3 port</param>
-		public void Connect(string strHost,int intPort)
+		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
+		public void Connect(string strHost,int intPort, bool useSsl)
 		{
-			OnCommunicationBegan(EventArgs.Empty);
+            OnCommunicationBegan(EventArgs.Empty);
 
-			clientSocket=new TcpClient();
-			clientSocket.ReceiveTimeout=_receiveTimeOut;
-			clientSocket.SendTimeout=_sendTimeOut;
-			clientSocket.ReceiveBufferSize=_receiveBufferSize;
-			clientSocket.SendBufferSize=_sendBufferSize;
+            clientSocket = new TcpClient();
+            clientSocket.ReceiveTimeout = _receiveTimeOut;
+            clientSocket.SendTimeout = _sendTimeOut;
+            clientSocket.ReceiveBufferSize = _receiveBufferSize;
+            clientSocket.SendBufferSize = _sendBufferSize;
 
-			try
-			{
-				clientSocket.Connect(strHost,intPort);				
-			}
-			catch(SocketException e)
-			{				
-				Disconnect();
-				Utility.LogError("Connect():"+e.Message);
-				throw new PopServerNotFoundException();
-			}
+            try
+            {
+                clientSocket.Connect(strHost, intPort);
+            }
+            catch (SocketException e) 
+            {
+                Disconnect();
+                Utility.LogError("Connect():" + e.Message);
+                throw new PopServerNotFoundException();
+            }
 
-			reader=new StreamReader(clientSocket.GetStream(),Encoding.Default,true);
-			writer=new StreamWriter(clientSocket.GetStream());
-			writer.AutoFlush=true;
-		
-			WaitForResponse(ref reader,WaitForResponseInterval);
+            if (useSsl)
+            {
+                // If we want to use SSL, open a new SSLStream on top of the open TCP stream.
+                // We also want to close the TCP stream when the SSL stream is closed
+                SslStream stream = new SslStream(clientSocket.GetStream(), false);
 
-			string strResponse=reader.ReadLine();
+                // Authenticate the server
+                stream.AuthenticateAsClient(strHost);
 
-			if(IsOkResponse(strResponse))
-			{
-				ExtractApopTimestamp(strResponse);
-				_connected=true;
-				OnCommunicationOccured(EventArgs.Empty);
-			}
-			else
-			{
-				Disconnect();
-				Utility.LogError("Connect():"+"Error when login, maybe POP3 server not exist");
-				throw new PopServerNotAvailableException();
-			}
+                reader = new StreamReader(stream);
+                writer = new StreamWriter(stream);
+            }
+            else
+            {
+                // If we do not want to use SSL, use plain TCP
+                reader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
+                writer = new StreamWriter(clientSocket.GetStream());
+            }
+
+            writer.AutoFlush = true;
+
+            WaitForResponse(ref reader, WaitForResponseInterval);
+
+            string strResponse = reader.ReadLine();
+
+            if (IsOkResponse(strResponse))
+            {
+                ExtractApopTimestamp(strResponse);
+                _connected = true;
+                OnCommunicationOccured(EventArgs.Empty);
+            }
+            else
+            {
+                Disconnect();
+                Utility.LogError("Connect():" + "Error when login, maybe POP3 server not exist");
+                throw new PopServerNotAvailableException();
+            }
 		}
 
 		/// <summary>
