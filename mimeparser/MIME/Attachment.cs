@@ -408,22 +408,22 @@ namespace OpenPOP.MIMEParser
 					
 					///<bug>reported by grandepuffo @ https://sourceforge.net/forum/message.php?msg_id=2589759
 					//_contentFileName=values[1];
-					if(values.Length>1) 
-					{
-						_contentFileName=values[1];
-					} 
-					else 
-					{
-						_contentFileName="";
-					}
-					
-					if(_contentFileName=="")
-					{
-						_contentFileName=srReader.ReadLine();
-						strLine=_contentFileName;
-					}
 
-					_contentFileName=_contentFileName.Replace("\t","");
+                    if (string.IsNullOrEmpty(_contentFileName))
+                    {
+                        if (values.Length > 1)
+                            _contentFileName = values[1];
+                        else
+                            _contentFileName = "";
+
+                        if (_contentFileName == "")
+                        {
+                            _contentFileName = srReader.ReadLine();
+                            strLine = _contentFileName;
+                        }
+                    }
+
+			        _contentFileName=_contentFileName.Replace("\t","");
 					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
 					_contentFileName=Utility.DecodeText(_contentFileName);
 					break;
