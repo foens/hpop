@@ -58,55 +58,34 @@ namespace OpenPOP.MIMEParser
 	public class Attachment : IComparable
 	{
 		#region Member Variables
-		private string _contentType=null;
-		private string _contentCharset=null;
-		private string _contentFormat=null;
-		private string _contentTransferEncoding=null;
-		private string _contentDescription=null;
-		private string _contentDisposition=null;
-		private string _contentFileName="";
-		private string _defaultFileName="body.htm";
-		private string _defaultFileName2="body*.htm";
-		private string _defaultReportFileName="report.htm";
-		private string _defaultMIMEFileName="body.eml";
-		private string _defaultMSTNEFFileName="winmail.dat";
-		private string _contentID=null;
-		private long _contentLength=0;
-		private string _rawAttachment=null;
-		private string _rawContent=null;
-		private bool _inBytes=false;
-		private byte[] _rawBytes=null;
-		#endregion
+
+	    private const string _defaultMSTNEFFileName="winmail.dat";
+        private const string _defaultMIMEFileName = "body.eml";
+        private const string _defaultReportFileName = "report.htm";
+        private const string _defaultFileName2 = "body*.htm";
+        private const string _defaultFileName = "body.htm";
+
+	    #endregion
 
 
 		#region Properties
-		/// <summary>
-		/// raw attachment content bytes
-		/// </summary>
-		public byte[] RawBytes
-		{
-			get{return _rawBytes;}
-			set{_rawBytes=value;}
-		}
 
-		/// <summary>
-		/// whether attachment is in bytes
-		/// </summary>
-		public bool InBytes
-		{
-			get{return _inBytes;}
-			set{_inBytes=value;}
-		}
+	    /// <summary>
+	    /// raw attachment content bytes
+	    /// </summary>
+	    public byte[] RawBytes { get; set; }
 
-		/// <summary>
-		/// Content length
-		/// </summary>
-		public long ContentLength
-		{
-			get{return _contentLength;}
-		}
+	    /// <summary>
+	    /// whether attachment is in bytes
+	    /// </summary>
+	    public bool InBytes { get; set; }
 
-		/// <summary>
+	    /// <summary>
+	    /// Content length
+	    /// </summary>
+	    public long ContentLength { get; private set; }
+
+	    /// <summary>
 		/// verify the attachment whether it is a real attachment or not
 		/// </summary>
 		/// <remarks>this is so far not comprehensive and needs more work to finish</remarks>
@@ -122,7 +101,7 @@ namespace OpenPOP.MIMEParser
 									return true;
 								else
 									return (_contentFileName!="");*/
-				if ((_contentType==null||_contentFileName=="") && _contentID==null)//&&_contentType.ToLower().IndexOf("text/")!=-1)
+				if ((ContentType==null||ContentFileName=="") && ContentID==null)//&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
 				else
 					return false;
@@ -130,124 +109,77 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
-		/// <summary>
-		/// Content format
-		/// </summary>
-		public string ContentFormat
-		{
-			get{return _contentFormat;}
-		}
+	    /// <summary>
+	    /// Content format
+	    /// </summary>
+	    public string ContentFormat { get; private set; }
 
-		/// <summary>
-		/// Content charset
-		/// </summary>
-		public string ContentCharset
-		{
-			get{return _contentCharset;}
-		}
+	    /// <summary>
+	    /// Content charset
+	    /// </summary>
+	    public string ContentCharset { get; private set; }
 
-		/// <summary>
-		/// default file name
-		/// </summary>
-		public string DefaultFileName
-		{
-			get{return _defaultFileName;}
-			set{_defaultFileName=value;}
-		}
+	    /// <summary>
+	    /// default file name
+	    /// </summary>
+	    public string DefaultFileName { get; set; }
 
-		/// <summary>
-		/// default file name 2
-		/// </summary>
-		public string DefaultFileName2
-		{
-			get{return _defaultFileName2;}
-			set{_defaultFileName2=value;}
-		}
+	    /// <summary>
+	    /// default file name 2
+	    /// </summary>
+	    public string DefaultFileName2 { get; set; }
 
-		/// <summary>
-		/// default report file name
-		/// </summary>
-		public string DefaultReportFileName
-		{
-			get{return _defaultReportFileName;}
-			set{_defaultReportFileName=value;}
-		}
+	    /// <summary>
+	    /// default report file name
+	    /// </summary>
+	    public string DefaultReportFileName { get; set; }
 
-		/// <summary>
-		/// default MIME File Name
-		/// </summary>
-		public string DefaultMIMEFileName
-		{
-			get{return _defaultMIMEFileName;}
-			set{_defaultMIMEFileName=value;}
-		}
+	    /// <summary>
+	    /// default MIME File Name
+	    /// </summary>
+	    public string DefaultMIMEFileName { get; set; }
 
-		/// <summary>
-		/// Content Type
-		/// </summary>
-		public string ContentType
-		{
-			get{return _contentType;}
-		}
+	    /// <summary>
+	    /// Content Type
+	    /// </summary>
+	    public string ContentType { get; private set; }
 
-		/// <summary>
-		/// Content Transfer Encoding
-		/// </summary>
-		public string ContentTransferEncoding
-		{
-			get{return _contentTransferEncoding;}
-		}
+	    /// <summary>
+	    /// Content Transfer Encoding
+	    /// </summary>
+	    public string ContentTransferEncoding { get; private set; }
 
-		/// <summary>
-		/// Content Description
-		/// </summary>
-		public string ContentDescription
-		{
-			get{return _contentDescription;}
-		}
+	    /// <summary>
+	    /// Content Description
+	    /// </summary>
+	    public string ContentDescription { get; private set; }
 
-		/// <summary>
-		/// Content File Name
-		/// </summary>
-		public string ContentFileName
-		{
-			get{return _contentFileName;}
-			set{_contentFileName=value;}
-		}
+	    /// <summary>
+	    /// Content File Name
+	    /// </summary>
+	    public string ContentFileName { get; set; }
 
-		/// <summary>
-		/// Content Disposition
-		/// </summary>
-		public string ContentDisposition
-		{
-			get{return _contentDisposition;}
-		}
+	    /// <summary>
+	    /// Content Disposition
+	    /// </summary>
+	    public string ContentDisposition { get; private set; }
 
-		/// <summary>
-		/// Content ID
-		/// </summary>
-		public string ContentID
-		{
-			get{return _contentID;}
-		}
+	    /// <summary>
+	    /// Content ID
+	    /// </summary>
+	    public string ContentID { get; private set; }
 
-		/// <summary>
-		/// Raw Content
-		/// </summary>
-		public string RawContent
-		{
-			get{return _rawContent;}
-		}
+	    /// <summary>
+	    /// Raw Content
+	    /// </summary>
+	    public string RawContent { get; private set; }
 
-		/// <summary>
-		/// Raw Attachment
-		/// </summary>
-		public string RawAttachment
-		{
-			get{return _rawAttachment;}
-		}
+	    /// <summary>
+	    /// Raw Attachment
+	    /// </summary>
+	    public string RawAttachment { get; private set; }
 
-		/// <summary>
+	    /// <summary>
 		/// decoded attachment in bytes
 		/// </summary>
 		public byte[] DecodedAttachment
@@ -263,11 +195,50 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// release all objects
 		/// </summary>
+		/// <remarks>
+		/// foens:
+		/// I do not belive destructors are needed for this purpose
+		/// My suggestion is therefore to remove this.
+		/// Please comment if reading this
+		/// </remarks>
 		~Attachment()
 		{
-			_rawBytes=null;
-			_rawAttachment=null;
+			RawBytes=null;
+			RawAttachment=null;
 		}
+
+        /// <summary>
+        /// Used to create a new attachment internally to avoid any
+        /// duplicate code for setting up an attachment
+        /// </summary>
+        /// <param name="bytAttachment">attachment bytes content</param>
+        /// <param name="lngFileLength">file length</param>
+        /// <param name="strFileName">file name</param>
+        /// <param name="strContentType">content type</param>
+        /// <param name="blnInBytes">wheter attachment is in bytes</param>
+        private Attachment(byte[] bytAttachment, long lngFileLength, string strFileName, string strContentType, bool blnInBytes)
+        {
+            // Setup defaults
+            RawAttachment = null;
+            RawContent = null;
+            ContentID = null;
+            ContentDisposition = null;
+            ContentDescription = null;
+            ContentTransferEncoding = null;
+            DefaultMIMEFileName = _defaultMIMEFileName;
+            DefaultReportFileName = _defaultReportFileName;
+            DefaultFileName2 = _defaultFileName2;
+            DefaultFileName = _defaultFileName;
+            ContentCharset = null;
+            ContentFormat = null;
+
+            // Setup parameters
+            InBytes = blnInBytes;
+            RawBytes = bytAttachment;
+            ContentLength = lngFileLength;
+            ContentFileName = strFileName;
+            ContentType = strContentType;
+        }
 
 		/// <summary>
 		/// New Attachment
@@ -277,13 +248,8 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strFileName">file name</param>
 		/// <param name="strContentType">content type</param>
 		public Attachment(byte[] bytAttachment, long lngFileLength, string strFileName, string strContentType)
-		{
-			_inBytes=true;
-			_rawBytes=bytAttachment;
-			_contentLength=lngFileLength;
-			_contentFileName=strFileName;
-			_contentType=strContentType;
-		}
+            : this(bytAttachment, lngFileLength, strFileName, strContentType, true)
+		{ }
 
 		/// <summary>
 		/// New Attachment
@@ -292,13 +258,8 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strFileName">file name</param>
 		/// <param name="strContentType">content type</param>
 		public Attachment(byte[] bytAttachment, string strFileName, string strContentType)
-		{
-			_inBytes=true;
-			_rawBytes=bytAttachment;
-			_contentLength=bytAttachment.Length;
-			_contentFileName=strFileName;
-			_contentType=strContentType;
-		}
+            : this(bytAttachment, bytAttachment.Length, strFileName, strContentType)
+		{ }
 
 		/// <summary>
 		/// New Attachment
@@ -307,13 +268,14 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strContentType">content type</param>
 		/// <param name="blnParseHeader">whether only parse the header or not</param>
 		public Attachment(string strAttachment,string strContentType, bool blnParseHeader)
+            : this(null, 0, "", null, false)
 		{
-			if(!blnParseHeader)
+		    if(!blnParseHeader)
 			{
-				_contentFileName=_defaultMSTNEFFileName;
-				_contentType=strContentType;
+				ContentFileName=_defaultMSTNEFFileName;
+				ContentType=strContentType;
 			}
-			this.NewAttachment(strAttachment,blnParseHeader);
+			NewAttachment(strAttachment,blnParseHeader);
 		}
 
 		/// <summary>
@@ -321,23 +283,24 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		/// <param name="strAttachment">attachment content</param>
 		public Attachment(string strAttachment)
-		{	
-			this.NewAttachment(strAttachment,true);
+            : this(null, 0, "", null, false)
+		{
+		    NewAttachment(strAttachment,true);
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// create attachment
 		/// </summary>
 		/// <param name="strAttachment">raw attachment text</param>
 		/// <param name="blnParseHeader">parse header</param>
 		private void NewAttachment(string strAttachment, bool blnParseHeader)
 		{
-			_inBytes=false;
+			InBytes=false;
 
 			if(strAttachment==null)
 				throw new ArgumentNullException("strAttachment");
 
-			_rawContent=strAttachment;
+			RawContent=strAttachment;
 
 			StringReader srReader=new StringReader(strAttachment);
 
@@ -349,13 +312,13 @@ namespace OpenPOP.MIMEParser
 					ParseHeader(srReader,ref strLine);
 					if(Utility.IsOrNullTextEx(strLine))
 						break;
-					else
-						strLine=srReader.ReadLine();
+					
+					strLine=srReader.ReadLine();
 				}
 			}
 
-			this._rawAttachment=srReader.ReadToEnd();
-			_contentLength=this._rawAttachment.Length;
+			RawAttachment=srReader.ReadToEnd();
+			ContentLength=RawAttachment.Length;
 		}
 
 		/// <summary>
@@ -367,68 +330,67 @@ namespace OpenPOP.MIMEParser
 		{
 			string []array=Utility.GetHeadersValue(strLine);//Regex.Split(strLine,":");
 			string []values=Regex.Split(array[1],";");//array[1].Split(';');
-			string strRet=null;
 
-			switch(array[0].ToUpper())
+		    switch(array[0].ToUpper())
 			{
 				case "CONTENT-TYPE":
 					if(values.Length>0)
-						_contentType=values[0].Trim();					
+						ContentType=values[0].Trim();					
 					if(values.Length>1)
 					{
-						_contentCharset=Utility.GetQuotedValue(values[1],"=","charset");
+						ContentCharset=Utility.GetQuotedValue(values[1],"=","charset");
 					}
 					if(values.Length>2)
 					{
-						_contentFormat=Utility.GetQuotedValue(values[2],"=","format");
+						ContentFormat=Utility.GetQuotedValue(values[2],"=","format");
 					}
-					_contentFileName=Utility.ParseFileName(strLine);
-					if(_contentFileName=="")
+					ContentFileName=Utility.ParseFileName(strLine);
+					if(ContentFileName=="")
 					{
-						strRet=srReader.ReadLine();
+						string strRet = srReader.ReadLine();
 						if(Utility.IsOrNullTextEx(strRet))
 						{
 							strLine="";
 							break;
 						}
-						_contentFileName=Utility.ParseFileName(strRet);
-						if(_contentFileName=="")
+						ContentFileName=Utility.ParseFileName(strRet);
+						if(ContentFileName=="")
 							ParseHeader(srReader,ref strRet);
 					}
 					break;
 				case "CONTENT-TRANSFER-ENCODING":
-					_contentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
+					ContentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
 					break;
 				case "CONTENT-DESCRIPTION":
-					_contentDescription=Utility.DecodeText(Utility.SplitOnSemiColon(array[1])[0].Trim());
+					ContentDescription=Utility.DecodeText(Utility.SplitOnSemiColon(array[1])[0].Trim());
 					break;
 				case "CONTENT-DISPOSITION":
 					if(values.Length>0)
-						_contentDisposition=values[0].Trim();
+						ContentDisposition=values[0].Trim();
 					
-					///<bug>reported by grandepuffo @ https://sourceforge.net/forum/message.php?msg_id=2589759
+					///bugfix reported by grandepuffo @ https://sourceforge.net/forum/message.php?msg_id=2589759
 					//_contentFileName=values[1];
 
-                    if (string.IsNullOrEmpty(_contentFileName))
+                    if (string.IsNullOrEmpty(ContentFileName))
                     {
                         if (values.Length > 1)
-                            _contentFileName = values[1];
+                            ContentFileName = values[1];
                         else
-                            _contentFileName = "";
+                            ContentFileName = "";
 
-                        if (_contentFileName == "")
+                        if (ContentFileName == "")
                         {
-                            _contentFileName = srReader.ReadLine();
-                            strLine = _contentFileName;
+                            ContentFileName = srReader.ReadLine();
+                            strLine = ContentFileName;
                         }
                     }
 
-			        _contentFileName=_contentFileName.Replace("\t","");
-					_contentFileName=Utility.GetQuotedValue(_contentFileName,"=","filename");
-					_contentFileName=Utility.DecodeText(_contentFileName);
+			        ContentFileName=ContentFileName.Replace("\t","");
+					ContentFileName=Utility.GetQuotedValue(ContentFileName,"=","filename");
+					ContentFileName=Utility.DecodeText(ContentFileName);
 					break;
 				case "CONTENT-ID":
-					_contentID=Utility.SplitOnSemiColon(array[1])[0].Trim('<').Trim('>');
+					ContentID=Utility.SplitOnSemiColon(array[1])[0].Trim('<').Trim('>');
 					break;
 			}
 		}
@@ -440,7 +402,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>true if encoding</returns>
 		private bool IsEncoding(string encoding)
 		{
-			return _contentTransferEncoding.ToLower().IndexOf(encoding.ToLower())!=-1;
+			return ContentTransferEncoding.ToLower().IndexOf(encoding.ToLower())!=-1;
 		}
 
 		/// <summary>
@@ -449,22 +411,22 @@ namespace OpenPOP.MIMEParser
 		/// <returns>Decoded attachment text</returns>
 		public string DecodeAsText()
 		{
-			string decodedAttachment=null;
+			string decodedAttachment;
 
 			try
 			{
-				if(_contentType.ToLower()=="message/rfc822".ToLower())
-					decodedAttachment=Utility.DecodeText(_rawAttachment);
-				else if(_contentTransferEncoding!=null)
+				if(ContentType.ToLower()=="message/rfc822".ToLower())
+					decodedAttachment=Utility.DecodeText(RawAttachment);
+				else if(ContentTransferEncoding!=null)
 				{
-					decodedAttachment=_rawAttachment;
+					decodedAttachment=RawAttachment;
 
 					if(!IsEncoding("7bit"))
 					{
-						if(IsEncoding("8bit")&&_contentCharset!=null&_contentCharset!="")
-							decodedAttachment=Utility.Change(decodedAttachment,_contentCharset);
+						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
+							decodedAttachment=Utility.Change(decodedAttachment,ContentCharset);
 
-						if(Utility.IsQuotedPrintable(_contentTransferEncoding))
+						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
 							decodedAttachment=DecodeQP.ConvertHexContent(decodedAttachment);
 						else if(IsEncoding("8bit"))
 						{ /* Do nothing, no decoding needed */ }
@@ -472,14 +434,14 @@ namespace OpenPOP.MIMEParser
 							decodedAttachment=Utility.deCodeB64s(Utility.RemoveNonB64(decodedAttachment));
 					}
 				}
-				else if(_contentCharset!=null)
-					decodedAttachment=Utility.Change(_rawAttachment,_contentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
+				else if(ContentCharset!=null)
+					decodedAttachment=Utility.Change(RawAttachment,ContentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
 				else
-					decodedAttachment=_rawAttachment;
+					decodedAttachment=RawAttachment;
 			}
 			catch
 			{
-				decodedAttachment=_rawAttachment;
+				decodedAttachment=RawAttachment;
 			}
 			return decodedAttachment;
 		}
@@ -493,7 +455,7 @@ namespace OpenPOP.MIMEParser
 		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine, bool blnUseRawContent)
 		{
 			bool blnRet=false;
-			string strContent=blnUseRawContent?_rawContent:_rawAttachment;
+			string strContent=blnUseRawContent?RawContent:RawAttachment;
 
 			/*if(blnRemoveHeaderBlankLine)
 			{
@@ -515,24 +477,24 @@ namespace OpenPOP.MIMEParser
 		/// <returns>Decoded attachment bytes</returns>
 		public byte[] DecodedAsBytes()
 		{
-			if(_rawAttachment==null)
+			if(RawAttachment==null)
 				return null;
-			if(_contentFileName!="")
+			if(ContentFileName!="")
 			{
-				byte []decodedBytes=null;
+				byte []decodedBytes;
 
-				if(_contentType!=null && _contentType.ToLower()=="message/rfc822".ToLower())
-					decodedBytes=Encoding.Default.GetBytes(Utility.DecodeText(_rawAttachment));
-				else if(_contentTransferEncoding!=null)
+				if(ContentType!=null && ContentType.ToLower()=="message/rfc822".ToLower())
+					decodedBytes=Encoding.Default.GetBytes(Utility.DecodeText(RawAttachment));
+				else if(ContentTransferEncoding!=null)
 				{
-					string bytContent=_rawAttachment;
+					string bytContent=RawAttachment;
 
 					if(!IsEncoding("7bit"))
 					{
-						if(IsEncoding("8bit")&&_contentCharset!=null&_contentCharset!="")
-							bytContent=Utility.Change(bytContent,_contentCharset);
+						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
+							bytContent=Utility.Change(bytContent,ContentCharset);
 
-						if(Utility.IsQuotedPrintable(_contentTransferEncoding))
+						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
 							decodedBytes=Encoding.Default.GetBytes(DecodeQP.ConvertHexContent(bytContent));
 						else if(IsEncoding("8bit"))
 							decodedBytes=Encoding.Default.GetBytes(bytContent);
@@ -542,23 +504,20 @@ namespace OpenPOP.MIMEParser
 					else
 						decodedBytes=Encoding.Default.GetBytes(bytContent);
 				}
-				else if(_contentCharset!=null)
-					decodedBytes=Encoding.Default.GetBytes(Utility.Change(_rawAttachment,_contentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
+				else if(ContentCharset!=null)
+					decodedBytes=Encoding.Default.GetBytes(Utility.Change(RawAttachment,ContentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
 				else
-					decodedBytes=Encoding.Default.GetBytes(_rawAttachment);
+					decodedBytes=Encoding.Default.GetBytes(RawAttachment);
 
 				return decodedBytes;
 			}
-			else
-			{
-				return null;
-			}
+			
+			return null;
 		}
 
 		public int CompareTo(object attachment)
 		{
-			return (this.RawAttachment.CompareTo(((Attachment)(attachment)).RawAttachment));
+			return (RawAttachment.CompareTo(((Attachment)(attachment)).RawAttachment));
 		}
 	}
 }
-
