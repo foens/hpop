@@ -7,6 +7,7 @@ using System.Data;
 using System.Threading;
 //using System.IO;
 using OpenPOP.POP3;
+using Message=OpenPOP.MIMEParser.Message;
 
 namespace OpenPOP.NET_Sample_App
 {
@@ -588,7 +589,7 @@ namespace OpenPOP.NET_Sample_App
 				if(result!=DialogResult.OK)
 					return;
 
-				if(m.IsMIMEMailFile(att))
+				if(Message.IsMIMEMailFile(att))
 				{
 					result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 					if(result==DialogResult.Yes)
@@ -710,6 +711,5 @@ namespace OpenPOP.NET_Sample_App
 		{
 			AddEvent("CommunicationLost");
 		}
-
 	}
 }

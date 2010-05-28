@@ -34,17 +34,14 @@ namespace OpenPOP.MIMEParser
 	/// Decoding Quoted-Printable text
 	/// 
 	/// </summary>
-	public class DecodeQP
+	public static class DecodeQP
 	{
-		public DecodeQP()
-		{
-		}
 
 		/// <summary>
 		/// Decoding Quoted-Printable string
 		/// </summary>
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
-		/// <param name="encode">encoding method</param>
+        /// <param name="Encoding">encoding method</param>
 		/// <returns>decoded string</returns>
 		public static string ConvertHexToString(string Hexstring,string Encoding)
 		{
@@ -68,7 +65,7 @@ namespace OpenPOP.MIMEParser
 
 				if(Hexstring.StartsWith("=")) Hexstring=Hexstring.Substring(1);
 			
-				string[] aHex= Hexstring.Split(new char[1]{'='});
+				string[] aHex= Hexstring.Split(new []{'='});
 				byte[] abyte = new Byte[aHex.Length];
 			
 				for(int i=0;i<abyte.Length;i++)
@@ -102,15 +99,14 @@ namespace OpenPOP.MIMEParser
 			StringBuilder sbEncoded = new StringBuilder();
 			sbEncoded.Append("");
 			//wether we reach Quoted-Printable string
-			bool isBegin = false;
-			string temp;
+		    string temp;
 			int i = (int)nStart;
 
 			while(i<Hexstring.Length )
 			{
 				//init next loop
 				sbHex.Remove(0,sbHex.Length);
-				isBegin = false;
+				bool isBegin = false;
 				int count=0;
 
 				while(i<Hexstring.Length )

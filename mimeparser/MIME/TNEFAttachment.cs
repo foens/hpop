@@ -30,7 +30,6 @@
 *				2004/5/1 14:13 GMT+8 by Unruled Boy
 *					1.Adding descriptions to every public functions/property/void
 */
-using System;
 
 namespace OpenPOP.MIMEParser
 {
@@ -39,61 +38,41 @@ namespace OpenPOP.MIMEParser
 	/// </summary>
 	public class TNEFAttachment
 	{
-
-		#region Member Variables
-		private string _fileName="";
-		private long _fileLength=0;
-		private string _subject="";
-		private byte[] _fileContent=null;
-		#endregion
-
-
 		#region Properties
-		/// <summary>
-		/// attachment subject
-		/// </summary>
-		public string Subject
-		{
-			get{return _subject;}
-			set{_subject=value;}
-		}
 
-		/// <summary>
-		/// attachment file length
-		/// </summary>
-		public long FileLength
-		{
-			get{return _fileLength;}
-			set{_fileLength=value;}
-		}
+	    /// <summary>
+	    /// attachment subject
+	    /// </summary>
+	    public string Subject { get; set; }
 
-		/// <summary>
-		/// attachment file name
-		/// </summary>
-		public string FileName
-		{
-			get{return _fileName;}
-			set{_fileName=value;}
-		}
+	    /// <summary>
+	    /// attachment file length
+	    /// </summary>
+	    public long FileLength { get; set; }
 
-		/// <summary>
-		/// attachment file content
-		/// </summary>
-		public byte[] FileContent
-		{
-			get{return _fileContent;}
-			set{_fileContent=value;}
-		}
-		#endregion
+	    /// <summary>
+	    /// attachment file name
+	    /// </summary>
+	    public string FileName { get; set; }
+
+	    /// <summary>
+	    /// attachment file content
+	    /// </summary>
+	    public byte[] FileContent { get; set; }
+
+	    #endregion
 
 
 		public TNEFAttachment()
 		{
+		    FileContent = null;
+		    FileName = "";
+		    Subject = "";
 		}
 
-		~TNEFAttachment()
+	    ~TNEFAttachment()
 		{
-			_fileContent=null;
+			FileContent=null;
 		}
 	}
 }

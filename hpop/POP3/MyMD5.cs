@@ -33,7 +33,7 @@ namespace OpenPOP.POP3
 	/// <summary>
 	/// Summary description for MyMD5.
 	/// </summary>
-	public class MyMD5
+	public static class MyMD5
 	{
 		public static string GetMD5Hash(String input)
 		{
@@ -42,7 +42,7 @@ namespace OpenPOP.POP3
 			byte []res=md5.ComputeHash(Encoding.Default.GetBytes(input),0,input.Length);
 			char []temp=new char[res.Length];
 			//copy to a char array which can be passed to a String constructor
-			System.Array.Copy(res,temp,res.Length);
+			Array.Copy(res,temp,res.Length);
 			//return the result as a string
 			return new String(temp);
 		}
@@ -50,7 +50,6 @@ namespace OpenPOP.POP3
 		public static string GetMD5HashHex(String input)
 		{
 			MD5 md5=new MD5CryptoServiceProvider();
-			DES des=new DESCryptoServiceProvider();
 			//the GetBytes method returns byte array equavalent of a string
 			byte []res=md5.ComputeHash(Encoding.Default.GetBytes(input),0,input.Length);
 
@@ -58,15 +57,12 @@ namespace OpenPOP.POP3
 
 			for(int i=0;i<res.Length;i++)
 			{
-				returnThis+=System.Uri.HexEscape((char)res[i]);
+				returnThis+=Uri.HexEscape((char)res[i]);
 			}
 			returnThis=returnThis.Replace("%","");
 			returnThis=returnThis.ToLower();
 
 			return returnThis;
-
-
 		}
-
 	}
 }

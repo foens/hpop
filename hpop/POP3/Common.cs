@@ -25,34 +25,9 @@
 *Changes:		3rd May 1600 GMT+5 by Hamid Qureshi
 *					1.Adding NDoc Comments
 */
-using System;
 
 namespace OpenPOP.POP3
 {
-
-	/// <summary>
-	/// Possible responses received from the server when performing an Authentication
-	/// </summary>
-	public enum  AuthenticationResponse
-	{
-		/// <summary>
-		/// Authentication succeeded
-		/// </summary>
-		SUCCESS=0,
-		/// <summary>
-		/// Login doesn't exist on the POP3 server
-		/// </summary>		
-		INVALIDUSER=1,
-		/// <summary>
-		/// Password is invalid for the give login
-		/// </summary>
-		INVALIDPASSWORD=2,
-		/// <summary>
-		/// Invalid login and/or password
-		/// </summary>
-		INVALIDUSERORPASSWORD=3
-	}		
-
 	/// <summary>
 	/// Authentication method to use
 	/// </summary>

@@ -24,7 +24,6 @@
 *Description:
 */
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("POP3 Mail MIME Parser Library")]
 [assembly: AssemblyDescription("POP3 Mail MIME Parser Library")]

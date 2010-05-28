@@ -25,7 +25,6 @@
 *				2004/3/30 09:15 GMT+8 by Unruled Boy
 *					1.Adding ImportanceType
 */
-using System;
 
 namespace OpenPOP.MIMEParser
 {

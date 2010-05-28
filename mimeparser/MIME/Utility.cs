@@ -42,7 +42,6 @@
 using System;
 using System.Text;
 using System.IO;
-using System.Threading;
 using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIMEParser
@@ -50,14 +49,9 @@ namespace OpenPOP.MIMEParser
 	/// <summary>
 	/// Summary description for Utility.
 	/// </summary>
-	public class Utility
+	public static class Utility
 	{
-		private static bool m_blnLog=false;
-		private static string m_strLogFile = "OpenPOP.log";
-
-		public Utility()
-		{
-		}
+	    private const string m_strLogFile = "OpenPOP.log";
 
 		//		public static string[] SplitText(string strText, string strSplitter)
 		//		{
@@ -80,16 +74,16 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				if(strFile!=null&&strFile!="")
+				if(!string.IsNullOrEmpty(strFile))
 				{
 					strFile=strFile.ToLower();
 					if(strFile.EndsWith(".jpg")||strFile.EndsWith(".bmp")||strFile.EndsWith(".ico")||strFile.EndsWith(".gif")||strFile.EndsWith(".png"))
 						return true;
-					else
-						return false;
-				}
-				else
+					
 					return false;
+				}
+				
+				return false;
 			}
 			catch
 			{
@@ -129,8 +123,8 @@ namespace OpenPOP.MIMEParser
 			int indexOfTag=strText.IndexOf(strTag);
 			if(indexOfTag!=-1)
 				return strText.Substring(0,indexOfTag-1);
-			else
-				return strText;
+			
+			return strText;
 		}
 
 		/// <summary>
@@ -140,8 +134,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>Decoded file name</returns>
 		public static string ParseFileName(string strHeader)
 		{
-			string strTag;
-			strTag="filename=";
+		    string strTag = "filename=";
 			int intPos=strHeader.ToLower().IndexOf(strTag);
 			if(intPos==-1)
 			{
@@ -169,8 +162,7 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strEmailAddress">MIME header</param>
 		/// <param name="strUser">Decoded user name</param>
 		/// <param name="strAddress">Decoded email address</param>
-		/// <returns>True if decoding succeeded, false if failed</returns>
-		public static bool ParseEmailAddress(string strEmailAddress,ref string strUser, ref string strAddress)
+		public static void ParseEmailAddress(string strEmailAddress,ref string strUser, ref string strAddress)
 		{
 			int indexOfAB=strEmailAddress.Trim().LastIndexOf("<");
 			int indexOfEndAB=strEmailAddress.Trim().LastIndexOf(">");
@@ -195,8 +187,6 @@ namespace OpenPOP.MIMEParser
 			strUser=DecodeText(strUser);
 			strAddress=strAddress.Trim();
 			strAddress=DecodeText(strAddress);
-
-			return true;
 		}
 
 		/// <summary>
@@ -218,7 +208,7 @@ namespace OpenPOP.MIMEParser
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("SaveByteContentToFile():"+e.Message);
+				LogError("SaveByteContentToFile():"+e.Message);
 				return false;
 			}
 		}
@@ -244,7 +234,7 @@ namespace OpenPOP.MIMEParser
 						blnRet=false;
 				}
 
-				if(blnRet==true)
+				if(blnRet)
 				{
 					StreamWriter sw=File.CreateText(strFile);
 					sw.Write(strText);
@@ -255,7 +245,7 @@ namespace OpenPOP.MIMEParser
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("SavePlainTextToFile():"+e.Message);
+				LogError("SavePlainTextToFile():"+e.Message);
 				return false;
 			}
 		}
@@ -275,8 +265,8 @@ namespace OpenPOP.MIMEParser
 				fs.Close();
 				return true;
 			}
-			else
-				return false;
+			
+			return false;
 		}
 
 		/// <summary>
@@ -289,7 +279,7 @@ namespace OpenPOP.MIMEParser
 			if(strRawHeader==null)
 				throw new ArgumentNullException("strRawHeader","Argument was null");
 
-			string []array=new string[2]{"",""};
+			string []array=new []{"",""};
 			int indexOfColon=strRawHeader.IndexOf(":");			
 
 			try
@@ -314,7 +304,7 @@ namespace OpenPOP.MIMEParser
 			if(strText==null)
 				throw new ArgumentNullException("strText","Argument was null");
 
-			string []array=new string[2]{"",""};
+			string []array=new []{"",""};
 			int indexOfstrSplitter=strText.IndexOf(strSplitter);			
 
 			try
@@ -333,8 +323,8 @@ namespace OpenPOP.MIMEParser
 			//return array;
 			if(array[0].ToLower()==strTag.ToLower())
 				return array[1].Trim();
-			else
-				return null;
+			
+			return null;
 
 /*			string []array=null;
 			try
@@ -358,7 +348,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>Encoded text with new charset</returns>
 		public static string Change(string strText,string strCharset)
 		{
-			if (strCharset==null || strCharset=="")
+			if (string.IsNullOrEmpty(strCharset))
 				return strText;
 			byte[] b=Encoding.Default.GetBytes(strText);
 			return new string(Encoding.GetEncoding(strCharset).GetChars(b));
@@ -466,16 +456,15 @@ namespace OpenPOP.MIMEParser
 			{
 				string strRet="";
 				string[] strParts=Regex.Split(strText,"\r\n");
-				string strBody="";
-				const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=";
-				Match m=null;
+			    const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=";
+				Match m;
 
 				for(int i=0;i<strParts.Length;i++)
 				{
 					m = Regex.Match(strParts[i], strRegEx);
 					if(m.Success)
 					{
-						strBody=m.Groups["Content"].Value;
+						string strBody=m.Groups["Content"].Value;
 
 						switch(m.Groups["Encoding"].Value.ToUpper())
 						{
@@ -494,10 +483,6 @@ namespace OpenPOP.MIMEParser
 					{
 						if(!IsValidMIMEText(strParts[i]))
 							strRet+=strParts[i];
-						else
-						{
-							//blank text
-						}
 					}
 				}
 				return strRet;
@@ -578,8 +563,8 @@ namespace OpenPOP.MIMEParser
 			{
 				if(strEncoding.ToLower()=="ISO-8859-1".ToLower())
 					return deCodeB64s(strText);
-				else
-					return Encoding.GetEncoding(strEncoding).GetString(deCodeB64(strText));
+				
+				return Encoding.GetEncoding(strEncoding).GetString(deCodeB64(strText));
 			}
 			catch
 			{
@@ -606,36 +591,23 @@ namespace OpenPOP.MIMEParser
 			return by;
 		}
 
-		/// <summary>
-		/// Turns file logging on and off.
-		/// </summary>
-		/// <remarks>Comming soon.</remarks>
-		public static bool Log
-		{
-			get
-			{
-				return m_blnLog;
-			}
-			set
-			{
-				m_blnLog = value;
-			}
-		}
+	    /// <summary>
+	    /// Turns file logging on and off.
+	    /// </summary>
+	    /// <remarks>Comming soon.</remarks>
+	    public static bool Log { get; set; }
 
-		internal static void LogError(string strText) 
+	    internal static void LogError(string strText) 
 		{
 			//Log=true;
 			if(Log)
 			{
-				FileInfo file = null;
-				FileStream fs = null;
+				FileInfo file;
 				StreamWriter sw = null;
 				try
 				{
 					file = new FileInfo(m_strLogFile);
 					sw = file.AppendText();
-					//fs = new FileStream(m_strLogFile, FileMode.OpenOrCreate, FileAccess.Write);
-					//sw = new StreamWriter(fs);
 					sw.WriteLine(DateTime.Now);
 					sw.WriteLine(strText);
 					sw.WriteLine("\r\n");
@@ -646,32 +618,25 @@ namespace OpenPOP.MIMEParser
 					if(sw != null)
 					{
 						sw.Close();
-						sw = null;
 					}
-					if(fs != null)
-					{
-						fs.Close();
-						fs = null;
-					}
-					
 				}
 			}
 		}
 
 		public static bool IsQuotedPrintable(string strText)
 		{
-			if(strText!=null)
+		    if(strText!=null)
 				return (strText.ToLower()=="quoted-printable".ToLower());
-			else
-				return false;
+
+		    return false;
 		}
 
-		public static bool IsBase64(string strText)
+	    public static bool IsBase64(string strText)
 		{
 			if(strText!=null)
 				return (strText.ToLower()=="base64".ToLower());
-			else
-				return false;
+			
+			return false;
 		}
 
 		public static string[] SplitOnSemiColon(string strText)
@@ -679,7 +644,7 @@ namespace OpenPOP.MIMEParser
 			if(strText==null)
 				throw new ArgumentNullException("strText","Argument was null");
 
-			string []array=null;
+			string []array;
 			int indexOfColon=strText.IndexOf(";");			
 
 			if(indexOfColon<0)
@@ -688,12 +653,10 @@ namespace OpenPOP.MIMEParser
 				array[0]=strText;
 				return array;
 			}
-			else
-			{
-				array=new string[2];
-			}
 
-			try
+		    array=new string[2];
+
+		    try
 			{
 				array[0]=strText.Substring(0,indexOfColon).Trim();
 				array[1]=strText.Substring(indexOfColon+1).Trim();
@@ -707,7 +670,7 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				return (strText!=null&&strText!="");
+				return (!string.IsNullOrEmpty(strText));
 			}
 			catch
 			{

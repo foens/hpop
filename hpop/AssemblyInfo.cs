@@ -24,7 +24,6 @@
 *Description	:
 */
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("OpenPOP")]
 [assembly: AssemblyDescription("POP3 Mail Library")]

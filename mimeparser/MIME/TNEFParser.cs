@@ -46,13 +46,13 @@ namespace OpenPOP.MIMEParser
 		private const int TNEF_SIGNATURE  =0x223e9f78;
 		private const int LVL_MESSAGE     =0x01;
 		private const int LVL_ATTACHMENT  =0x02;
-		private const int _string			=0x00010000;
-		private const int _BYTE			=0x00060000;
-		private const int _WORD			=0x00070000;
-		private const int _DWORD			=0x00080000;
+		private const int _string		  =0x00010000;
+		private const int _BYTE			  =0x00060000;
+		private const int _WORD			  =0x00070000;
+		private const int _DWORD		  =0x00080000;
 
-		private const int AVERSION      =(_DWORD|0x9006);
-		private const int AMCLASS       =(_WORD|0x8008);
+		private const int AVERSION      =(_DWORD|0x9006);   // Unused?
+        private const int AMCLASS       = (_WORD | 0x8008); // Unused?
 		private const int ASUBJECT      =(_DWORD|0x8004);
 		private const int AFILENAME     =(_string|0x8010);
 		private const int ATTACHDATA    =(_BYTE|0x800f);
@@ -61,15 +61,10 @@ namespace OpenPOP.MIMEParser
 		private Hashtable _attachments=new Hashtable();
 		private TNEFAttachment _attachment=null;
 
-		private bool _verbose = false;
-		//private string _logFile="OpenPOP.TNEF.log";
+	    //private string _logFile="OpenPOP.TNEF.log";
 		private string _basePath=null;
-		private int _skipSignature = 0;
-		private bool _searchSignature = false;
-		private long _offset = 0;
-		private long _fileLength=0;
-		private string _tnefFile="";
-		private string strSubject;
+	    private long _fileLength=0;
+	    private string strSubject;
 		#endregion
 
 		#region Properties
@@ -79,19 +74,11 @@ namespace OpenPOP.MIMEParser
 		//			set{_logFile=value;}
 		//		}
 
-		public string TNEFFile
-		{
-			get{return _tnefFile;}
-			set{_tnefFile=value;}
-		}
+	    public string TNEFFile { get; set; }
 
-		public bool Verbose
-		{
-			get{return _verbose;}
-			set{_verbose=value;}
-		}
+	    public bool Verbose { get; set; }
 
-		public string BasePath
+	    public string BasePath
 		{
 			get{return _basePath;}
 			set
@@ -103,38 +90,28 @@ namespace OpenPOP.MIMEParser
 					else
 						_basePath=value+"\\";
 				}
-				catch
+				catch(Exception)
 				{
+                    // Is this needed???
 				}
 			}
 		}
 
-		public int SkipSignature
-		{
-			get{return _skipSignature;}
-			set{_skipSignature=value;}
-		}
+	    public int SkipSignature { get; set; }
 
-		public bool SearchSignature
-		{
-			get{return _searchSignature;}
-			set{_searchSignature=value;}
-		}
+	    public bool SearchSignature { get; set; }
 
-		public long Offset
-		{
-			get{return _offset;}
-			set{_offset=value;}
-		}
-		#endregion
+	    public long Offset { get; set; }
+
+	    #endregion
 
 
-		private int GETINT32(byte[] p)
+		private static int GETINT32(byte[] p)
 		{
 			return (p[0]+(p[1]<<8)+(p[2]<<16)+(p[3]<<24));
 		}
 
-		private short GETINT16(byte[] p)
+		private static short GETINT16(byte[] p)
 		{
 			return (short)(p[0]+(p[1]<<8));
 		}
@@ -172,7 +149,7 @@ namespace OpenPOP.MIMEParser
 				Utility.LogError("geti8():unexpected end of input\n");
 				return 1;
 			}
-			return (int)buf[0];
+			return buf[0];
 		}
 
 		private int StreamReadBytes(byte[] buffer, int size)
@@ -184,8 +161,8 @@ namespace OpenPOP.MIMEParser
 					fsTNEF.Read(buffer,0,size);
 					return 1;
 				}
-				else
-					return 0;
+
+				return 0;
 			}
 			catch(Exception e)				
 			{				
@@ -221,8 +198,7 @@ namespace OpenPOP.MIMEParser
 				fsTNEF=new FileStream(strFile,FileMode.Open,FileAccess.Read);
 				FileInfo fi=new FileInfo(strFile);
 				_fileLength=fi.Length;
-				fi=null;
-				return true;
+			    return true;
 			}
 			catch(Exception e)
 			{
@@ -259,12 +235,10 @@ namespace OpenPOP.MIMEParser
 		/// <returns>true if found, vice versa</returns>
 		public bool FindSignature()
 		{
-			bool ret=false;
+			bool ret;
 			long lpos=0;
 
-			int d;
-
-			try
+		    try
 			{
 				for (lpos=0; ; lpos++) 
 				{
@@ -275,7 +249,7 @@ namespace OpenPOP.MIMEParser
 						return false;
 					}
 
-					d = geti32();
+					int d = geti32();
 					if (d == TNEF_SIGNATURE) 
 					{
 						PrintResult("Signature found at {0}\n", lpos);
@@ -298,11 +272,10 @@ namespace OpenPOP.MIMEParser
 		private void decode_attribute (int d) 
 		{
 			byte[] buf=new byte[4000];
-			int len;
-			int v;
+		    int v;
 			int i;
 
-			len = geti32();   /* data length */
+			int len = geti32();
 
 			switch(d&0xffff0000)
 			{
@@ -365,11 +338,9 @@ namespace OpenPOP.MIMEParser
 		private void decode_attachment() 
 		{  
 			byte[] buf=new byte[4096];
-			int d;
-			int len;
-			int i,chunk;
-    
-			d = geti32();
+		    int len;
+
+		    int d = geti32();
 
 			switch (d) 
 			{
@@ -397,6 +368,7 @@ namespace OpenPOP.MIMEParser
 					byte[] _fileNameBuffer=new byte[len-1];
 					Array.Copy(buf,_fileNameBuffer,(long)len-1);
 
+                    // BUG? foens: This is always null. What was the intention?
 					if (_fileNameBuffer == null) _fileNameBuffer = Encoding.Default.GetBytes("tnef.dat");
 					string strFileName=Encoding.Default.GetString(_fileNameBuffer);
 
@@ -419,9 +391,9 @@ namespace OpenPOP.MIMEParser
 					_attachment.FileContent=new byte[len];
 					_attachment.FileLength=len;
 
-					for (i = 0; i < len; ) 
+			        for (int i = 0; i < len; ) 
 					{
-						chunk = len-i;
+						int chunk = len-i;
 						if (chunk > buf.Length) chunk = buf.Length;
 
 						StreamReadBytes(buf,chunk);
@@ -502,11 +474,11 @@ namespace OpenPOP.MIMEParser
 		public bool Parse()
 		{
 			byte[] buf=new byte[4];
-			int d;
 
-			if(FindSignature())
+		    if(FindSignature())
 			{
-				if (SkipSignature < 2) 
+			    int d;
+			    if (SkipSignature < 2) 
 				{
 					d = geti32();
 					if (SkipSignature < 1) 
@@ -526,7 +498,7 @@ namespace OpenPOP.MIMEParser
 					if(StreamReadBytes(buf,1)==0) 
 						break;
 
-					d = (int)buf[0];
+					d = buf[0];
 
 					switch (d) 
 					{
@@ -545,8 +517,8 @@ namespace OpenPOP.MIMEParser
 				}
 				return true;
 			}
-			else
-				return false;
+			
+			return false;
 		}
 
 		private void PrintResult(string strResult, params object[] strContent)
@@ -564,25 +536,28 @@ namespace OpenPOP.MIMEParser
 
 		public TNEFParser()
 		{
+		    TNEFFile = "";
 		}
 
-		/// <summary>
-		/// open MS-TNEF stream from a file
-		/// </summary>
-		/// <param name="strFile">MS-TNEF file</param>
-		public TNEFParser(string strFile)
-		{
-			OpenTNEFStream(strFile);
-		}	
+	    /// <summary>
+	    /// open MS-TNEF stream from a file
+	    /// </summary>
+	    /// <param name="strFile">MS-TNEF file</param>
+	    public TNEFParser(string strFile)
+	        : this()
+	    {
+	        OpenTNEFStream(strFile);
+	    }
 
-		/// <summary>
+	    /// <summary>
 		/// open MS-TNEF stream from bytes
 		/// </summary>
 		/// <param name="bytContents">MS-TNEF bytes</param>
 		public TNEFParser(byte[] bytContents)
-		{
-			OpenTNEFStream(bytContents);
-		}
+            : this()
+	    {
+	        OpenTNEFStream(bytContents);
+	    }
 	}
 }
 

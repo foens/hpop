@@ -107,9 +107,6 @@
     <Compile Include="MIME\DecodeQP.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MIME\Exceptions.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MIME\Message.cs">
       <SubType>Code</SubType>
     </Compile>
