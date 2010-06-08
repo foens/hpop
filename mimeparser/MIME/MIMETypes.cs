@@ -72,285 +72,282 @@ namespace OpenPOP
 			return null;
 		}
 
-	    public static Hashtable MIMETypeList { get; set; }
-
-	    static ~MIMETypes()
-		{
-			MIMETypeList.Clear();
-			MIMETypeList=null;
-		}
+	    public static Hashtable MIMETypeList { get; private set; }
 
 		static MIMETypes()
 		{
-			MIMETypeList.Add(".323","text/h323");
-			MIMETypeList.Add(".3gp","video/3gpp");
-			MIMETypeList.Add(".3gpp","video/3gpp");
-			MIMETypeList.Add(".acp","audio/x-mei-aac");
-			MIMETypeList.Add(".act","text/xml");
-			MIMETypeList.Add(".actproj","text/plain");
-			MIMETypeList.Add(".ade","application/msaccess");
-			MIMETypeList.Add(".adp","application/msaccess");
-			MIMETypeList.Add(".ai","application/postscript");
-			MIMETypeList.Add(".aif","audio/aiff");
-			MIMETypeList.Add(".aifc","audio/aiff");
-			MIMETypeList.Add(".aiff","audio/aiff");
-			MIMETypeList.Add(".asf","video/x-ms-asf");
-			MIMETypeList.Add(".asm","text/plain");
-			MIMETypeList.Add(".asx","video/x-ms-asf");
-			MIMETypeList.Add(".au","audio/basic");
-			MIMETypeList.Add(".avi","video/avi");
-			MIMETypeList.Add(".bmp","image/bmp");
-			MIMETypeList.Add(".bwp","application/x-bwpreview");
-			MIMETypeList.Add(".c","text/plain");
-			MIMETypeList.Add(".cat","application/vnd.ms-pki.seccat");
-			MIMETypeList.Add(".cc","text/plain");
-			MIMETypeList.Add(".cdf","application/x-cdf");
-			MIMETypeList.Add(".cer","application/x-x509-ca-cert");
-			MIMETypeList.Add(".cod","text/plain");
-			MIMETypeList.Add(".cpp","text/plain");
-			MIMETypeList.Add(".crl","application/pkix-crl");
-			MIMETypeList.Add(".crt","application/x-x509-ca-cert");
-			MIMETypeList.Add(".cs","text/plain");
-			MIMETypeList.Add(".css","text/css");
-			MIMETypeList.Add(".csv","application/vnd.ms-excel");
-			MIMETypeList.Add(".cxx","text/plain");
-			MIMETypeList.Add(".dbs","text/plain");
-			MIMETypeList.Add(".def","text/plain");
-			MIMETypeList.Add(".der","application/x-x509-ca-cert");
-			MIMETypeList.Add(".dib","image/bmp");
-			MIMETypeList.Add(".dif","video/x-dv");
-			MIMETypeList.Add(".dll","application/x-msdownload");
-			MIMETypeList.Add(".doc","application/msword");
-			MIMETypeList.Add(".dot","application/msword");
-			MIMETypeList.Add(".dsp","text/plain");
-			MIMETypeList.Add(".dsw","text/plain");
-			MIMETypeList.Add(".dv","video/x-dv");
-			MIMETypeList.Add(".edn","application/vnd.adobe.edn");
-			MIMETypeList.Add(".eml","message/rfc822");
-			MIMETypeList.Add(".eps","application/postscript");
-			MIMETypeList.Add(".etd","application/x-ebx");
-			MIMETypeList.Add(".etp","text/plain");
-			MIMETypeList.Add(".exe","application/x-msdownload");
-			MIMETypeList.Add(".ext","text/plain");
-			MIMETypeList.Add(".fdf","application/vnd.fdf");
-			MIMETypeList.Add(".fif","application/fractals");
-			MIMETypeList.Add(".fky","text/plain");
-			MIMETypeList.Add(".gif","image/gif");
-			MIMETypeList.Add(".gz","application/x-gzip");
-			MIMETypeList.Add(".h","text/plain");
-			MIMETypeList.Add(".hpp","text/plain");
-			MIMETypeList.Add(".hqx","application/mac-binhex40");
-			MIMETypeList.Add(".hta","application/hta");
-			MIMETypeList.Add(".htc","text/x-component");
-			MIMETypeList.Add(".htm","text/html");
-			MIMETypeList.Add(".html","text/html");
-			MIMETypeList.Add(".htt","text/webviewhtml");
-			MIMETypeList.Add(".hxx","text/plain");
-			MIMETypeList.Add(".i","text/plain");
-			MIMETypeList.Add(".iad","application/x-iad");
-			MIMETypeList.Add(".ico","image/x-icon");
-			MIMETypeList.Add(".ics","text/calendar");
-			MIMETypeList.Add(".idl","text/plain");
-			MIMETypeList.Add(".iii","application/x-iphone");
-			MIMETypeList.Add(".inc","text/plain");
-			MIMETypeList.Add(".infopathxml","application/ms-infopath.xml");
-			MIMETypeList.Add(".inl","text/plain");
-			MIMETypeList.Add(".ins","application/x-internet-signup");
-			MIMETypeList.Add(".iqy","text/x-ms-iqy");
-			MIMETypeList.Add(".isp","application/x-internet-signup");
-			MIMETypeList.Add(".java","text/java");
-			MIMETypeList.Add(".jfif","image/jpeg");
-			MIMETypeList.Add(".jnlp","application/x-java-jnlp-file");
-			MIMETypeList.Add(".jpe","image/jpeg");
-			MIMETypeList.Add(".jpeg","image/jpeg");
-			MIMETypeList.Add(".jpg","image/jpeg");
-			MIMETypeList.Add(".jsl","text/plain");
-			MIMETypeList.Add(".kci","text/plain");
-			MIMETypeList.Add(".la1","audio/x-liquid-file");
-			MIMETypeList.Add(".lar","application/x-laplayer-reg");
-			MIMETypeList.Add(".latex","application/x-latex");
-			MIMETypeList.Add(".lavs","audio/x-liquid-secure");
-			MIMETypeList.Add(".lgn","text/plain");
-			MIMETypeList.Add(".lmsff","audio/x-la-lms");
-			MIMETypeList.Add(".lqt","audio/x-la-lqt");
-			MIMETypeList.Add(".lst","text/plain");
-			MIMETypeList.Add(".m1v","video/mpeg");
-			MIMETypeList.Add(".m3u","audio/mpegurl");
-			MIMETypeList.Add(".m4e","video/mpeg4");
-			MIMETypeList.Add(".MAC","image/x-macpaint");
-			MIMETypeList.Add(".mak","text/plain");
-			MIMETypeList.Add(".man","application/x-troff-man");
-			MIMETypeList.Add(".map","text/plain");
-			MIMETypeList.Add(".mda","application/msaccess");
-			MIMETypeList.Add(".mdb","application/msaccess");
-			MIMETypeList.Add(".mde","application/msaccess");
-			MIMETypeList.Add(".mdi","image/vnd.ms-modi");
-			MIMETypeList.Add(".mfp","application/x-shockwave-flash");
-			MIMETypeList.Add(".mht","message/rfc822");
-			MIMETypeList.Add(".mhtml","message/rfc822");
-			MIMETypeList.Add(".mid","audio/mid");
-			MIMETypeList.Add(".midi","audio/mid");
-			MIMETypeList.Add(".mk","text/plain");
-			MIMETypeList.Add(".mnd","audio/x-musicnet-download");
-			MIMETypeList.Add(".mns","audio/x-musicnet-stream");
-			MIMETypeList.Add(".MP1","audio/mp1");
-			MIMETypeList.Add(".mp2","video/mpeg");
-			MIMETypeList.Add(".mp2v","video/mpeg");
-			MIMETypeList.Add(".mp3","audio/mpeg");
-			MIMETypeList.Add(".mp4","video/mp4");
-			MIMETypeList.Add(".mpa","video/mpeg");
-			MIMETypeList.Add(".mpe","video/mpeg");
-			MIMETypeList.Add(".mpeg","video/mpeg");
-			MIMETypeList.Add(".mpf","application/vnd.ms-mediapackage");
-			MIMETypeList.Add(".mpg","video/mpeg");
-			MIMETypeList.Add(".mpg4","video/mp4");
-			MIMETypeList.Add(".mpga","audio/rn-mpeg");
-			MIMETypeList.Add(".mpv2","video/mpeg");
-			MIMETypeList.Add(".NMW","application/nmwb");
-			MIMETypeList.Add(".nws","message/rfc822");
-			MIMETypeList.Add(".odc","text/x-ms-odc");
-			MIMETypeList.Add(".odh","text/plain");
-			MIMETypeList.Add(".odl","text/plain");
-			MIMETypeList.Add(".p10","application/pkcs10");
-			MIMETypeList.Add(".p12","application/x-pkcs12");
-			MIMETypeList.Add(".p7b","application/x-pkcs7-certificates");
-			MIMETypeList.Add(".p7c","application/pkcs7-mime");
-			MIMETypeList.Add(".p7m","application/pkcs7-mime");
-			MIMETypeList.Add(".p7r","application/x-pkcs7-certreqresp");
-			MIMETypeList.Add(".p7s","application/pkcs7-signature");
-			MIMETypeList.Add(".PCT","image/pict");
-			MIMETypeList.Add(".pdf","application/pdf");
-			MIMETypeList.Add(".pdx","application/vnd.adobe.pdx");
-			MIMETypeList.Add(".pfx","application/x-pkcs12");
-			MIMETypeList.Add(".pic","image/pict");
-			MIMETypeList.Add(".PICT","image/pict");
-			MIMETypeList.Add(".pko","application/vnd.ms-pki.pko");
-			MIMETypeList.Add(".png","image/png");
-			MIMETypeList.Add(".pnt","image/x-macpaint");
-			MIMETypeList.Add(".pntg","image/x-macpaint");
-			MIMETypeList.Add(".pot","application/vnd.ms-powerpoint");
-			MIMETypeList.Add(".ppa","application/vnd.ms-powerpoint");
-			MIMETypeList.Add(".pps","application/vnd.ms-powerpoint");
-			MIMETypeList.Add(".ppt","application/vnd.ms-powerpoint");
-			MIMETypeList.Add(".prc","text/plain");
-			MIMETypeList.Add(".prf","application/pics-rules");
-			MIMETypeList.Add(".ps","application/postscript");
-			MIMETypeList.Add(".pub","application/vnd.ms-publisher");
-			MIMETypeList.Add(".pwz","application/vnd.ms-powerpoint");
-			MIMETypeList.Add(".qt","video/quicktime");
-			MIMETypeList.Add(".qti","image/x-quicktime");
-			MIMETypeList.Add(".qtif","image/x-quicktime");
-			MIMETypeList.Add(".qtl","application/x-quicktimeplayer");
-			MIMETypeList.Add(".qup","application/x-quicktimeupdater");
-			MIMETypeList.Add(".r1m","application/vnd.rn-recording");
-			MIMETypeList.Add(".r3t","text/vnd.rn-realtext3d");
-			MIMETypeList.Add(".RA","audio/vnd.rn-realaudio");
-			MIMETypeList.Add(".RAM","audio/x-pn-realaudio");
-			MIMETypeList.Add(".rat","application/rat-file");
-			MIMETypeList.Add(".rc","text/plain");
-			MIMETypeList.Add(".rc2","text/plain");
-			MIMETypeList.Add(".rct","text/plain");
-			MIMETypeList.Add(".rec","application/vnd.rn-recording");
-			MIMETypeList.Add(".rgs","text/plain");
-			MIMETypeList.Add(".rjs","application/vnd.rn-realsystem-rjs");
-			MIMETypeList.Add(".rjt","application/vnd.rn-realsystem-rjt");
-			MIMETypeList.Add(".RM","application/vnd.rn-realmedia");
-			MIMETypeList.Add(".rmf","application/vnd.adobe.rmf");
-			MIMETypeList.Add(".rmi","audio/mid");
-			MIMETypeList.Add(".RMJ","application/vnd.rn-realsystem-rmj");
-			MIMETypeList.Add(".RMM","audio/x-pn-realaudio");
-			MIMETypeList.Add(".rms","application/vnd.rn-realmedia-secure");
-			MIMETypeList.Add(".rmvb","application/vnd.rn-realmedia-vbr");
-			MIMETypeList.Add(".RMX","application/vnd.rn-realsystem-rmx");
-			MIMETypeList.Add(".RNX","application/vnd.rn-realplayer");
-			MIMETypeList.Add(".rp","image/vnd.rn-realpix");
-			MIMETypeList.Add(".RPM","audio/x-pn-realaudio-plugin");
-			MIMETypeList.Add(".rqy","text/x-ms-rqy");
-			MIMETypeList.Add(".rsml","application/vnd.rn-rsml");
-			MIMETypeList.Add(".rt","text/vnd.rn-realtext");
-			MIMETypeList.Add(".rtf","application/msword");
-			MIMETypeList.Add(".rul","text/plain");
-			MIMETypeList.Add(".RV","video/vnd.rn-realvideo");
-			MIMETypeList.Add(".s","text/plain");
-			MIMETypeList.Add(".sc2","application/schdpl32");
-			MIMETypeList.Add(".scd","application/schdpl32");
-			MIMETypeList.Add(".sch","application/schdpl32");
-			MIMETypeList.Add(".sct","text/scriptlet");
-			MIMETypeList.Add(".sd2","audio/x-sd2");
-			MIMETypeList.Add(".sdp","application/sdp");
-			MIMETypeList.Add(".sit","application/x-stuffit");
-			MIMETypeList.Add(".slk","application/vnd.ms-excel");
-			MIMETypeList.Add(".sln","application/octet-stream");
-			MIMETypeList.Add(".SMI","application/smil");
-			MIMETypeList.Add(".smil","application/smil");
-			MIMETypeList.Add(".snd","audio/basic");
-			MIMETypeList.Add(".snp","application/msaccess");
-			MIMETypeList.Add(".spc","application/x-pkcs7-certificates");
-			MIMETypeList.Add(".spl","application/futuresplash");
-			MIMETypeList.Add(".sql","text/plain");
-			MIMETypeList.Add(".srf","text/plain");
-			MIMETypeList.Add(".ssm","application/streamingmedia");
-			MIMETypeList.Add(".sst","application/vnd.ms-pki.certstore");
-			MIMETypeList.Add(".stl","application/vnd.ms-pki.stl");
-			MIMETypeList.Add(".swf","application/x-shockwave-flash");
-			MIMETypeList.Add(".tab","text/plain");
-			MIMETypeList.Add(".tar","application/x-tar");
-			MIMETypeList.Add(".tdl","text/xml");
-			MIMETypeList.Add(".tgz","application/x-compressed");
-			MIMETypeList.Add(".tif","image/tiff");
-			MIMETypeList.Add(".tiff","image/tiff");
-			MIMETypeList.Add(".tlh","text/plain");
-			MIMETypeList.Add(".tli","text/plain");
-			MIMETypeList.Add(".torrent","application/x-bittorrent");
-			MIMETypeList.Add(".trg","text/plain");
-			MIMETypeList.Add(".txt","text/plain");
-			MIMETypeList.Add(".udf","text/plain");
-			MIMETypeList.Add(".udt","text/plain");
-			MIMETypeList.Add(".uls","text/iuls");
-			MIMETypeList.Add(".user","text/plain");
-			MIMETypeList.Add(".usr","text/plain");
-			MIMETypeList.Add(".vb","text/plain");
-			MIMETypeList.Add(".vcf","text/x-vcard");
-			MIMETypeList.Add(".vcproj","text/plain");
-			MIMETypeList.Add(".viw","text/plain");
-			MIMETypeList.Add(".vpg","application/x-vpeg005");
-			MIMETypeList.Add(".vspscc","text/plain");
-			MIMETypeList.Add(".vsscc","text/plain");
-			MIMETypeList.Add(".vssscc","text/plain");
-			MIMETypeList.Add(".wav","audio/wav");
-			MIMETypeList.Add(".wax","audio/x-ms-wax");
-			MIMETypeList.Add(".wbk","application/msword");
-			MIMETypeList.Add(".wiz","application/msword");
-			MIMETypeList.Add(".wm","video/x-ms-wm");
-			MIMETypeList.Add(".wma","audio/x-ms-wma");
-			MIMETypeList.Add(".wmd","application/x-ms-wmd");
-			MIMETypeList.Add(".wmv","video/x-ms-wmv");
-			MIMETypeList.Add(".wmx","video/x-ms-wmx");
-			MIMETypeList.Add(".wmz","application/x-ms-wmz");
-			MIMETypeList.Add(".wpl","application/vnd.ms-wpl");
-			MIMETypeList.Add(".wprj","application/webzip");
-			MIMETypeList.Add(".wsc","text/scriptlet");
-			MIMETypeList.Add(".wvx","video/x-ms-wvx");
-			MIMETypeList.Add(".XBM","image/x-xbitmap");
-			MIMETypeList.Add(".xdp","application/vnd.adobe.xdp+xml");
-			MIMETypeList.Add(".xfd","application/vnd.adobe.xfd+xml");
-			MIMETypeList.Add(".xfdf","application/vnd.adobe.xfdf");
-			MIMETypeList.Add(".xla","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlb","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlc","application/vnd.ms-excel");
-			MIMETypeList.Add(".xld","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlk","application/vnd.ms-excel");
-			MIMETypeList.Add(".xll","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlm","application/vnd.ms-excel");
-			MIMETypeList.Add(".xls","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlt","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlv","application/vnd.ms-excel");
-			MIMETypeList.Add(".xlw","application/vnd.ms-excel");
-			MIMETypeList.Add(".xml","text/xml");
-			MIMETypeList.Add(".xpl","audio/scpls");
-			MIMETypeList.Add(".xsl","text/xml");
-			MIMETypeList.Add(".z","application/x-compress");
-			MIMETypeList.Add(".zip","application/x-zip-compressed");
+            MIMETypeList = new Hashtable
+                               {
+                                   {".323", "text/h323"},
+                                   {".3gp", "video/3gpp"},
+                                   {".3gpp", "video/3gpp"},
+                                   {".acp", "audio/x-mei-aac"},
+                                   {".act", "text/xml"},
+                                   {".actproj", "text/plain"},
+                                   {".ade", "application/msaccess"},
+                                   {".adp", "application/msaccess"},
+                                   {".ai", "application/postscript"},
+                                   {".aif", "audio/aiff"},
+                                   {".aifc", "audio/aiff"},
+                                   {".aiff", "audio/aiff"},
+                                   {".asf", "video/x-ms-asf"},
+                                   {".asm", "text/plain"},
+                                   {".asx", "video/x-ms-asf"},
+                                   {".au", "audio/basic"},
+                                   {".avi", "video/avi"},
+                                   {".bmp", "image/bmp"},
+                                   {".bwp", "application/x-bwpreview"},
+                                   {".c", "text/plain"},
+                                   {".cat", "application/vnd.ms-pki.seccat"},
+                                   {".cc", "text/plain"},
+                                   {".cdf", "application/x-cdf"},
+                                   {".cer", "application/x-x509-ca-cert"},
+                                   {".cod", "text/plain"},
+                                   {".cpp", "text/plain"},
+                                   {".crl", "application/pkix-crl"},
+                                   {".crt", "application/x-x509-ca-cert"},
+                                   {".cs", "text/plain"},
+                                   {".css", "text/css"},
+                                   {".csv", "application/vnd.ms-excel"},
+                                   {".cxx", "text/plain"},
+                                   {".dbs", "text/plain"},
+                                   {".def", "text/plain"},
+                                   {".der", "application/x-x509-ca-cert"},
+                                   {".dib", "image/bmp"},
+                                   {".dif", "video/x-dv"},
+                                   {".dll", "application/x-msdownload"},
+                                   {".doc", "application/msword"},
+                                   {".dot", "application/msword"},
+                                   {".dsp", "text/plain"},
+                                   {".dsw", "text/plain"},
+                                   {".dv", "video/x-dv"},
+                                   {".edn", "application/vnd.adobe.edn"},
+                                   {".eml", "message/rfc822"},
+                                   {".eps", "application/postscript"},
+                                   {".etd", "application/x-ebx"},
+                                   {".etp", "text/plain"},
+                                   {".exe", "application/x-msdownload"},
+                                   {".ext", "text/plain"},
+                                   {".fdf", "application/vnd.fdf"},
+                                   {".fif", "application/fractals"},
+                                   {".fky", "text/plain"},
+                                   {".gif", "image/gif"},
+                                   {".gz", "application/x-gzip"},
+                                   {".h", "text/plain"},
+                                   {".hpp", "text/plain"},
+                                   {".hqx", "application/mac-binhex40"},
+                                   {".hta", "application/hta"},
+                                   {".htc", "text/x-component"},
+                                   {".htm", "text/html"},
+                                   {".html", "text/html"},
+                                   {".htt", "text/webviewhtml"},
+                                   {".hxx", "text/plain"},
+                                   {".i", "text/plain"},
+                                   {".iad", "application/x-iad"},
+                                   {".ico", "image/x-icon"},
+                                   {".ics", "text/calendar"},
+                                   {".idl", "text/plain"},
+                                   {".iii", "application/x-iphone"},
+                                   {".inc", "text/plain"},
+                                   {".infopathxml", "application/ms-infopath.xml"},
+                                   {".inl", "text/plain"},
+                                   {".ins", "application/x-internet-signup"},
+                                   {".iqy", "text/x-ms-iqy"},
+                                   {".isp", "application/x-internet-signup"},
+                                   {".java", "text/java"},
+                                   {".jfif", "image/jpeg"},
+                                   {".jnlp", "application/x-java-jnlp-file"},
+                                   {".jpe", "image/jpeg"},
+                                   {".jpeg", "image/jpeg"},
+                                   {".jpg", "image/jpeg"},
+                                   {".jsl", "text/plain"},
+                                   {".kci", "text/plain"},
+                                   {".la1", "audio/x-liquid-file"},
+                                   {".lar", "application/x-laplayer-reg"},
+                                   {".latex", "application/x-latex"},
+                                   {".lavs", "audio/x-liquid-secure"},
+                                   {".lgn", "text/plain"},
+                                   {".lmsff", "audio/x-la-lms"},
+                                   {".lqt", "audio/x-la-lqt"},
+                                   {".lst", "text/plain"},
+                                   {".m1v", "video/mpeg"},
+                                   {".m3u", "audio/mpegurl"},
+                                   {".m4e", "video/mpeg4"},
+                                   {".MAC", "image/x-macpaint"},
+                                   {".mak", "text/plain"},
+                                   {".man", "application/x-troff-man"},
+                                   {".map", "text/plain"},
+                                   {".mda", "application/msaccess"},
+                                   {".mdb", "application/msaccess"},
+                                   {".mde", "application/msaccess"},
+                                   {".mdi", "image/vnd.ms-modi"},
+                                   {".mfp", "application/x-shockwave-flash"},
+                                   {".mht", "message/rfc822"},
+                                   {".mhtml", "message/rfc822"},
+                                   {".mid", "audio/mid"},
+                                   {".midi", "audio/mid"},
+                                   {".mk", "text/plain"},
+                                   {".mnd", "audio/x-musicnet-download"},
+                                   {".mns", "audio/x-musicnet-stream"},
+                                   {".MP1", "audio/mp1"},
+                                   {".mp2", "video/mpeg"},
+                                   {".mp2v", "video/mpeg"},
+                                   {".mp3", "audio/mpeg"},
+                                   {".mp4", "video/mp4"},
+                                   {".mpa", "video/mpeg"},
+                                   {".mpe", "video/mpeg"},
+                                   {".mpeg", "video/mpeg"},
+                                   {".mpf", "application/vnd.ms-mediapackage"},
+                                   {".mpg", "video/mpeg"},
+                                   {".mpg4", "video/mp4"},
+                                   {".mpga", "audio/rn-mpeg"},
+                                   {".mpv2", "video/mpeg"},
+                                   {".NMW", "application/nmwb"},
+                                   {".nws", "message/rfc822"},
+                                   {".odc", "text/x-ms-odc"},
+                                   {".odh", "text/plain"},
+                                   {".odl", "text/plain"},
+                                   {".p10", "application/pkcs10"},
+                                   {".p12", "application/x-pkcs12"},
+                                   {".p7b", "application/x-pkcs7-certificates"},
+                                   {".p7c", "application/pkcs7-mime"},
+                                   {".p7m", "application/pkcs7-mime"},
+                                   {".p7r", "application/x-pkcs7-certreqresp"},
+                                   {".p7s", "application/pkcs7-signature"},
+                                   {".PCT", "image/pict"},
+                                   {".pdf", "application/pdf"},
+                                   {".pdx", "application/vnd.adobe.pdx"},
+                                   {".pfx", "application/x-pkcs12"},
+                                   {".pic", "image/pict"},
+                                   {".PICT", "image/pict"},
+                                   {".pko", "application/vnd.ms-pki.pko"},
+                                   {".png", "image/png"},
+                                   {".pnt", "image/x-macpaint"},
+                                   {".pntg", "image/x-macpaint"},
+                                   {".pot", "application/vnd.ms-powerpoint"},
+                                   {".ppa", "application/vnd.ms-powerpoint"},
+                                   {".pps", "application/vnd.ms-powerpoint"},
+                                   {".ppt", "application/vnd.ms-powerpoint"},
+                                   {".prc", "text/plain"},
+                                   {".prf", "application/pics-rules"},
+                                   {".ps", "application/postscript"},
+                                   {".pub", "application/vnd.ms-publisher"},
+                                   {".pwz", "application/vnd.ms-powerpoint"},
+                                   {".qt", "video/quicktime"},
+                                   {".qti", "image/x-quicktime"},
+                                   {".qtif", "image/x-quicktime"},
+                                   {".qtl", "application/x-quicktimeplayer"},
+                                   {".qup", "application/x-quicktimeupdater"},
+                                   {".r1m", "application/vnd.rn-recording"},
+                                   {".r3t", "text/vnd.rn-realtext3d"},
+                                   {".RA", "audio/vnd.rn-realaudio"},
+                                   {".RAM", "audio/x-pn-realaudio"},
+                                   {".rat", "application/rat-file"},
+                                   {".rc", "text/plain"},
+                                   {".rc2", "text/plain"},
+                                   {".rct", "text/plain"},
+                                   {".rec", "application/vnd.rn-recording"},
+                                   {".rgs", "text/plain"},
+                                   {".rjs", "application/vnd.rn-realsystem-rjs"},
+                                   {".rjt", "application/vnd.rn-realsystem-rjt"},
+                                   {".RM", "application/vnd.rn-realmedia"},
+                                   {".rmf", "application/vnd.adobe.rmf"},
+                                   {".rmi", "audio/mid"},
+                                   {".RMJ", "application/vnd.rn-realsystem-rmj"},
+                                   {".RMM", "audio/x-pn-realaudio"},
+                                   {".rms", "application/vnd.rn-realmedia-secure"},
+                                   {".rmvb", "application/vnd.rn-realmedia-vbr"},
+                                   {".RMX", "application/vnd.rn-realsystem-rmx"},
+                                   {".RNX", "application/vnd.rn-realplayer"},
+                                   {".rp", "image/vnd.rn-realpix"},
+                                   {".RPM", "audio/x-pn-realaudio-plugin"},
+                                   {".rqy", "text/x-ms-rqy"},
+                                   {".rsml", "application/vnd.rn-rsml"},
+                                   {".rt", "text/vnd.rn-realtext"},
+                                   {".rtf", "application/msword"},
+                                   {".rul", "text/plain"},
+                                   {".RV", "video/vnd.rn-realvideo"},
+                                   {".s", "text/plain"},
+                                   {".sc2", "application/schdpl32"},
+                                   {".scd", "application/schdpl32"},
+                                   {".sch", "application/schdpl32"},
+                                   {".sct", "text/scriptlet"},
+                                   {".sd2", "audio/x-sd2"},
+                                   {".sdp", "application/sdp"},
+                                   {".sit", "application/x-stuffit"},
+                                   {".slk", "application/vnd.ms-excel"},
+                                   {".sln", "application/octet-stream"},
+                                   {".SMI", "application/smil"},
+                                   {".smil", "application/smil"},
+                                   {".snd", "audio/basic"},
+                                   {".snp", "application/msaccess"},
+                                   {".spc", "application/x-pkcs7-certificates"},
+                                   {".spl", "application/futuresplash"},
+                                   {".sql", "text/plain"},
+                                   {".srf", "text/plain"},
+                                   {".ssm", "application/streamingmedia"},
+                                   {".sst", "application/vnd.ms-pki.certstore"},
+                                   {".stl", "application/vnd.ms-pki.stl"},
+                                   {".swf", "application/x-shockwave-flash"},
+                                   {".tab", "text/plain"},
+                                   {".tar", "application/x-tar"},
+                                   {".tdl", "text/xml"},
+                                   {".tgz", "application/x-compressed"},
+                                   {".tif", "image/tiff"},
+                                   {".tiff", "image/tiff"},
+                                   {".tlh", "text/plain"},
+                                   {".tli", "text/plain"},
+                                   {".torrent", "application/x-bittorrent"},
+                                   {".trg", "text/plain"},
+                                   {".txt", "text/plain"},
+                                   {".udf", "text/plain"},
+                                   {".udt", "text/plain"},
+                                   {".uls", "text/iuls"},
+                                   {".user", "text/plain"},
+                                   {".usr", "text/plain"},
+                                   {".vb", "text/plain"},
+                                   {".vcf", "text/x-vcard"},
+                                   {".vcproj", "text/plain"},
+                                   {".viw", "text/plain"},
+                                   {".vpg", "application/x-vpeg005"},
+                                   {".vspscc", "text/plain"},
+                                   {".vsscc", "text/plain"},
+                                   {".vssscc", "text/plain"},
+                                   {".wav", "audio/wav"},
+                                   {".wax", "audio/x-ms-wax"},
+                                   {".wbk", "application/msword"},
+                                   {".wiz", "application/msword"},
+                                   {".wm", "video/x-ms-wm"},
+                                   {".wma", "audio/x-ms-wma"},
+                                   {".wmd", "application/x-ms-wmd"},
+                                   {".wmv", "video/x-ms-wmv"},
+                                   {".wmx", "video/x-ms-wmx"},
+                                   {".wmz", "application/x-ms-wmz"},
+                                   {".wpl", "application/vnd.ms-wpl"},
+                                   {".wprj", "application/webzip"},
+                                   {".wsc", "text/scriptlet"},
+                                   {".wvx", "video/x-ms-wvx"},
+                                   {".XBM", "image/x-xbitmap"},
+                                   {".xdp", "application/vnd.adobe.xdp+xml"},
+                                   {".xfd", "application/vnd.adobe.xfd+xml"},
+                                   {".xfdf", "application/vnd.adobe.xfdf"},
+                                   {".xla", "application/vnd.ms-excel"},
+                                   {".xlb", "application/vnd.ms-excel"},
+                                   {".xlc", "application/vnd.ms-excel"},
+                                   {".xld", "application/vnd.ms-excel"},
+                                   {".xlk", "application/vnd.ms-excel"},
+                                   {".xll", "application/vnd.ms-excel"},
+                                   {".xlm", "application/vnd.ms-excel"},
+                                   {".xls", "application/vnd.ms-excel"},
+                                   {".xlt", "application/vnd.ms-excel"},
+                                   {".xlv", "application/vnd.ms-excel"},
+                                   {".xlw", "application/vnd.ms-excel"},
+                                   {".xml", "text/xml"},
+                                   {".xpl", "audio/scpls"},
+                                   {".xsl", "text/xml"},
+                                   {".z", "application/x-compress"},
+                                   {".zip", "application/x-zip-compressed"}
+                               };
 		}
 
 	    /// <summary>Returns the MIME content-type for the supplied file extension</summary>
