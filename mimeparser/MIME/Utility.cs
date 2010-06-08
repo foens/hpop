@@ -456,7 +456,7 @@ namespace OpenPOP.MIMEParser
 			{
 				string strRet="";
 				string[] strParts=Regex.Split(strText,"\r\n");
-			    const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=";
+			    const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>.+)\?\=";
 				Match m;
 
 				for(int i=0;i<strParts.Length;i++)
