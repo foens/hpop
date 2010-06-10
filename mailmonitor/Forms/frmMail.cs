@@ -408,7 +408,7 @@ namespace MailMonitor
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)
 				{
-					if(_msg.IsMIMEMailFile(att))
+					if(OpenPOP.MIMEParser.Message.IsMIMEMailFile(att))
 					{
 						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
