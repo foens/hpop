@@ -61,6 +61,7 @@
 *					1.Adding ImportanceType
 */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Collections;
 using System.Text;
@@ -123,7 +124,7 @@ namespace OpenPOP.MIMEParser
 	    /// <summary>
 	    /// message keywords
 	    /// </summary>
-	    public ArrayList Keywords { get; private set; }
+	    public List<string> Keywords { get; private set; }
 
 	    /// <summary>
 	    /// disposition notification
@@ -180,7 +181,7 @@ namespace OpenPOP.MIMEParser
 	    /// <summary>
 	    /// Message Bodies
 	    /// </summary>
-	    public ArrayList MessageBody { get; private set; }
+	    public List<string> MessageBody { get; private set; }
 
 	    /// <summary>
 	    /// Attachment Boundry
@@ -200,7 +201,7 @@ namespace OpenPOP.MIMEParser
 	    /// <summary>
 	    /// Attachments
 	    /// </summary>
-	    public ArrayList Attachments { get; private set; }
+	    public List<Attachment> Attachments { get; private set; }
 
 	    /// <summary>
 	    /// CC
@@ -374,16 +375,16 @@ namespace OpenPOP.MIMEParser
             TO = new string[0];
             BCC = new string[0];
             CC = new string[0];
-            Attachments = new ArrayList();
+            Attachments = new List<Attachment>();
             AttachmentCount = 0;
             AttachmentBoundry2 = null;
             AttachmentBoundry = null;
-            MessageBody = new ArrayList();
+            MessageBody = new List<string>();
             ContentTransferEncoding = null;
             ContentCharset = null;
             Importance = null;
             DispositionNotificationTo = null;
-            Keywords = new ArrayList();
+            Keywords = new List<string>();
             AutoDecodeMSTNEF = false;
             CustomHeaders = new Hashtable();
         }
