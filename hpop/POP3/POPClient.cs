@@ -740,6 +740,9 @@ namespace OpenPOP.POP3
 
 			while (strResponse!=".")// || (intLen<intContentLength)) //(strResponse.IndexOf(".")==0 && intLen<intContentLength)
 			{
+                if (strResponse.StartsWith(".."))
+                    strResponse = strResponse.Substring(1);
+
 				builder.Append(strResponse + "\r\n");
 				intLines+=1;
 				//intLen+=strResponse.Length+"\r\n".Length;
