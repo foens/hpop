@@ -475,7 +475,7 @@ namespace OpenPOP.MIMEParser
 							default:
 								break;
 						}
-						strRet+=strBody;
+                        strRet += strBody + strParts[i].Replace(m.Value, "");
 					}
 					else
 					{
