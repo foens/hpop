@@ -107,15 +107,11 @@ namespace OpenPOP.POP3
 		private bool _receiveFinish=false;
 	    private string _aPOPTimestamp;
 		private string _lastCommandResponse;
-		private bool _connected=true;
 
 
-		public bool Connected
-		{
-			get{return _connected;}
-		}
+	    public bool Connected { get; private set; }
 
-		public string APOPTimestamp
+	    public string APOPTimestamp
 		{
 			get{return _aPOPTimestamp;}
 		}
@@ -327,6 +323,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public POPClient()
 		{
+		    Connected = true;
 		    SendBufferSize = 4090;
 		    ReceiveBufferSize = 4090;
 		    SendTimeOut = 60000;
@@ -408,7 +405,7 @@ namespace OpenPOP.POP3
             if (IsOkResponse(strResponse))
             {
                 ExtractApopTimestamp(strResponse);
-                _connected = true;
+                Connected = true;
                 CommunicationOccured(this, EventArgs.Empty);
             }
             else
@@ -446,6 +443,7 @@ namespace OpenPOP.POP3
 				reader=null;
 				writer=null;
 				clientSocket=null;
+			    Connected = false;
 			}
 			CommunicationLost(this, EventArgs.Empty);
 		}
