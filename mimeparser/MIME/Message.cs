@@ -1304,7 +1304,10 @@ namespace OpenPOP.MIMEParser
 						if(intCharset!=-1)
 						{
 							int intPos=strLine.IndexOf(";",intCharset+13);
-							ReportType=strLine.Substring(intCharset+12,intPos-intCharset-13);
+							if ( intPos > -1 )
+                                 ReportType = strLine.Substring(intCharset + 12, intPos - intCharset - 13);
+                             else
+                                 ReportType = strLine.Substring(intCharset + 12);
 						}
 						else if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 						{
