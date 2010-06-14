@@ -472,7 +472,7 @@ namespace OpenPOP.MIMEParser
 								strBody=deCodeB64s(strBody,m.Groups["Charset"].Value);
 								break;
 							case "Q":
-								strBody=DecodeQP.ConvertHexContent(strBody);//, m.Groups["Charset"].Value);
+                                strBody = DecodeQP.ConvertHexContent(strBody, Encoding.GetEncoding(m.Groups["Charset"].Value), 0);
 								break;
 							default:
 								break;

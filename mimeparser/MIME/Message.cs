@@ -80,7 +80,6 @@ namespace OpenPOP.MIMEParser
 		private string _from=null;
 		private string _fromEmail=null;
 	    private string _subject=null;
-	    private bool _html=false;
 	    private string _received=null;
 	    private string _basePath=null;
 
@@ -239,12 +238,9 @@ namespace OpenPOP.MIMEParser
 	    public string ReportType { get; private set; }
 
 	    /// <summary>
-		/// HTML
-		/// </summary>
-		public bool HTML
-		{
-			get{return _html;}
-		}
+	    /// HTML
+	    /// </summary>
+	    public bool HTML { get; private set; }
 
 	    /// <summary>
 	    /// Date
@@ -464,14 +460,13 @@ namespace OpenPOP.MIMEParser
 				Utility.LogError("GetAttachment():attachment not exist");
 				throw new ArgumentOutOfRangeException("intAttachmentNumber");	
 			}
-			return (Attachment)Attachments[intAttachmentNumber];
+			return Attachments[intAttachmentNumber];
 		}
 
 		/// <summary>
 		/// New Message
 		/// </summary>
 		/// <param name="blnFinish">reference for the finishing state</param>
-		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
 		/// <param name="strMessage">raw message content</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
 		/// <returns>construction result whether successfully new a message</returns>
@@ -576,16 +571,20 @@ namespace OpenPOP.MIMEParser
 
 				        if(Utility.IsQuotedPrintable(ContentTransferEncoding))
 				        {
-				            body=DecodeQP.ConvertHexContent(body);
+                            if (Utility.IsNotNullText(ContentCharset))
+                            {
+                                body = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                            }
+                            else
+                            {
+                                body = DecodeQP.ConvertHexContent(body);
+                            }
 				        }
 				        else if(Utility.IsBase64(ContentTransferEncoding))
-				        {
 				            body=Utility.deCodeB64s(Utility.RemoveNonB64(body));
-				        }
 				        else if(Utility.IsNotNullText(ContentCharset))
-				        {
 				            body=Encoding.GetEncoding(ContentCharset).GetString(Encoding.Default.GetBytes(body));
-				        }
+
 				        MessageBody.Add(Utility.RemoveNonB64(body));
 				    }
 				    else
@@ -625,8 +624,13 @@ namespace OpenPOP.MIMEParser
 
 				                    if(Utility.IsQuotedPrintable(encoding))
 				                    {
-				                        string ret=body;
-				                        ret=DecodeQP.ConvertHexContent(ret);
+				                        string ret;
+
+                                        if (Utility.IsNotNullText(ContentCharset))
+                                            ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                                        else
+                                            ret = DecodeQP.ConvertHexContent(body);
+
 				                        MessageBody.Add(ret);
 				                    }
 				                    else if(Utility.IsBase64(encoding))
@@ -667,7 +671,7 @@ namespace OpenPOP.MIMEParser
 			}
 
 			if(MessageBody.Count>1)
-				_html=true;
+				HTML=true;
 		}
 
 		/// <summary>
@@ -883,7 +887,7 @@ namespace OpenPOP.MIMEParser
 				else
 				{
 					GetMessageBody(attItem.DecodeAsText());
-					da=Encoding.Default.GetBytes((string)MessageBody[MessageBody.Count-1]);
+					da=Encoding.Default.GetBytes(MessageBody[MessageBody.Count-1]);
 				}
 				return Utility.SaveByteContentToFile(strFileName,da);
 			}
@@ -1326,7 +1330,7 @@ namespace OpenPOP.MIMEParser
 						return;
 
 					if(ContentType.ToLower()=="text/html"||ContentType.ToLower().IndexOf("multipart/")!=-1)
-						_html=true;
+						HTML=true;
 
 					if(strLine.Trim().Length==ContentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
 					{
