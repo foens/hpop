@@ -723,41 +723,44 @@ namespace OpenPOP.POP3
 			return SendCommandIntResponse("LIST " + intMessageNumber.ToString());
 		}
 
-		/// <summary>
-		/// read stream content
-		/// </summary>
-		///// <param name="intContentLength">length of content to read</param>
-		/// <returns>content</returns>
-		private string ReceiveContent(/*int intContentLength*/)
+		
+        /// <summary>
+        /// Reads a mail message that is sent from the server, when the server
+        /// was handled a RETR [num] command which it accepted.
+        /// </summary>
+        /// <returns>The message read from the server stream</returns>
+		private string ReceiveRETRMessage()
 		{
+            // Create a StringBuilder to which we will append
+            // input as it comes
 		    StringBuilder builder = new StringBuilder();
-			
+
+            // Is this really needed? I think that when you as the reader to read a line, it will
+            // just not return before being ready - why wait for response when the reader does it
+            // for us?
 			WaitForResponse(ref reader,WaitForResponseInterval);
 
-			string strResponse = reader.ReadLine();
-			int intLines=0;
-			//int intLen=0;
-
-			while (strResponse!=".")// || (intLen<intContentLength)) //(strResponse.IndexOf(".")==0 && intLen<intContentLength)
+            // Read input line for line
+            string line;
+			while ((line = reader.ReadLine()) != ".")
 			{
-                if (strResponse.StartsWith(".."))
-                    strResponse = strResponse.Substring(1);
+                // This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
+                // It says that a line starting with "." and not having CRLF after it
+                // is a multi line, and the "." should be stripped
+                if (line.StartsWith("."))
+                    line = line.Substring(1);
 
-				builder.Append(strResponse + "\r\n");
-				intLines+=1;
-				//intLen+=strResponse.Length+"\r\n".Length;
+                // Add the read line with CRLF after it
+				builder.Append(line + "\r\n");
 				
 				WaitForResponse(ref reader,1);
-
-				strResponse = reader.ReadLine();
-				if((intLines % ReceiveContentSleepInterval)==0) //make an interval pause to ensure response from server
-					Thread.Sleep(1);
 			}
 
-			builder.Append(strResponse+ "\r\n");
+            // foens: I have no idea why this is here? The last line should not
+            // be in the message according to the RFC. Does anyone agree?
+			builder.Append(line + "\r\n");
 
 			return builder.ToString();
-
 		}
 
 		/// <summary>
@@ -791,7 +794,7 @@ namespace OpenPOP.POP3
 
 			try
 			{
-				string receivedContent=ReceiveContent( /* -1 */);
+				string receivedContent=ReceiveRETRMessage();
 
 				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,AutoDecodeMSTNEF,receivedContent,blnOnlyHeader);
 
