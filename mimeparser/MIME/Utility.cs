@@ -166,8 +166,8 @@ namespace OpenPOP.MIMEParser
 		{
 			int indexOfAB=strEmailAddress.Trim().LastIndexOf("<");
 			int indexOfEndAB=strEmailAddress.Trim().LastIndexOf(">");
-			strUser=strEmailAddress;
-			strAddress=strEmailAddress;
+			strUser=strEmailAddress.Trim();
+			strAddress=strEmailAddress.Trim();
 			if(indexOfAB>=0&&indexOfEndAB>=0)
 			{
 				if(indexOfAB>0)
@@ -183,9 +183,7 @@ namespace OpenPOP.MIMEParser
 				strUser=strUser.Trim('\"');
 				strAddress=strAddress.Substring(indexOfAB+1,indexOfEndAB-(indexOfAB+1));
 			}
-			strUser=strUser.Trim();
 			strUser=DecodeText(strUser);
-			strAddress=strAddress.Trim();
 			strAddress=DecodeText(strAddress);
 		}
 
