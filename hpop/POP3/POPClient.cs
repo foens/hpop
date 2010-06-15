@@ -46,22 +46,24 @@
 *					2.added handling for PopServerLockException
 */
 using System;
+using System.Collections.Generic;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Collections;
 
 namespace OpenPOP.POP3
 {
 	/// <summary>
 	/// POPClient
+	/// Does not included threaded support or usage
 	/// </summary>
 	public class POPClient
-	{
-		/// <summary>
+    {
+        #region member variables and events
+        /// <summary>
 		/// Event that fires when begin to connect with target POP3 server.
 		/// </summary>
 		// Using delegate { } there is no need for null checking
@@ -97,24 +99,19 @@ namespace OpenPOP.POP3
 		/// </summary>
         public event EventHandler MessageTransferFinished = delegate { };
 
+        // Response sent by server when the response is OK
 		private const string RESPONSE_OK="+OK";
-		//private const string RESPONSE_ERR="-ERR";
-		private TcpClient clientSocket=null;		
+
 		private StreamReader reader;
 		private StreamWriter writer;
-		private string _Error = "";
 	    private string _basePath=null;
 		private bool _receiveFinish=false;
-	    private string _aPOPTimestamp;
-		private string _lastCommandResponse;
+	    private string _lastCommandResponse;
 
 
 	    public bool Connected { get; private set; }
 
-	    public string APOPTimestamp
-		{
-			get{return _aPOPTimestamp;}
-		}
+	    private string APOPTimestamp { get; set; }
 
 	    /// <summary>
 	    /// receive content sleep interval
@@ -174,6 +171,43 @@ namespace OpenPOP.POP3
 	    /// Send buffer size
 	    /// </summary>
 	    public int SendBufferSize { get; set; }
+        #endregion
+
+        /// <summary>
+        /// Constructs a new POPClient
+        /// </summary>
+        public POPClient()
+        {
+            // We have not seen the APOPTimestamp yet
+            APOPTimestamp = null;
+
+            // We are not connected
+            Connected = false;
+
+            // Set up default buffer and timeout sizes
+            SendBufferSize = 4090;
+            ReceiveBufferSize = 4090;
+            SendTimeOut = 60000;
+            ReceiveTimeOut = 60000;
+            WaitForResponseInterval = 200;
+            ReceiveContentSleepInterval = 100;
+
+            // Auto decode MS-TNEF attachments
+            AutoDecodeMSTNEF = true;
+
+            // Do not log any failures
+            Utility.Log = false;
+        }
+
+        /// <summary>
+        /// Constructs a new POPClient, connects to the server and authenticates the with the supplied user
+        /// </summary>
+        public POPClient(string strHost, int intPort, string strlogin, string strPassword, AuthenticationMethod authenticationMethod, bool useSsl)
+            : this()
+        {
+            Connect(strHost, intPort, useSsl);
+            Authenticate(strlogin, strPassword, authenticationMethod);
+        }
 
 	    private void WaitForResponse(bool blnCondiction, int intInterval)
 		{
@@ -189,7 +223,7 @@ namespace OpenPOP.POP3
 		{
 			if(intInterval==0)
 				intInterval=WaitForResponseInterval;
-			//while(rdReader.Peek()==-1 || !rdReader.BaseStream.CanRead)
+			
 			while(!rdReader.BaseStream.CanRead)
 			{
 				Thread.Sleep(intInterval);
@@ -223,33 +257,27 @@ namespace OpenPOP.POP3
 		/// Examines string to see if it contains a timestamp to use with the APOP command
 		/// If it does, sets the ApopTimestamp property to this value
 		/// </summary>
-		/// <param name="strResponse">string to examine</param>
-		private void ExtractApopTimestamp(string strResponse)
+		/// <param name="response">The string to examine</param>
+		private void ExtractApopTimestamp(string response)
 		{
-			Match match = Regex.Match(strResponse, "<.+>");
+            // RFC Example:
+            // +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
+			Match match = Regex.Match(response, "<.+>");
 			if (match.Success)
 			{
-				_aPOPTimestamp = match.Value;
+				APOPTimestamp = match.Value;
 			}
 		}
 
 		/// <summary>
-		/// Tests a string to see if it's a "+OK" string
+		/// Tests a string to see if it is a "+OK" string.
+		/// The method does only check if it starts with an "+OK"
 		/// </summary>
-		/// <param name="strResponse">string to examine</param>
+		/// <param name="strResponse">The string to examine</param>
 		/// <returns>true if response is an "+OK" string</returns>
 		private static bool IsOkResponse(string strResponse)
 		{
-			return (strResponse.Substring(0, 3) == RESPONSE_OK);
-		}
-
-		/// <summary>
-		/// get response content
-		/// </summary>
-		/// <returns>response content</returns>
-		private string GetResponseContent()
-		{
-			return _lastCommandResponse.Substring(3);
+			return strResponse.StartsWith(RESPONSE_OK);
 		}
 
 		/// <summary>
@@ -265,10 +293,13 @@ namespace OpenPOP.POP3
 			{
 				if(writer.BaseStream.CanWrite)
 				{
-					writer.WriteLine(strCommand);
-					writer.Flush();
-					//WaitForResponse(ref reader,WaitForResponseInterval);
+                    // Write a command with CRLF afterwards as per RFC.
+					writer.Write(strCommand + "\r\n");
+					writer.Flush(); // Flush the content as we now wait for a response
+					
+                    // Is this really needed??
 					WaitForResponse(ref reader);
+
 					_lastCommandResponse = reader.ReadLine();				
 					return IsOkResponse(_lastCommandResponse);
 				}
@@ -279,8 +310,7 @@ namespace OpenPOP.POP3
 			{
 				if(!blnSilent)
 				{
-					_Error = strCommand + ":" +e.Message;
-					Utility.LogError(_Error);
+					Utility.LogError(strCommand + ":" +e.Message);
 				}
 				return false;
 			}
@@ -300,15 +330,22 @@ namespace OpenPOP.POP3
 		/// Sends a command to the POP server, expects an integer reply in the response
 		/// </summary>
 		/// <param name="strCommand">command to send to server</param>
-		/// <returns>integer value in the reply</returns>
-		private int SendCommandIntResponse(string strCommand)
+		/// <param name="intLocation">
+		/// The location of the int to return.
+		/// Example:
+        /// S: +OK 2 200
+        /// Set intLocation=1 to get 2
+        /// Set intLocation=2 to get 200
+		/// </param>
+		/// <returns>integer value in the reply or -1 if server did not accept the command</returns>
+		private int SendCommandIntResponse(string strCommand, int intLocation)
 		{
-			int retVal = 0;
+			int retVal = -1;
 			if(SendCommand(strCommand))
 			{
 				try
 				{
-					retVal = int.Parse(_lastCommandResponse.Split(' ')[1]);
+					retVal = int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
 				}
 				catch(Exception e)
 				{
@@ -319,42 +356,16 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Construct new POPClient
+		/// Connects to remote POP3 server
 		/// </summary>
-		public POPClient()
-		{
-		    Connected = true;
-		    SendBufferSize = 4090;
-		    ReceiveBufferSize = 4090;
-		    SendTimeOut = 60000;
-		    ReceiveTimeOut = 60000;
-		    AutoDecodeMSTNEF = true;
-		    WaitForResponseInterval = 200;
-		    ReceiveContentSleepInterval = 100;
-		    Utility.Log=false;
-		}
-
-        /// <summary>
-        /// Construct new POPClient, connects to the server and authenticates the user
-        /// </summary>
-        public POPClient(string strHost, int intPort, string strlogin, string strPassword, AuthenticationMethod authenticationMethod, bool useSsl)
-            : this()
-        {
-            Connect(strHost, intPort, useSsl);
-            Authenticate(strlogin, strPassword, authenticationMethod);
-        }
-
-		/// <summary>
-		/// connect to remote server
-		/// </summary>
-		/// <param name="strHost">POP3 host</param>
-		/// <param name="intPort">POP3 port</param>
+		/// <param name="hostname">The hostname of the POP3 server</param>
+		/// <param name="port">The port of the POP3 server</param>
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
-		public void Connect(string strHost,int intPort, bool useSsl)
+		public void Connect(string hostname, int port, bool useSsl)
 		{
             CommunicationBegan(this, EventArgs.Empty);
 
-            clientSocket = new TcpClient();
+            TcpClient clientSocket = new TcpClient();
             clientSocket.ReceiveTimeout = ReceiveTimeOut;
             clientSocket.SendTimeout = SendTimeOut;
             clientSocket.ReceiveBufferSize = ReceiveBufferSize;
@@ -362,7 +373,7 @@ namespace OpenPOP.POP3
 
             try
             {
-                clientSocket.Connect(strHost, intPort);
+                clientSocket.Connect(hostname, port);
             }
             catch (SocketException e) 
             {
@@ -378,7 +389,7 @@ namespace OpenPOP.POP3
                 SslStream stream = new SslStream(clientSocket.GetStream(), false);
 
                 // Authenticate the server
-                stream.AuthenticateAsClient(strHost);
+                stream.AuthenticateAsClient(hostname);
 
                 reader = new StreamReader(stream);
                 writer = new StreamWriter(stream);
@@ -390,18 +401,19 @@ namespace OpenPOP.POP3
                 writer = new StreamWriter(clientSocket.GetStream());
             }
 
-            writer.AutoFlush = true;
-
             // Specify that LineEndings are \r\n, which is described in the
             // POP3 RFC: http://www.ietf.org/rfc/rfc1939.txt
             // This would otherwise work fine on Windows, as the default is \r\n,
             // but it would not work on Linux (Mono)
 		    writer.NewLine = "\r\n";
 
+            // Is this really needed?
             WaitForResponse(ref reader, WaitForResponseInterval);
 
+            // Fetch the server one-line welcome greeting
             string strResponse = reader.ReadLine();
 
+            // Check if the response was an OK response
             if (IsOkResponse(strResponse))
             {
                 ExtractApopTimestamp(strResponse);
@@ -410,6 +422,7 @@ namespace OpenPOP.POP3
             }
             else
             {
+                // If not close down the connection and abort
                 Disconnect();
                 Utility.LogError("Connect():" + "Error when login, maybe POP3 server not exist");
                 throw new PopServerNotAvailableException();
@@ -417,21 +430,16 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Disconnect from POP3 server
+		/// Disconnects from POP3 server
+		/// Sends the QUIT command before closing the connection.
 		/// </summary>
 		public void Disconnect()
 		{
 			try
 			{
-				clientSocket.ReceiveTimeout=500;
-				clientSocket.SendTimeout=500;
-				SendCommand("QUIT",true);
-				clientSocket.ReceiveTimeout=ReceiveTimeOut;
-				clientSocket.SendTimeout=SendTimeOut;
+			    SendCommand("QUIT", true);
 				reader.Close();
 				writer.Close();
-				clientSocket.GetStream().Close();
-				clientSocket.Close();
 			}
 			catch (Exception)
 			{
@@ -442,14 +450,13 @@ namespace OpenPOP.POP3
 			{
 				reader=null;
 				writer=null;
-				clientSocket=null;
 			    Connected = false;
 			}
 			CommunicationLost(this, EventArgs.Empty);
 		}
 
 		/// <summary>
-		/// release me
+		/// Releases any resources that this POPClient has.
 		/// </summary>
 		~POPClient()
 		{
@@ -457,63 +464,52 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// verify user and password
+		/// Authenticates a user towards the POP server using AuthenticationMethod.TRYBOTH
 		/// </summary>
-		/// <param name="strlogin">user name</param>
-		/// <param name="strPassword">password</param>
-		public void Authenticate(string strlogin,string strPassword)
+		/// <param name="username">The username</param>
+		/// <param name="password">The user password</param>
+		public void Authenticate(string username, string password)
 		{
-			Authenticate(strlogin,strPassword,AuthenticationMethod.USERPASS);
+			Authenticate(username, password, AuthenticationMethod.TRYBOTH);
 		}
 
-		/// <summary>
-		/// verify user and password
-		/// </summary>
-		/// <param name="strlogin">user name</param>
-		/// <param name="strPassword">strPassword</param>
-		/// <param name="authenticationMethod">verification mode</param>
-		public void Authenticate(string strlogin,string strPassword,AuthenticationMethod authenticationMethod)
+        /// <summary>
+        /// Authenticates a user towards the POP server using some AuthenticationMethod.
+        /// </summary>
+        /// <param name="username">The username</param>
+        /// <param name="password">The user password</param>
+		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
+        /// <exception cref="NotSupportedException">If AuthenticationMethod.APOP is used, but not supported by the server</exception>
+		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
-			if(authenticationMethod==AuthenticationMethod.USERPASS)
+			if(authenticationMethod == AuthenticationMethod.USERPASS)
 			{
-				AuthenticateUsingUSER(strlogin,strPassword);				
+				AuthenticateUsingUSER(username, password);				
 			}
-			else if(authenticationMethod==AuthenticationMethod.APOP)
+			else if(authenticationMethod == AuthenticationMethod.APOP)
 			{
-				AuthenticateUsingAPOP(strlogin,strPassword);
+				AuthenticateUsingAPOP(username, password);
 			}
-			else if(authenticationMethod==AuthenticationMethod.TRYBOTH)
+			else if(authenticationMethod == AuthenticationMethod.TRYBOTH)
 			{
-				try
-				{
-					AuthenticateUsingUSER(strlogin,strPassword);
-				}
-				catch(InvalidLoginException e)
-				{
-					Utility.LogError("Authenticate():"+e.Message);
-				}
-				catch(InvalidPasswordException e)
-				{
-					Utility.LogError("Authenticate():"+e.Message);
-				}
-				catch(Exception e)
-				{
-					Utility.LogError("Authenticate():"+e.Message);
-					AuthenticateUsingAPOP(strlogin,strPassword);
-				}
+                // Check if APOP is supported
+                if(APOPTimestamp != null)
+                    AuthenticateUsingAPOP(username, password);
+                else
+                    AuthenticateUsingUSER(username, password);
 			}
 		}
 
-		/// <summary>
-		/// verify user and password
-		/// </summary>
-		/// <param name="strlogin">user name</param>
-		/// <param name="strPassword">password</param>
-		private void AuthenticateUsingUSER(string strlogin,string strPassword)
+        /// <summary>
+        /// Authenticates a user towards the POP server using the USER, PASSWORD commands
+        /// </summary>
+        /// <param name="username">The username</param>
+        /// <param name="password">The user password</param>
+		private void AuthenticateUsingUSER(string username, string password)
 		{				
 			AuthenticationBegan(this, EventArgs.Empty);
 
-			if(!SendCommand("USER " + strlogin))
+			if(!SendCommand("USER " + username))
 			{
 				Utility.LogError("AuthenticateUsingUSER():wrong user");
 				throw new InvalidLoginException();
@@ -521,7 +517,7 @@ namespace OpenPOP.POP3
 			
 			WaitForResponse(ref writer,WaitForResponseInterval);
 
-			if(!SendCommand("PASS " + strPassword))	
+			if(!SendCommand("PASS " + password))	
 			{
 				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
 				{
@@ -529,74 +525,64 @@ namespace OpenPOP.POP3
 					throw new PopServerLockException();			
 				}
 
-			    Utility.LogError("AuthenticateUsingUSER():wrong password or " + GetResponseContent());
+                // Lastcommand might contain an error description like:
+                // S: -ERR maildrop already locked
+			    Utility.LogError("AuthenticateUsingUSER(): wrong password. Server responded: " + _lastCommandResponse);
 			    throw new InvalidPasswordException();
 			}
 			
 			AuthenticationFinished(this, EventArgs.Empty);
 		}
 
-		/// <summary>
-		/// verify user and password using APOP
-		/// </summary>
-		/// <param name="strlogin">user name</param>
-		/// <param name="strPassword">password</param>
-		private void AuthenticateUsingAPOP(string strlogin,string strPassword)
+        /// <summary>
+        /// Authenticates a user towards the POP server using APOP
+        /// </summary>
+        /// <param name="username">The username</param>
+        /// <param name="password">The user password</param>
+        /// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
+		private void AuthenticateUsingAPOP(string username, string password)
 		{
+            if(APOPTimestamp == null)
+                throw new NotSupportedException("APOP is not supported on this server");
+
 			AuthenticationBegan(this, EventArgs.Empty);
 
-			if(!SendCommand("APOP " + strlogin + " " + MyMD5.GetMD5HashHex(strPassword)))
+			if(!SendCommand("APOP " + username + " " + MyMD5.GetMD5HashHex(APOPTimestamp + password)))
 			{
 				Utility.LogError("AuthenticateUsingAPOP():wrong user or password");
-				throw new InvalidLoginOrPasswordException();		
+				throw new InvalidLoginOrPasswordException();
 			}
 
 			AuthenticationFinished(this, EventArgs.Empty);
 		}
 
-/*		private string GetCommand(string input)
-		{			
-			try
-			{
-				return input.Split(' ')[0];
-			}
-			catch(Exception e)
-			{
-				Utility.LogError("GetCommand():"+e.Message);
-				return "";
-			}
-		}*/
-
-		private static string[] GetParameters(string input)
-		{
-			string []temp=input.Split(' ');
-			string []retStringArray=new string[temp.Length-1];
-			Array.Copy(temp,1,retStringArray,0,temp.Length-1);
-
-			return retStringArray;
-		}		
-
 		/// <summary>
-		/// get message count
+		/// Get the number of messages on the server using a STAT command
 		/// </summary>
-		/// <returns>message count</returns>
+		/// <returns>The message count</returns>
 		public int GetMessageCount()
-		{			
-			return SendCommandIntResponse("STAT");
-		}
-
-		/// <summary>
-		/// Deletes message with given index when Close() is called
-		/// </summary>
-		/// <param name="intMessageIndex"> </param>
-		public bool DeleteMessage(int intMessageIndex) 
 		{
-			return SendCommand("DELE " + intMessageIndex);
+			return SendCommandIntResponse("STAT", 1);
 		}
 
 		/// <summary>
-		/// Deletes messages
+		/// Marks the message with the given message number as deleted.
+		/// The message will not be deleted until a QUIT command is sent to the server.
+		/// This is done on disconnect.
 		/// </summary>
+		/// <param name="messageNumber">The number of the message to be deleted. This message may not already have been deleted</param>
+		/// <returns>True on success, false on failure of deletion</returns>
+		public bool DeleteMessage(int messageNumber) 
+		{
+			return SendCommand("DELE " + messageNumber);
+		}
+
+		/// <summary>
+        /// Marks all messages as deleted.
+        /// The messages will not be deleted until a QUIT command is sent to the server.
+        /// This is done on disconnect.
+		/// </summary>
+		/// <returns>True if all messages was marked as deleted successfully, false if one message could not be marked. Messages following that message will not be tried to be deleted</returns>
 		public bool DeleteAllMessages() 
 		{
 			int messageCount=GetMessageCount();
@@ -609,15 +595,24 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// quit POP3 server
+		/// Sends the POP3 server the QUIT command.
+		/// 
+		/// According to RFC the server should then:
+		/// If there is an error, such as a resource shortage, encountered while removing messages, the maildrop may result in having some or none of the messages marked as deleted be removed.
+		/// The POP3 server removes all messages marked as deleted from the maildrop and replies as to the status of this operation.
+		/// The server is required to release any exclusive-access locks on the mailbox and close the TCP connection
 		/// </summary>
+		/// <returns>True on OK message from server. False otherwise.</returns>
 		public bool QUIT()
 		{
 			return SendCommand("QUIT");
 		}
 
 		/// <summary>
-		/// keep server active
+		/// Keep server active
+		/// 
+		/// RFC:
+		/// The POP3 server does nothing, it merely replies with a positive response
 		/// </summary>
 		public bool NOOP()
 		{
@@ -625,7 +620,12 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// keep server active
+		/// Send a reset command to the server.
+		/// 
+		/// RFC:
+		/// If any messages have been marked as deleted by the POP3
+        /// server, they are unmarked.  The POP3 server then replies
+        /// with a positive response.
 		/// </summary>
 		public bool RSET()
 		{
@@ -633,100 +633,111 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// identify user
+		/// Get a unique ID for a single message
 		/// </summary>
-		public bool USER()
+        /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
+        /// <returns>The unique ID for the message, or null if the message does not exist</returns>
+		public string GetMessageUID(int messageNumber)
 		{
-			return SendCommand("USER");
+            // Example from RFC:
+            //C: UIDL 2
+            //S: +OK 2 QhdPYR:00WBw1Ph7x7
 
-		}
-
-		/// <summary>
-		/// get messages info
-		/// </summary>
-		/// <param name="intMessageNumber">message number</param>
-		/// <returns>Message object</returns>
-		public MIMEParser.Message GetMessageHeader(int intMessageNumber)
-		{
-			MessageTransferBegan(this, EventArgs.Empty);
-
-			MIMEParser.Message msg=FetchMessage("TOP "+intMessageNumber+" 0", true);
-			
-			MessageTransferFinished(this, EventArgs.Empty);
-
-			return msg;
-		}
-
-		/// <summary>
-		/// get message uid
-		/// </summary>
-		/// <param name="intMessageNumber">message number</param>
-		public string GetMessageUID(int intMessageNumber)
-		{
-			string[] strValues=null;
-			if(SendCommand("UIDL " + intMessageNumber))
+			if(SendCommand("UIDL " + messageNumber))
 			{
-				strValues = GetParameters(_lastCommandResponse);
+                // Parse out the unique ID
+                return _lastCommandResponse.Split(' ')[2];
 			}
-			return strValues[1];			
+
+		    // The command was not accepted. The message did properly not exist
+		    return null;
 		}
 
 		/// <summary>
-		/// get message uids
+        /// Gets a list of unique ID's for all messages.
+        /// Messages marked as deleted are not listed.
 		/// </summary>
-		public ArrayList GetMessageUIDs()
+		/// <returns>
+		/// A list containing the unique ID's in sorted order from message number 1 and upwards.
+		/// Returns null if the server did not accept the UIDL command.
+		/// </returns>
+		public List<string> GetMessageUIDs()
 		{
-			ArrayList uids=new ArrayList();
+            // RFC Example:
+            // C: UIDL
+            // S: +OK
+            // S: 1 whqtswO00WBw418f9t5JxYwZ
+            // S: 2 QhdPYR:00WBw1Ph7x7
+            // S: .      // this is the end
+
 			if(SendCommand("UIDL"))
 			{
-				string strResponse=reader.ReadLine();
-				while (strResponse!=".")
+                List<string> uids = new List<string>();
+
+			    string strResponse;
+                // Keep reading until multi-line ends with a "."
+				while (!".".Equals(strResponse = reader.ReadLine()))
 				{
+                    // Add the unique ID to the list
 					uids.Add(strResponse.Split(' ')[1]);
-					strResponse=reader.ReadLine();
 				}
 				return uids;
 			}
 			
+            // Server did not accept command.
             return null;
 		}
 
-		/// <summary>
-		/// Get the sizes of all the messages
-		/// CAUTION:  Assumes no messages have been deleted
-		/// </summary>
-		/// <returns>Size of each message</returns>
-		public ArrayList LIST()
-		{
-			ArrayList sizes=new ArrayList();
-			if(SendCommand("LIST"))
-			{
-				string strResponse=reader.ReadLine();
-				while (strResponse!=".")
-				{
-					sizes.Add(int.Parse(strResponse.Split(' ')[1]));
-					strResponse=reader.ReadLine();
-				}
-				return sizes;
-			}
-			
-			return null;
-		}
-
-		/// <summary>
-		/// get the size of a message
-		/// </summary>
-		/// <param name="intMessageNumber">message number</param>
-		/// <returns>Size of message</returns>
-		public int LIST(int intMessageNumber)
-		{
-			return SendCommandIntResponse("LIST " + intMessageNumber.ToString());
-		}
-
-		
         /// <summary>
+        /// Gets the size of a single message
+        /// </summary>
+        /// <param name="messageNumber">The number of a message which may not be a message marked as deleted</param>
+        /// <returns>Size of the message</returns>
+        public int GetMessageSize(int messageNumber)
+        {
+            // RFC Example:
+            // C: LIST 2
+            // S: +OK 2 200
+            return SendCommandIntResponse("LIST " + messageNumber, 2);
+        }
+
+		/// <summary>
+		/// Get the sizes of all the messages.
+        /// Messages marked as deleted are not listed
+		/// </summary>
+		/// <returns>
+		/// Size of each message excluding deleted ones.
+		/// If the server did not accept the LIST command, null is returned.
+		/// </returns>
+        public List<int> GetMessageSizes()
+		{
+		    // RFC Example:
+		    // C: LIST
+		    // S: +OK 2 messages (320 octets)
+		    // S: 1 120
+		    // S: 2 200
+		    // S: .       // End of multi-line
+
+		    if (SendCommand("LIST"))
+		    {
+		        List<int> sizes = new List<int>();
+
+		        string strResponse;
+		        // Read until end of multi-line
+		        while (".".Equals(strResponse = reader.ReadLine()))
+		        {
+		            sizes.Add(int.Parse(strResponse.Split(' ')[1]));
+		        }
+
+		        return sizes;
+		    }
+
+		    return null;
+		}
+
+	    /// <summary>
         /// Reads a mail message that is sent from the server, when the server
-        /// was handled a RETR [num] command which it accepted.
+        /// was handed a RETR [num] command which it accepted.
         /// </summary>
         /// <returns>The message read from the server stream</returns>
 		private string ReceiveRETRMessage()
@@ -764,50 +775,71 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// get message info
+		/// Fetches a message from the server and parses it
 		/// </summary>
-		/// <param name="number">message number on server</param>
-        /// <param name="blnOnlyHeader">Only return message header?</param>
-		/// <returns>Message object</returns>
-		public MIMEParser.Message GetMessage(int number, bool blnOnlyHeader)
-		{			
-			MessageTransferBegan(this, EventArgs.Empty);
+		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
+        /// <param name="headersOnly">Only return message header?</param>
+		/// <returns>The message or null if server did not accept the command</returns>
+		public MIMEParser.Message GetMessage(int messageNumber, bool headersOnly)
+		{
+		    MIMEParser.Message msg;
 
-			MIMEParser.Message msg=FetchMessage("RETR " + number, blnOnlyHeader);
-
-			MessageTransferFinished(this, EventArgs.Empty);
+            if (headersOnly)
+                msg = GetMessageHeaders(messageNumber);
+            else
+                msg = FetchMessage("RETR " + messageNumber, false);
 
 			return msg;
 		}
 
+        /// <summary>
+        /// Get all the headers for a message
+        /// </summary>
+        /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
+        /// <returns>Message object</returns>
+        public MIMEParser.Message GetMessageHeaders(int messageNumber)
+        {
+            // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
+            MIMEParser.Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
+
+            return msg;
+        }
+
 		/// <summary>
-		/// fetches a message or a message header
+		/// Fetches a message or a message header
 		/// </summary>
-		/// <param name="strCommand">Command to send to Pop server</param>
-		/// <param name="blnOnlyHeader">Only return message header?</param>
-		/// <returns>Message object</returns>
-		public MIMEParser.Message FetchMessage(string strCommand, bool blnOnlyHeader)
-		{			
+		/// <param name="command">Command to send to POP server</param>
+		/// <param name="headersOnly">Only return message header?</param>
+		/// <returns>Message object or null if the server did not accept the command</returns>
+		private MIMEParser.Message FetchMessage(string command, bool headersOnly)
+		{
+            MessageTransferBegan(this, EventArgs.Empty);
+
 			_receiveFinish=false;
-			if(!SendCommand(strCommand))			
+			if(!SendCommand(command))			
 				return null;
 
 			try
 			{
-				string receivedContent=ReceiveRETRMessage();
+                // Receive the message from the server
+				string receivedContent = ReceiveRETRMessage();
 
-				MIMEParser.Message msg=new MIMEParser.Message(ref _receiveFinish,_basePath,AutoDecodeMSTNEF,receivedContent,blnOnlyHeader);
+                // Parse the message
+				MIMEParser.Message msg = new MIMEParser.Message(ref _receiveFinish, _basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
 
-				WaitForResponse(_receiveFinish,WaitForResponseInterval);
+                // foens: Is this really needed?
+				WaitForResponse(_receiveFinish, WaitForResponseInterval);
 
+                MessageTransferFinished(this, EventArgs.Empty);
 				return msg;
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("FetchMessage():"+e.Message);
+				Utility.LogError("FetchMessage():" + e.Message);
+
+                MessageTransferFinished(this, EventArgs.Empty);
 				return null;
 			}
 		}
-
 	}
 }

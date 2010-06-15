@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -650,13 +651,12 @@ namespace OpenPOP.NET_Sample_App
 
 		private void button2_Click(object sender, System.EventArgs e)
 		{
-			ArrayList uids=popClient.GetMessageUIDs();
+			List<string> uids=popClient.GetMessageUIDs();
 			txtMessage.Text="UIDL:\r\n";
-			for (IEnumerator i = uids.GetEnumerator(); i.MoveNext();)
-			{
-				string uid = (string)i.Current;
-				txtMessage.Text+=(uid+"\r\n");
-			}
+		    foreach (string uid in uids)
+		    {
+                txtMessage.Text += (uid + "\r\n");
+		    }
 		}
 
 		private void AddEvent(string strEvent)

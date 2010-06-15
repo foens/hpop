@@ -16,6 +16,7 @@
 /*******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -1037,16 +1038,15 @@ namespace MailMonitor
 				int intCount=_popClient.GetMessageCount();
 				lvi.SubItems[1].Text=intCount.ToString();
 
-				string strMessageID;
-				int intNewMessages=0;
+			    int intNewMessages=0;
 				MailInfo mi;
 
-				ArrayList alUIDs=_popClient.GetMessageUIDs();
+				List<string> alUIDs=_popClient.GetMessageUIDs();
 
 				for(int i=0;i<intCount;i++)
 				{
-					strMessageID=(string)alUIDs[i];//_popClient.GetMessageUID(i);
-					if(!_settings.MessageIDs.ContainsKey(strMessageID))
+				    string strMessageID = alUIDs[i];
+				    if(!_settings.MessageIDs.ContainsKey(strMessageID))
 					{
 						intNewMessages+=1;
 						mi=new MailInfo();
@@ -1055,7 +1055,7 @@ namespace MailMonitor
 						_settings.MessageIDs.Add(strMessageID,mi);
 					}
 				}
-				_popClient.Disconnect();
+			    _popClient.Disconnect();
 
 				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
 				

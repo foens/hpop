@@ -283,7 +283,7 @@ namespace MailMonitor
 				for(int i=1;i<=_count;i++)
 				{
 					this.Text="MailBox Info("+i.ToString()+"/"+_count.ToString() + ")";
-					_msg=_popClient.GetMessageHeader(i);
+					_msg=_popClient.GetMessageHeaders(i);
 					if(_msg!=null)
 					{
 						lvi=lvwMailBoxes.Items.Add(_msg.From+"("+_msg.FromEmail+")");
