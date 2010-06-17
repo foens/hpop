@@ -637,37 +637,37 @@ namespace OpenPOP.NET_Sample_App
 		    MessageBox.Show(this, strRet);
 		}
 
-		private void popClient_CommunicationBegan(object sender, EventArgs e)
+        private void popClient_CommunicationBegan(POPClient sender)
 		{
 		    AddEvent("CommunicationBegan");
 		}
 
-		private void popClient_CommunicationOccured(object sender, EventArgs e)
+        private void popClient_CommunicationOccured(POPClient sender)
 		{
 			AddEvent("CommunicationOccured");
 		}
 
-		private void popClient_AuthenticationBegan(object sender, EventArgs e)
+		private void popClient_AuthenticationBegan(POPClient sender)
 		{
 			AddEvent("AuthenticationBegan");
 		}
 
-		private void popClient_AuthenticationFinished(object sender, EventArgs e)
+        private void popClient_AuthenticationFinished(POPClient sender)
 		{
 			AddEvent("AuthenticationFinished");
 		}
-		
-		private void popClient_MessageTransferBegan(object sender, EventArgs e)
+
+        private void popClient_MessageTransferBegan(POPClient sender)
 		{
 			AddEvent("MessageTransferBegan");
 		}
 
-		private void popClient_MessageTransferFinished(object sender, EventArgs e)
+        private void popClient_MessageTransferFinished(POPClient sender)
 		{
 			AddEvent("MessageTransferFinished");
 		}
 
-		private void popClient_CommunicationLost(object sender, EventArgs e)
+        private void popClient_CommunicationLost(POPClient sender)
 		{
 			AddEvent("CommunicationLost");
 		}

@@ -15,116 +15,102 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			OpenPOP.POP3.POPClient
-*Function:		POP Client
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Modified:		2004/6/16 12:47 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/6/16 12:47 GMT+8 by Unruled Boy
-*					1.Added new high performance WaitForResponse function;
-*				2004/5/26 09:25 GMT+8 by Unruled Boy
-*					1.Fixed some parameter description errors and tidy up some codes
-*				2004/5/21 00:00 by dteviot via Unruled Boy
-*					1.Added support for the LIST command
-*					2.Heavily refactored replicated code
-*				2004/5/4 20:52 GMT+8 by Unruled Boy
-*					1.Renamed DeleteMessages to DeleteAllMessages
-*				2004/5/3 12:53 GMT+8 by Unruled Boy
-*					1.Adding ReceiveContentSleepInterval property
-*					2.Adding WaitForResponseInterval property
-*				2004/5/1 14:13 GMT+8 by Unruled Boy
-*					1.Adding descriptions to every public functions/property/void
-*					2.Now with 6 events!
-*				2004/4/23 21:07 GMT+8 by Unruled Boy
-*					1.Modifies the construction for new Message
-*					2.Tidy up the codes to follow Hungarian Notation
-*				2004/4/2 21:25 GMT+8 by Unruled Boy
-*					1.modifies the WaitForResponse
-*					2.added handling for PopServerLockException
-*/
 using System;
 using System.Collections.Generic;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.IO;
-using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
+using OpenPOP.MIMEParser;
 
 namespace OpenPOP.POP3
 {
-    // TODO: Make a field public accesible to check if the server accepts APOP login method
-    // TODO: Remove ability to set Receive intervals and buffer sizes. These should ONLY be set by a constructor. Maybe give arguments to constructor.
-
 	/// <summary>
-	/// POPClient
-	/// Does not included threaded support or usage
+	/// POP3 complient POPClient
+	/// 
+	/// This implementation does not support threads at all.
+	/// 
+	/// Here is an example how the POPClient could be used:
+	/// POPClient client = new POPClient();
+	/// client.Connect(serverHostName, serverPort, useSsl);
+	/// client.Authenticate(username, password);
+    /// Message messageNumber1 = client.GetMessage(1, false);
+    /// client.Disconnect();
 	/// </summary>
 	public class POPClient
     {
-        #region member variables and events
+        #region Events
+        /// <summary>
+        /// Basic delegate which is used for alle events
+        /// </summary>
+        /// <param name="client">The client from which the event happened</param>
+	    public delegate void POPClientEvent(POPClient client);
+
         /// <summary>
 		/// Event that fires when begin to connect with target POP3 server.
 		/// </summary>
 		// Using delegate { } there is no need for null checking
         // which produces much cleaner code
-		public event EventHandler CommunicationBegan = delegate { };
+        public event POPClientEvent CommunicationBegan = delegate { };
+
 		/// <summary>
 		/// Event that fires when connected with target POP3 server.
 		/// </summary>
-		public event EventHandler CommunicationOccured = delegate { };
+        public event POPClientEvent CommunicationOccured = delegate { };
 
 		/// <summary>
 		/// Event that fires when disconnected with target POP3 server.
 		/// </summary>
-        public event EventHandler CommunicationLost = delegate { };
+        public event POPClientEvent CommunicationLost = delegate { };
 
 		/// <summary>
 		/// Event that fires when authentication began with target POP3 server.
 		/// </summary>
-        public event EventHandler AuthenticationBegan = delegate { };
+        public event POPClientEvent AuthenticationBegan = delegate { };
 
 		/// <summary>
 		/// Event that fires when authentication finished with target POP3 server.
 		/// </summary>
-        public event EventHandler AuthenticationFinished = delegate { };
+        public event POPClientEvent AuthenticationFinished = delegate { };
 
 		/// <summary>
 		/// Event that fires when message transfer has begun.
 		/// </summary>		
-        public event EventHandler MessageTransferBegan = delegate { };
+        public event POPClientEvent MessageTransferBegan = delegate { };
 		
 		/// <summary>
 		/// Event that fires when message transfer has finished.
 		/// </summary>
-        public event EventHandler MessageTransferFinished = delegate { };
+        public event POPClientEvent MessageTransferFinished = delegate { };
+        #endregion
 
-        // Response sent by server when the response is OK
-		private const string RESPONSE_OK="+OK";
-
-		private StreamReader reader;
+        #region Private member variables
+        private StreamReader reader;
 		private StreamWriter writer;
 	    private string _basePath=null;
 	    private string _lastCommandResponse;
 
+        /// <summary>
+        /// The APOP timestamp sent by the server in it's welcome
+        /// message if APOP is supported.
+        /// </summary>
+        private string APOPTimestamp { get; set; }
+        #endregion
 
+        #region Public member variables
+        /// <summary>
+        /// Tells whether the POPClient is connected to a POP server or not
+        /// </summary>
 	    public bool Connected { get; private set; }
 
-	    private string APOPTimestamp { get; set; }
-
-	    /// <summary>
-	    /// receive content sleep interval
-	    /// </summary>
-	    public int ReceiveContentSleepInterval { get; set; }
-
-	    /// <summary>
-	    /// wait for response interval
-	    /// </summary>
-	    public int WaitForResponseInterval { get; set; }
-
+        /// <summary>
+        /// Allows you to check if the server supports APOP.
+        /// This value is filled when the connect method has been used,
+        /// as the server tells in its welcome message if APOP is supported.
+        /// </summary>
+        public bool APOPSupported { get; private set; }
+        
 	    /// <summary>
 	    /// whether auto decoding MS-TNEF attachment files
 	    /// </summary>
@@ -136,47 +122,31 @@ namespace OpenPOP.POP3
 		public string BasePath
 		{
 			get{return _basePath;}
-			set
-			{
-				try
-				{
-					if(value.EndsWith("\\"))
-						_basePath=value;
-					else
-						_basePath=value+"\\";
-				}
-				catch (Exception)
-				{
-                    // Why is there a catch here???
-				}
-			}
+            set
+            {
+                if (value == null)
+                    return;
+
+                if (value.EndsWith("\\"))
+                    _basePath = value;
+                else
+                    _basePath = value + "\\";
+            }
 		}
 
 	    /// <summary>
 	    /// Receive timeout for the connection to the SMTP server in milliseconds.
-	    /// The default value is 60000 milliseconds.
 	    /// </summary>
-	    public int ReceiveTimeOut { get; set; }
+	    public int ReceiveTimeOut { get; private set; }
 
 	    /// <summary>
 	    /// Send timeout for the connection to the SMTP server in milliseconds.
-	    /// The default value is 60000 milliseconds.
 	    /// </summary>
-	    public int SendTimeOut { get; set; }
-
-	    /// <summary>
-	    /// Receive buffer size
-	    /// </summary>
-	    public int ReceiveBufferSize { get; set; }
-
-	    /// <summary>
-	    /// Send buffer size
-	    /// </summary>
-	    public int SendBufferSize { get; set; }
+	    public int SendTimeOut { get; private set; }
         #endregion
 
         /// <summary>
-        /// Constructs a new POPClient
+        /// Constructs a new POPClient with default settings.
         /// </summary>
         public POPClient()
         {
@@ -186,77 +156,33 @@ namespace OpenPOP.POP3
             // We are not connected
             Connected = false;
 
-            // Set up default buffer and timeout sizes
-            SendBufferSize = 4090;
-            ReceiveBufferSize = 4090;
+            // Set up default timeout times
             SendTimeOut = 60000;
             ReceiveTimeOut = 60000;
-            WaitForResponseInterval = 200;
-            ReceiveContentSleepInterval = 100;
 
             // Auto decode MS-TNEF attachments
             AutoDecodeMSTNEF = true;
+
+            // APOP is not supported before we check on login
+            APOPSupported = false;
 
             // Do not log any failures
             Utility.Log = false;
         }
 
         /// <summary>
-        /// Constructs a new POPClient, connects to the server and authenticates the with the supplied user
+        /// Creates a new POPClient with special settings for socket timeouts.
         /// </summary>
-        public POPClient(string strHost, int intPort, string strlogin, string strPassword, AuthenticationMethod authenticationMethod, bool useSsl)
-            : this()
+        /// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading</param>
+        /// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending</param>
+	    public POPClient(int receiveTimeout, int sendTimeout)
+	        : this()
         {
-            Connect(strHost, intPort, useSsl);
-            Authenticate(strlogin, strPassword, authenticationMethod);
+	        ReceiveTimeOut = receiveTimeout;
+	        SendTimeOut = sendTimeout;
         }
 
-	    private void WaitForResponse(bool blnCondiction, int intInterval)
-		{
-			if(intInterval==0)
-				intInterval=WaitForResponseInterval;
-			while(!blnCondiction)
-			{
-				Thread.Sleep(intInterval);
-			}
-		}
-
-		private void WaitForResponse(ref StreamReader rdReader, int intInterval)
-		{
-            /*
-			if(intInterval==0)
-				intInterval=WaitForResponseInterval;
-			
-			while(!rdReader.BaseStream.CanRead)
-			{
-				Thread.Sleep(intInterval);
-			}*/
-		}
-
-		private void WaitForResponse(ref StreamReader rdReader)
-		{/*
-			DateTime dtStart=DateTime.Now;
-			TimeSpan tsSpan;
-			while(!rdReader.BaseStream.CanRead)
-			{
-				tsSpan=DateTime.Now.Subtract(dtStart);
-				if(tsSpan.Milliseconds>ReceiveTimeOut)
-					break;
-				Thread.Sleep(WaitForResponseInterval);
-			}*/
-		}
-
-		private void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
-		{/*
-			if(intInterval==0)
-				intInterval=WaitForResponseInterval;
-			while(!wrWriter.BaseStream.CanWrite)
-			{
-				Thread.Sleep(intInterval);
-			}*/
-		}
-
-		/// <summary>
+	    /// <summary>
 		/// Examines string to see if it contains a timestamp to use with the APOP command
 		/// If it does, sets the ApopTimestamp property to this value
 		/// </summary>
@@ -269,18 +195,22 @@ namespace OpenPOP.POP3
 			if (match.Success)
 			{
 				APOPTimestamp = match.Value;
+			    APOPSupported = true;
 			}
 		}
 
 		/// <summary>
 		/// Tests a string to see if it is a "+OK" string.
+		/// An "+OK" string should be returned by a compliant POP3
+		/// server if the request could be served.
+		/// 
 		/// The method does only check if it starts with an "+OK"
 		/// </summary>
 		/// <param name="strResponse">The string to examine</param>
 		/// <returns>true if response is an "+OK" string</returns>
 		private static bool IsOkResponse(string strResponse)
 		{
-			return strResponse.StartsWith(RESPONSE_OK);
+			return strResponse.StartsWith("+OK");
 		}
 
 		/// <summary>
@@ -291,7 +221,6 @@ namespace OpenPOP.POP3
 		/// <returns>true if server responded "+OK"</returns>
 		private bool SendCommand(string strCommand, bool blnSilent)
 		{
-			_lastCommandResponse = "";
 			try
 			{
 				if(writer.BaseStream.CanWrite)
@@ -299,9 +228,6 @@ namespace OpenPOP.POP3
                     // Write a command with CRLF afterwards as per RFC.
 					writer.Write(strCommand + "\r\n");
 					writer.Flush(); // Flush the content as we now wait for a response
-					
-                    // Is this really needed??
-					WaitForResponse(ref reader);
 
 					_lastCommandResponse = reader.ReadLine();				
 					return IsOkResponse(_lastCommandResponse);
@@ -326,7 +252,7 @@ namespace OpenPOP.POP3
 		/// <returns>true if server responded "+OK"</returns>
 		private bool SendCommand(string strCommand)
 		{
-			return SendCommand(strCommand,false);
+		    return SendCommand(strCommand, false);
 		}
 
 		/// <summary>
@@ -343,36 +269,27 @@ namespace OpenPOP.POP3
 		/// <returns>integer value in the reply or -1 if server did not accept the command</returns>
 		private int SendCommandIntResponse(string strCommand, int intLocation)
 		{
-			int retVal = -1;
 			if(SendCommand(strCommand))
 			{
-				try
-				{
-					retVal = int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
-				}
-				catch(Exception e)
-				{
-					Utility.LogError(strCommand + ":" + e.Message);
-				}
+				return int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
 			}
-			return retVal;
+
+		    return -1;
 		}
 
 		/// <summary>
-		/// Connects to remote POP3 server
+		/// Connects to a remote POP3 server
 		/// </summary>
 		/// <param name="hostname">The hostname of the POP3 server</param>
 		/// <param name="port">The port of the POP3 server</param>
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
 		public void Connect(string hostname, int port, bool useSsl)
 		{
-            CommunicationBegan(this, EventArgs.Empty);
+            CommunicationBegan(this);
 
             TcpClient clientSocket = new TcpClient();
             clientSocket.ReceiveTimeout = ReceiveTimeOut;
             clientSocket.SendTimeout = SendTimeOut;
-            clientSocket.ReceiveBufferSize = ReceiveBufferSize;
-            clientSocket.SendBufferSize = SendBufferSize;
 
             try
             {
@@ -390,6 +307,8 @@ namespace OpenPOP.POP3
                 // If we want to use SSL, open a new SSLStream on top of the open TCP stream.
                 // We also want to close the TCP stream when the SSL stream is closed
                 SslStream stream = new SslStream(clientSocket.GetStream(), false);
+                stream.ReadTimeout = ReceiveTimeOut;
+                stream.WriteTimeout = SendTimeOut;
 
                 // Authenticate the server
                 stream.AuthenticateAsClient(hostname);
@@ -404,9 +323,6 @@ namespace OpenPOP.POP3
                 writer = new StreamWriter(clientSocket.GetStream());
             }
 
-            // Is this really needed?
-            WaitForResponse(ref reader, WaitForResponseInterval);
-
             // Fetch the server one-line welcome greeting
             string strResponse = reader.ReadLine();
 
@@ -415,13 +331,13 @@ namespace OpenPOP.POP3
             {
                 ExtractApopTimestamp(strResponse);
                 Connected = true;
-                CommunicationOccured(this, EventArgs.Empty);
+                CommunicationOccured(this);
             }
             else
             {
                 // If not close down the connection and abort
                 Disconnect();
-                Utility.LogError("Connect():" + "Error when login, maybe POP3 server not exist");
+                Utility.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
                 throw new PopServerNotAvailableException();
             }
 		}
@@ -440,14 +356,16 @@ namespace OpenPOP.POP3
 			}
 			catch (Exception)
 			{
-                // We don't care about errors in disconnect
-			    //Utility.LogError("Disconnect():"+e.Message);
+			    // We don't care about errors in disconnect
 			}
 			finally
 			{
+                // Reset values
 			    Connected = false;
+			    APOPSupported = false;
+			    APOPTimestamp = null;
 			}
-			CommunicationLost(this, EventArgs.Empty);
+			CommunicationLost(this);
 		}
 
 		/// <summary>
@@ -489,7 +407,7 @@ namespace OpenPOP.POP3
 			else if(authenticationMethod == AuthenticationMethod.TRYBOTH)
 			{
                 // Check if APOP is supported
-                if(APOPTimestamp != null)
+                if(APOPSupported)
                     AuthenticateUsingAPOP(username, password);
                 else
                     AuthenticateUsingUSER(username, password);
@@ -503,15 +421,13 @@ namespace OpenPOP.POP3
         /// <param name="password">The user password</param>
 		private void AuthenticateUsingUSER(string username, string password)
 		{				
-			AuthenticationBegan(this, EventArgs.Empty);
+			AuthenticationBegan(this);
 
 			if(!SendCommand("USER " + username))
 			{
 				Utility.LogError("AuthenticateUsingUSER():wrong user");
 				throw new InvalidLoginException();
 			}
-			
-			WaitForResponse(ref writer,WaitForResponseInterval);
 
 			if(!SendCommand("PASS " + password))	
 			{
@@ -527,7 +443,7 @@ namespace OpenPOP.POP3
 			    throw new InvalidPasswordException();
 			}
 			
-			AuthenticationFinished(this, EventArgs.Empty);
+			AuthenticationFinished(this);
 		}
 
         /// <summary>
@@ -538,10 +454,10 @@ namespace OpenPOP.POP3
         /// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
 		private void AuthenticateUsingAPOP(string username, string password)
 		{
-            if(APOPTimestamp == null)
+            if(!APOPSupported)
                 throw new NotSupportedException("APOP is not supported on this server");
 
-			AuthenticationBegan(this, EventArgs.Empty);
+			AuthenticationBegan(this);
 
 			if(!SendCommand("APOP " + username + " " + MyMD5.GetMD5HashHex(APOPTimestamp + password)))
 			{
@@ -549,13 +465,13 @@ namespace OpenPOP.POP3
 				throw new InvalidLoginOrPasswordException();
 			}
 
-			AuthenticationFinished(this, EventArgs.Empty);
+			AuthenticationFinished(this);
 		}
 
 		/// <summary>
 		/// Get the number of messages on the server using a STAT command
 		/// </summary>
-		/// <returns>The message count</returns>
+		/// <returns>The message count or -1 if the server did not respond with an OK message</returns>
 		public int GetMessageCount()
 		{
 			return SendCommandIntResponse("STAT", 1);
@@ -581,12 +497,17 @@ namespace OpenPOP.POP3
 		/// <returns>True if all messages was marked as deleted successfully, false if one message could not be marked. Messages following that message will not be tried to be deleted</returns>
 		public bool DeleteAllMessages() 
 		{
-			int messageCount=GetMessageCount();
-			for(int messageItem=messageCount;messageItem>0;messageItem--)
-			{
-				if (!DeleteMessage(messageItem))
-					return false;
-			}
+		    int messageCount = GetMessageCount();
+
+            // Maybe the server did not response OK to the message cout
+            if(messageCount == -1)
+                return false;
+
+            for (int messageItem = messageCount; messageItem > 0; messageItem--)
+            {
+                if (!DeleteMessage(messageItem))
+                    return false;
+            }
 			return true;
 		}
 
@@ -690,7 +611,7 @@ namespace OpenPOP.POP3
         /// Gets the size of a single message
         /// </summary>
         /// <param name="messageNumber">The number of a message which may not be a message marked as deleted</param>
-        /// <returns>Size of the message</returns>
+        /// <returns>Size of the message or -1 if the server did not respond with an OK message</returns>
         public int GetMessageSize(int messageNumber)
         {
             // RFC Example:
@@ -722,7 +643,7 @@ namespace OpenPOP.POP3
 
 		        string strResponse;
 		        // Read until end of multi-line
-		        while (".".Equals(strResponse = reader.ReadLine()))
+		        while (!".".Equals(strResponse = reader.ReadLine()))
 		        {
 		            sizes.Add(int.Parse(strResponse.Split(' ')[1]));
 		        }
@@ -740,18 +661,19 @@ namespace OpenPOP.POP3
         /// <returns>The message read from the server stream</returns>
 		private string ReceiveRETRMessage()
 		{
+            // RFC 1939 Example
+            // C: RETR 1
+            // S: +OK 120 octets
+            // S: <the POP3 server sends the entire message here>
+            // S: .
+
             // Create a StringBuilder to which we will append
             // input as it comes
 		    StringBuilder builder = new StringBuilder();
 
-            // Is this really needed? I think that when you as the reader to read a line, it will
-            // just not return before being ready - why wait for response when the reader does it
-            // for us?
-			WaitForResponse(ref reader,WaitForResponseInterval);
-
-            // Read input line for line
+            // Read input line for line until end
             string line;
-			while ((line = reader.ReadLine()) != ".")
+			while (!".".Equals(line = reader.ReadLine()))
 			{
                 // This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
                 // It says that a line starting with "." and not having CRLF after it
@@ -761,13 +683,7 @@ namespace OpenPOP.POP3
 
                 // Add the read line with CRLF after it
 				builder.Append(line + "\r\n");
-				
-				WaitForResponse(ref reader,1);
 			}
-
-            // foens: I have no idea why this is here? The last line should not
-            // be in the message according to the RFC. Does anyone agree?
-			builder.Append(line + "\r\n");
 
 			return builder.ToString();
 		}
@@ -778,9 +694,9 @@ namespace OpenPOP.POP3
 		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
         /// <param name="headersOnly">Only return message header?</param>
 		/// <returns>The message or null if server did not accept the command</returns>
-		public MIMEParser.Message GetMessage(int messageNumber, bool headersOnly)
+		public Message GetMessage(int messageNumber, bool headersOnly)
 		{
-		    MIMEParser.Message msg;
+		    Message msg;
 
             if (headersOnly)
                 msg = GetMessageHeaders(messageNumber);
@@ -795,7 +711,7 @@ namespace OpenPOP.POP3
         /// </summary>
         /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
         /// <returns>Message object</returns>
-        public MIMEParser.Message GetMessageHeaders(int messageNumber)
+        public Message GetMessageHeaders(int messageNumber)
         {
             // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
             MIMEParser.Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
@@ -809,9 +725,9 @@ namespace OpenPOP.POP3
 		/// <param name="command">Command to send to POP server</param>
 		/// <param name="headersOnly">Only return message header?</param>
 		/// <returns>Message object or null if the server did not accept the command</returns>
-		private MIMEParser.Message FetchMessage(string command, bool headersOnly)
+		private Message FetchMessage(string command, bool headersOnly)
 		{
-            MessageTransferBegan(this, EventArgs.Empty);
+            MessageTransferBegan(this);
 
 		    if(!SendCommand(command))			
 				return null;
@@ -819,18 +735,10 @@ namespace OpenPOP.POP3
             // Receive the message from the server
 			string receivedContent = ReceiveRETRMessage();
 
-		    MIMEParser.Message msg = null;
-            // Parse the message
-		    //try
-		    //{
-                msg = new MIMEParser.Message(_basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
-		    //}
-		    //catch (Exception)
-		    //{
-                // foens: In the long run, I wan't this removed!
-		    //}
+            // Parse the message from the received contet
+            Message msg = new Message(_basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
 
-            MessageTransferFinished(this, EventArgs.Empty);
+            MessageTransferFinished(this);
 			return msg;	
 		}
 	}

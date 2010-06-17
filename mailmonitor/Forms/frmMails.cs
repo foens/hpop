@@ -56,13 +56,13 @@ namespace MailMonitor
 		{
 			InitializeComponent();
 
-			_popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
-			_popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
-			_popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
-			_popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
-			_popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
-			_popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
-			_popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
+		    _popClient.AuthenticationBegan += popClient_AuthenticationBegan;
+		    _popClient.AuthenticationFinished += popClient_AuthenticationFinished;
+		    _popClient.CommunicationBegan += popClient_CommunicationBegan;
+		    _popClient.CommunicationOccured += popClient_CommunicationOccured;
+		    _popClient.CommunicationLost += popClient_CommunicationLost;
+		    _popClient.MessageTransferBegan += popClient_MessageTransferBegan;
+		    _popClient.MessageTransferFinished += popClient_MessageTransferFinished;
 		}
 
 		protected override void Dispose( bool disposing )
@@ -267,8 +267,6 @@ namespace MailMonitor
 			{
 				OpenPOP.POP3.Utility.Log=true;
 				_popClient.Disconnect();
-				_popClient.ReceiveContentSleepInterval=1;
-				_popClient.WaitForResponseInterval=10;
 				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port, _mailBox.UseSsl);
 				_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
 
@@ -372,37 +370,37 @@ namespace MailMonitor
 			//lstEvents.Items.Add(strEvent);
 		}
 
-		private void popClient_CommunicationBegan(object sender, EventArgs e)
+        private void popClient_CommunicationBegan(POPClient sender)
 		{
 			AddEvent("CommunicationBegan");
 		}
 
-		private void popClient_CommunicationOccured(object sender, EventArgs e)
+        private void popClient_CommunicationOccured(POPClient sender)
 		{
 			AddEvent("CommunicationOccured");
 		}
 
-		private void popClient_AuthenticationBegan(object sender, EventArgs e)
+		private void popClient_AuthenticationBegan(POPClient sender)
 		{
 			AddEvent("AuthenticationBegan");
 		}
 
-		private void popClient_AuthenticationFinished(object sender, EventArgs e)
+        private void popClient_AuthenticationFinished(POPClient sender)
 		{
 			AddEvent("AuthenticationFinished");
 		}
-		
-		private void popClient_MessageTransferBegan(object sender, EventArgs e)
+
+        private void popClient_MessageTransferBegan(POPClient sender)
 		{
 			AddEvent("MessageTransferBegan");
 		}
 
-		private void popClient_MessageTransferFinished(object sender, EventArgs e)
+        private void popClient_MessageTransferFinished(POPClient sender)
 		{
 			AddEvent("MessageTransferFinished");
 		}
 
-		private void popClient_CommunicationLost(object sender, EventArgs e)
+        private void popClient_CommunicationLost(POPClient sender)
 		{
 			AddEvent("CommunicationLost");
 		}
