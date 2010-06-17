@@ -62,7 +62,6 @@ namespace OpenPOP.MIMEParser
 		private TNEFAttachment _attachment=null;
 
 	    //private string _logFile="OpenPOP.TNEF.log";
-		private string _basePath=null;
 	    private long _fileLength=0;
 	    private string strSubject;
 		#endregion
@@ -77,25 +76,6 @@ namespace OpenPOP.MIMEParser
 	    public string TNEFFile { get; set; }
 
 	    public bool Verbose { get; set; }
-
-	    public string BasePath
-		{
-			get{return _basePath;}
-			set
-			{
-				try
-				{
-					if(value.EndsWith("\\"))
-						_basePath=value;
-					else
-						_basePath=value+"\\";
-				}
-				catch(Exception)
-				{
-                    // Is this needed???
-				}
-			}
-		}
 
 	    public int SkipSignature { get; set; }
 
@@ -368,11 +348,11 @@ namespace OpenPOP.MIMEParser
 					byte[] _fileNameBuffer=new byte[len-1];
 					Array.Copy(buf,_fileNameBuffer,(long)len-1);
 
-                    // BUG? foens: This is always null. What was the intention?
+                    // BUG? foens: This is never null. What was the intention?
 					if (_fileNameBuffer == null) _fileNameBuffer = Encoding.Default.GetBytes("tnef.dat");
 					string strFileName=Encoding.Default.GetString(_fileNameBuffer);
 
-					PrintResult("{0}: WRITING {1}\n", BasePath, strFileName);
+					//PrintResult("{0}: WRITING {1}\n", BasePath, strFileName);
 
 					//new attachment found because attachment data goes before attachment name
 					_attachment.FileName=strFileName;
@@ -426,14 +406,14 @@ namespace OpenPOP.MIMEParser
 		/// save all decoded attachments to files
 		/// </summary>
 		/// <returns>true is succeded, vice versa</returns>
-		public bool SaveAttachments()
+		public bool SaveAttachments(string pathToSaveTo)
 		{
 			bool blnRet=false;
 			IDictionaryEnumerator ideAttachments=_attachments.GetEnumerator();
 
 			while(ideAttachments.MoveNext())
 			{
-				blnRet=SaveAttachment((TNEFAttachment)ideAttachments.Value);
+				blnRet=SaveAttachment((TNEFAttachment)ideAttachments.Value, pathToSaveTo);
 			}
 
 			return blnRet;
@@ -444,11 +424,11 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		/// <param name="attachment">decoded attachment</param>
 		/// <returns>true is succeded, vice versa</returns>
-		public bool SaveAttachment(TNEFAttachment attachment)
+		public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
 		{
 			try
 			{
-				string strOutFile=BasePath+attachment.FileName;
+                string strOutFile = pathToSaveTo + attachment.FileName;
 
 				if(File.Exists(strOutFile))
 					File.Delete(strOutFile);

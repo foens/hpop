@@ -84,11 +84,10 @@ namespace TNEFTest
 			TNEFParser t=new TNEFParser();//(@"c:\temp\winmail.dat");
 			if(t.OpenTNEFStream(@"c:\temp\winmail.dat"))
 			{
-				t.BasePath=@"c:\temp\";
 				t.Verbose=checkBox1.Checked;
 				bool blnRet=t.Parse();
 				MessageBox.Show(this,"tnef file parsing "+(blnRet==true?"succeeded":"failed"));
-				blnRet=t.SaveAttachments();
+                blnRet = t.SaveAttachments(@"c:\temp\");
 				MessageBox.Show(this,"tnef file saving "+(blnRet==true?"succeeded":"failed"));
 			}
 			else

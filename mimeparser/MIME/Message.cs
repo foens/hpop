@@ -34,36 +34,12 @@ namespace OpenPOP.MIMEParser
 	/// </summary>
 	public class Message
 	{
-		#region Member Variables
-
-	    private string _basePath=null;
-
-	    #endregion
-
 		#region Properties
 
         /// <summary>
 	    /// whether auto decoding MS-TNEF attachment files
 	    /// </summary>
 	    public bool AutoDecodeMSTNEF { get; set; }
-
-	    /// <summary>
-		/// path to extract MS-TNEF attachment files
-		/// </summary>
-		public string BasePath
-		{
-            get { return _basePath; }
-			set
-			{
-                if (value == null)
-                    return;
-
-                if (value.EndsWith("\\"))
-                    _basePath = value;
-                else
-                    _basePath = value + "\\";
-			}
-		}
 
         /// <summary>
         /// All headers which were not recognized and explicitly dealt with.
@@ -320,17 +296,15 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
 		/// <param name="strEMLFile">file of email content to load from</param>
-		public Message(string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
+		public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
             : this()
 		{
 		    string strMessage=null;
 			if(Utility.ReadPlainTextFromFile(strEMLFile,ref strMessage))
 			{
-			    _basePath = strBasePath;
 			    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
 				InitializeMessage(strMessage,blnOnlyHeader);
 			}
@@ -339,14 +313,12 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="strMessage">raw message content</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		public Message(string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
+		public Message(bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
             : this()
 		{
-		    _basePath = strBasePath;
 		    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
 		    InitializeMessage(strMessage,blnOnlyHeader);
 		}
@@ -359,7 +331,6 @@ namespace OpenPOP.MIMEParser
 		public Message(string strMessage, bool blnOnlyHeader)
             : this()
 	    {
-	        _basePath = "";
             InitializeMessage(strMessage, blnOnlyHeader);
 	    }
 
@@ -370,7 +341,6 @@ namespace OpenPOP.MIMEParser
 		public Message(string strMessage)
             : this()
 	    {
-	        _basePath = "";
 	        InitializeMessage(strMessage,false);
         }
         #endregion
@@ -899,7 +869,6 @@ namespace OpenPOP.MIMEParser
 				    TNEFParser tnef = new TNEFParser();
 
 				    tnef.Verbose=false;
-					tnef.BasePath=BasePath;
 					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{

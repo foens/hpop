@@ -88,7 +88,6 @@ namespace OpenPOP.POP3
         #region Private member variables
         private StreamReader reader;
 		private StreamWriter writer;
-	    private string _basePath=null;
 	    private string _lastCommandResponse;
 
         /// <summary>
@@ -115,24 +114,6 @@ namespace OpenPOP.POP3
 	    /// whether auto decoding MS-TNEF attachment files
 	    /// </summary>
 	    public bool AutoDecodeMSTNEF { get; set; }
-
-	    /// <summary>
-		/// path to extract MS-TNEF attachment files
-		/// </summary>
-		public string BasePath
-		{
-			get{return _basePath;}
-            set
-            {
-                if (value == null)
-                    return;
-
-                if (value.EndsWith("\\"))
-                    _basePath = value;
-                else
-                    _basePath = value + "\\";
-            }
-		}
 
 	    /// <summary>
 	    /// Receive timeout for the connection to the SMTP server in milliseconds.
@@ -736,7 +717,7 @@ namespace OpenPOP.POP3
 			string receivedContent = ReceiveRETRMessage();
 
             // Parse the message from the received contet
-            Message msg = new Message(_basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
+            Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly);
 
             MessageTransferFinished(this);
 			return msg;	

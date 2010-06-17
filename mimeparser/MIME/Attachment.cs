@@ -452,7 +452,7 @@ namespace OpenPOP.MIMEParser
 			}*/
 			if(blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
 				strContent=strContent.Substring(2,strContent.Length-2);					
-			return new Message("",false ,strContent,false);
+			return new Message(false ,strContent,false);
 		}
 
 		/// <summary>
