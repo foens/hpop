@@ -37,7 +37,7 @@ namespace OpenPOP
 	/// </summary>
 	public static class MIMETypes
 	{
-		public const string MIMEType_MSTNEF="application/ms-tnef";
+	    private const string MIMEType_MSTNEF="application/ms-tnef";
 		private const string Content_Transfer_Encoding_Tag="Content-Transfer-Encoding";
 
 
@@ -55,7 +55,7 @@ namespace OpenPOP
 
 		public static bool IsMSTNEF(string strContentType)
 		{
-			if(strContentType!=null & strContentType!="")
+			if(!string.IsNullOrEmpty(strContentType))
 				if(strContentType.ToLower() == MIMEType_MSTNEF.ToLower())
 					return true;
 				else
