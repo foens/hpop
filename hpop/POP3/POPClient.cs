@@ -499,7 +499,7 @@ namespace OpenPOP.POP3
 		{
 		    int messageCount = GetMessageCount();
 
-            // Maybe the server did not response OK to the message cout
+            // Maybe the server did not response OK to the message count
             if(messageCount == -1)
                 return false;
 
