@@ -15,30 +15,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			OpenPOP.Utility
-*Function:		Utility
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Modified:		2004/5/31 14:22 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/5/31 14:22 GMT+8 by Unruled Boy
-*					1.Fixed a bug in decoding Base64 text when using non-standard encoding
-*				2004/5/30 15:04 GMT+8 by Unruled Boy
-*					1.Added all description to all functions
-*				2004/5/25 13:55 GMT+8 by Unruled Boy
-*					1.Rewrote the DecodeText function using Regular Expression
-*				2004/5/17 14:20 GMT+8 by Unruled Boy
-*					1.Added ParseFileName
-*				2004/4/29 19:05 GMT+8 by Unruled Boy
-*					1.Adding ReadPlainTextFromFile function
-*				2004/4/28 19:06 GMT+8 by Unruled Boy
-*					1.Rewriting the Decode method
-*				2004/3/29 12:25 GMT+8 by Unruled Boy
-*					1.GetMimeType support for MONO
-*					2.cleaning up the names of variants
-*/
 using System;
 using System.Text;
 using System.IO;
@@ -46,53 +22,39 @@ using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIMEParser
 {
-	/// <summary>
-	/// Summary description for Utility.
-	/// </summary>
+    /// <summary>
+    /// foens: This class should be reworked.
+    /// Right now it is just like "The blob" - which
+    /// is lots of code that is totally unrelated to eachother
+    /// </summary>
 	public static class Utility
 	{
 	    private const string m_strLogFile = "OpenPOP.log";
 
-		//		public static string[] SplitText(string strText, string strSplitter)
-		//		{
-		//			string []segments=new string[0];
-		//			int indexOfstrSplitter=strText.IndexOf(strSplitter);
-		//			if(indexOfstrSplitter!=-1)
-		//			{
-		//
-		//			}
-		//			return segments;
-		//		}
-		//
-
 		/// <summary>
-		/// Verifies whether the file is of picture type or not
+		/// Verifies whether the filename is of picture type or not by
+		/// checking what the extension is
 		/// </summary>
-		/// <param name="strFile">File to be verified</param>
-		/// <returns>True if picture file, false if not</returns>
-		public static bool IsPictureFile(string strFile)
+		/// <param name="filename">Filename to be checked</param>
+		/// <returns>True if filename is of picture type, false if not</returns>
+		public static bool IsPictureFile(string filename)
 		{
-			try
+			if(!string.IsNullOrEmpty(filename))
 			{
-				if(!string.IsNullOrEmpty(strFile))
-				{
-					strFile=strFile.ToLower();
-					if(strFile.EndsWith(".jpg")||strFile.EndsWith(".bmp")||strFile.EndsWith(".ico")||strFile.EndsWith(".gif")||strFile.EndsWith(".png"))
-						return true;
-					
-					return false;
-				}
-				
+				filename = filename.ToLower();
+				if(filename.EndsWith(".jpg") ||
+                    filename.EndsWith(".bmp") ||
+                    filename.EndsWith(".ico") ||
+                    filename.EndsWith(".gif") ||
+                    filename.EndsWith(".png"))
+					return true;
 				return false;
 			}
-			catch
-			{
-				return false;
-			}
+			return false;
 		}
 
 		/// <summary>
-		/// Parse date time info from MIME header
+		/// Parse date time info from MIME Date header
 		/// </summary>
 		/// <param name="strDate">Encoded MIME date time</param>
 		/// <returns>Decoded date time info</returns>
@@ -158,37 +120,76 @@ namespace OpenPOP.MIMEParser
 
 		/// <summary>
 		/// Parse email address from MIME header
+        /// http://tools.ietf.org/html/rfc5322#section-3.4
+		/// 
+		/// Example of input:
+        /// Eksperten mailrobot <noreply@mail.eksperten.dk>
+        /// 
+        /// It might also contain encoded text.
+        /// A username in front of the emailaddress is not required.
+        /// <see cref="DecodeText">For more information about encoded text</see>
 		/// </summary>
-		/// <param name="strEmailAddress">MIME header</param>
-		/// <param name="strUser">Decoded user name</param>
-		/// <param name="strAddress">Decoded email address</param>
-		public static void ParseEmailAddress(string strEmailAddress,ref string strUser, ref string strAddress)
+		/// <param name="input">The value to parse out and email and/or a username</param>
+        /// <param name="username">
+        /// The decoded username in front.
+        /// From the example this would be "Eksperten mailrobot"
+        /// If there is no username, returned value will be empty.
+        /// </param>
+		/// <param name="emailAddress">
+		/// The decoded email address.
+        /// From the example this would be noreply@mail.eksperten.dk
+        /// </param>
+		public static void ParseEmailAddress(string input, out string username, out string emailAddress)
 		{
-			int indexOfAB=strEmailAddress.Trim().LastIndexOf("<");
-			int indexOfEndAB=strEmailAddress.Trim().LastIndexOf(">");
-			strUser=strEmailAddress.Trim();
-			strAddress=strEmailAddress.Trim();
-			if(indexOfAB>=0&&indexOfEndAB>=0)
+            // Remove exesive whitespace
+		    input = input.Trim();
+
+            // Find the location of the email address
+		    int indexStartEmail = input.LastIndexOf("<");
+		    int indexEndEmail = input.LastIndexOf(">");
+
+            if (indexStartEmail >= 0 && indexEndEmail >= 0)
 			{
-				if(indexOfAB>0)
-				{
-					strUser=strUser.Substring(0,indexOfAB);//-1
-					//					strUser=strUser.Substring(0,indexOfAB-1).Trim('\"');
-					//					if(strUser.IndexOf("\"")>=0)
-					//					{
-					//						strUser=strUser.Substring(1,strUser.Length-1);
-					//					}
-				}
-				strUser=strUser.Trim();
-				strUser=strUser.Trim('\"');
-				strAddress=strAddress.Substring(indexOfAB+1,indexOfEndAB-(indexOfAB+1));
+                // Check if there is a username in front of the email address
+                if (indexStartEmail > 0)
+                {
+                    // Parse out the user
+                    username = input.Substring(0, indexStartEmail).Trim();
+                }
+                else
+                {
+                    // There was no user
+                    username = "";
+                }
+
+                // Parse out the email address without the "<"  and ">"
+			    indexStartEmail = indexStartEmail + 1;
+                int emailLength = indexEndEmail - indexStartEmail;
+                emailAddress = input.Substring(indexStartEmail, emailLength);
+
+                // Decode both values
+                username = DecodeText(username);
+                emailAddress = DecodeText(emailAddress);
 			}
-			strUser=DecodeText(strUser);
-			strAddress=DecodeText(strAddress);
+            else
+            {
+                // Check first to see, as a last resort, if it contains an email only
+                if(input.Contains("@"))
+                {
+                    username = "";
+                    emailAddress = input;
+                } else
+                {
+                    // This must be a group name only then
+                    username = input;
+                    emailAddress = "";
+                }
+            }
 		}
 
 		/// <summary>
-		/// Save byte content to a file
+		/// Save byte content to a file.
+		/// If file exists it is deleted!
 		/// </summary>
 		/// <param name="strFile">File to be saved to</param>
 		/// <param name="bytContent">Byte array content</param>
@@ -199,14 +200,15 @@ namespace OpenPOP.MIMEParser
 			{
 				if(File.Exists(strFile))
 					File.Delete(strFile);
-				FileStream fs=File.Create(strFile);
-				fs.Write(bytContent,0,bytContent.Length);
+				FileStream fs = File.Create(strFile);
+				fs.Write(bytContent, 0, bytContent.Length);
+                fs.Flush();
 				fs.Close();
 				return true;
 			}
 			catch(Exception e)
 			{
-				LogError("SaveByteContentToFile():"+e.Message);
+				LogError("SaveByteContentToFile():" + e.Message);
 				return false;
 			}
 		}
@@ -222,28 +224,24 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				bool blnRet=true;
-
 				if(File.Exists(strFile))
 				{
 					if(blnReplaceExists)
 						File.Delete(strFile);
 					else
-						blnRet=false;
+					    return false; // Failure. File exist but we may not delete it
 				}
 
-				if(blnRet)
-				{
-					StreamWriter sw=File.CreateText(strFile);
-					sw.Write(strText);
-					sw.Close();
-				}
+				StreamWriter sw = File.CreateText(strFile);
+				sw.Write(strText);
+                sw.Flush();
+				sw.Close();
 
-				return blnRet;
+				return true; // Success
 			}
 			catch(Exception e)
 			{
-				LogError("SavePlainTextToFile():"+e.Message);
+				LogError("SavePlainTextToFile():" + e.Message);
 				return false;
 			}
 		}
@@ -252,14 +250,14 @@ namespace OpenPOP.MIMEParser
 		/// Read text content from a file
 		/// </summary>
 		/// <param name="strFile">File to be read from</param>
-		/// <param name="strText">Read text content</param>
+		/// <param name="strText">This is where the content of the file is placed</param>
 		/// <returns>True if reading succeeded, false if failed</returns>
 		public static bool ReadPlainTextFromFile(string strFile, ref string strText)
 		{
 			if(File.Exists(strFile))
 			{
-				StreamReader fs=new StreamReader(strFile);
-				strText=fs.ReadToEnd();
+				StreamReader fs = new StreamReader(strFile);
+				strText = fs.ReadToEnd();
 				fs.Close();
 				return true;
 			}
@@ -270,22 +268,20 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// Sepearte header name and header value
 		/// </summary>
-		/// <param name="strRawHeader"></param>
-		/// <returns></returns>
 		public static string[] GetHeadersValue(string strRawHeader)
 		{
 			if(strRawHeader==null)
-				throw new ArgumentNullException("strRawHeader","Argument was null");
+				throw new ArgumentNullException("strRawHeader", "Argument was null");
 
-			string []array=new []{"",""};
-			int indexOfColon=strRawHeader.IndexOf(":");			
+			string[] array = new[] {"",""};
+			int indexOfColon=strRawHeader.IndexOf(":");
 
-			try
-			{
-				array[0]=strRawHeader.Substring(0,indexOfColon).Trim();
-				array[1]=strRawHeader.Substring(indexOfColon+1).Trim();
-			}
-			catch(Exception){}
+            // Check if it is allowed to make substring calls
+            if(indexOfColon >= 0 && strRawHeader.Length > indexOfColon+1)
+            {
+                array[0] = strRawHeader.Substring(0, indexOfColon).Trim();
+                array[1] = strRawHeader.Substring(indexOfColon + 1).Trim();
+            }
 
 			return array;
 		}
@@ -299,43 +295,31 @@ namespace OpenPOP.MIMEParser
 		/// <returns>Text without quote</returns>
 		public static string GetQuotedValue(string strText, string strSplitter, string strTag)
 		{
-			if(strText==null)
-				throw new ArgumentNullException("strText","Argument was null");
+			if(strText == null)
+				throw new ArgumentNullException("strText", "Argument was null");
 
-			string []array=new []{"",""};
-			int indexOfstrSplitter=strText.IndexOf(strSplitter);			
+			string[] array = new[] {"",""};
+			int indexOfstrSplitter=strText.IndexOf(strSplitter);
 
-			try
-			{
-				array[0]=strText.Substring(0,indexOfstrSplitter).Trim();
-				array[1]=strText.Substring(indexOfstrSplitter+1).Trim();
-				int pos=array[1].IndexOf("\"");
-				if(pos!=-1)
-				{
-					int pos2=array[1].IndexOf("\"",pos+1);
-					array[1]=array[1].Substring(pos+1,pos2-pos-1);
-				}
-			}
-			catch(Exception){}
+            if (indexOfstrSplitter >= 0 && strText.Length > indexOfstrSplitter + 1)
+            {
+                array[0] = strText.Substring(0, indexOfstrSplitter).Trim();
+                array[1] = strText.Substring(indexOfstrSplitter + 1).Trim();
 
-			//return array;
-			if(array[0].ToLower()==strTag.ToLower())
+                // Check for quoted value
+                int pos = array[1].IndexOf("\"");
+                if (pos != -1 && array[1].Length > pos + 1)
+                {
+                    int pos2 = array[1].IndexOf("\"", pos + 1);
+                    if (pos2 != -1)
+                        array[1] = array[1].Substring(pos + 1, pos2 - pos - 1);
+                }
+            }
+
+			if(array[0].ToLower() == strTag.ToLower())
 				return array[1].Trim();
 			
 			return null;
-
-/*			string []array=null;
-			try
-			{
-				array=Regex.Split(strText,strSplitter);
-				//return array;
-				if(array[0].ToLower()==strTag.ToLower())
-					return RemoveQuote(array[1].Trim());
-				else
-					return null;
-			}
-			catch
-			{return null;}*/
 		}
 
 		/// <summary>
@@ -344,11 +328,12 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strText">Source encoded text</param>
 		/// <param name="strCharset">New charset</param>
 		/// <returns>Encoded text with new charset</returns>
-		public static string Change(string strText,string strCharset)
+		public static string Change(string strText, string strCharset)
 		{
 			if (string.IsNullOrEmpty(strCharset))
 				return strText;
-			byte[] b=Encoding.Default.GetBytes(strText);
+
+			byte[] b = Encoding.Default.GetBytes(strText);
 			return new string(Encoding.GetEncoding(strCharset).GetChars(b));
 		}
 
@@ -380,10 +365,12 @@ namespace OpenPOP.MIMEParser
 		public static string RemoveQuote(string strText)			
 		{
 			string strRet=strText;
+
 			if(strRet.StartsWith("\""))
 				strRet=strRet.Substring(1);
 			if(strRet.EndsWith("\""))
 				strRet=strRet.Substring(0,strRet.Length-1);
+
 			return strRet;
 		}
 
@@ -399,157 +386,164 @@ namespace OpenPOP.MIMEParser
 
 		/// <summary>
 		/// Verifies wether the text is a valid MIME Text or not
+		/// 
+		/// foens: I do not belive the right term is "MIME Text"
+		/// I think this is about checking if the text is encoded using the following BNF
+        /// encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
 		/// </summary>
 		/// <param name="strText">Text to be verified</param>
 		/// <returns>True if MIME text, false if not</returns>
 		private static bool IsValidMIMEText(string strText)
 		{
-			int intPos=strText.IndexOf("=?");
-			return (intPos!=-1&&strText.IndexOf("?=",intPos+6)!=-1&&strText.Length>7);
+		    int intPos = strText.IndexOf("=?");
+		    return (intPos != -1 && strText.IndexOf("?=", intPos + 6) != -1 && strText.Length > 7);
 		}
 
 		/// <summary>
-		/// Decode text
+		/// Decode text that is encoded. See BNF below.
+		/// This will decode any encoded-word found in the string.
+		/// All unencoded parts will not be touched.	
+		/// 
+        /// From http://tools.ietf.org/html/rfc2047:
+        /// Generally, an "encoded-word" is a sequence of printable ASCII
+        /// characters that begins with "=?", ends with "?=", and has two "?"s in
+        /// between.  It specifies a character set and an encoding method, and
+        /// also includes the original text encoded as graphic ASCII characters,
+        /// according to the rules for that encoding method.
+        /// 
+        /// BNF:
+        /// encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+        /// 
+        /// Example:
+        /// =?iso-8859-1?q?this=20is=20some=20text?= other text here
 		/// </summary>
+        /// <see cref="http://tools.ietf.org/html/rfc2047#section-2">RFC Part 2 "Syntax of encoded-words" for more detail</see>
 		/// <param name="strText">Source text</param>
 		/// <returns>Decoded text</returns>
 		public static string DecodeText(string strText)
 		{
-			/*try
-			{
-				string strRet="";
-				string strBody="";
-				MatchCollection mc=Regex.Matches(strText,@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>\S+)\?\=");
+            if(strText == null)
+                return null;
 
-				for(int i=0;i<mc.Count;i++)
-				{
-					if(mc[i].Success)
-					{
-						strBody=mc[i].Groups["Content"].Value;
+		    string strRet = strText;
+		    //string[] strParts = Regex.Split(strText, "\r\n");
 
-						switch(mc[i].Groups["Encoding"].Value.ToUpper())
-						{
-							case "B":
-								strBody=deCodeB64s(strBody,mc[i].Groups["Charset"].Value);
-								break;
-							case "Q":
-								strBody=DecodeQP.ConvertHexContent(strBody);//, m.Groups["Charset"].Value);
-								break;
-							default:
-								break;
-						}
-						strRet+=strBody;
-					}
-					else
-					{
-						strRet+=mc[i].Value;
-					}
-				}
-				return strRet;
-			}
-			catch
-			{return strText;}*/
+            // This is the regex that should fit the BNF
+            // RFC Says that NO WHITESPACE is allowed in this encoding. Again, see RFC for details.
+		    const string strRegEx = @"\=\?(?<Charset>\S+?)\?(?<Encoding>\w)\?(?<Content>\S+?)\?\=";
+            // \w	Matches any word character including underscore. Equivalent to "[A-Za-z0-9_]".
+            // \S	Matches any nonwhite space character. Equivalent to "[^ \f\n\r\t\v]".
+            // +?   non-gready equivalent to +
 
-			try
-			{
-				string strRet="";
-				string[] strParts=Regex.Split(strText,"\r\n");
-			    const string strRegEx=@"\=\?(?<Charset>\S+)\?(?<Encoding>\w)\?(?<Content>.+)\?\=";
-				Match m;
+		    //for (int i = 0; i < strParts.Length; i++)
+		    //{
+                MatchCollection matches = Regex.Matches(strText, strRegEx);
+		        foreach (Match match in matches)
+		        {
+		            if(match.Success)
+		            {
+		                string fullMatchValue = match.Value;
 
-				for(int i=0;i<strParts.Length;i++)
-				{
-					m = Regex.Match(strParts[i], strRegEx);
-					if(m.Success)
-					{
-						string strBody=m.Groups["Content"].Value;
+                        string encodedText = match.Groups["Content"].Value;
+                        string encoding = match.Groups["Encoding"].Value;
+                        string charset = match.Groups["Charset"].Value;
 
-						switch(m.Groups["Encoding"].Value.ToUpper())
-						{
-							case "B":
-								strBody=deCodeB64s(strBody,m.Groups["Charset"].Value);
-								break;
-							case "Q":
-                                strBody = DecodeQP.ConvertHexContent(strBody, Encoding.GetEncoding(m.Groups["Charset"].Value), 0);
-								break;
-							default:
-								break;
-						}
-                        strRet += strBody + strParts[i].Replace(m.Value, "");
-					}
-					else
-					{
-						if(!IsValidMIMEText(strParts[i]))
-							strRet+=strParts[i];
-					}
-				}
-				return strRet;
-			}
-			catch
-			{return strText;}
+                        // Store decoded text here when done
+                        string decodedText;
 
-/*		
-		{
-			try
-			{
-				if(strText!=null&&strText!="")
-				{
-					if(IsValidMIMEText(strText))
-					{
-						//position at the end of charset
-						int intPos=strText.IndexOf("=?");
-						int intPos2=strText.IndexOf("?",intPos+2);
-						if(intPos2>3)
-						{
-							string strCharset=strText.Substring(2,intPos2-2);
-							string strEncoding=strText.Substring(intPos2+1,1);
-							int intPos3=strText.IndexOf("?=",intPos2+3);
-							string strBody=strText.Substring(intPos2+3,intPos3-intPos2-3);
-							string strHead="";
-							if(intPos>0)
-							{
-								strHead=strText.Substring(0,intPos-1);
-							}
-							string strEnd="";
-							if(intPos3<strText.Length-2)
-							{
-								strEnd=strText.Substring(intPos3+2);
-							}
-							switch(strEncoding.ToUpper())
-							{
-								case "B":
-									strBody=deCodeB64s(strBody);
-									break;
-								case "Q":
-									strBody=DecodeQP.ConvertHexContent(strBody);
-									break;
-								default:
-									break;
-							}
-							strText=strHead+strBody+strEnd;
-							if(IsValidMIMEText(strText))
-								return DecodeText(strText);
-							else
-								return strText;
-						}
-						else
-						{return strText;}
-					}
-					else
-					{return strText;}
-				}
-				else
-				{return strText;}
-			}
-			catch
-			{return strText;}*/
+                        // Encoding may also be written in lowercase
+                        switch (encoding.ToUpper())
+                        {
+                            // RFC:
+                            // The "B" encoding is identical to the "BASE64" 
+                            // encoding defined by RFC 2045.
+                            case "B":
+                                decodedText = deCodeB64s(encodedText, charset);
+                                break;
+
+                            // RFC:
+                            // The "Q" encoding is similar to the "Quoted-Printable" content-
+                            // transfer-encoding defined in RFC 2045.
+                            // There are mo details to this. Please check section 4.2 in
+                            // http://tools.ietf.org/html/rfc2047
+                            case "Q":
+                                try
+                                {
+                                    decodedText = DecodeQP.ConvertHexContent(encodedText, Encoding.GetEncoding(charset), 0);
+                                }
+                                catch (ArgumentException)
+                                {
+                                    // The encoding we are using is not supported.
+                                    // Therefore we cannot decode it. We must simply return
+                                    // the encoded form
+                                    decodedText = fullMatchValue;
+                                }
+                                break;
+                            default:
+                                decodedText = encodedText;
+                                break;
+                        }
+
+                        // Repalce our encoded value with our decoded value
+		                strRet = strRet.Replace(fullMatchValue, decodedText);
+		            }
+		        //}
+                /*
+		        if (m.Success)
+                {
+                    // Fetch out the values
+                    string encodedText = m.Groups["Content"].Value;
+                    string encoding = m.Groups["Encoding"].Value;
+                    string charset = m.Groups["Charset"].Value;
+
+                    // Store decoded text here when done
+                    string decodedText;
+
+                    // Encoding may also be written in lowercase
+                    switch (encoding.ToUpper())
+                    {
+                        // RFC:
+                        // The "B" encoding is identical to the "BASE64" 
+                        // encoding defined by RFC 2045.
+                        case "B":
+                            decodedText = deCodeB64s(encodedText, charset);
+                            break;
+
+                        // RFC:
+                        // The "Q" encoding is similar to the "Quoted-Printable" content-
+                        // transfer-encoding defined in RFC 2045.
+                        // There are mo details to this. Please check section 4.2 in
+                        // http://tools.ietf.org/html/rfc2047
+                        case "Q":
+                            decodedText = DecodeQP.ConvertHexContent(encodedText, Encoding.GetEncoding(charset), 0);
+                            break;
+                        default:
+                            decodedText = encodedText;
+                            break;
+                    }
+
+                    // There might be more text than just encoded text, therefore
+                    // append what was in the source text, but with the encoded part removed
+                    strRet += decodedText + strParts[i].Replace(m.Value, "");
+                }
+                else
+                {
+                    if (!IsValidMIMEText(strParts[i]))
+                        strRet += strParts[i];
+                    else
+                    {
+                        // foens: I do not be that to above if statement is needed.
+                        // Therefore I throw this exception, and if anyone ever sees this exception, then it was actually needed
+                        // If noone says that this exception has been thrown, remove above if.
+                        throw new Exception("If you ever see this exception - please tell developers to remove this throw. Please give following too:\n" + strParts[i]);
+                    }
+                }
+                 * */
+		    }
+
+		    return strRet;
 		}
 		
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="strText"></param>
-		/// <returns></returns>
 		public static string deCodeB64s(string strText)
 		{
 			return Encoding.Default.GetString(deCodeB64(strText));
@@ -559,7 +553,7 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				if(strEncoding.ToLower()=="ISO-8859-1".ToLower())
+				if(strEncoding.ToLower().Equals("ISO-8859-1".ToLower()))
 					return deCodeB64s(strText);
 				
 				return Encoding.GetEncoding(strEncoding).GetString(deCodeB64(strText));
@@ -570,21 +564,20 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 		
-		private static byte []deCodeB64(string strText)
+		private static byte[] deCodeB64(string strText)
 		{
-			byte[] by=null;
+		    byte[] by = null;
 			try
 			{ 
-				if(strText!="")
+				if(!"".Equals(strText))
 				{
-					by=Convert.FromBase64String(strText); 
-					//strText=Encoding.Default.GetString(by);
+				    by = Convert.FromBase64String(strText);
 				}
 			} 
 			catch(Exception e) 
 			{
-				by=Encoding.Default.GetBytes("\0");
-				LogError("deCodeB64():"+e.Message);
+			    by = Encoding.Default.GetBytes("\0");
+			    LogError("deCodeB64():" + e.Message);
 			}
 			return by;
 		}
@@ -623,16 +616,16 @@ namespace OpenPOP.MIMEParser
 
 		public static bool IsQuotedPrintable(string strText)
 		{
-		    if(strText!=null)
-				return (strText.ToLower()=="quoted-printable".ToLower());
+		    if(strText != null)
+				return strText.ToLower().Equals("quoted-printable");
 
 		    return false;
 		}
 
 	    public static bool IsBase64(string strText)
 		{
-			if(strText!=null)
-				return (strText.ToLower()=="base64".ToLower());
+			if(strText != null)
+				return strText.ToLower().Equals("base64");
 			
 			return false;
 		}
@@ -642,64 +635,37 @@ namespace OpenPOP.MIMEParser
 			if(strText==null)
 				throw new ArgumentNullException("strText","Argument was null");
 
-			string []array;
-			int indexOfColon=strText.IndexOf(";");			
+		    int indexOfColon=strText.IndexOf(";");
 
-			if(indexOfColon<0)
-			{
-				array=new string[1];
-				array[0]=strText;
-				return array;
-			}
+            if (indexOfColon == -1)
+            {
+                // Return string[] with single value
+                return new[] { strText };
+            }
 
-		    array=new string[2];
+		    string[] array = new string[2];
+		    if (strText.Length > indexOfColon + 1)
+		    {
+		        array[0] = strText.Substring(0, indexOfColon).Trim();
+		        array[1] = strText.Substring(indexOfColon + 1).Trim();
+		    }
 
-		    try
-			{
-				array[0]=strText.Substring(0,indexOfColon).Trim();
-				array[1]=strText.Substring(indexOfColon+1).Trim();
-			}
-			catch(Exception){}
-
-			return array;
+		    return array;
 		}
 
 		public static bool IsNotNullText(string strText)
 		{
-			try
-			{
-				return (!string.IsNullOrEmpty(strText));
-			}
-			catch
-			{
-				return false;
-			}
+			return (!string.IsNullOrEmpty(strText));
 		}
 
 		public static bool IsNotNullTextEx(string strText)
 		{
-			try
-			{
-				return (strText!=null&&strText.Trim()!="");
-			}
-			catch
-			{
-				return false;
-			}
+			return strText != null && !strText.Trim().Equals("");
 		}
 
 		public static bool IsOrNullTextEx(string strText)
 		{
-			try
-			{
-				return (strText==null||strText.Trim()=="");
-			}
-			catch
-			{
-				return false;
-			}
+		    return strText == null || strText.Trim().Equals("");
 		}
-
 	}
 }
-

@@ -15,53 +15,9 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			OpenPOP.MIMEParser.Message
-*Function:		Message Parser
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Modified:		2004/6/28 01:32 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/6/28 01:32 GMT+8 by Unruled Boy
-*					1.Fixed a bug in not docoding multi-line sender
-*				2004/6/26 16:03 GMT+8 by Unruled Boy
-*					1.Renamed set_attachments to SetAttachments(), modified it and related functions to handle forwarded email that treats original email as attachment
-*				2004/6/16 18:34 GMT+8 by Unruled Boy
-*					1.fixed a loop in message body decoding by .
-*				2004/5/17 14:20 GMT+8 by Unruled Boy
-*					1.Again, fixed something but do not remember :(
-*				2004/5/11 17:00 GMT+8 by Unruled Boy
-*					1.Fixed a bug in parsing ContentCharset
-*					2.Fixed a bug in ParseStreamLines
-*				2004/5/10 10:00 GMT+8 by Unruled Boy
-*					1.Well, fixed something but do not remember :(
-*				2004/5/8 17:00 GMT+8 by Unruled Boy
-*					1.Fixed a bug in parsing boundary
-*				2004/5/1 14:13 GMT+8 by Unruled Boy
-*					1.Adding three more constructors
-*					2.Adding descriptions to every public functions/property/void
-*				2004/4/29 19:05 GMT+8 by Unruled Boy
-*					1.Fixed the bug parsing headers/boundary
-*				2004/4/28 19:06 GMT+8 by Unruled Boy
-*					1.Adding DateTimeInfo property
-*					2.Maybe we correct the HTML content type bug
-*				2004/4/23 21:13 GMT+8 by Unruled Boy
-*					1.New Contructor
-*					2.Tidy up the codes to follow Hungarian Notation
-*				2004/3/29 10:38 GMT+8 by Unruled Boy
-*					1.removing bugs in decoding message
-*				2004/3/29 17:22 GMT+8 by Unruled Boy
-*					1.adding support for reply message using ms-tnef 
-*					2.adding support for all custom headers
-*					3.rewriting the header parser(adding 3 ParseStreamLines)
-*					4.adding detail description for every function
-*					5.cleaning up the codes
-*				2004/3/30 09:15 GMT+8 by Unruled Boy
-*					1.Adding ImportanceType
-*/
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Collections;
 using System.Text;
@@ -70,30 +26,23 @@ namespace OpenPOP.MIMEParser
 {
 	/// <summary>
 	/// Message Parser.
+	/// 
+	/// foens: This class has become a big big blob class with unrelated methods
+	/// My idea is to make a Message class that just hold messages
+	/// Then we should have a messageparser which can create a Message class from string,
+	/// file and should also be able to save to file.
 	/// </summary>
 	public class Message
 	{
 		#region Member Variables
 
-	    private string _replyTo=null;
-		private string _replyToEmail=null;
-		private string _from=null;
-		private string _fromEmail=null;
-	    private string _subject=null;
-	    private string _received=null;
 	    private string _basePath=null;
 
 	    #endregion
 
-
 		#region Properties
 
-	    /// <summary>
-	    /// custom headers
-	    /// </summary>
-	    public Hashtable CustomHeaders { get; set; }
-
-	    /// <summary>
+        /// <summary>
 	    /// whether auto decoding MS-TNEF attachment files
 	    /// </summary>
 	    public bool AutoDecodeMSTNEF { get; set; }
@@ -103,22 +52,24 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		public string BasePath
 		{
-			get{return _basePath;}
+            get { return _basePath; }
 			set
 			{
-				try
-				{
-					if(value.EndsWith("\\"))
-						_basePath=value;
-					else
-						_basePath=value+"\\";
-				}
-				catch (Exception)
-				{
-                    // What is the idea here?, why is this catch needed?
-				}
+                if (value == null)
+                    return;
+
+                if (value.EndsWith("\\"))
+                    _basePath = value;
+                else
+                    _basePath = value + "\\";
 			}
 		}
+
+        /// <summary>
+        /// All headers which were not recognized and explicitly dealt with.
+        /// This should mostly be custom headers, like X-[name].
+        /// </summary>
+        public NameValueCollection CustomHeaders { get; private set; }
 
 	    /// <summary>
 	    /// message keywords
@@ -131,12 +82,9 @@ namespace OpenPOP.MIMEParser
 	    public string DispositionNotificationTo { get; private set; }
 
 	    /// <summary>
-		/// received server
-		/// </summary>
-		public string Received
-		{
-			get{return _received;}
-		}
+	    /// received server
+	    /// </summary>
+	    public string Received { get; private set; }
 
 	    /// <summary>
 	    /// importance level
@@ -186,11 +134,6 @@ namespace OpenPOP.MIMEParser
 	    /// Attachment Boundry
 	    /// </summary>
 	    public string AttachmentBoundry { get; private set; }
-
-	    /// <summary>
-	    /// Alternate Attachment Boundry
-	    /// </summary>
-	    public string AttachmentBoundry2 { get; private set; }
 
 	    /// <summary>
 	    /// Attachment Count
@@ -243,46 +186,56 @@ namespace OpenPOP.MIMEParser
 	    public bool HTML { get; private set; }
 
 	    /// <summary>
-	    /// Date
+	    /// This is the Date header parsed, where
+	    /// timezone and day-of-week has been stripped.
 	    /// </summary>
 	    public string Date { get; private set; }
 
 	    /// <summary>
 	    /// DateTime Info
+	    /// This is the raw value of the Date header.
 	    /// </summary>
 	    public string DateTimeInfo { get; private set; }
 
 	    /// <summary>
-		/// From name
-		/// </summary>
-		public string From
-		{
-			get{return _from;}
-		}
+	    /// The name of the person that sent the email
+	    /// 
+	    /// If the from header was:
+        /// Eksperten mailrobot <noreply@mail.eksperten.dk>
+        /// this field would be
+        /// Eksperten mailrobot
+	    /// </summary>
+	    public string From { get; private set; }
 
-		/// <summary>
-		/// From Email
-		/// </summary>
-		public string FromEmail
-		{
-			get{return _fromEmail;}
-		}
+        /// <summary>
+        /// The email of the person that sent the email
+        /// 
+        /// If the from header was:
+        /// Eksperten mailrobot <noreply@mail.eksperten.dk>
+        /// this field would be
+        /// noreply@mail.eksperten.dk
+        /// </summary>
+	    public string FromEmail { get; private set; }
 
-		/// <summary>
-		/// Reply to name
-		/// </summary>
-		public string ReplyTo
-		{
-			get{return _replyTo;}
-		}
+        /// <summary>
+        /// The name of the person that is in the reply-to header field
+        /// 
+        /// If the reply-to header was:
+        /// Eksperten mailrobot <noreply@mail.eksperten.dk>
+        /// this field would be
+        /// Eksperten mailrobot
+        /// </summary>
+	    public string ReplyTo { get; private set; }
 
-		/// <summary>
-		/// Reply to email
-		/// </summary>
-		public string ReplyToEmail
-		{
-			get{return _replyToEmail;}
-		}
+        /// <summary>
+        /// The emailaddress of the person that is in the reply-to header field
+        /// 
+        /// If the reply-to header was:
+        /// Eksperten mailrobot <noreply@mail.eksperten.dk>
+        /// this field would be
+        /// noreply@mail.eksperten.dk
+        /// </summary>
+	    public string ReplyToEmail { get; private set; }
 
 	    /// <summary>
 	    /// whether has attachment
@@ -290,7 +243,7 @@ namespace OpenPOP.MIMEParser
 	    public bool HasAttachment { get; private set; }
 
 	    /// <summary>
-	    /// raw message body
+	    /// The raw message body part of the RawMessage that this message was constructed with
 	    /// </summary>
 	    public string RawMessageBody { get; private set; }
 
@@ -305,12 +258,12 @@ namespace OpenPOP.MIMEParser
 	    public string MimeVersion { get; private set; }
 
 	    /// <summary>
-	    /// raw header
+	    /// The header part from the RawMessage that this message was constructed with
 	    /// </summary>
 	    public string RawHeader { get; private set; }
 
 	    /// <summary>
-	    /// raw message
+	    /// The raw content from which this message has been constructed
 	    /// </summary>
 	    public string RawMessage { get; private set; }
 
@@ -320,41 +273,21 @@ namespace OpenPOP.MIMEParser
 	    public string ReturnPath { get; private set; }
 
 	    /// <summary>
-		/// subject
-		/// </summary>
-		public string Subject
-		{
-			get{return _subject;}
-		}
-		#endregion
+	    /// The subject line of the message in decoded, one line state.
+	    /// </summary>
+	    public string Subject { get; private set; }
+	    #endregion
 
-
-		/// <summary>
-		/// release all objects
-		/// </summary>
-        /// <remarks>
-        /// foens:
-        /// I do not belive destructors are needed for this purpose
-        /// My suggestion is therefore to remove this.
-        /// Please comment if reading this
-        /// </remarks>
-		~Message()
-		{
-			Attachments.Clear();
-			Attachments=null;
-			Keywords.Clear();
-			Keywords=null;
-			MessageBody.Clear();
-			MessageBody=null;
-			CustomHeaders.Clear();
-			CustomHeaders=null;
-		}
-
+        #region Constructors
         /// <summary>
         /// Sets up a default new message
         /// </summary>
         private Message()
         {
+            ReplyTo = null;
+            FromEmail = null;
+            Subject = null;
+            Received = null;
             ReturnPath = null;
             RawMessage = null;
             RawHeader = null;
@@ -373,7 +306,6 @@ namespace OpenPOP.MIMEParser
             CC = new string[0];
             Attachments = new List<Attachment>();
             AttachmentCount = 0;
-            AttachmentBoundry2 = null;
             AttachmentBoundry = null;
             MessageBody = new List<string>();
             ContentTransferEncoding = null;
@@ -382,18 +314,17 @@ namespace OpenPOP.MIMEParser
             DispositionNotificationTo = null;
             Keywords = new List<string>();
             AutoDecodeMSTNEF = false;
-            CustomHeaders = new Hashtable();
+            CustomHeaders = null;
         }
 
 		/// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="blnFinish">reference for the finishing state</param>
 		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
 		/// <param name="strEMLFile">file of email content to load from</param>
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
+		public Message(string strBasePath, bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
             : this()
 		{
 		    string strMessage=null;
@@ -401,103 +332,93 @@ namespace OpenPOP.MIMEParser
 			{
 			    _basePath = strBasePath;
 			    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
-				NewMessage(ref blnFinish,strMessage,blnOnlyHeader);
+				InitializeMessage(strMessage,blnOnlyHeader);
 			}
-			else
-				blnFinish=true;
 		}
 
 		/// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="blnFinish">reference for the finishing state</param>
 		/// <param name="strBasePath">path to extract MS-TNEF attachment files</param>
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="strMessage">raw message content</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		public Message(ref bool blnFinish, string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
+		public Message(string strBasePath, bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
             : this()
 		{
 		    _basePath = strBasePath;
 		    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
-		    NewMessage(ref blnFinish,strMessage,blnOnlyHeader);
+		    InitializeMessage(strMessage,blnOnlyHeader);
 		}
 
 	    /// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="blnFinish">reference for the finishing state</param>
 		/// <param name="strMessage">raw message content</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		public Message(ref bool blnFinish, string strMessage, bool blnOnlyHeader)
+		public Message(string strMessage, bool blnOnlyHeader)
             : this()
 	    {
 	        _basePath = "";
-            NewMessage(ref blnFinish, strMessage, blnOnlyHeader);
+            InitializeMessage(strMessage, blnOnlyHeader);
 	    }
 
 	    /// <summary>
 		/// New Message
 		/// </summary>
-		/// <param name="blnFinish">reference for the finishing state</param>
 		/// <param name="strMessage">raw message content</param>
-		public Message(ref bool blnFinish, string strMessage)
+		public Message(string strMessage)
             : this()
 	    {
 	        _basePath = "";
-	        NewMessage(ref blnFinish,strMessage,false);
-	    }
-
-	    /// <summary>
-		/// get valid attachment
-		/// </summary>
-		/// <param name="intAttachmentNumber">attachment index in the attachments collection</param>
-		/// <returns>attachment</returns>
-		public Attachment GetAttachment(int intAttachmentNumber)
-		{
-			if(intAttachmentNumber<0 || intAttachmentNumber>AttachmentCount || intAttachmentNumber>Attachments.Count)
-			{
-				Utility.LogError("GetAttachment():attachment not exist");
-				throw new ArgumentOutOfRangeException("intAttachmentNumber");	
-			}
-			return Attachments[intAttachmentNumber];
-		}
+	        InitializeMessage(strMessage,false);
+        }
+        #endregion
 
 		/// <summary>
-		/// New Message
+		/// Initializes a new message from raw MIME content.
+		/// This method parses headers, messagebody and attachments.
 		/// </summary>
-		/// <param name="blnFinish">reference for the finishing state</param>
-		/// <param name="strMessage">raw message content</param>
-		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		/// <returns>construction result whether successfully new a message</returns>
-		private void NewMessage(ref bool blnFinish, string strMessage, bool blnOnlyHeader)
+		/// <param name="input">Raw message content from which parsing will begin</param>
+		/// <param name="onlyParseHeaders">Whether only to parse and decode headers</param>
+		private void InitializeMessage(string input, bool onlyParseHeaders)
 		{
-			StringReader srdReader=new StringReader(strMessage);
-			StringBuilder sbdBuilder=new StringBuilder();
+            // Keep the raw message for later usage
+			RawMessage=input;
 
-			RawMessage=strMessage;
+            // Genericly parse out header names and values
+            // Also include the rawHeader text for later use
+		    string rawHeadersTemp;
+		    NameValueCollection headersTest;
+            ParseHeaders(input, out rawHeadersTemp, out headersTest);
+		    RawHeader = rawHeadersTemp;
 
-			string strLine=srdReader.ReadLine();
-			while(Utility.IsNotNullTextEx(strLine))
-			{	
-				sbdBuilder.Append(strLine + "\r\n");
-				ParseHeader(sbdBuilder,srdReader,ref strLine);
-				if(Utility.IsOrNullTextEx(strLine))
-					break;
-				
-				strLine=srdReader.ReadLine();
-			}
+            // Create a holder for custom headers
+            CustomHeaders = new NameValueCollection();
 
-			RawHeader=sbdBuilder.ToString();
-			
-			SetAttachmentBoundry2(RawHeader);
+            // Now specificly parse each header. Some headers require special parsing.
+		    foreach (string headerName in headersTest.Keys)
+		    {
+		        string[] values = headersTest.GetValues(headerName);
+                if(values != null)
+		            foreach (string headerValue in values)
+		            {
+                        // Parse the header. If it was not recognized, it must have been a custom header
+                        if(!ParseHeader(headerName, headerValue))
+                        {
+                            CustomHeaders.Add(headerName, headerValue);
+                        }
+		            }
+		    }
 
-			if(ContentLength==0)
-				ContentLength=strMessage.Length;//_rawMessageBody.Length;
+            if (ContentLength == 0)
+                ContentLength = input.Length;
 
-			if(blnOnlyHeader==false)
+			if(onlyParseHeaders==false)
 			{
-				RawMessageBody=srdReader.ReadToEnd().Trim();
+                // The message body must be the full raw message, with headers removed.
+                // Also remove any CRLF in top or bottom.
+			    RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
 
 				//the auto reply mail by outlook uses ms-tnef format
 				if((HasAttachment && AttachmentBoundry!=null)||MIMETypes.IsMSTNEF(ContentType))
@@ -522,9 +443,23 @@ namespace OpenPOP.MIMEParser
 				else
 					GetMessageBody(RawMessageBody);
 			}
+        }
 
-			blnFinish=true;
-		}
+        #region Public functions
+        /// <summary>
+        /// get valid attachment
+        /// </summary>
+        /// <param name="intAttachmentNumber">attachment index in the attachments collection</param>
+        /// <returns>attachment</returns>
+        public Attachment GetAttachment(int intAttachmentNumber)
+        {
+            if (intAttachmentNumber < 0 || intAttachmentNumber > AttachmentCount || intAttachmentNumber > Attachments.Count)
+            {
+                Utility.LogError("GetAttachment():attachment not exist");
+                throw new ArgumentOutOfRangeException("intAttachmentNumber");
+            }
+            return Attachments[intAttachmentNumber];
+        }
 
 		/// <summary>
 		/// parse message body
@@ -533,13 +468,13 @@ namespace OpenPOP.MIMEParser
 		/// <returns>message body</returns>
 		public static string GetTextBody(string strBuffer)
 		{
-			if(strBuffer.EndsWith("\r\n."))
+		    if(strBuffer.EndsWith("\r\n."))
 				return strBuffer.Substring(0,strBuffer.Length-"\r\n.".Length);
-			else
-				return strBuffer;
+
+		    return strBuffer;
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// parse message body
 		/// </summary>
 		/// <param name="strBuffer">raw message body</param>
@@ -565,7 +500,7 @@ namespace OpenPOP.MIMEParser
 				else
 				{
 				    string body;
-				    if(AttachmentBoundry2==null)
+				    if(AttachmentBoundry==null)
 				    {					
 				        body=GetTextBody(strBuffer);
 
@@ -594,7 +529,7 @@ namespace OpenPOP.MIMEParser
 				        while(begin!=-1)
 				        {
 				            // find "\r\n\r\n" denoting end of header
-				            begin = strBuffer.IndexOf("--" + AttachmentBoundry2,begin);
+				            begin = strBuffer.IndexOf("--" + AttachmentBoundry,begin);
 				            if(begin!=-1)
 				            {
 				                string encoding=MIMETypes.GetContentTransferEncoding(strBuffer,begin);
@@ -602,7 +537,7 @@ namespace OpenPOP.MIMEParser
 				                begin = strBuffer.IndexOf("\r\n\r\n",begin+1);//strBuffer.LastIndexOfAny(ALPHABET.ToCharArray());
 							
 				                // find end of text
-				                int end = strBuffer.IndexOf("--" + AttachmentBoundry2,begin+1);
+				                int end = strBuffer.IndexOf("--" + AttachmentBoundry,begin+1);
 
 				                if(begin!=-1)
 				                {
@@ -695,11 +630,12 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				return (attItem.ContentType.ToLower()=="message/rfc822".ToLower() || attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower()));
+			    return attItem.ContentType.ToLower() == "message/rfc822".ToLower() ||
+			           attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower());
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("IsMIMEMailFile():"+e.Message);
+			    Utility.LogError("IsMIMEMailFile():" + e.Message);
 				return false;
 			}
 		}
@@ -709,7 +645,7 @@ namespace OpenPOP.MIMEParser
 			try
 			{
 				//return (attItem.ContentType.ToLower()=="multipart/related".ToLower() && attItem.ContentFileName=="");
-				return (attItem.ContentType.ToLower().StartsWith("multipart/".ToLower()) && attItem.ContentFileName=="");
+			    return attItem.ContentType.ToLower().StartsWith("multipart/".ToLower()) && attItem.ContentFileName == "";
 			}
 			catch(Exception e)
 			{
@@ -730,20 +666,20 @@ namespace OpenPOP.MIMEParser
 			{
 				for(int i=0;i<AttachmentCount;i++)
 				{
-					Attachment att=GetAttachment(i);
+				    Attachment att = GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName))
 					{
-						if(Utility.IsNotNullText(att.ContentID))
-							//support for embedded pictures
-							strBody=strBody.Replace("cid:"+att.ContentID,hsbFiles[att.ContentFileName].ToString());
+                        if (Utility.IsNotNullText(att.ContentID))
+                            //support for embedded pictures
+                            strBody = strBody.Replace("cid:" + att.ContentID, hsbFiles[att.ContentFileName].ToString());
 
-						strBody=strBody.Replace(att.ContentFileName,hsbFiles[att.ContentFileName].ToString());
+					    strBody = strBody.Replace(att.ContentFileName, hsbFiles[att.ContentFileName].ToString());
 					}
 				}
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("TranslateHTMLPictureFiles():"+e.Message);
+			    Utility.LogError("TranslateHTMLPictureFiles():" + e.Message);
 			}
 			return strBody;
 		}
@@ -760,23 +696,23 @@ namespace OpenPOP.MIMEParser
 			{
 				if(!strPath.EndsWith("\\"))
 				{
-					strPath+="\\";
+				    strPath += "\\";
 				}			
 				for(int i=0;i<AttachmentCount;i++)
 				{
 					Attachment att=GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName))
 					{
-						if(Utility.IsNotNullText(att.ContentID))
-							//support for embedded pictures
-							strBody=strBody.Replace("cid:"+att.ContentID,strPath+att.ContentFileName);
-						strBody=strBody.Replace(att.ContentFileName,strPath+att.ContentFileName);
+                        if (Utility.IsNotNullText(att.ContentID))
+                            //support for embedded pictures
+                            strBody = strBody.Replace("cid:" + att.ContentID, strPath + att.ContentFileName);
+					    strBody = strBody.Replace(att.ContentFileName, strPath + att.ContentFileName);
 					}
 				}
 			}			
 			catch(Exception e)
 			{
-				Utility.LogError("TranslateHTMLPictureFiles():"+e.Message);
+			    Utility.LogError("TranslateHTMLPictureFiles():" + e.Message);
 			}
 			return strBody;
 		}
@@ -788,42 +724,80 @@ namespace OpenPOP.MIMEParser
 		/// <returns>propery attachment file name</returns>
 		public string GetAttachmentFileName(Attachment attItem)
 		{
-			
 			int items=0;
 
 			//return unique body file names
-			for(int i=0;i<Attachments.Count;i++)
-			{
-				if(attItem.ContentFileName==attItem.DefaultFileName)
-				{
-					items++;
-					attItem.ContentFileName=attItem.DefaultFileName2.Replace("*",items.ToString());
-				}
-			}
-			string name=attItem.ContentFileName;
+            for (int i = 0; i < Attachments.Count; i++)
+            {
+                if (attItem.ContentFileName == attItem.DefaultFileName)
+                {
+                    items++;
+                    attItem.ContentFileName = attItem.DefaultFileName2.Replace("*", items.ToString());
+                }
+            }
+		    string name = attItem.ContentFileName;
 			
 			//return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):(attItem.ContentID!=null?attItem.ContentID:attItem.DefaultFileName)):name);
 			if(string.IsNullOrEmpty(name))
 				if(IsReport())
 				{
-					if(IsMIMEMailFile(attItem))
-						return attItem.DefaultMIMEFileName;
+                    if (IsMIMEMailFile(attItem))
+                        return attItem.DefaultMIMEFileName;
 
 					return attItem.DefaultReportFileName;
 				}
 				else
 				{
-					if(IsMIMEMailFile(attItem))
-						return attItem.DefaultMIMEFileName;
-					
-                    if(attItem.ContentID!=null)
-						return attItem.ContentID;
-					
-					return attItem.DefaultFileName;
+                    if (IsMIMEMailFile(attItem))
+                        return attItem.DefaultMIMEFileName;
+
+                    if (attItem.ContentID != null)
+                        return attItem.ContentID;
+
+				    return attItem.DefaultFileName;
 				}
 			
 			return name;
 		}
+
+        /// <summary>
+        /// save attachment to file
+        /// </summary>
+        /// <param name="attItem">Attachment</param>
+        /// <param name="strFileName">File to be saved to</param>
+        /// <returns>true if save successfully, false if failed</returns>
+        public bool SaveAttachment(Attachment attItem, string strFileName)
+        {
+            byte[] da;
+            try
+            {
+                if (attItem.InBytes)
+                {
+                    da = attItem.RawBytes;
+                }
+                else if (attItem.ContentFileName.Length > 0)
+                {
+                    da = attItem.DecodedAttachment;
+                }
+                else if (attItem.ContentType.ToLower() == "message/rfc822")
+                {
+                    da = Encoding.Default.GetBytes(attItem.RawAttachment);
+                }
+                else
+                {
+                    GetMessageBody(attItem.DecodeAsText());
+                    da = Encoding.Default.GetBytes(MessageBody[MessageBody.Count - 1]);
+                }
+                return Utility.SaveByteContentToFile(strFileName, da);
+            }
+            catch
+            {
+                /*Utility.LogError("SaveAttachment():"+e.Message);
+                return false;*/
+                da = Encoding.Default.GetBytes(attItem.RawAttachment);
+                return Utility.SaveByteContentToFile(strFileName, da);
+            }
+        }
 
 		/// <summary>
 		/// save attachments to a defined path
@@ -840,15 +814,15 @@ namespace OpenPOP.MIMEParser
 
 					if(!strPath.EndsWith("\\"))
 					{
-						strPath+="\\";
-					}			
-					for(int i=0;i<Attachments.Count;i++)
-					{
-						Attachment att=GetAttachment(i);
-						blnRet=SaveAttachment(att,strPath+GetAttachmentFileName(att));
-						if(!blnRet)
-							break;
+					    strPath += "\\";
 					}
+                    for (int i = 0; i < Attachments.Count; i++)
+                    {
+                        Attachment att = GetAttachment(i);
+                        blnRet = SaveAttachment(att, strPath + GetAttachmentFileName(att));
+                        if (!blnRet)
+                            break;
+                    }
 					return blnRet;
 				}
 				catch(Exception e)
@@ -859,61 +833,29 @@ namespace OpenPOP.MIMEParser
 			}
 			
 			return false;
-		}
+        }
 
-		/// <summary>
-		/// save attachment to file
-		/// </summary>
-		/// <param name="attItem">Attachment</param>
-		/// <param name="strFileName">File to be saved to</param>
-		/// <returns>true if save successfully, false if failed</returns>
-		public bool SaveAttachment(Attachment attItem, string strFileName)
-		{
-			byte[] da;
-			try
-			{
-				if(attItem.InBytes)
-				{
-					da=attItem.RawBytes;
-				}
-				else if(attItem.ContentFileName.Length>0)
-				{
-					da=attItem.DecodedAttachment;
-				}
-				else if(attItem.ContentType.ToLower()=="message/rfc822".ToLower())
-				{
-					da=Encoding.Default.GetBytes(attItem.RawAttachment);
-				}
-				else
-				{
-					GetMessageBody(attItem.DecodeAsText());
-					da=Encoding.Default.GetBytes(MessageBody[MessageBody.Count-1]);
-				}
-				return Utility.SaveByteContentToFile(strFileName,da);
-			}
-			catch
-			{
-				/*Utility.LogError("SaveAttachment():"+e.Message);
-				return false;*/
-				da=Encoding.Default.GetBytes(attItem.RawAttachment);
-				return Utility.SaveByteContentToFile(strFileName,da);
-			}
-		}
+        /// <summary>
+        /// Save message content to eml file
+        /// </summary>
+        /// <param name="strFile"></param>
+        /// <param name="blnReplaceExists"></param>
+        /// <returns></returns>
+        public bool SaveToMIMEEmailFile(string strFile, bool blnReplaceExists)
+        {
+            return Utility.SavePlainTextToFile(strFile, RawMessage, blnReplaceExists);
+        }
+        #endregion
 
-		/// <summary>
+        /// <summary>
 		/// set attachments
 		/// </summary>
 		private void SetAttachments()
 		{
 			int indexOfAttachmentStart=0;
 		    bool processed=false;
-			string strLine;
-		    Message m;
-			Attachment att;
 
-			SetAttachmentBoundry2(RawMessageBody);
-
-			while(!processed)
+            while(!processed)
 			{
 			    int indexOfAttachmentEnd;
 			    if(Utility.IsNotNullText(AttachmentBoundry))
@@ -946,16 +888,15 @@ namespace OpenPOP.MIMEParser
 					processed=true;
 				}
 
-				strLine=RawMessageBody.Substring(indexOfAttachmentStart,(indexOfAttachmentEnd-indexOfAttachmentStart-2));            
+				string strLine = RawMessageBody.Substring(indexOfAttachmentStart,(indexOfAttachmentEnd-indexOfAttachmentStart-2));            
 				bool isMSTNEF = MIMETypes.IsMSTNEF(ContentType);
-				att=new Attachment(strLine.Trim(),ContentType,!isMSTNEF);
+				Attachment att = new Attachment(strLine.Trim(),ContentType,!isMSTNEF);
 
 				//ms-tnef format might contain multiple attachments
 			    if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF && !isMSTNEF) 
 				{
 					Utility.LogError("SetAttachments():found ms-tnef file");
-					TNEFParser tnef=new TNEFParser();
-					TNEFAttachment tatt;
+				    TNEFParser tnef = new TNEFParser();
 
 				    tnef.Verbose=false;
 					tnef.BasePath=BasePath;
@@ -966,7 +907,7 @@ namespace OpenPOP.MIMEParser
 						{
 							for (IDictionaryEnumerator i = tnef.Attachments().GetEnumerator(); i.MoveNext();)
 							{
-								tatt=(TNEFAttachment)i.Value;
+								TNEFAttachment tatt = (TNEFAttachment)i.Value;
 								Attachment attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,MIMETypes.GetMimeType(tatt.FileName));
 								AttachmentCount++;
 								Attachments.Add(attNew);
@@ -980,8 +921,8 @@ namespace OpenPOP.MIMEParser
 				}
 				else if(IsMIMEMailFile2(att))
 				{
-					m=att.DecodeAsMessage(true,true);
-					for(int i=0;i<m.AttachmentCount;i++)
+				    Message m = att.DecodeAsMessage(true,true);
+				    for(int i=0;i<m.AttachmentCount;i++)
 					{
 						att=m.GetAttachment(i);
 						AttachmentCount++;
@@ -998,398 +939,324 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 
-		/// <summary>
-		/// Set alternative attachment boundry
-		/// </summary>
-		/// <param name="strBuffer">raw message</param>
-		private void SetAttachmentBoundry2(string strBuffer)
-		{
-		    int indexOfAttachmentBoundry2Begin = strBuffer.ToLower().IndexOf("Multipart/Alternative".ToLower());
-		    if(indexOfAttachmentBoundry2Begin!=-1)
-			{
-				indexOfAttachmentBoundry2Begin=strBuffer.IndexOf("boundary=");
-				if(indexOfAttachmentBoundry2Begin!=-1)
-				{
-					int indexOfAttachmentBoundry2End=strBuffer.IndexOf("\r\n",indexOfAttachmentBoundry2Begin+9);
-					if(indexOfAttachmentBoundry2End==-1)
-						indexOfAttachmentBoundry2End=strBuffer.Length;
-					AttachmentBoundry2=Utility.RemoveQuote(strBuffer.Substring(indexOfAttachmentBoundry2Begin+9,indexOfAttachmentBoundry2End-indexOfAttachmentBoundry2Begin-9));
-				}					
-			}
-			else
-			{
-				AttachmentBoundry2=AttachmentBoundry;
-			}
-		}
+        #region Header parser functions
+        /// <summary>
+        /// Method that takes a full message and parses the headers from it.
+        /// </summary>
+        /// <param name="message">The message to parse headers from</param>
+        /// <param name="rawHeaders">The portion of the message that was headers</param>
+        /// <param name="headers">A collection of Name and Value pairs of headers</param>
+        private static void ParseHeaders(string message, out string rawHeaders, out NameValueCollection headers)
+        {
+            headers = new NameValueCollection();
+            StringBuilder rawHeadersBuilder = new StringBuilder();
+
+            StringReader messageReader = new StringReader(message);
+
+            // Read until all headers have ended. It ends with an empty line
+            string line;
+            while (!"".Equals(line = messageReader.ReadLine()))
+            {
+                rawHeadersBuilder.Append(line + "\r\n");
+
+                // Split into name and value
+                string[] splittedValue = Utility.GetHeadersValue(line);
+                string headerName = splittedValue[0];
+                string headerValue = splittedValue[1];
+
+                // Read a single header. It might be a multi line header
+                if (IsMoreLinesInHeaderValue(messageReader))
+                {
+                    // Keep reading until we would hit next header
+                    while (IsMoreLinesInHeaderValue(messageReader))
+                    {
+                        // Unfolding is accomplished by simply removing any CRLF
+                        // that is immediately followed by WSP
+                        // This was done using ReadLine
+                        string moreHeaderValue = messageReader.ReadLine();
+                        headerValue += moreHeaderValue.Substring(1); // Remove the first whitespace
+
+                        rawHeadersBuilder.Append(moreHeaderValue + "\r\n");
+                    }
+
+                    // Now we have the name and full value. Add it
+                    headers.Add(headerName, headerValue);
+                }
+                else
+                {
+                    // This is a single line header. Simply insert it
+                    headers.Add(headerName, headerValue);
+                }
+            }
+
+            // Set the out parameter to our raw header. Remember to remove the last line ending.
+            rawHeaders = rawHeadersBuilder.ToString().TrimEnd(new[] { '\r', '\n' });
+        }
+
+        /// <summary>
+        /// Check if the next line is part of the current header value we are parsing by
+        /// peeking on the next character of the TextReader.
+        /// This should only be called while parsing headers
+        /// </summary>
+        /// <param name="reader">The reader from which the header is read from</param>
+        /// <returns>true if multi-line header. False otherwise</returns>
+        private static bool IsMoreLinesInHeaderValue(TextReader reader)
+        {
+            int peek = reader.Peek();
+            if (peek == -1)
+                return false;
+
+            char peekChar = (char)peek;
+
+            // A multi line header must have a whitespace character
+            // on the next line if it is to be continued
+            return peekChar == ' ' || peekChar == '\t';
+        }
 
 	    /// <summary>
-		/// Save message content to eml file
-		/// </summary>
-		/// <param name="strFile"></param>
-		/// <param name="blnReplaceExists"></param>
-		/// <returns></returns>
-		public bool SaveToMIMEEmailFile(string strFile,bool blnReplaceExists)
-		{
-			return Utility.SavePlainTextToFile(strFile,RawMessage,blnReplaceExists);
-		}
+        /// Parses a single header and sets member variables according to it.
+        /// </summary>
+        /// <param name="name">The name of the header</param>
+        /// <param name="value">The value of the header in unfolded state (only one line)</param>
+        /// <returns>True if the message was understood and parsed. False if it was not (custom headers)</returns>
+        private bool ParseHeader(string name, string value)
+        {
+            switch (name.ToUpper())
+            {
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.3
+                case "TO":
+                    TO = value.Split(',');
+                    for (int i = 0; i < TO.Length; i++)
+                    {
+                        TO[i] = Utility.DecodeLine(TO[i].Trim());
+                    }
+                    break;
 
-		/// <summary>
-		/// parse multi-line header
-		/// </summary>
-		/// <param name="sbdBuilder">string builder to hold header content</param>
-		/// <param name="srdReader">string reader to get each line of the header</param>
-		/// <param name="strValue">first line content</param>
-		/// <param name="strLine">reference header line</param>
-		/// <param name="alCollection">collection to hold every content line</param>
-		private void ParseStreamLines(StringBuilder sbdBuilder
-										,StringReader srdReader
-										,string strValue
-										,ref string strLine
-										,IList alCollection)
-		{
-		    int intLines=0;
-			alCollection.Add(strValue);
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.3
+                case "CC":
+                    CC = value.Split(',');
+                    for (int i = 0; i < CC.Length; i++)
+                    {
+                        CC[i] = Utility.DecodeLine(CC[i].Trim());
+                    }
+                    break;
 
-			sbdBuilder.Append(strLine);
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.3
+                case "BCC":
+                    BCC = value.Split(',');
+                    for (int i = 0; i < BCC.Length; i++)
+                    {
+                        BCC[i] = Utility.DecodeLine(BCC[i].Trim());
+                    }
+                    break;
 
-			strLine=srdReader.ReadLine();
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.2
+                case "FROM":
+                    string fromTemp;
+                    string fromEmailTemp;
+                    Utility.ParseEmailAddress(value, out fromTemp, out fromEmailTemp);
+                    From = fromTemp;
+                    FromEmail = fromEmailTemp;
+                    break;
 
-			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
-			{
-				string strFormmated = strLine.Substring(1);
-				alCollection.Add(Utility.DecodeLine(strFormmated));
-				sbdBuilder.Append(strLine);
-				strLine=srdReader.ReadLine();
-				intLines++;
-			}
+                // http://tools.ietf.org/html/rfc5322#section-3.6.2
+                // The implementation here might be wrong
+                case "REPLY-TO":
+                    string replyToTemp;
+                    string replyToEmailTemp;
+                    Utility.ParseEmailAddress(value, out replyToTemp, out replyToEmailTemp);
+                    ReplyTo = replyToTemp;
+                    ReplyToEmail = replyToEmailTemp;
+                    break;
 
-			if(strLine!="")
-			{
-				sbdBuilder.Append(strLine);
-			}
-			else
-				if(intLines==0)
-				{
-					strLine=srdReader.ReadLine();
-					sbdBuilder.Append(strLine);
-				}
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.5
+                // RFC 5322:
+                // The "Keywords:" field contains a comma-separated list of one or more
+                // words or quoted-strings.
+                // The field are intended to have only human-readable content
+                // with information about the message
+                case "KEYWORDS": //ms outlook keywords
+                    string[] KeywordsTemp = value.Split(',');
+                    for (int i = 0; i < KeywordsTemp.Length; i++)
+                    {
+                        // Remove the quote if there is any
+                        Keywords.Add(Utility.RemoveQuote(KeywordsTemp[i].Trim()));
+                    }
+                    break;
 
-			ParseHeader(sbdBuilder,srdReader,ref strLine);
-		}
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.7
+                case "RECEIVED":
+                    Received = value;
+                    break;
 
-		/// <summary>
-		/// parse multi-line header
-		/// </summary>
-		/// <param name="sbdBuilder">string builder to hold header content</param>
-		/// <param name="srdReader">string reader to get each line of the header</param>
-		/// <param name="strName">collection key</param>
-		/// <param name="strValue">first line content</param>
-		/// <param name="strLine">reference header line</param>
-		/// <param name="hstCollection">collection to hold every content line</param>
-		private void ParseStreamLines(StringBuilder sbdBuilder
-										,StringReader srdReader
-										,string strName
-										,string strValue
-										,ref string strLine
-										,Hashtable hstCollection)
-		{
-		    string strReturn=strValue;
-			int intLines=0;
+                case "IMPORTANCE":
+                    Importance = value.Trim();
+                    break;
 
-			//sbdBuilder.Append(strLine);
+                case "DISPOSITION-NOTIFICATION-TO":
+                    DispositionNotificationTo = value.Trim();
+                    break;
 
-			strLine=srdReader.ReadLine();
-			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
-			{
-				string strFormmated = strLine.Substring(1);
-				strReturn+=Utility.DecodeLine(strFormmated);
-				sbdBuilder.Append(strLine + "\r\n");
-				strLine=srdReader.ReadLine();
-				intLines++;
-			}
-			if(!hstCollection.ContainsKey(strName))
-				hstCollection.Add(strName,strReturn);
+                case "MIME-VERSION":
+                    MimeVersion = value.Trim();
+                    break;
 
-			if(strLine!="")
-			{
-				sbdBuilder.Append(strLine + "\r\n");
-			}
-			else
-				if(intLines==0)
-				{
-//					strLine=srdReader.ReadLine();
-//					sbdBuilder.Append(strLine + "\r\n");
-				}
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.5
+                case "SUBJECT":
+                case "THREAD-TOPIC":
+                    Subject = Utility.DecodeLine(value);
+                    break;
 
-			ParseHeader(sbdBuilder,srdReader,ref strLine);
-		}
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.7
+                case "RETURN-PATH":
+                    ReturnPath = value.Trim().TrimEnd('>').TrimStart('<');
+                    break;
 
-		/// <summary>
-		/// parse multi-line header
-		/// </summary>
-		/// <param name="sbdBuilder">string builder to hold header content</param>
-		/// <param name="srdReader">string reader to get each line of the header</param>
-		/// <param name="strValue">first line content</param>
-		/// <param name="strLine">reference header line</param>
-		/// <param name="strReturn">return value</param>
-		/// <param name="blnLineDecode">decode each line</param>
-		private void ParseStreamLines(StringBuilder sbdBuilder
-										,StringReader srdReader
-										,string strValue
-										,ref string strLine
-										,ref string strReturn
-										,bool blnLineDecode)
-		{
-		    int intLines=0;
-			strReturn=strValue;
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.4
+                // Example Message-ID
+                // <33cdd74d6b89ab2250ecd75b40a41405@nfs.eksperten.dk>
+                case "MESSAGE-ID":
+                    MessageID = value.Trim().TrimEnd('>').TrimStart('<');
+                    break;
 
-			sbdBuilder.Append(strLine + "\r\n");
+                // See http://tools.ietf.org/html/rfc5322#section-3.6.1
+                case "DATE":
+                    DateTimeInfo = value.Trim();
+                    Date = Utility.ParseEmailDate(DateTimeInfo);
+                    break;
 
-			if(blnLineDecode)
-				strReturn=Utility.DecodeLine(strReturn);
+                case "CONTENT-LENGTH":
+                    ContentLength = Convert.ToInt32(value);
+                    break;
 
-			strLine=srdReader.ReadLine();
-			while(strLine.Trim()!="" && (strLine.StartsWith("\t") || strLine.StartsWith(" ")))
-			{
-				string strFormmated = strLine.Substring(1);
-				strReturn+=(blnLineDecode?Utility.DecodeLine(strFormmated):"\r\n"+strFormmated);
-				sbdBuilder.Append(strLine + "\r\n");
-				strLine=srdReader.ReadLine();
-				intLines++;
-			}
+                case "CONTENT-TRANSFER-ENCODING":
+                    ContentTransferEncoding = value.Trim();
+                    break;
 
-			if(strLine!="")
-			{
-				sbdBuilder.Append(strLine + "\r\n");
-			}
-			else
-				if(intLines==0)
-				{
-					strLine=srdReader.ReadLine();
-					sbdBuilder.Append(strLine + "\r\n");
-				}
+                // See http://www.ietf.org/rfc/rfc2045.txt section 5.1.
+                // For more details on CONTENT-TYPE.
+                // Example: Content-type: text/plain; charset="us-ascii"
+                case "CONTENT-TYPE":
+                    //if already content type has been assigned
+                    if (ContentType != null)
+                        break;
 
-			if(!blnLineDecode)
-			{
-				strReturn=Utility.RemoveWhiteBlanks(Utility.DecodeText(strReturn));
-			}
-	
-			ParseHeader(sbdBuilder,srdReader,ref strLine);
-		}
+                    // ContentType is the first value, and it is required.
+                    ContentType = value.Split(';')[0].Trim();
 
-		/// <summary>
-		/// Parse the headers populating respective member fields
-		/// </summary>
-		/// <param name="sbdBuilder">string builder to hold the header content</param>
-		/// <param name="srdReader">string reader to get each line of the header</param>
-		/// <param name="strLine">reference header line</param>
-		private void ParseHeader(StringBuilder sbdBuilder,StringReader srdReader,ref string strLine)
-		{
-			string []array=Utility.GetHeadersValue(strLine);//Regex.Split(strLine,":");
+                    // We need the string in lower-case to search in it
+                    // and we don't want to create that lower-case string each time
+                    string lowerValue = value.ToLower();
 
-			switch(array[0].ToUpper())
-			{
-				case "TO":
-					TO=array[1].Split(',');
-					for(int i=0;i<TO.Length;i++)
-					{
-						TO[i]=Utility.DecodeLine(TO[i].Trim());
-					}
-					break;
+                    const string charsetFind = "charset=";
+                    int charsetStart = lowerValue.IndexOf(charsetFind);
+                    if (charsetStart != -1)
+                    {
+                        charsetStart = charsetStart + charsetFind.Length;
 
-				case "CC":
-					CC=array[1].Split(',');					
-					for(int i=0;i<CC.Length;i++)
-					{
-						CC[i]=Utility.DecodeLine(CC[i].Trim());
-					}
-					break;
+                        // If there is a attribute more behind the charset, charset should
+                        // be ended with an ";"
+                        int intCharsetEnd = value.IndexOf(";", charsetStart);
+                        string contentCharset;
+                        if (intCharsetEnd != -1)
+                        {
+                            int intCharsetLength = intCharsetEnd - charsetStart;
+                            contentCharset = value.Substring(charsetStart, intCharsetLength);
+                        }
+                        else
+                        {
+                            // If there is no ";" then there should be no more attributes,
+                            // and then charset extends to the end of the line
+                            contentCharset = value.Substring(charsetStart);
+                        }
 
-				case "BCC":
-					BCC=array[1].Split(',');					
-					for(int i=0;i<BCC.Length;i++)
-					{
-						BCC[i]=Utility.DecodeLine(BCC[i].Trim());
-					}
-					break;
+                        // The content might be qouted. Remove them if any
+                        ContentCharset = Utility.RemoveQuote(contentCharset);
+                    }
+                    else
+                    {
+                        // report-type is explained in
+                        // http://tools.ietf.org/html/rfc3462
+                        // If the MIME subtype is report, then
+                        // report-type and boundary attributes must be set
 
-				case "FROM":
-					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _from,false);
-					Utility.ParseEmailAddress(_from,ref _from,ref _fromEmail);
-					break;
+                        const string reportTypeFind = "report-type=";
 
-				case "REPLY-TO":
-					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _replyTo,false);
-					Utility.ParseEmailAddress(_replyTo,ref _replyTo,ref _replyToEmail);
-					break;
+                        int reportTypeStart = lowerValue.IndexOf(reportTypeFind);
+                        if (reportTypeStart != -1)
+                        {
+                            reportTypeStart = reportTypeStart + reportTypeFind.Length;
 
-				case "KEYWORDS": //ms outlook keywords
-					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,Keywords);
-					break;
+                            // If there is a attribute more behind the report-type, report-type should
+                            // be ended with an ";"
+                            int reportTypeEnd = value.IndexOf(";", reportTypeStart);
+                            string reportType;
+                            if (reportTypeEnd != -1)
+                            {
+                                int reportTypeLength = reportTypeEnd - reportTypeStart;
+                                reportType = value.Substring(reportTypeStart, reportTypeLength);
+                            }
+                            else
+                            {
+                                // If there is no ";" then there should be no more attributes,
+                                // and then report-type extends to the end of the line
+                                reportType = value.Substring(reportTypeStart);
+                            }
 
-				case "RECEIVED":
-					ParseStreamLines(sbdBuilder,srdReader,array[1].Trim(),ref strLine,ref _received,true);
-					break;
+                            // Remove qoutes if any
+                            ReportType = Utility.RemoveQuote(reportType);
+                        }
 
-				case "IMPORTANCE":
-					Importance=array[1].Trim();
-					break;
+                        const string boundaryFind = "boundary=";
+                        int boundaryStart = lowerValue.IndexOf(boundaryFind);
+                        if(boundaryStart != -1)
+                        {
+                            boundaryStart = boundaryStart + boundaryFind.Length;
 
-				case "DISPOSITION-NOTIFICATION-TO":
-					DispositionNotificationTo=array[1].Trim();
-					break;
+                            // If there is a attribute more behind the boundary, boundary should
+                            // be ended with an ";"
+                            int boundaryEnd = lowerValue.IndexOf(";", boundaryStart);
+                            string boundary;
+                            if (boundaryEnd != -1)
+                            {
+                                int boundaryLength = boundaryEnd - boundaryStart;
+                                boundary = value.Substring(boundaryStart, boundaryLength);
+                            }
+                            else
+                            {
+                                // If there is no ";" then there should be no more attributes,
+                                // and then boundary extends to the end of the line
+                                boundary = value.Substring(boundaryStart);
+                            }
 
-				case "MIME-VERSION":
-					MimeVersion=array[1].Trim();
-					break;
+                            // Remove qoutes if any
+                            AttachmentBoundry = Utility.RemoveQuote(boundary);
+                            HasAttachment = true;
+                        }
+                    }
 
-				case "SUBJECT":
-				case "THREAD-TOPIC":
-					string strRet=null;
-					for(int i=1;i<array.Length;i++)
-					{
-						strRet+=array[i];
-					}
-					ParseStreamLines(sbdBuilder,srdReader,strRet,ref strLine,ref _subject,false);
-					break;
+                    // Checking if we need to set additional fields according to the Centent-Type
+                    if (ContentType == "text/plain")
+                        break;
 
-				case "RETURN-PATH":
-					ReturnPath=array[1].Trim().Trim('>').Trim('<');
-					break;
+                    if (ContentType.ToLower().Equals("text/html") || ContentType.ToLower().IndexOf("multipart/") != -1)
+                        HTML = true;
+                    break;
 
-				case "MESSAGE-ID":
-					MessageID=array[1].Trim().Trim('>').Trim('<');
-					break;
+                default:
+                    // This is a unknown header
+                    
+                    // Custom headers are allowed. That means headers
+                    // that are not mentionen in the RFC.
+                    // Such headers start with the letter "X"
+                    // We do not have any special parsing of such
+                    return false;
+            }
 
-				case "DATE":
-					for(int i=1;i<array.Length;i++)
-					{
-						DateTimeInfo+=array[i];
-					}
-					DateTimeInfo=DateTimeInfo.Trim();
-					Date=Utility.ParseEmailDate(DateTimeInfo);
-					break;
-
-				case "CONTENT-LENGTH":
-					ContentLength=Convert.ToInt32(array[1]);
-					break;
-
-				case "CONTENT-TRANSFER-ENCODING":
-					ContentTransferEncoding=array[1].Trim();
-					break;
-
-				case "CONTENT-TYPE":
-					//if already content type has been assigned
-					if(ContentType!=null)
-						return;
-
-					strLine=array[1];
-
-					ContentType=strLine.Split(';')[0];
-					ContentType=ContentType.Trim();
-
-					int intCharset=strLine.IndexOf("charset=");
-					if(intCharset!=-1)
-					{
-						int intBound2=strLine.ToLower().IndexOf(";",intCharset+8);
-						if(intBound2==-1)
-							intBound2=strLine.Length;
-						intBound2-=(intCharset+8);
-						ContentCharset=strLine.Substring(intCharset+8,intBound2);
-						ContentCharset=Utility.RemoveQuote(ContentCharset);
-					}
-					else 
-					{
-						intCharset=strLine.ToLower().IndexOf("report-type=".ToLower());
-						if(intCharset!=-1)
-						{
-							int intPos=strLine.IndexOf(";",intCharset+13);
-							if ( intPos > -1 )
-                                 ReportType = strLine.Substring(intCharset + 12, intPos - intCharset - 13);
-                             else
-                                 ReportType = strLine.Substring(intCharset + 12);
-						}
-						else if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
-						{
-							strLine=srdReader.ReadLine();
-							if (strLine=="")
-								return;
-							intCharset=strLine.ToLower().IndexOf("charset=".ToLower());
-							if(intCharset!=-1)
-								ContentCharset=strLine.Substring(intCharset+9,strLine.Length-intCharset-10);
-							else if(strLine.IndexOf(":")!=-1)
-							{
-								sbdBuilder.Append(strLine + "\r\n");
-								ParseHeader(sbdBuilder,srdReader,ref strLine);
-								return;						
-							}
-							else
-							{
-								sbdBuilder.Append(strLine + "\r\n");
-							}
-						}
-					}
-					if(ContentType=="text/plain")
-						return;
-
-					if(ContentType.ToLower()=="text/html"||ContentType.ToLower().IndexOf("multipart/")!=-1)
-						HTML=true;
-
-					if(strLine.Trim().Length==ContentType.Length+1 || strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
-					{
-						strLine=srdReader.ReadLine();
-						if(string.IsNullOrEmpty(strLine)||strLine.IndexOf(":")!=-1)
-						{
-							sbdBuilder.Append(strLine + "\r\n");
-							ParseHeader(sbdBuilder,srdReader,ref strLine);
-							return;
-						}
-						
-						sbdBuilder.Append(strLine + "\r\n");
-
-						if(strLine.ToLower().IndexOf("boundary=".ToLower())==-1)
-						{
-							AttachmentBoundry=srdReader.ReadLine();
-							sbdBuilder.Append(AttachmentBoundry+"\r\n");
-						}
-						AttachmentBoundry=strLine;
-					}
-					else
-					{
-						/*if(strLine.IndexOf(";")!=-1)
-							_attachmentboundry=strLine.Split(';')[1];
-						else*/
-						AttachmentBoundry=strLine;
-					}
-
-					int intBound=AttachmentBoundry.ToLower().IndexOf("boundary=");
-					if(intBound!=-1)
-					{
-						int intBound2=AttachmentBoundry.ToLower().IndexOf(";",intBound+10);
-						if(intBound2==-1)
-							intBound2=AttachmentBoundry.Length;
-						intBound2-=(intBound+9);
-						AttachmentBoundry=AttachmentBoundry.Substring(intBound+9,intBound2);
-					}
-					AttachmentBoundry=Utility.RemoveQuote(AttachmentBoundry);
-					HasAttachment=true;
-
-					break;
-
-				default:
-					if(array.Length>1) //here we parse all custom headers
-					{
-						string headerName=array[0].Trim();
-						if(headerName.ToUpper().StartsWith("X")) //every custom header starts with "X"
-						{
-							ParseStreamLines(sbdBuilder,srdReader,headerName,array[1].Trim(),ref strLine,CustomHeaders);
-						}
-					}
-					break;
-			}
-		}
-
-
-	}
+            // This header was parsed correctly.
+            return true;
+        }
+        #endregion
+    }
 }
 

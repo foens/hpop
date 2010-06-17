@@ -1,57 +1,49 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
-using System.Threading;
-//using System.IO;
 using OpenPOP.POP3;
-using Message=OpenPOP.MIMEParser.Message;
 
 namespace OpenPOP.NET_Sample_App
 {
-	/// <summary>
-	/// Summary description for Form1.
-	/// </summary>
-	public class frmTest : System.Windows.Forms.Form
+	public class frmTest : Form
 	{
-		private System.Windows.Forms.Panel panel1;
-		private System.Windows.Forms.TextBox txtPOPServer;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox txtPort;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Panel panel2;
-		private System.Windows.Forms.Panel panel3;
-		private System.Windows.Forms.Panel panel4;
-		private System.Windows.Forms.Panel panel5;
-		private System.Windows.Forms.Panel panel6;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.TextBox txtPassword;
-		private System.Windows.Forms.Label label8;
-		private System.Windows.Forms.TextBox txtLogin;
-		private System.Windows.Forms.DataGrid gridHeaders;
-		private System.Windows.Forms.TextBox txtMessage;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.TextBox txtTotalMessages;
-		private System.Windows.Forms.TreeView listAttachments;
-		private System.Windows.Forms.TreeView listMessages;
-		private System.Windows.Forms.SaveFileDialog saveFile;
+		private Panel panel1;
+		private TextBox txtPOPServer;
+		private Label label1;
+		private Label label2;
+		private TextBox txtPort;
+		private Button button1;
+		private Panel panel2;
+		private Panel panel3;
+		private Panel panel4;
+		private Panel panel5;
+		private Panel panel6;
+		private Label label5;
+		private Label label7;
+		private TextBox txtPassword;
+		private Label label8;
+		private TextBox txtLogin;
+		private DataGrid gridHeaders;
+		private TextBox txtMessage;
+		private Label label4;
+		private Label label3;
+		private Label label6;
+		private TextBox txtTotalMessages;
+		private TreeView listAttachments;
+		private TreeView listMessages;
+		private SaveFileDialog saveFile;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
-		private System.Windows.Forms.ContextMenu ctmMessages;
-		private System.Windows.Forms.MenuItem mnuDeleteMessage;
-		private System.Windows.Forms.Button button2;
+		private ContextMenu ctmMessages;
+		private MenuItem mnuDeleteMessage;
+		private Button button2;
 		private POPClient popClient=new POPClient();
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.ListBox lstEvents;
+		private Button button3;
+		private ListBox lstEvents;
         private CheckBox useSsl;
 		private Hashtable msgs=new Hashtable();
 
@@ -64,15 +56,15 @@ namespace OpenPOP.NET_Sample_App
 			InitializeComponent();
 
 			//
-			// TODO: Add any constructor code after InitializeComponent call
+			// User defined stuff here 
 			//
-			popClient.AuthenticationBegan+=new EventHandler(popClient_AuthenticationBegan);
-			popClient.AuthenticationFinished+=new EventHandler(popClient_AuthenticationFinished);
-			popClient.CommunicationBegan+=new EventHandler(popClient_CommunicationBegan);
-			popClient.CommunicationOccured+=new EventHandler(popClient_CommunicationOccured);
-			popClient.CommunicationLost+=new EventHandler(popClient_CommunicationLost);
-			popClient.MessageTransferBegan+=new EventHandler(popClient_MessageTransferBegan);
-			popClient.MessageTransferFinished+=new EventHandler(popClient_MessageTransferFinished);
+		    popClient.AuthenticationBegan     += popClient_AuthenticationBegan;
+		    popClient.AuthenticationFinished  += popClient_AuthenticationFinished;
+		    popClient.CommunicationBegan      += popClient_CommunicationBegan;
+		    popClient.CommunicationOccured    += popClient_CommunicationOccured;
+		    popClient.CommunicationLost       += popClient_CommunicationLost;
+		    popClient.MessageTransferBegan    += popClient_MessageTransferBegan;
+		    popClient.MessageTransferFinished += popClient_MessageTransferFinished;
 		}
 
 		/// <summary>
@@ -97,37 +89,37 @@ namespace OpenPOP.NET_Sample_App
 		/// </summary>
 		private void InitializeComponent()
 		{
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.panel1 =           new System.Windows.Forms.Panel();
+            this.button3 =          new System.Windows.Forms.Button();
+            this.button2 =          new System.Windows.Forms.Button();
             this.txtTotalMessages = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.txtLogin = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtPort = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtPOPServer = new System.Windows.Forms.TextBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.gridHeaders = new System.Windows.Forms.DataGrid();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.lstEvents = new System.Windows.Forms.ListBox();
-            this.txtMessage = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.panel5 = new System.Windows.Forms.Panel();
-            this.listMessages = new System.Windows.Forms.TreeView();
-            this.ctmMessages = new System.Windows.Forms.ContextMenu();
+            this.label6 =           new System.Windows.Forms.Label();
+            this.label7 =           new System.Windows.Forms.Label();
+            this.txtPassword =      new System.Windows.Forms.TextBox();
+            this.label8 =           new System.Windows.Forms.Label();
+            this.txtLogin =         new System.Windows.Forms.TextBox();
+            this.button1 =          new System.Windows.Forms.Button();
+            this.label2 =           new System.Windows.Forms.Label();
+            this.txtPort =          new System.Windows.Forms.TextBox();
+            this.label1 =           new System.Windows.Forms.Label();
+            this.txtPOPServer =     new System.Windows.Forms.TextBox();
+            this.panel2 =           new System.Windows.Forms.Panel();
+            this.gridHeaders =      new System.Windows.Forms.DataGrid();
+            this.panel3 =           new System.Windows.Forms.Panel();
+            this.panel4 =           new System.Windows.Forms.Panel();
+            this.lstEvents =        new System.Windows.Forms.ListBox();
+            this.txtMessage =       new System.Windows.Forms.TextBox();
+            this.label4 =           new System.Windows.Forms.Label();
+            this.panel5 =           new System.Windows.Forms.Panel();
+            this.listMessages =     new System.Windows.Forms.TreeView();
+            this.ctmMessages =      new System.Windows.Forms.ContextMenu();
             this.mnuDeleteMessage = new System.Windows.Forms.MenuItem();
-            this.label5 = new System.Windows.Forms.Label();
-            this.panel6 = new System.Windows.Forms.Panel();
-            this.listAttachments = new System.Windows.Forms.TreeView();
-            this.label3 = new System.Windows.Forms.Label();
-            this.saveFile = new System.Windows.Forms.SaveFileDialog();
-            this.useSsl = new System.Windows.Forms.CheckBox();
+            this.label5 =           new System.Windows.Forms.Label();
+            this.panel6 =           new System.Windows.Forms.Panel();
+            this.listAttachments =  new System.Windows.Forms.TreeView();
+            this.label3 =           new System.Windows.Forms.Label();
+            this.saveFile =         new System.Windows.Forms.SaveFileDialog();
+            this.useSsl =           new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -462,7 +454,8 @@ namespace OpenPOP.NET_Sample_App
 		private void ReceiveMails()
 		{
 			Utility.Log=true;
-			popClient.Disconnect();
+            if(popClient.Connected)
+			    popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text), useSsl.Checked);
 			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
 			int Count=popClient.GetMessageCount();
@@ -473,199 +466,166 @@ namespace OpenPOP.NET_Sample_App
 			listMessages.Nodes.Clear();
 			listAttachments.Nodes.Clear();
 
-			for(int i=Count;i>=1;i-=1)
-			{
-				MIMEParser.Message m=popClient.GetMessage(i,false);
-				TreeNode node;
-				if(m!=null)
-				{
-					msgs.Add("msg"+i.ToString(),m);
-					node=listMessages.Nodes.Add(m.Subject);
-					node.Tag=i.ToString();
-				}
-				else
-				{
-					//node=listMessages.Nodes.Add("(wrong email)");
-				}
-				//node.Tag="msg"+i.ToString();
-				//popClient.DeleteMessage(i);
-			}
-			MessageBox.Show(this,"mail received!");
+		    int success = 0;
+		    int fail = 0;
+            for (int i = Count; i >= 1; i -= 1)
+            {
+                MIMEParser.Message m = popClient.GetMessage(i, false);
+                TreeNode node;
+                if (m != null)
+                {
+                    success++;
+                    msgs.Add("msg" + i, m);
+                    node = listMessages.Nodes.Add(m.Subject);
+                    node.Tag = i.ToString();
+                }
+                else
+                {
+                    fail++;
+                }
+            }
+		    MessageBox.Show(this, "mail received!\nSuccess: " + success + "\nFailed: " + fail);
 		}
 
-		private void button1_Click(object sender, System.EventArgs e)
+		private void button1_Click(object sender, EventArgs e)
 		{
-
-//			Thread InstanceCaller=new Thread(new ThreadStart(ReceiveMails));
-//
-//			InstanceCaller.Start();
 			ReceiveMails();
 		}
 
-		private void frmTest_Load(object sender, System.EventArgs e)
+		private void frmTest_Load(object sender, EventArgs e)
 		{
 			
 		}		
 
-		private void listMessages_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
-			if(m!=null)
+		    MIMEParser.Message m = (MIMEParser.Message) msgs["msg" + listMessages.SelectedNode.Tag];
+			if(m != null)
 			{
-//				if (m.Attachments.Count>0)
-//					{
-//						MIMEParser.Attachment at=m.GetAttachment(0);
-//						if(at.NotAttachment)
-//							m.GetMessageBody(at.DecodeAttachment());						
-//						else
-//							{}
-//					}
-//				else
-//					{}
 				if(m.MessageBody.Count>0)
 				{
-					txtMessage.Text=(string)m.MessageBody[m.MessageBody.Count-1];
+				    txtMessage.Text = m.MessageBody[m.MessageBody.Count - 1];
 				}
 				listAttachments.Nodes.Clear();
-				for(int i=0;i<m.AttachmentCount;i++)
-				{
-					MIMEParser.Attachment att=m.GetAttachment(i);
-					//string name=att.ContentFileName;
-					//listAttachments.Nodes.Add(name==null||name==""?(m.IsMIMEMailFile(att)==true?att.DefaultMIMEFileName:att.DefaultFileName):name).Tag=m.GetAttachment(i);
-					listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag=att;
-				}
+                for (int i = 0; i < m.AttachmentCount; i++)
+                {
+                    MIMEParser.Attachment att = m.GetAttachment(i);
+                    listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
+                }
 
-				DataSet ds=new DataSet();
-				ds.Tables.Add("table1");
-				ds.Tables[0].Columns.Add("Header");
+			    DataSet ds = new DataSet();
+			    ds.Tables.Add("table1");
+			    ds.Tables[0].Columns.Add("Header");
 				ds.Tables[0].Columns.Add("Value");				
 
 				ds.Tables[0].Rows.Add(new object[]{"AttachmentBoundry",m.AttachmentBoundry});
-				ds.Tables[0].Rows.Add(new object[]{"AttachmentBoundry2",m.AttachmentBoundry2});
 				ds.Tables[0].Rows.Add(new object[]{"AttachmentCount",m.AttachmentCount});
 
-				for(int j=0;j<m.CC.Length;j++)
-					ds.Tables[0].Rows.Add(new object[]{"CC",m.CC[j]});
-				for(int j=0;j<m.TO.Length;j++)
-					ds.Tables[0].Rows.Add(new object[]{"TO",m.TO[j]});
-					
-				ds.Tables[0].Rows.Add(new object[]{"ContentEncoding",m.ContentEncoding});
-				ds.Tables[0].Rows.Add(new object[]{"ContentLength",m.ContentLength});
-				ds.Tables[0].Rows.Add(new object[]{"ContentType",m.ContentType});
-				ds.Tables[0].Rows.Add(new object[]{"FROM",m.From});
-				ds.Tables[0].Rows.Add(new object[]{"FromEmail",m.FromEmail});
-				ds.Tables[0].Rows.Add(new object[]{"HasAttachment",m.HasAttachment});				
-				ds.Tables[0].Rows.Add(new object[]{"MessageID",m.MessageID});
-				ds.Tables[0].Rows.Add(new object[]{"MimeVersion",m.MimeVersion});
-				ds.Tables[0].Rows.Add(new object[]{"ReturnPath",m.ReturnPath});
-				ds.Tables[0].Rows.Add(new object[]{"Subject",m.Subject});
-				ds.Tables[0].Rows.Add(new object[]{"Date",m.Date});
-				ds.Tables[0].Rows.Add(new object[]{"Received",m.Received});
-				ds.Tables[0].Rows.Add(new object[]{"HTML",m.HTML});
-				ds.Tables[0].Rows.Add(new object[]{"Importance",m.Importance});
-				ds.Tables[0].Rows.Add(new object[]{"ReplyTo",m.ReplyTo});
-				ds.Tables[0].Rows.Add(new object[]{"ReplyToEmail",m.ReplyToEmail});
-				for(int j=0;j<m.Keywords.Count;j++)
-					ds.Tables[0].Rows.Add(new object[]{"Keyword",(string)m.Keywords[j]});				
-				for(IDictionaryEnumerator i=m.CustomHeaders.GetEnumerator();i.MoveNext();)
-					ds.Tables[0].Rows.Add(new object[]{(string)i.Entry.Key,(string)i.Entry.Value});				
-				gridHeaders.DataMember=ds.Tables[0].TableName;
-				gridHeaders.DataSource=ds;			
-			}
-			else
-			{
-				//MessageBox.Show(this,"mail object is null");
+                for (int j = 0; j < m.CC.Length; j++)
+                    ds.Tables[0].Rows.Add(new object[] { "CC", m.CC[j] });
+                for (int j = 0; j < m.TO.Length; j++)
+                    ds.Tables[0].Rows.Add(new object[] { "TO", m.TO[j] });
+
+			    ds.Tables[0].Rows.Add(new object[] {"ContentEncoding", m.ContentEncoding});
+			    ds.Tables[0].Rows.Add(new object[] {"ContentTransferEncoding", m.ContentTransferEncoding});
+			    ds.Tables[0].Rows.Add(new object[] {"ContentLength", m.ContentLength});
+			    ds.Tables[0].Rows.Add(new object[] {"ContentCharset", m.ContentCharset});
+			    ds.Tables[0].Rows.Add(new object[] {"ContentType", m.ContentType});
+			    ds.Tables[0].Rows.Add(new object[] {"FROM", m.From});
+			    ds.Tables[0].Rows.Add(new object[] {"FromEmail", m.FromEmail});
+			    ds.Tables[0].Rows.Add(new object[] {"HasAttachment", m.HasAttachment});
+			    ds.Tables[0].Rows.Add(new object[] {"MessageID", m.MessageID});
+			    ds.Tables[0].Rows.Add(new object[] {"MimeVersion", m.MimeVersion});
+			    ds.Tables[0].Rows.Add(new object[] {"ReturnPath", m.ReturnPath});
+			    ds.Tables[0].Rows.Add(new object[] {"Subject", m.Subject});
+			    ds.Tables[0].Rows.Add(new object[] {"Date", m.Date});
+			    ds.Tables[0].Rows.Add(new object[] {"Received", m.Received});
+			    ds.Tables[0].Rows.Add(new object[] {"HTML", m.HTML});
+			    ds.Tables[0].Rows.Add(new object[] {"Importance", m.Importance});
+			    ds.Tables[0].Rows.Add(new object[] {"ReplyTo", m.ReplyTo});
+			    ds.Tables[0].Rows.Add(new object[] {"ReplyToEmail", m.ReplyToEmail});
+                for (int j = 0; j < m.Keywords.Count; j++)
+                    ds.Tables[0].Rows.Add(new object[] { "Keyword", m.Keywords[j] });
+                foreach (string  key in m.CustomHeaders )
+                {
+                    string[] values = m.CustomHeaders.GetValues(key);
+                    if(values != null)
+                        foreach (string value in values)
+                        {
+                            ds.Tables[0].Rows.Add(new object[] { key, value });				
+                        }
+                }
+			    gridHeaders.DataMember = ds.Tables[0].TableName;
+			    gridHeaders.DataSource = ds;
 			}
 		}
 
-		private void listAttachments_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			MIMEParser.Attachment att=(MIMEParser.Attachment)listAttachments.SelectedNode.Tag;
-			MIMEParser.Message m=(MIMEParser.Message)msgs["msg"+listMessages.SelectedNode.Tag];
-			if(att!=null && m!=null)// && att.ContentFileName.Length>0)
+		    MIMEParser.Attachment att = (MIMEParser.Attachment) listAttachments.SelectedNode.Tag;
+		    MIMEParser.Message m = (MIMEParser.Message) msgs["msg" + listMessages.SelectedNode.Tag];
+			if(att!=null && m!=null)
 			{
-				//saveFile.FileName=(att.ContentFileName==null||att.ContentFileName==""?att.DefaultFileName:att.ContentFileName);//+(m.HTML==true?".html":"");
-				saveFile.FileName=m.GetAttachmentFileName(att);
-				DialogResult result=saveFile.ShowDialog();
-				if(result!=DialogResult.OK)
+			    saveFile.FileName = m.GetAttachmentFileName(att);
+			    DialogResult result = saveFile.ShowDialog();
+				if(result != DialogResult.OK)
 					return;
 
-				if(Message.IsMIMEMailFile(att))
+				if(MIMEParser.Message.IsMIMEMailFile(att))
 				{
-					result=MessageBox.Show(this,"OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
-					if(result==DialogResult.Yes)
+				    result = MessageBox.Show(this, "OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?", "MIME mail", MessageBoxButtons.YesNo);
+					if(result == DialogResult.Yes)
 					{
-						MIMEParser.Message m2=att.DecodeAsMessage(true, false);
-						string attachmentNames="";
-						bool blnRet=false;
-						if(m2.AttachmentCount>0)
-							for(int i=0;i<m2.AttachmentCount;i++)
-							{
-								MIMEParser.Attachment att2=m2.GetAttachment(i);
-								//string attachmentName=att2.ContentFileName;
-								//attachmentNames+=(attachmentName==null||attachmentName==""?att2.DefaultFileName:att2.ContentFileName)+"("+att2.ContentLength+")";
-								attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";
-								//m2.SaveAttachment(att2,System.IO.Path.GetDirectoryName(saveFile.FileName) + "\\" + m2.GetAttachmentFileName(att2));
-							}
-							blnRet=m.SaveAttachments(System.IO.Path.GetDirectoryName(saveFile.FileName));
-						MessageBox.Show(this,"Parsing "+(blnRet==true?"succeeded":"failed")+"£¡\r\n\r\nsubject:"+m2.Subject+"\r\n\r\nAttachment:\r\n"+attachmentNames);
-					}
-					else
-					{
+					    MIMEParser.Message m2 = att.DecodeAsMessage(true, false);
+					    string attachmentNames = "";
+                        if (m2.AttachmentCount > 0)
+                            for (int i = 0; i < m2.AttachmentCount; i++)
+                            {
+                                MIMEParser.Attachment att2 = m2.GetAttachment(i);
+                                attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
+                            }
+							bool blnRet = m.SaveAttachments(System.IO.Path.GetDirectoryName(saveFile.FileName));
+                            MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
 				MessageBox.Show(this,"Attachment saving "+((m.SaveAttachment(att,saveFile.FileName))?"succeeded":"failed")+"£¡");
-
-//				FileStream fs=File.Create(saveFile.FileName);
-//				byte[] da;
-//				if(att.ContentFileName.Length>0)
-//				{
-//					da=att.DecodedAttachment;
-//				}
-//				else
-//				{
-//					m.GetMessageBody(att.DecodeAttachment());
-//					da=Encoding.Default.GetBytes((string)m.MessageBody[m.MessageBody.Count-1]);
-//				}
-//				fs.Write(da,0,da.Length);
-//				fs.Close();
 			}
 			else
 				MessageBox.Show(this,"attachment object is null!");
 		}
 
-		private void mnuDeleteMessage_Click(object sender, System.EventArgs e)
+		private void mnuDeleteMessage_Click(object sender, EventArgs e)
 		{
-			DialogResult drRet=MessageBox.Show(this,"Are you sure to delete the email?","Delete email",MessageBoxButtons.YesNo);
-			if(drRet==DialogResult.Yes)
+		    DialogResult drRet = MessageBox.Show(this, "Are you sure to delete the email?", "Delete email", MessageBoxButtons.YesNo);
+			if(drRet == DialogResult.Yes)
 			{
-				popClient.DeleteMessage(Convert.ToInt32(listMessages.SelectedNode.Tag));
+			    popClient.DeleteMessage(Convert.ToInt32(listMessages.SelectedNode.Tag));
 
-				listMessages.SelectedNode.Remove();
+			    listMessages.SelectedNode.Remove();
 
-				drRet=MessageBox.Show(this,"Do you want to receive email again?","Receive email",MessageBoxButtons.YesNo);
-				if(drRet==DialogResult.Yes)
+			    drRet = MessageBox.Show(this, "Do you want to receive email again?", "Receive email", MessageBoxButtons.YesNo);
+				if(drRet == DialogResult.Yes)
 					ReceiveMails();
 			}
 		}
 
-		private void button2_Click(object sender, System.EventArgs e)
+		private void button2_Click(object sender, EventArgs e)
 		{
-			List<string> uids=popClient.GetMessageUIDs();
-			txtMessage.Text="UIDL:\r\n";
+		    List<string> uids = popClient.GetMessageUIDs();
+		    txtMessage.Text = "UIDL:\r\n";
 		    foreach (string uid in uids)
 		    {
-                txtMessage.Text += (uid + "\r\n");
+		        txtMessage.Text += (uid + "\r\n");
 		    }
 		}
 
 		private void AddEvent(string strEvent)
 		{
-			lstEvents.Items.Add(strEvent);
-			lstEvents.SelectedIndex=lstEvents.Items.Count-1;
+		    lstEvents.Items.Add(strEvent);
+		    lstEvents.SelectedIndex = lstEvents.Items.Count - 1;
 		}
 
-		private void button3_Click(object sender, System.EventArgs e)
+		private void button3_Click(object sender, EventArgs e)
 		{
 /*			bool f=false;
 			string s="";
@@ -673,13 +633,13 @@ namespace OpenPOP.NET_Sample_App
 			MIMEParser.Message m=new MIMEParser.Message(ref f,s);
 			s=m.Subject;
 			s=m.MessageBody[m.MessageBody.Count-1].ToString();*/
-			string strRet=MIMEParser.Utility.DecodeText("=?ISO-8859-1?B?s8nUsbzTyOssv+zIpbTyuPbV0Lr0sMkh?=");
-			MessageBox.Show(this,strRet);
+		    string strRet = MIMEParser.Utility.DecodeText("=?ISO-8859-1?B?s8nUsbzTyOssv+zIpbTyuPbV0Lr0sMkh?=");
+		    MessageBox.Show(this, strRet);
 		}
 
 		private void popClient_CommunicationBegan(object sender, EventArgs e)
 		{
-			AddEvent("CommunicationBegan");
+		    AddEvent("CommunicationBegan");
 		}
 
 		private void popClient_CommunicationOccured(object sender, EventArgs e)

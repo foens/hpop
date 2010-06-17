@@ -351,8 +351,7 @@ namespace MailMonitor
 			{
 				if(File.Exists(_file)||FindLocalMessage(ref _file))
 				{
-					bool blnRet=false;
-					_msg=new OpenPOP.MIMEParser.Message(ref blnRet,"",true,false,_file);
+					_msg=new OpenPOP.MIMEParser.Message("",true,false,_file);
 				}
 				else
 				{

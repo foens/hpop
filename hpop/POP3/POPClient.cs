@@ -56,6 +56,9 @@ using System.Text.RegularExpressions;
 
 namespace OpenPOP.POP3
 {
+    // TODO: Make a field public accesible to check if the server accepts APOP login method
+    // TODO: Remove ability to set Receive intervals and buffer sizes. These should ONLY be set by a constructor. Maybe give arguments to constructor.
+
 	/// <summary>
 	/// POPClient
 	/// Does not included threaded support or usage
@@ -105,7 +108,6 @@ namespace OpenPOP.POP3
 		private StreamReader reader;
 		private StreamWriter writer;
 	    private string _basePath=null;
-		private bool _receiveFinish=false;
 	    private string _lastCommandResponse;
 
 
@@ -221,17 +223,18 @@ namespace OpenPOP.POP3
 
 		private void WaitForResponse(ref StreamReader rdReader, int intInterval)
 		{
+            /*
 			if(intInterval==0)
 				intInterval=WaitForResponseInterval;
 			
 			while(!rdReader.BaseStream.CanRead)
 			{
 				Thread.Sleep(intInterval);
-			}
+			}*/
 		}
 
 		private void WaitForResponse(ref StreamReader rdReader)
-		{
+		{/*
 			DateTime dtStart=DateTime.Now;
 			TimeSpan tsSpan;
 			while(!rdReader.BaseStream.CanRead)
@@ -240,17 +243,17 @@ namespace OpenPOP.POP3
 				if(tsSpan.Milliseconds>ReceiveTimeOut)
 					break;
 				Thread.Sleep(WaitForResponseInterval);
-			}
+			}*/
 		}
 
 		private void WaitForResponse(ref StreamWriter wrWriter, int intInterval)
-		{
+		{/*
 			if(intInterval==0)
 				intInterval=WaitForResponseInterval;
 			while(!wrWriter.BaseStream.CanWrite)
 			{
 				Thread.Sleep(intInterval);
-			}
+			}*/
 		}
 
 		/// <summary>
@@ -401,12 +404,6 @@ namespace OpenPOP.POP3
                 writer = new StreamWriter(clientSocket.GetStream());
             }
 
-            // Specify that LineEndings are \r\n, which is described in the
-            // POP3 RFC: http://www.ietf.org/rfc/rfc1939.txt
-            // This would otherwise work fine on Windows, as the default is \r\n,
-            // but it would not work on Linux (Mono)
-		    writer.NewLine = "\r\n";
-
             // Is this really needed?
             WaitForResponse(ref reader, WaitForResponseInterval);
 
@@ -448,8 +445,6 @@ namespace OpenPOP.POP3
 			}
 			finally
 			{
-				reader=null;
-				writer=null;
 			    Connected = false;
 			}
 			CommunicationLost(this, EventArgs.Empty);
@@ -460,7 +455,8 @@ namespace OpenPOP.POP3
 		/// </summary>
 		~POPClient()
 		{
-			Disconnect();
+            if(Connected)
+			    Disconnect();
 		}
 
 		/// <summary>
@@ -596,6 +592,7 @@ namespace OpenPOP.POP3
 
 		/// <summary>
 		/// Sends the POP3 server the QUIT command.
+		/// You should use disconnect instead, which also sends the QUIT command.
 		/// 
 		/// According to RFC the server should then:
 		/// If there is an error, such as a resource shortage, encountered while removing messages, the maildrop may result in having some or none of the messages marked as deleted be removed.
@@ -603,6 +600,7 @@ namespace OpenPOP.POP3
 		/// The server is required to release any exclusive-access locks on the mailbox and close the TCP connection
 		/// </summary>
 		/// <returns>True on OK message from server. False otherwise.</returns>
+        [Obsolete("You should use the disconnect method instead. It also sends the QUIT command and closes the streams correctly.")]
 		public bool QUIT()
 		{
 			return SendCommand("QUIT");
@@ -815,31 +813,25 @@ namespace OpenPOP.POP3
 		{
             MessageTransferBegan(this, EventArgs.Empty);
 
-			_receiveFinish=false;
-			if(!SendCommand(command))			
+		    if(!SendCommand(command))			
 				return null;
 
-			try
-			{
-                // Receive the message from the server
-				string receivedContent = ReceiveRETRMessage();
+            // Receive the message from the server
+			string receivedContent = ReceiveRETRMessage();
 
-                // Parse the message
-				MIMEParser.Message msg = new MIMEParser.Message(ref _receiveFinish, _basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
+		    MIMEParser.Message msg = null;
+            // Parse the message
+		    //try
+		    //{
+                msg = new MIMEParser.Message(_basePath, AutoDecodeMSTNEF, receivedContent, headersOnly);
+		    //}
+		    //catch (Exception)
+		    //{
+                // foens: In the long run, I wan't this removed!
+		    //}
 
-                // foens: Is this really needed?
-				WaitForResponse(_receiveFinish, WaitForResponseInterval);
-
-                MessageTransferFinished(this, EventArgs.Empty);
-				return msg;
-			}
-			catch(Exception e)
-			{
-				Utility.LogError("FetchMessage():" + e.Message);
-
-                MessageTransferFinished(this, EventArgs.Empty);
-				return null;
-			}
+            MessageTransferFinished(this, EventArgs.Empty);
+			return msg;	
 		}
 	}
 }

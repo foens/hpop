@@ -52,9 +52,6 @@ using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIMEParser
 {
-	/// <summary>
-	/// Summary description for Attachment.
-	/// </summary>
 	public class Attachment : IComparable
 	{
 		#region Member Variables
@@ -190,22 +187,6 @@ namespace OpenPOP.MIMEParser
 			}
 		}
 		#endregion
-
-
-		/// <summary>
-		/// release all objects
-		/// </summary>
-		/// <remarks>
-		/// foens:
-		/// I do not belive destructors are needed for this purpose
-		/// My suggestion is therefore to remove this.
-		/// Please comment if reading this
-		/// </remarks>
-		~Attachment()
-		{
-			RawBytes=null;
-			RawAttachment=null;
-		}
 
         /// <summary>
         /// Used to create a new attachment internally to avoid any
@@ -367,14 +348,16 @@ namespace OpenPOP.MIMEParser
 				case "CONTENT-DISPOSITION":
 					if(values.Length>0)
 						ContentDisposition=values[0].Trim();
-					
-					///bugfix reported by grandepuffo @ https://sourceforge.net/forum/message.php?msg_id=2589759
+
+                    ///bugfix reported by grandepuffo @ https://sourceforge.net/projects/hpop/forums/forum/318198/topic/1082917?message=2589759
 					//_contentFileName=values[1];
 
                     if (string.IsNullOrEmpty(ContentFileName))
                     {
                         if (values.Length > 1)
+                        {
                             ContentFileName = values[1];
+                        }
                         else
                             ContentFileName = "";
 
@@ -383,11 +366,13 @@ namespace OpenPOP.MIMEParser
                             ContentFileName = srReader.ReadLine();
                             strLine = ContentFileName;
                         }
+
+                        ContentFileName = ContentFileName.Replace("\t", "");
+                        ContentFileName = Utility.GetQuotedValue(ContentFileName, "=", "filename");
+                        ContentFileName = Utility.DecodeText(ContentFileName);
                     }
 
-			        ContentFileName=ContentFileName.Replace("\t","");
-					ContentFileName=Utility.GetQuotedValue(ContentFileName,"=","filename");
-					ContentFileName=Utility.DecodeText(ContentFileName);
+			        
 					break;
 				case "CONTENT-ID":
 					ContentID=Utility.SplitOnSemiColon(array[1])[0].Trim('<').Trim('>');
@@ -454,7 +439,6 @@ namespace OpenPOP.MIMEParser
 		/// <returns>new message object</returns>
 		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine, bool blnUseRawContent)
 		{
-			bool blnRet=false;
 			string strContent=blnUseRawContent?RawContent:RawAttachment;
 
 			/*if(blnRemoveHeaderBlankLine)
@@ -468,7 +452,7 @@ namespace OpenPOP.MIMEParser
 			}*/
 			if(blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
 				strContent=strContent.Substring(2,strContent.Length-2);					
-			return new Message(ref blnRet,"",false ,strContent,false);
+			return new Message("",false ,strContent,false);
 		}
 
 		/// <summary>

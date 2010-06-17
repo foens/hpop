@@ -84,6 +84,7 @@ namespace OpenPOP.MIMEParser
 		/// <summary>
 		/// Decoding Quoted-Printable string at a position
 		/// </summary>
+        /// <see cref="http://tools.ietf.org/html/rfc2047">Section 4.2 about Q encoding for details</see>
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method, "Default" is suggested</param>
 		/// <param name="nStart">position to start, normally 0</param>
