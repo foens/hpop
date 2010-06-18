@@ -90,7 +90,7 @@ namespace OpenPOP.MIMEParser
 		{
 			get
 			{
-				/*				if (_contentDisposition==null||_contentType==null)
+			    /*				if (_contentDisposition==null||_contentType==null)
 									return true;
 								else
 									return (_contentDisposition.IndexOf("attachment")==-1 && _contentType.IndexOf("text/plain")!=-1); */
@@ -100,9 +100,7 @@ namespace OpenPOP.MIMEParser
 									return (_contentFileName!="");*/
 				if ((ContentType==null||ContentFileName=="") && ContentID==null)//&&_contentType.ToLower().IndexOf("text/")!=-1)
 					return true;
-				else
-					return false;
-
+			    return false;
 			}
 		}
 

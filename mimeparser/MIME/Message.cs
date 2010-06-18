@@ -107,9 +107,9 @@ namespace OpenPOP.MIMEParser
 	    public List<string> MessageBody { get; private set; }
 
 	    /// <summary>
-	    /// Attachment Boundry
+	    /// The boundary between each message in the body
 	    /// </summary>
-	    public string AttachmentBoundry { get; private set; }
+	    public string MultipartBoundry { get; private set; }
 
 	    /// <summary>
 	    /// Attachment Count
@@ -214,9 +214,9 @@ namespace OpenPOP.MIMEParser
 	    public string ReplyToEmail { get; private set; }
 
 	    /// <summary>
-	    /// whether has attachment
+	    /// Whether this message is a multipart message
 	    /// </summary>
-	    public bool HasAttachment { get; private set; }
+	    public bool isMultipart { get; private set; }
 
 	    /// <summary>
 	    /// The raw message body part of the RawMessage that this message was constructed with
@@ -270,7 +270,7 @@ namespace OpenPOP.MIMEParser
             MimeVersion = null;
             MessageID = null;
             RawMessageBody = null;
-            HasAttachment = false;
+            isMultipart = false;
             DateTimeInfo = null;
             Date = null;
             ReportType = null;
@@ -282,7 +282,7 @@ namespace OpenPOP.MIMEParser
             CC = new string[0];
             Attachments = new List<Attachment>();
             AttachmentCount = 0;
-            AttachmentBoundry = null;
+            MultipartBoundry = null;
             MessageBody = new List<string>();
             ContentTransferEncoding = null;
             ContentCharset = null;
@@ -391,7 +391,7 @@ namespace OpenPOP.MIMEParser
 			    RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
 
 				//the auto reply mail by outlook uses ms-tnef format
-				if(HasAttachment || MIMETypes.IsMSTNEF(ContentType))
+				if(isMultipart || MIMETypes.IsMSTNEF(ContentType))
 				{
 					SetAttachments();
 
@@ -432,154 +432,6 @@ namespace OpenPOP.MIMEParser
         }
 
 		/// <summary>
-		/// parse message body
-		/// </summary>
-		/// <param name="strBuffer">raw message body</param>
-		/// <returns>message body</returns>
-		public static string GetTextBody(string strBuffer)
-		{
-		    if(strBuffer.EndsWith("\r\n."))
-				return strBuffer.Substring(0,strBuffer.Length-"\r\n.".Length);
-
-		    return strBuffer;
-		}
-
-	    /// <summary>
-		/// parse message body
-		/// </summary>
-		/// <param name="strBuffer">raw message body</param>
-		public void GetMessageBody(string strBuffer)
-		{
-		    MessageBody.Clear();
-
-			try
-			{
-				if(Utility.IsOrNullTextEx(strBuffer))
-					return;
-
-				if(Utility.IsOrNullTextEx(ContentType) && ContentTransferEncoding==null)
-				{
-					MessageBody.Add(GetTextBody(strBuffer));
-				}
-				else if(ContentType != null && ContentType.Contains("digest"))
-				{
-					// this is a digest method
-					//ParseDigestMessage(strBuffer);
-					MessageBody.Add(GetTextBody(strBuffer));
-				}
-				else
-				{
-				    string body;
-				    if(AttachmentBoundry==null)
-				    {					
-				        body=GetTextBody(strBuffer);
-
-				        if(Utility.IsQuotedPrintable(ContentTransferEncoding))
-				        {
-                            if (Utility.IsNotNullText(ContentCharset))
-                            {
-                                body = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
-                            }
-                            else
-                            {
-                                body = DecodeQP.ConvertHexContent(body);
-                            }
-				        }
-				        else if(Utility.IsBase64(ContentTransferEncoding))
-				            body=Utility.deCodeB64s(Utility.RemoveNonB64(body));
-				        else if(Utility.IsNotNullText(ContentCharset))
-				            body=Encoding.GetEncoding(ContentCharset).GetString(Encoding.Default.GetBytes(body));
-
-				        MessageBody.Add(Utility.RemoveNonB64(body));
-				    }
-				    else
-				    {
-				        int begin = 0;
-
-				        while(begin!=-1)
-				        {
-				            // find "\r\n\r\n" denoting end of header
-				            begin = strBuffer.IndexOf("--" + AttachmentBoundry,begin);
-				            if(begin!=-1)
-				            {
-				                string encoding=MIMETypes.GetContentTransferEncoding(strBuffer,begin);
-
-				                begin = strBuffer.IndexOf("\r\n\r\n",begin+1);//strBuffer.LastIndexOfAny(ALPHABET.ToCharArray());
-							
-				                // find end of text
-				                int end = strBuffer.IndexOf("--" + AttachmentBoundry,begin+1);
-
-				                if(begin!=-1)
-				                {
-				                    if(end!=-1)
-				                    {
-				                        begin += 4;
-				                        if(begin>=end)
-				                            continue;
-
-				                        if (ContentEncoding!=null && ContentEncoding.IndexOf("8bit")!=-1)
-				                            body=Utility.Change(strBuffer.Substring(begin, end - begin-2 ),ContentCharset);
-				                        else
-				                            body=strBuffer.Substring(begin, end - begin-2);
-				                    }
-				                    else
-				                    {
-				                        body=strBuffer.Substring(begin);
-				                    }
-
-				                    if(Utility.IsQuotedPrintable(encoding))
-				                    {
-				                        string ret;
-
-                                        if (Utility.IsNotNullText(ContentCharset))
-                                            ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
-                                        else
-                                            ret = DecodeQP.ConvertHexContent(body);
-
-				                        MessageBody.Add(ret);
-				                    }
-				                    else if(Utility.IsBase64(encoding))
-				                    {
-				                        string ret=Utility.RemoveNonB64(body);
-				                        ret=Utility.deCodeB64s(ret);
-				                        if(ret!="\0")
-				                            MessageBody.Add(ret);
-				                        else
-				                            MessageBody.Add(body);
-				                    }
-				                    else
-				                        MessageBody.Add(body);
-
-				                    if(end==-1)break;
-				                }
-				                else
-				                {
-				                    break;
-				                }
-				            }
-				            else
-				            {
-				                if(MessageBody.Count==0)
-				                {
-				                    MessageBody.Add(strBuffer);
-				                }
-				                break;
-				            }
-				        }
-				    }
-				}
-			}
-			catch(Exception e)
-			{
-				Utility.LogError("GetMessageBody():"+e.Message);
-				MessageBody.Add(Utility.deCodeB64s(strBuffer));
-			}
-
-			if(MessageBody.Count>1)
-				HTML=true;
-		}
-
-		/// <summary>
 		/// verify if the message is a report
 		/// </summary>
 		/// <returns>if it is a report message, return true, else, false</returns>
@@ -614,7 +466,6 @@ namespace OpenPOP.MIMEParser
 		{
 			try
 			{
-				//return (attItem.ContentType.ToLower()=="multipart/related".ToLower() && attItem.ContentFileName=="");
 			    return attItem.ContentType.ToLower().StartsWith("multipart/".ToLower()) && attItem.ContentFileName == "";
 			}
 			catch(Exception e)
@@ -817,6 +668,7 @@ namespace OpenPOP.MIMEParser
         }
         #endregion
 
+        #region Body parser functions
         /// <summary>
 		/// set attachments
 		/// </summary>
@@ -828,12 +680,12 @@ namespace OpenPOP.MIMEParser
             while(!processed)
 			{
 			    int indexOfAttachmentEnd;
-			    if(!string.IsNullOrEmpty(AttachmentBoundry))
+			    if(!string.IsNullOrEmpty(MultipartBoundry))
 				{
-				    indexOfAttachmentStart = RawMessageBody.IndexOf(AttachmentBoundry, indexOfAttachmentStart) + AttachmentBoundry.Length;
+				    indexOfAttachmentStart = RawMessageBody.IndexOf(MultipartBoundry, indexOfAttachmentStart) + MultipartBoundry.Length;
                     if (RawMessageBody.Equals("") || indexOfAttachmentStart < 0) return;
 
-				    indexOfAttachmentEnd = RawMessageBody.IndexOf(AttachmentBoundry, indexOfAttachmentStart + 1);
+				    indexOfAttachmentEnd = RawMessageBody.IndexOf(MultipartBoundry, indexOfAttachmentStart + 1);
 				}
 				else
 				{
@@ -906,7 +758,155 @@ namespace OpenPOP.MIMEParser
 
 				indexOfAttachmentStart++;
 			}
-		}
+        }
+
+        /// <summary>
+        /// parse message body
+        /// </summary>
+        /// <param name="strBuffer">raw message body</param>
+        /// <returns>message body</returns>
+        private static string GetTextBody(string strBuffer)
+        {
+            if (strBuffer.EndsWith("\r\n."))
+                return strBuffer.Substring(0, strBuffer.Length - "\r\n.".Length);
+
+            return strBuffer;
+        }
+
+        /// <summary>
+        /// parse message body
+        /// </summary>
+        /// <param name="strBuffer">raw message body</param>
+        private void GetMessageBody(string strBuffer)
+        {
+            MessageBody.Clear();
+
+            try
+            {
+                if (Utility.IsOrNullTextEx(strBuffer))
+                    return;
+
+                if (Utility.IsOrNullTextEx(ContentType) && ContentTransferEncoding == null)
+                {
+                    MessageBody.Add(GetTextBody(strBuffer));
+                }
+                else if (ContentType != null && ContentType.Contains("digest"))
+                {
+                    // this is a digest method
+                    MessageBody.Add(GetTextBody(strBuffer));
+                }
+                else
+                {
+                    string body;
+                    if (MultipartBoundry == null)
+                    {
+                        body = GetTextBody(strBuffer);
+
+                        if (Utility.IsQuotedPrintable(ContentTransferEncoding))
+                        {
+                            if (Utility.IsNotNullText(ContentCharset))
+                            {
+                                body = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                            }
+                            else
+                            {
+                                body = DecodeQP.ConvertHexContent(body);
+                            }
+                        }
+                        else if (Utility.IsBase64(ContentTransferEncoding))
+                            body = Utility.deCodeB64s(Utility.RemoveNonB64(body));
+                        else if (Utility.IsNotNullText(ContentCharset))
+                            body = Encoding.GetEncoding(ContentCharset).GetString(Encoding.Default.GetBytes(body));
+
+                        MessageBody.Add(Utility.RemoveNonB64(body));
+                    }
+                    else
+                    {
+                        int begin = 0;
+
+                        while (begin != -1)
+                        {
+                            // find "\r\n\r\n" denoting end of header
+                            begin = strBuffer.IndexOf("--" + MultipartBoundry, begin);
+                            if (begin != -1)
+                            {
+                                string encoding = MIMETypes.GetContentTransferEncoding(strBuffer, begin);
+
+                                begin = strBuffer.IndexOf("\r\n\r\n", begin + 1);//strBuffer.LastIndexOfAny(ALPHABET.ToCharArray());
+
+                                // find end of text
+                                int end = strBuffer.IndexOf("--" + MultipartBoundry, begin + 1);
+
+                                if (begin != -1)
+                                {
+                                    if (end != -1)
+                                    {
+                                        begin += 4;
+                                        if (begin >= end)
+                                            continue;
+
+                                        if (ContentEncoding != null && ContentEncoding.IndexOf("8bit") != -1)
+                                            body = Utility.Change(strBuffer.Substring(begin, end - begin - 2), ContentCharset);
+                                        else
+                                            body = strBuffer.Substring(begin, end - begin - 2);
+                                    }
+                                    else
+                                    {
+                                        body = strBuffer.Substring(begin);
+                                    }
+
+                                    if (Utility.IsQuotedPrintable(encoding))
+                                    {
+                                        string ret;
+
+                                        if (Utility.IsNotNullText(ContentCharset))
+                                            ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                                        else
+                                            ret = DecodeQP.ConvertHexContent(body);
+
+                                        MessageBody.Add(ret);
+                                    }
+                                    else if (Utility.IsBase64(encoding))
+                                    {
+                                        string ret = Utility.RemoveNonB64(body);
+                                        ret = Utility.deCodeB64s(ret);
+                                        if (ret != "\0")
+                                            MessageBody.Add(ret);
+                                        else
+                                            MessageBody.Add(body);
+                                    }
+                                    else
+                                        MessageBody.Add(body);
+
+                                    if (end == -1) break;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (MessageBody.Count == 0)
+                                {
+                                    MessageBody.Add(strBuffer);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Utility.LogError("GetMessageBody():" + e.Message);
+                MessageBody.Add(Utility.deCodeB64s(strBuffer));
+            }
+
+            if (MessageBody.Count > 1)
+                HTML = true;
+        }
+        #endregion
 
         #region Header parser functions
         /// <summary>
@@ -1199,8 +1199,8 @@ namespace OpenPOP.MIMEParser
                             }
 
                             // Remove qoutes if any
-                            AttachmentBoundry = Utility.RemoveQuote(boundary);
-                            HasAttachment = true;
+                            MultipartBoundry = Utility.RemoveQuote(boundary);
+                            isMultipart = true;
                         }
                     }
 

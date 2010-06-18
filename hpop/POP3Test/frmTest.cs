@@ -518,7 +518,7 @@ namespace OpenPOP.NET_Sample_App
 			    ds.Tables[0].Columns.Add("Header");
 				ds.Tables[0].Columns.Add("Value");				
 
-				ds.Tables[0].Rows.Add(new object[]{"AttachmentBoundry",m.AttachmentBoundry});
+				ds.Tables[0].Rows.Add(new object[]{"AttachmentBoundry",m.MultipartBoundry});
 				ds.Tables[0].Rows.Add(new object[]{"AttachmentCount",m.AttachmentCount});
 
                 for (int j = 0; j < m.CC.Length; j++)
@@ -533,7 +533,7 @@ namespace OpenPOP.NET_Sample_App
 			    ds.Tables[0].Rows.Add(new object[] {"ContentType", m.ContentType});
 			    ds.Tables[0].Rows.Add(new object[] {"FROM", m.From});
 			    ds.Tables[0].Rows.Add(new object[] {"FromEmail", m.FromEmail});
-			    ds.Tables[0].Rows.Add(new object[] {"HasAttachment", m.HasAttachment});
+			    ds.Tables[0].Rows.Add(new object[] {"HasAttachment", m.isMultipart});
 			    ds.Tables[0].Rows.Add(new object[] {"MessageID", m.MessageID});
 			    ds.Tables[0].Rows.Add(new object[] {"MimeVersion", m.MimeVersion});
 			    ds.Tables[0].Rows.Add(new object[] {"ReturnPath", m.ReturnPath});
