@@ -115,7 +115,6 @@
     <Compile Include="POP3\MyMD5.cs" />
     <Compile Include="POP3\POPClient.cs" />
     <Compile Include="POP3\Utility.cs" />
-    <Content Include="changes.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MIMEParser\MIMEParser.csproj">

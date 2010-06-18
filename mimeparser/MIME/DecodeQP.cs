@@ -46,9 +46,13 @@ namespace OpenPOP.MIMEParser
 		public static string ConvertHexToString(string Hexstring,string Encoding)
 		{
 			try
-			{return ConvertHexToString(Hexstring, System.Text.Encoding.GetEncoding(Encoding));}
+            {
+                return ConvertHexToString(Hexstring, System.Text.Encoding.GetEncoding(Encoding));
+            }
 			catch
-			{return ConvertHexContent(Hexstring);}
+            {
+                return ConvertHexContent(Hexstring);
+            }
 		}
 
 		/// <summary>
@@ -57,23 +61,23 @@ namespace OpenPOP.MIMEParser
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method</param>
 		/// <returns>decoded string</returns>
-		public static string ConvertHexToString(string Hexstring,Encoding encode)
+		public static string ConvertHexToString(string Hexstring, Encoding encode)
 		{			
 			try
 			{
-				if(Hexstring==null||Hexstring.Equals("")) return "";
+				if(Hexstring==null || Hexstring.Equals("")) return "";
 
 				if(Hexstring.StartsWith("=")) Hexstring=Hexstring.Substring(1);
-			
-				string[] aHex= Hexstring.Split(new []{'='});
-				byte[] abyte = new Byte[aHex.Length];
-			
-				for(int i=0;i<abyte.Length;i++)
-				{
-					//	Console.WriteLine(aHex[i]);
-					abyte[i] =(byte) int.Parse(aHex[i],NumberStyles.HexNumber);
-				}
-				return encode.GetString(abyte);
+
+			    string[] aHex = Hexstring.Split(new[] {'='});
+			    byte[] abyte = new Byte[aHex.Length];
+
+                for (int i = 0; i < abyte.Length; i++)
+                {
+                    //	Console.WriteLine(aHex[i]);
+                    abyte[i] = (byte) int.Parse(aHex[i], NumberStyles.HexNumber);
+                }
+			    return encode.GetString(abyte);
 			}
 			catch
 			{
@@ -164,9 +168,10 @@ namespace OpenPOP.MIMEParser
 		/// <returns>decoded string</returns>
 		public static string ConvertHexContent(string Hexstring)
 		{
-			if(Hexstring==null || Hexstring.Equals("")) return Hexstring;
+            if (Hexstring == null || Hexstring.Equals(""))
+                return Hexstring;
 
-			return ConvertHexContent(Hexstring,Encoding.Default,0);
+		    return ConvertHexContent(Hexstring, Encoding.Default, 0);
 			
 		}
 	}

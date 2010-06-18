@@ -391,7 +391,7 @@ namespace OpenPOP.MIMEParser
 			    RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
 
 				//the auto reply mail by outlook uses ms-tnef format
-				if((HasAttachment && AttachmentBoundry!=null)||MIMETypes.IsMSTNEF(ContentType))
+				if(HasAttachment || MIMETypes.IsMSTNEF(ContentType))
 				{
 					SetAttachments();
 
@@ -461,7 +461,7 @@ namespace OpenPOP.MIMEParser
 				{
 					MessageBody.Add(GetTextBody(strBuffer));
 				}
-				else if(ContentType!=null && ContentType.IndexOf("digest") >= 0)
+				else if(ContentType != null && ContentType.Contains("digest"))
 				{
 					// this is a digest method
 					//ParseDigestMessage(strBuffer);
@@ -822,22 +822,22 @@ namespace OpenPOP.MIMEParser
 		/// </summary>
 		private void SetAttachments()
 		{
-			int indexOfAttachmentStart=0;
-		    bool processed=false;
+            int indexOfAttachmentStart = 0;
+            bool processed = false;
 
             while(!processed)
 			{
 			    int indexOfAttachmentEnd;
-			    if(Utility.IsNotNullText(AttachmentBoundry))
+			    if(!string.IsNullOrEmpty(AttachmentBoundry))
 				{
-					indexOfAttachmentStart=RawMessageBody.IndexOf(AttachmentBoundry,indexOfAttachmentStart)+AttachmentBoundry.Length;
-					if(RawMessageBody==""||indexOfAttachmentStart<0)return;
-					
-					indexOfAttachmentEnd=RawMessageBody.IndexOf(AttachmentBoundry,indexOfAttachmentStart+1);				
+				    indexOfAttachmentStart = RawMessageBody.IndexOf(AttachmentBoundry, indexOfAttachmentStart) + AttachmentBoundry.Length;
+                    if (RawMessageBody.Equals("") || indexOfAttachmentStart < 0) return;
+
+				    indexOfAttachmentEnd = RawMessageBody.IndexOf(AttachmentBoundry, indexOfAttachmentStart + 1);
 				}
 				else
 				{
-					indexOfAttachmentEnd=-1;
+				    indexOfAttachmentEnd = -1;
 				}
 
 				//if(indexOfAttachmentEnd<0)return;

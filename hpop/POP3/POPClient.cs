@@ -695,7 +695,7 @@ namespace OpenPOP.POP3
         public Message GetMessageHeaders(int messageNumber)
         {
             // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
-            MIMEParser.Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
+            Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
 
             return msg;
         }
