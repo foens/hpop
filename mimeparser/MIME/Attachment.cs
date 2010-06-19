@@ -407,7 +407,7 @@ namespace OpenPOP.MIMEParser
 					if(!IsEncoding("7bit"))
 					{
 						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
-							decodedAttachment=Utility.Change(decodedAttachment,ContentCharset);
+							decodedAttachment=Utility.ChangeEncoding(decodedAttachment,ContentCharset);
 
 						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
 							decodedAttachment=DecodeQP.ConvertHexContent(decodedAttachment);
@@ -418,7 +418,7 @@ namespace OpenPOP.MIMEParser
 					}
 				}
 				else if(ContentCharset!=null)
-					decodedAttachment=Utility.Change(RawAttachment,ContentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
+					decodedAttachment=Utility.ChangeEncoding(RawAttachment,ContentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
 				else
 					decodedAttachment=RawAttachment;
 			}
@@ -474,7 +474,7 @@ namespace OpenPOP.MIMEParser
 					if(!IsEncoding("7bit"))
 					{
 						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
-							bytContent=Utility.Change(bytContent,ContentCharset);
+							bytContent=Utility.ChangeEncoding(bytContent,ContentCharset);
 
 						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
 							decodedBytes=Encoding.Default.GetBytes(DecodeQP.ConvertHexContent(bytContent));
@@ -487,7 +487,7 @@ namespace OpenPOP.MIMEParser
 						decodedBytes=Encoding.Default.GetBytes(bytContent);
 				}
 				else if(ContentCharset!=null)
-					decodedBytes=Encoding.Default.GetBytes(Utility.Change(RawAttachment,ContentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
+					decodedBytes=Encoding.Default.GetBytes(Utility.ChangeEncoding(RawAttachment,ContentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
 				else
 					decodedBytes=Encoding.Default.GetBytes(RawAttachment);
 

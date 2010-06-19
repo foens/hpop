@@ -109,7 +109,7 @@ namespace OpenPOP.MIMEParser
 	    /// <summary>
 	    /// The boundary between each message in the body
 	    /// </summary>
-	    public string MultipartBoundry { get; private set; }
+	    public string MultipartBoundary { get; private set; }
 
 	    /// <summary>
 	    /// Attachment Count
@@ -282,7 +282,7 @@ namespace OpenPOP.MIMEParser
             CC = new string[0];
             Attachments = new List<Attachment>();
             AttachmentCount = 0;
-            MultipartBoundry = null;
+            MultipartBoundary = null;
             MessageBody = new List<string>();
             ContentTransferEncoding = null;
             ContentCharset = null;
@@ -344,76 +344,6 @@ namespace OpenPOP.MIMEParser
 	        InitializeMessage(strMessage,false);
         }
         #endregion
-
-		/// <summary>
-		/// Initializes a new message from raw MIME content.
-		/// This method parses headers, messagebody and attachments.
-		/// </summary>
-		/// <param name="input">Raw message content from which parsing will begin</param>
-		/// <param name="onlyParseHeaders">Whether only to parse and decode headers</param>
-		private void InitializeMessage(string input, bool onlyParseHeaders)
-		{
-            // Keep the raw message for later usage
-			RawMessage=input;
-
-            // Genericly parse out header names and values
-            // Also include the rawHeader text for later use
-		    string rawHeadersTemp;
-		    NameValueCollection headersTest;
-            ParseHeaders(input, out rawHeadersTemp, out headersTest);
-		    RawHeader = rawHeadersTemp;
-
-            // Create a holder for custom headers
-            CustomHeaders = new NameValueCollection();
-
-            // Now specificly parse each header. Some headers require special parsing.
-		    foreach (string headerName in headersTest.Keys)
-		    {
-		        string[] values = headersTest.GetValues(headerName);
-                if(values != null)
-		            foreach (string headerValue in values)
-		            {
-                        // Parse the header. If it was not recognized, it must have been a custom header
-                        if(!ParseHeader(headerName, headerValue))
-                        {
-                            CustomHeaders.Add(headerName, headerValue);
-                        }
-		            }
-		    }
-
-            if (ContentLength == 0)
-                ContentLength = input.Length;
-
-			if(onlyParseHeaders==false)
-			{
-                // The message body must be the full raw message, with headers removed.
-                // Also remove any CRLF in top or bottom.
-			    RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
-
-				//the auto reply mail by outlook uses ms-tnef format
-				if(isMultipart || MIMETypes.IsMSTNEF(ContentType))
-				{
-					SetAttachments();
-
-					if (Attachments.Count>0)
-					{
-						Attachment at=GetAttachment(0);
-						if(at!=null&&at.NotAttachment)
-							GetMessageBody(at.DecodeAsText());
-						
-						//in case body parts as text[0] html[1]
-						if(Attachments.Count>1&&!IsReport())
-						{
-							at=GetAttachment(1);
-							if(at!=null&&at.NotAttachment)
-								GetMessageBody(at.DecodeAsText());						
-						}
-					}
-				}
-				else
-					GetMessageBody(RawMessageBody);
-			}
-        }
 
         #region Public functions
         /// <summary>
@@ -668,6 +598,78 @@ namespace OpenPOP.MIMEParser
         }
         #endregion
 
+        #region Main parser function
+        /// <summary>
+        /// Initializes a new message from raw MIME content.
+        /// This method parses headers, messagebody and attachments.
+        /// </summary>
+        /// <param name="input">Raw message content from which parsing will begin</param>
+        /// <param name="onlyParseHeaders">Whether only to parse and decode headers</param>
+        private void InitializeMessage(string input, bool onlyParseHeaders)
+        {
+            // Keep the raw message for later usage
+            RawMessage = input;
+
+            // Genericly parse out header names and values
+            // Also include the rawHeader text for later use
+            string rawHeadersTemp;
+            NameValueCollection headersTest;
+            ParseHeaders(input, out rawHeadersTemp, out headersTest);
+            RawHeader = rawHeadersTemp;
+
+            // Create a holder for custom headers
+            CustomHeaders = new NameValueCollection();
+
+            // Now specificly parse each header. Some headers require special parsing.
+            foreach (string headerName in headersTest.Keys)
+            {
+                string[] values = headersTest.GetValues(headerName);
+                if (values != null)
+                    foreach (string headerValue in values)
+                    {
+                        // Parse the header. If it was not recognized, it must have been a custom header
+                        if (!ParseHeader(headerName, headerValue))
+                        {
+                            CustomHeaders.Add(headerName, headerValue);
+                        }
+                    }
+            }
+
+            if (ContentLength == 0)
+                ContentLength = input.Length;
+
+            if (onlyParseHeaders == false)
+            {
+                // The message body must be the full raw message, with headers removed.
+                // Also remove any CRLF in top or bottom.
+                RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
+
+                //the auto reply mail by outlook uses ms-tnef format
+                if (isMultipart || MIMETypes.IsMSTNEF(ContentType))
+                {
+                    SetAttachments();
+
+                    if (Attachments.Count > 0)
+                    {
+                        Attachment at = GetAttachment(0);
+                        if (at != null && at.NotAttachment)
+                            GetMessageBody(at.DecodeAsText());
+
+                        //in case body parts as text[0] html[1]
+                        if (Attachments.Count > 1 && !IsReport())
+                        {
+                            at = GetAttachment(1);
+                            if (at != null && at.NotAttachment)
+                                GetMessageBody(at.DecodeAsText());
+                        }
+                    }
+                }
+                else
+                    GetMessageBody(RawMessageBody);
+            }
+        }
+        #endregion
+
         #region Body parser functions
         /// <summary>
 		/// set attachments
@@ -680,12 +682,12 @@ namespace OpenPOP.MIMEParser
             while(!processed)
 			{
 			    int indexOfAttachmentEnd;
-			    if(!string.IsNullOrEmpty(MultipartBoundry))
+			    if(!string.IsNullOrEmpty(MultipartBoundary))
 				{
-				    indexOfAttachmentStart = RawMessageBody.IndexOf(MultipartBoundry, indexOfAttachmentStart) + MultipartBoundry.Length;
+				    indexOfAttachmentStart = RawMessageBody.IndexOf(MultipartBoundary, indexOfAttachmentStart) + MultipartBoundary.Length;
                     if (RawMessageBody.Equals("") || indexOfAttachmentStart < 0) return;
 
-				    indexOfAttachmentEnd = RawMessageBody.IndexOf(MultipartBoundry, indexOfAttachmentStart + 1);
+				    indexOfAttachmentEnd = RawMessageBody.IndexOf(MultipartBoundary, indexOfAttachmentStart + 1);
 				}
 				else
 				{
@@ -710,29 +712,27 @@ namespace OpenPOP.MIMEParser
 					processed=true;
 				}
 
-				string strLine = RawMessageBody.Substring(indexOfAttachmentStart,(indexOfAttachmentEnd-indexOfAttachmentStart-2));            
-				bool isMSTNEF = MIMETypes.IsMSTNEF(ContentType);
-				Attachment att = new Attachment(strLine.Trim(),ContentType,!isMSTNEF);
+			    string strLine = RawMessageBody.Substring(indexOfAttachmentStart, indexOfAttachmentEnd - indexOfAttachmentStart - 2);
+			    bool isMSTNEF = MIMETypes.IsMSTNEF(ContentType);
+			    Attachment att = new Attachment(strLine.Trim(), ContentType, !isMSTNEF);
 
 				//ms-tnef format might contain multiple attachments
 			    if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF && !isMSTNEF) 
 				{
-					Utility.LogError("SetAttachments():found ms-tnef file");
+				    Utility.LogError("SetAttachments():found ms-tnef file");
 				    TNEFParser tnef = new TNEFParser();
-
 				    tnef.Verbose=false;
-					//tnef.LogFilePath=this.BasePath + "OpenPOP.TNEF.log";
+
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
 						{
-							for (IDictionaryEnumerator i = tnef.Attachments().GetEnumerator(); i.MoveNext();)
-							{
-								TNEFAttachment tatt = (TNEFAttachment)i.Value;
-								Attachment attNew=new Attachment(tatt.FileContent,tatt.FileLength ,tatt.FileName,MIMETypes.GetMimeType(tatt.FileName));
-								AttachmentCount++;
-								Attachments.Add(attNew);
-							}
+						    foreach (TNEFAttachment tatt in tnef.Attachments())
+						    {
+                                Attachment attNew = new Attachment(tatt.FileContent, tatt.FileLength, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
+                                AttachmentCount++;
+                                Attachments.Add(attNew);
+						    }
 						}
 						else
 							Utility.LogError("SetAttachments():ms-tnef file parse failed");
@@ -761,22 +761,9 @@ namespace OpenPOP.MIMEParser
         }
 
         /// <summary>
-        /// parse message body
+        /// Parses message body of a MIME message
         /// </summary>
-        /// <param name="strBuffer">raw message body</param>
-        /// <returns>message body</returns>
-        private static string GetTextBody(string strBuffer)
-        {
-            if (strBuffer.EndsWith("\r\n."))
-                return strBuffer.Substring(0, strBuffer.Length - "\r\n.".Length);
-
-            return strBuffer;
-        }
-
-        /// <summary>
-        /// parse message body
-        /// </summary>
-        /// <param name="strBuffer">raw message body</param>
+        /// <param name="strBuffer">Raw message body</param>
         private void GetMessageBody(string strBuffer)
         {
             MessageBody.Clear();
@@ -788,105 +775,95 @@ namespace OpenPOP.MIMEParser
 
                 if (Utility.IsOrNullTextEx(ContentType) && ContentTransferEncoding == null)
                 {
-                    MessageBody.Add(GetTextBody(strBuffer));
+                    MessageBody.Add(strBuffer);
                 }
                 else if (ContentType != null && ContentType.Contains("digest"))
                 {
-                    // this is a digest method
-                    MessageBody.Add(GetTextBody(strBuffer));
+                    MessageBody.Add(strBuffer);
                 }
                 else
                 {
                     string body;
-                    if (MultipartBoundry == null)
+                    if (!isMultipart)
                     {
-                        body = GetTextBody(strBuffer);
+                        // This is not a multipart message.
+                        // It only contains some text
+                        body = strBuffer;
 
+                        // Now we only need to decode the text according to encoding
                         if (Utility.IsQuotedPrintable(ContentTransferEncoding))
                         {
-                            if (Utility.IsNotNullText(ContentCharset))
-                            {
+                            if (!string.IsNullOrEmpty(ContentCharset))
                                 body = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
-                            }
                             else
-                            {
                                 body = DecodeQP.ConvertHexContent(body);
-                            }
                         }
                         else if (Utility.IsBase64(ContentTransferEncoding))
                             body = Utility.deCodeB64s(Utility.RemoveNonB64(body));
-                        else if (Utility.IsNotNullText(ContentCharset))
+                        else if (!string.IsNullOrEmpty(ContentCharset))
                             body = Encoding.GetEncoding(ContentCharset).GetString(Encoding.Default.GetBytes(body));
 
                         MessageBody.Add(Utility.RemoveNonB64(body));
                     }
                     else
                     {
+                        // This is a multipart message with multiple message bodies or attachments
                         int begin = 0;
 
+                        // Foreach part
                         while (begin != -1)
                         {
-                            // find "\r\n\r\n" denoting end of header
-                            begin = strBuffer.IndexOf("--" + MultipartBoundry, begin);
+                            // The start of a part of the message body is indicated by a "--" and the MutlipartBoundary
+                            // Find this start, which should not be included in the message
+                            begin = strBuffer.IndexOf("--" + MultipartBoundary, begin);
                             if (begin != -1)
                             {
+                                // Find the encoding of this part
                                 string encoding = MIMETypes.GetContentTransferEncoding(strBuffer, begin);
 
-                                begin = strBuffer.IndexOf("\r\n\r\n", begin + 1);//strBuffer.LastIndexOfAny(ALPHABET.ToCharArray());
+                                // The message itself is located after the MultipartBoundary. It may contain headers, which is ended
+                                // by a empty line, which corrosponds to "\r\n\r\n". We don't want to include the "\r\n", so skip them.
+                                begin = strBuffer.IndexOf("\r\n\r\n", begin) + "\r\n\r\n".Length;
 
-                                // find end of text
-                                int end = strBuffer.IndexOf("--" + MultipartBoundry, begin + 1);
+                                // Find end of text
+                                // This is again ended by the "--" and the MultipartBoundary, where we don't want the last line delimter in the message
+                                int end = strBuffer.IndexOf("--" + MultipartBoundary, begin) - "\r\n".Length;
 
-                                if (begin != -1)
+                                // Calculate the message length
+                                int messageLength = end - begin;
+
+                                if (ContentEncoding != null && ContentEncoding.IndexOf("8bit") != -1)
+                                    body = Utility.ChangeEncoding(strBuffer.Substring(begin, messageLength), ContentCharset);
+                                else
+                                    body = strBuffer.Substring(begin, messageLength);
+                                
+                                // We have now found the body. Now we need to decode the body
+                                if (Utility.IsQuotedPrintable(encoding))
                                 {
-                                    if (end != -1)
-                                    {
-                                        begin += 4;
-                                        if (begin >= end)
-                                            continue;
-
-                                        if (ContentEncoding != null && ContentEncoding.IndexOf("8bit") != -1)
-                                            body = Utility.Change(strBuffer.Substring(begin, end - begin - 2), ContentCharset);
-                                        else
-                                            body = strBuffer.Substring(begin, end - begin - 2);
-                                    }
+                                    string ret;
+                                    if (Utility.IsNotNullText(ContentCharset))
+                                        ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
                                     else
-                                    {
-                                        body = strBuffer.Substring(begin);
-                                    }
+                                        ret = DecodeQP.ConvertHexContent(body);
 
-                                    if (Utility.IsQuotedPrintable(encoding))
-                                    {
-                                        string ret;
-
-                                        if (Utility.IsNotNullText(ContentCharset))
-                                            ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
-                                        else
-                                            ret = DecodeQP.ConvertHexContent(body);
-
+                                    MessageBody.Add(ret);
+                                }
+                                else if (Utility.IsBase64(encoding))
+                                {
+                                    string ret = Utility.RemoveNonB64(body);
+                                    ret = Utility.deCodeB64s(ret);
+                                    if (ret != "\0")
                                         MessageBody.Add(ret);
-                                    }
-                                    else if (Utility.IsBase64(encoding))
-                                    {
-                                        string ret = Utility.RemoveNonB64(body);
-                                        ret = Utility.deCodeB64s(ret);
-                                        if (ret != "\0")
-                                            MessageBody.Add(ret);
-                                        else
-                                            MessageBody.Add(body);
-                                    }
                                     else
                                         MessageBody.Add(body);
-
-                                    if (end == -1) break;
                                 }
                                 else
-                                {
-                                    break;
-                                }
+                                    MessageBody.Add(body);
                             }
                             else
                             {
+                                // If we did not find any parts in the multipart message
+                                // We just add everything as a message
                                 if (MessageBody.Count == 0)
                                 {
                                     MessageBody.Add(strBuffer);
@@ -1199,7 +1176,7 @@ namespace OpenPOP.MIMEParser
                             }
 
                             // Remove qoutes if any
-                            MultipartBoundry = Utility.RemoveQuote(boundary);
+                            MultipartBoundary = Utility.RemoveQuote(boundary);
                             isMultipart = true;
                         }
                     }
@@ -1228,4 +1205,3 @@ namespace OpenPOP.MIMEParser
         #endregion
     }
 }
-

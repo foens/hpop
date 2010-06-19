@@ -328,7 +328,7 @@ namespace OpenPOP.MIMEParser
 		/// <param name="strText">Source encoded text</param>
 		/// <param name="strCharset">New charset</param>
 		/// <returns>Encoded text with new charset</returns>
-		public static string Change(string strText, string strCharset)
+		public static string ChangeEncoding(string strText, string strCharset)
 		{
 			if (string.IsNullOrEmpty(strCharset))
 				return strText;

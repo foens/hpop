@@ -43,11 +43,11 @@ namespace OpenPOP
 
 	    public static string GetContentTransferEncoding(string strBuffer, int pos)
 		{
-	        int begin = strBuffer.ToLower().IndexOf(Content_Transfer_Encoding_Tag.ToLower(),pos);
-			if(begin!=-1)
+	        int begin = strBuffer.ToLower().IndexOf(Content_Transfer_Encoding_Tag.ToLower(), pos);
+			if(begin != -1)
 			{
-			    int end = strBuffer.ToLower().IndexOf("\r\n".ToLower(),begin+1);
-			    return strBuffer.Substring(begin+Content_Transfer_Encoding_Tag.Length+1,end-begin-Content_Transfer_Encoding_Tag.Length).Trim();
+			    int end = strBuffer.ToLower().IndexOf("\r\n".ToLower(), begin + 1);
+			    return strBuffer.Substring(begin + Content_Transfer_Encoding_Tag.Length + 1, end - begin - Content_Transfer_Encoding_Tag.Length).Trim();
 			}
 
 	        return "";
