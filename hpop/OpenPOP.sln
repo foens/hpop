@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOP", "OpenPOP.csproj", "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIMEParser", "..\MIMEParser\MIMEParser.csproj", "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
