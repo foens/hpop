@@ -38,7 +38,6 @@ namespace OpenPOP.NET_Sample_App
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private readonly System.ComponentModel.Container components = null;
 		private ContextMenu ctmMessages;
 		private MenuItem mnuDeleteMessage;
 		private Button UIDLButton;
@@ -48,7 +47,7 @@ namespace OpenPOP.NET_Sample_App
 	    private readonly Hashtable msgs = new Hashtable();
 
 
-		public frmTest()
+	    private frmTest()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -65,21 +64,6 @@ namespace OpenPOP.NET_Sample_App
 		    popClient.CommunicationLost       += popClient_CommunicationLost;
 		    popClient.MessageTransferBegan    += popClient_MessageTransferBegan;
 		    popClient.MessageTransferFinished += popClient_MessageTransferFinished;
-		}
-
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if (components != null) 
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
 		}
 
 		#region Windows Form Designer generated code
@@ -445,7 +429,7 @@ namespace OpenPOP.NET_Sample_App
 		    ConnectAndRetrieveButton.Enabled = false;
 		    UIDLButton.Enabled = false;
 
-			Utility.Log=true;
+			Logger.Log=true;
             if(popClient.Connected)
 			    popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text), useSsl.Checked);

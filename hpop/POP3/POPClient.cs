@@ -148,7 +148,7 @@ namespace OpenPOP.POP3
             APOPSupported = false;
 
             // Do not log any failures
-            Utility.Log = false;
+            Logger.Log = false;
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace OpenPOP.POP3
 			{
 				if(!blnSilent)
 				{
-					Utility.LogError(strCommand + ":" +e.Message);
+					Logger.LogError(strCommand + ":" +e.Message);
 				}
 				return false;
 			}
@@ -279,7 +279,7 @@ namespace OpenPOP.POP3
             catch (SocketException e) 
             {
                 Disconnect();
-                Utility.LogError("Connect():" + e.Message);
+                Logger.LogError("Connect():" + e.Message);
                 throw new PopServerNotFoundException();
             }
 
@@ -318,7 +318,7 @@ namespace OpenPOP.POP3
             {
                 // If not close down the connection and abort
                 Disconnect();
-                Utility.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+                Logger.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
                 throw new PopServerNotAvailableException();
             }
 		}
@@ -406,7 +406,7 @@ namespace OpenPOP.POP3
 
 			if(!SendCommand("USER " + username))
 			{
-				Utility.LogError("AuthenticateUsingUSER():wrong user");
+				Logger.LogError("AuthenticateUsingUSER():wrong user");
 				throw new InvalidLoginException();
 			}
 
@@ -414,13 +414,13 @@ namespace OpenPOP.POP3
 			{
 				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
 				{
-					Utility.LogError("AuthenticateUsingUSER():maildrop is locked");
+					Logger.LogError("AuthenticateUsingUSER():maildrop is locked");
 					throw new PopServerLockException();			
 				}
 
                 // Lastcommand might contain an error description like:
                 // S: -ERR maildrop already locked
-			    Utility.LogError("AuthenticateUsingUSER(): wrong password. Server responded: " + _lastCommandResponse);
+			    Logger.LogError("AuthenticateUsingUSER(): wrong password. Server responded: " + _lastCommandResponse);
 			    throw new InvalidPasswordException();
 			}
 			
@@ -440,9 +440,9 @@ namespace OpenPOP.POP3
 
 			AuthenticationBegan(this);
 
-			if(!SendCommand("APOP " + username + " " + MyMD5.GetMD5HashHex(APOPTimestamp + password)))
+			if(!SendCommand("APOP " + username + " " + MD5.ComputeHashHex(APOPTimestamp + password)))
 			{
-				Utility.LogError("AuthenticateUsingAPOP():wrong user or password");
+				Logger.LogError("AuthenticateUsingAPOP():wrong user or password");
 				throw new InvalidLoginOrPasswordException();
 			}
 

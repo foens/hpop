@@ -112,11 +112,11 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POP3\Common.cs" />
+    <Compile Include="POP3\AuthenticationMethod.cs" />
     <Compile Include="POP3\Exceptions.cs" />
-    <Compile Include="POP3\MyMD5.cs" />
+    <Compile Include="POP3\MD5.cs" />
     <Compile Include="POP3\POPClient.cs" />
-    <Compile Include="POP3\Utility.cs" />
+    <Compile Include="POP3\Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MIMEParser\MIMEParser.csproj">

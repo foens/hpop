@@ -15,45 +15,54 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			OpenPOP.POP3
-*Function:		Common definitions
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Modified:		3rd May 1600 GMT+5
-*Description:
-*Changes:		3rd May 1600 GMT+5 by Hamid Qureshi
-*					1.Adding NDoc Comments
-*/
+using System;
+using System.IO;
 
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Authentication method to use
+	/// Logger which can be used for debugging purposes
 	/// </summary>
-	/// <remarks>
-	/// TRYBOTH means code will first attempt by using APOP method as its more secure.
-	/// In case of failure the code will fall back to USERPASS method.
-	/// </remarks>
-	public enum  AuthenticationMethod
+	public static class Logger
 	{
-		/// <summary>
-		/// Authenticate using the USER/PASS method.
-		/// APOP is more secure but might not be supported on a server.
-		/// Recomended AuthenticationMethod is APOP, but it does not matter
-		/// if SSL is used.
+	    /// <summary>
+		/// The file to which logging will be done
 		/// </summary>
-		USERPASS=0,
-		/// <summary>
-		/// Authenticate using the APOP method, which is more secure.
-		/// </summary>
-		APOP=1,
-		/// <summary>
-		/// Authenticate using APOP first, which is more secure.
-		/// If APOP is not supported on the server, authenticate
-		/// using USER/PASS.
-		/// </summary>
-		TRYBOTH=2
-	}
+		private const string logFile = "OpenPOP.log";
 
+	    /// <summary>
+	    /// Turns file logging on and off.
+	    /// </summary>
+	    public static bool Log { get; set; }
+
+	    /// <summary>
+		/// Log an error to the log file
+		/// </summary>
+		/// <param name="toLog">The error text to log</param>
+		internal static void LogError(string toLog) 
+		{
+			// Should this be logged?
+			if(Log)
+			{
+			    StreamWriter sw = null;
+				try
+				{
+                    // We want to open the file and append some text to it
+					FileInfo file = new FileInfo(logFile);
+					sw = file.AppendText();
+					sw.WriteLine(DateTime.Now);
+					sw.WriteLine(toLog);
+					sw.WriteLine();
+					sw.Flush();
+				}
+				finally
+				{
+					if(sw != null)
+					{
+						sw.Close();
+					}
+				}
+			}
+		}
+	}
 }
