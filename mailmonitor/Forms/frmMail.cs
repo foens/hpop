@@ -16,14 +16,12 @@
 /*******************************************************************************/
 
 using System;
-using System.Drawing;
 using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using OpenPOP.POP3;
-using OpenPOP.MIMEParser;
+using OpenPOP.MIME;
 
 namespace MailMonitor
 {
@@ -50,7 +48,7 @@ namespace MailMonitor
 		private System.Windows.Forms.OpenFileDialog dlgOpen;
 		private POPClient _popClient;
 		private Settings _settings;
-		private OpenPOP.MIMEParser.Message _msg;
+		private OpenPOP.MIME.Message _msg;
 		private MailBox _mailBox;
 		private int _messageIndex;
 		private string _messageID;
@@ -351,7 +349,7 @@ namespace MailMonitor
 			{
 				if(File.Exists(_file)||FindLocalMessage(ref _file))
 				{
-					_msg=new OpenPOP.MIMEParser.Message(true,false,_file);
+					_msg=new OpenPOP.MIME.Message(true,false,_file);
 				}
 				else
 				{
@@ -383,7 +381,7 @@ namespace MailMonitor
 
 				strBodyFile=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mail.htm";
 				string strBodyText=Utilities.ToFormattedHTML((string)_msg.MessageBody[_msg.MessageBody.Count-1]);
-				OpenPOP.MIMEParser.Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
+				OpenPOP.MIME.Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
 				
@@ -405,12 +403,12 @@ namespace MailMonitor
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)
 				{
-					if(OpenPOP.MIMEParser.Message.IsMIMEMailFile(att))
+					if(OpenPOP.MIME.Message.IsMIMEMailFile(att))
 					{
 						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
 						{
-							OpenPOP.MIMEParser.Message  m2=att.DecodeAsMessage(true,false);
+							OpenPOP.MIME.Message  m2=att.DecodeAsMessage(true,false);
 							string attachmentNames="";
 							bool blnRet=false;
 							if(m2.AttachmentCount>0)

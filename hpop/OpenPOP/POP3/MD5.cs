@@ -15,33 +15,33 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace OpenPOP.POP3
 {
-	/// <summary>
-	/// Authentication method to use
-	/// </summary>
-	/// <remarks>
-	/// TRYBOTH means code will first attempt by using APOP method as its more secure.
-	/// In case of failure the code will fall back to USERPASS method.
-	/// </remarks>
-	public enum  AuthenticationMethod
+	public static class MD5
 	{
-		/// <summary>
-		/// Authenticate using the USER/PASS method.
-		/// APOP is more secure but might not be supported on a server.
-		/// Recomended AuthenticationMethod is APOP, but it does not matter
-		/// if SSL is used.
-		/// </summary>
-		USERPASS=0,
-		/// <summary>
-		/// Authenticate using the APOP method, which is more secure.
-		/// </summary>
-		APOP=1,
-		/// <summary>
-		/// Authenticate using APOP first, which is more secure.
-		/// If APOP is not supported on the server, authenticate
-		/// using USER/PASS.
-		/// </summary>
-		TRYBOTH=2
+        /// <summary>
+        /// Computes the MD5 hash function on a string
+        /// </summary>
+        /// <param name="input">The input string to be hashed</param>
+        /// <returns>The MD5 hash of the input string</returns>
+	    public static string ComputeHashHex(String input)
+		{
+	        System.Security.Cryptography.MD5 md5 = new MD5CryptoServiceProvider();
+
+			// Give the md5 function the bytes of the string, and get an hashed byte[] as output
+	        byte[] res = md5.ComputeHash(Encoding.Default.GetBytes(input), 0, input.Length);
+
+            StringBuilder returnThis = new StringBuilder();
+
+            // Convert the hashed value back into a string
+	        foreach (byte re in res)
+	            returnThis.Append(Uri.HexEscape((char) re));
+
+	        return returnThis.ToString().Replace("%", "").ToLower();
+		}
 	}
 }

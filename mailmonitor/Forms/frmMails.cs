@@ -16,13 +16,9 @@
 /*******************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
 using System.Threading;
 using OpenPOP.POP3;
-using OpenPOP.MIMEParser;
 
 namespace MailMonitor
 {
@@ -43,7 +39,7 @@ namespace MailMonitor
 		private Settings _settings;
 		private POPClient _popClient=new POPClient();
 		private frmMail _mail;
-		private OpenPOP.MIMEParser.Message _msg;
+		private OpenPOP.MIME.Message _msg;
 		private MailBox _mailBox;
 		private Thread _thread;
 		private System.Windows.Forms.SaveFileDialog dlgSave;
@@ -265,7 +261,7 @@ namespace MailMonitor
 		{
 			try
 			{
-				OpenPOP.POP3.Utility.Log=true;
+				OpenPOP.POP3.Logger.Log=true;
 				_popClient.Disconnect();
 				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port, _mailBox.UseSsl);
 				_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
@@ -461,7 +457,7 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				OpenPOP.MIMEParser.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag,false);
+				OpenPOP.MIME.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag,false);
 				dlgSave.FileName=_msg.Subject;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)			

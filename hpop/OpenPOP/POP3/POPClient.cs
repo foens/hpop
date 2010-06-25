@@ -22,7 +22,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using OpenPOP.MIMEParser;
+using OpenPOP.MIME;
 
 namespace OpenPOP.POP3
 {

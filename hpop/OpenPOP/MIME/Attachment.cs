@@ -49,8 +49,9 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using OpenPOP.MIME.Decode;
 
-namespace OpenPOP.MIMEParser
+namespace OpenPOP.MIME
 {
 	public class Attachment : IComparable
 	{
@@ -341,7 +342,7 @@ namespace OpenPOP.MIMEParser
 					ContentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
 					break;
 				case "CONTENT-DESCRIPTION":
-					ContentDescription=Utility.DecodeText(Utility.SplitOnSemiColon(array[1])[0].Trim());
+					ContentDescription=EncodedWord.decode(Utility.SplitOnSemiColon(array[1])[0].Trim());
 					break;
 				case "CONTENT-DISPOSITION":
 					if(values.Length>0)
@@ -367,7 +368,7 @@ namespace OpenPOP.MIMEParser
 
                         ContentFileName = ContentFileName.Replace("\t", "");
                         ContentFileName = Utility.GetQuotedValue(ContentFileName, "=", "filename");
-                        ContentFileName = Utility.DecodeText(ContentFileName);
+                        ContentFileName = EncodedWord.decode(ContentFileName);
                     }
 
 			        
@@ -399,7 +400,7 @@ namespace OpenPOP.MIMEParser
 			try
 			{
 				if(ContentType.ToLower()=="message/rfc822".ToLower())
-					decodedAttachment=Utility.DecodeText(RawAttachment);
+                    decodedAttachment = EncodedWord.decode(RawAttachment);
 				else if(ContentTransferEncoding!=null)
 				{
 					decodedAttachment=RawAttachment;
@@ -409,12 +410,12 @@ namespace OpenPOP.MIMEParser
 						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
 							decodedAttachment=Utility.ChangeEncoding(decodedAttachment,ContentCharset);
 
-						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
-							decodedAttachment=DecodeQP.ConvertHexContent(decodedAttachment);
+                        if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
+							decodedAttachment=QuotedPrintable.ConvertHexContent(decodedAttachment);
 						else if(IsEncoding("8bit"))
 						{ /* Do nothing, no decoding needed */ }
 						else
-							decodedAttachment=Utility.deCodeB64s(Utility.RemoveNonB64(decodedAttachment));
+							decodedAttachment=Base64.decode(Utility.RemoveNonB64(decodedAttachment));
 					}
 				}
 				else if(ContentCharset!=null)
@@ -466,7 +467,7 @@ namespace OpenPOP.MIMEParser
 				byte []decodedBytes;
 
 				if(ContentType!=null && ContentType.ToLower()=="message/rfc822".ToLower())
-					decodedBytes=Encoding.Default.GetBytes(Utility.DecodeText(RawAttachment));
+                    decodedBytes = Encoding.Default.GetBytes(EncodedWord.decode(RawAttachment));
 				else if(ContentTransferEncoding!=null)
 				{
 					string bytContent=RawAttachment;
@@ -476,8 +477,8 @@ namespace OpenPOP.MIMEParser
 						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
 							bytContent=Utility.ChangeEncoding(bytContent,ContentCharset);
 
-						if(Utility.IsQuotedPrintable(ContentTransferEncoding))
-							decodedBytes=Encoding.Default.GetBytes(DecodeQP.ConvertHexContent(bytContent));
+                        if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
+							decodedBytes=Encoding.Default.GetBytes(QuotedPrintable.ConvertHexContent(bytContent));
 						else if(IsEncoding("8bit"))
 							decodedBytes=Encoding.Default.GetBytes(bytContent);
 						else

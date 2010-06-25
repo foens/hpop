@@ -35,11 +35,13 @@ using System.IO;
 using System.Text;
 using System.Collections;
 
-namespace OpenPOP.MIMEParser
+namespace OpenPOP.MIME
 {
-	/// <summary>
-	/// OpenPOP.MIMEParser.TNEFParser
-	/// </summary>
+    /// <summary>
+    /// Used to parse attachments that have the MIME-type Application/MS-TNEF
+    /// TNEF stands for Transport Neutral Encapsulation Format, and is proprietary Microsoft attachment format.
+    /// </summary>
+    /// <see cref="http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format">For more details</see>
 	public class TNEFParser
 	{
 		#region Member Variables
@@ -540,4 +542,3 @@ namespace OpenPOP.MIMEParser
 	    }
 	}
 }
-

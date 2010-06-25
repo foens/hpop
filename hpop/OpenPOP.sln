@@ -1,12 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOP", "OpenPOP.csproj", "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOP", "OpenPOP\OpenPOP.csproj", "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIMEParser", "..\MIMEParser\MIMEParser.csproj", "{CC4C4334-335D-4369-B0ED-F3C17CD57364}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POP3Test", "POP3Test\POP3Test.csproj", "{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TNEFTest", "..\MIMEParser\TNEFTest\TNEFTest.csproj", "{E513953D-B5F0-45FB-A7B8-74609A91639B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOPTest", "OpenPOPTest\OpenPOPTest.csproj", "{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,18 +14,10 @@ Global
 		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC4C4334-335D-4369-B0ED-F3C17CD57364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC4C4334-335D-4369-B0ED-F3C17CD57364}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC4C4334-335D-4369-B0ED-F3C17CD57364}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC4C4334-335D-4369-B0ED-F3C17CD57364}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E513953D-B5F0-45FB-A7B8-74609A91639B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E513953D-B5F0-45FB-A7B8-74609A91639B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E513953D-B5F0-45FB-A7B8-74609A91639B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E513953D-B5F0-45FB-A7B8-74609A91639B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

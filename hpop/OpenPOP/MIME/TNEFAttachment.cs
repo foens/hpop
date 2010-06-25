@@ -31,7 +31,7 @@
 *					1.Adding descriptions to every public functions/property/void
 */
 
-namespace OpenPOP.MIMEParser
+namespace OpenPOP.MIME
 {
 	/// <summary>
 	/// TNEFAttachment

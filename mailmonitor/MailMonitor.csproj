@@ -105,16 +105,6 @@
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
     </COMReference>
-    <ProjectReference Include="..\hpop\OpenPOP.csproj">
-      <Name>OpenPOP</Name>
-      <Project>{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-    </ProjectReference>
-    <ProjectReference Include="..\mimeparser\MIMEParser.csproj">
-      <Name>MIMEParser</Name>
-      <Project>{CC4C4334-335D-4369-B0ED-F3C17CD57364}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.ico" />
@@ -142,8 +132,6 @@
     <Compile Include="Forms\frmSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Folder Include="Controls" />
-    <Folder Include="Resources" />
     <EmbeddedResource Include="Forms\frmMail.resx">
       <DependentUpon>frmMail.cs</DependentUpon>
     </EmbeddedResource>
@@ -159,6 +147,15 @@
     <EmbeddedResource Include="Forms\frmSettings.resx">
       <DependentUpon>frmSettings.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\hpop\OpenPOP\OpenPOP.csproj">
+      <Project>{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}</Project>
+      <Name>OpenPOP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

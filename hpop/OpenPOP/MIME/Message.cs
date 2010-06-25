@@ -18,11 +18,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Collections;
 using System.Text;
+using OpenPOP.MIME.Decode;
+using OpenPOP.MIME.Parse;
 
-namespace OpenPOP.MIMEParser
+namespace OpenPOP.MIME
 {
 	/// <summary>
 	/// Message Parser.
@@ -367,7 +368,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>if it is a report message, return true, else, false</returns>
 		public bool IsReport()
 		{
-			if(Utility.IsNotNullText(ContentType))
+			if(!string.IsNullOrEmpty(ContentType))
 				return (ContentType.ToLower().IndexOf("report".ToLower())!=-1);
 			
 			return false;
@@ -420,7 +421,7 @@ namespace OpenPOP.MIMEParser
 				    Attachment att = GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName))
 					{
-                        if (Utility.IsNotNullText(att.ContentID))
+                        if (!string.IsNullOrEmpty(att.ContentID))
                             //support for embedded pictures
                             strBody = strBody.Replace("cid:" + att.ContentID, hsbFiles[att.ContentFileName].ToString());
 
@@ -454,7 +455,7 @@ namespace OpenPOP.MIMEParser
 					Attachment att=GetAttachment(i);
 					if(Utility.IsPictureFile(att.ContentFileName))
 					{
-                        if (Utility.IsNotNullText(att.ContentID))
+                        if (!string.IsNullOrEmpty(att.ContentID))
                             //support for embedded pictures
                             strBody = strBody.Replace("cid:" + att.ContentID, strPath + att.ContentFileName);
 					    strBody = strBody.Replace(att.ContentFileName, strPath + att.ContentFileName);
@@ -557,7 +558,7 @@ namespace OpenPOP.MIMEParser
 		/// <returns>true if save successfully, false if failed</returns>
 		public bool SaveAttachments(string strPath)
 		{
-			if(Utility.IsNotNullText(strPath))
+            if (!string.IsNullOrEmpty(strPath))
 			{
 				try
 				{
@@ -614,7 +615,7 @@ namespace OpenPOP.MIMEParser
             // Also include the rawHeader text for later use
             string rawHeadersTemp;
             NameValueCollection headersTest;
-            ParseHeaders(input, out rawHeadersTemp, out headersTest);
+            HeaderParser.ParseHeaders(input, out rawHeadersTemp, out headersTest);
             RawHeader = rawHeadersTemp;
 
             // Create a holder for custom headers
@@ -791,15 +792,15 @@ namespace OpenPOP.MIMEParser
                         body = strBuffer;
 
                         // Now we only need to decode the text according to encoding
-                        if (Utility.IsQuotedPrintable(ContentTransferEncoding))
+                        if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
                         {
                             if (!string.IsNullOrEmpty(ContentCharset))
-                                body = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                                body = QuotedPrintable.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
                             else
-                                body = DecodeQP.ConvertHexContent(body);
+                                body = QuotedPrintable.ConvertHexContent(body);
                         }
-                        else if (Utility.IsBase64(ContentTransferEncoding))
-                            body = Utility.deCodeB64s(Utility.RemoveNonB64(body));
+                        else if (Base64.IsBase64(ContentTransferEncoding))
+                            body = Base64.decode(Utility.RemoveNonB64(body));
                         else if (!string.IsNullOrEmpty(ContentCharset))
                             body = Encoding.GetEncoding(ContentCharset).GetString(Encoding.Default.GetBytes(body));
 
@@ -838,20 +839,20 @@ namespace OpenPOP.MIMEParser
                                     body = strBuffer.Substring(begin, messageLength);
                                 
                                 // We have now found the body. Now we need to decode the body
-                                if (Utility.IsQuotedPrintable(encoding))
+                                if (QuotedPrintable.IsQuotedPrintable(encoding))
                                 {
                                     string ret;
-                                    if (Utility.IsNotNullText(ContentCharset))
-                                        ret = DecodeQP.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
+                                    if (!string.IsNullOrEmpty(ContentCharset))
+                                        ret = QuotedPrintable.ConvertHexContent(body, Encoding.GetEncoding(ContentCharset), 0);
                                     else
-                                        ret = DecodeQP.ConvertHexContent(body);
+                                        ret = QuotedPrintable.ConvertHexContent(body);
 
                                     MessageBody.Add(ret);
                                 }
-                                else if (Utility.IsBase64(encoding))
+                                else if (Base64.IsBase64(encoding))
                                 {
                                     string ret = Utility.RemoveNonB64(body);
-                                    ret = Utility.deCodeB64s(ret);
+                                    ret = Base64.decode(ret);
                                     if (ret != "\0")
                                         MessageBody.Add(ret);
                                     else
@@ -877,7 +878,7 @@ namespace OpenPOP.MIMEParser
             catch (Exception e)
             {
                 Utility.LogError("GetMessageBody():" + e.Message);
-                MessageBody.Add(Utility.deCodeB64s(strBuffer));
+                MessageBody.Add(Base64.decode(strBuffer));
             }
 
             if (MessageBody.Count > 1)
@@ -885,81 +886,8 @@ namespace OpenPOP.MIMEParser
         }
         #endregion
 
-        #region Header parser functions
+        #region Header parser function
         /// <summary>
-        /// Method that takes a full message and parses the headers from it.
-        /// </summary>
-        /// <param name="message">The message to parse headers from</param>
-        /// <param name="rawHeaders">The portion of the message that was headers</param>
-        /// <param name="headers">A collection of Name and Value pairs of headers</param>
-        private static void ParseHeaders(string message, out string rawHeaders, out NameValueCollection headers)
-        {
-            headers = new NameValueCollection();
-            StringBuilder rawHeadersBuilder = new StringBuilder();
-
-            StringReader messageReader = new StringReader(message);
-
-            // Read until all headers have ended. It ends with an empty line
-            string line;
-            while (!"".Equals(line = messageReader.ReadLine()))
-            {
-                rawHeadersBuilder.Append(line + "\r\n");
-
-                // Split into name and value
-                string[] splittedValue = Utility.GetHeadersValue(line);
-                string headerName = splittedValue[0];
-                string headerValue = splittedValue[1];
-
-                // Read a single header. It might be a multi line header
-                if (IsMoreLinesInHeaderValue(messageReader))
-                {
-                    // Keep reading until we would hit next header
-                    while (IsMoreLinesInHeaderValue(messageReader))
-                    {
-                        // Unfolding is accomplished by simply removing any CRLF
-                        // that is immediately followed by WSP
-                        // This was done using ReadLine
-                        string moreHeaderValue = messageReader.ReadLine();
-                        headerValue += moreHeaderValue.Substring(1); // Remove the first whitespace
-
-                        rawHeadersBuilder.Append(moreHeaderValue + "\r\n");
-                    }
-
-                    // Now we have the name and full value. Add it
-                    headers.Add(headerName, headerValue);
-                }
-                else
-                {
-                    // This is a single line header. Simply insert it
-                    headers.Add(headerName, headerValue);
-                }
-            }
-
-            // Set the out parameter to our raw header. Remember to remove the last line ending.
-            rawHeaders = rawHeadersBuilder.ToString().TrimEnd(new[] { '\r', '\n' });
-        }
-
-        /// <summary>
-        /// Check if the next line is part of the current header value we are parsing by
-        /// peeking on the next character of the TextReader.
-        /// This should only be called while parsing headers
-        /// </summary>
-        /// <param name="reader">The reader from which the header is read from</param>
-        /// <returns>true if multi-line header. False otherwise</returns>
-        private static bool IsMoreLinesInHeaderValue(TextReader reader)
-        {
-            int peek = reader.Peek();
-            if (peek == -1)
-                return false;
-
-            char peekChar = (char)peek;
-
-            // A multi line header must have a whitespace character
-            // on the next line if it is to be continued
-            return peekChar == ' ' || peekChar == '\t';
-        }
-
-	    /// <summary>
         /// Parses a single header and sets member variables according to it.
         /// </summary>
         /// <param name="name">The name of the header</param>
@@ -974,7 +902,7 @@ namespace OpenPOP.MIMEParser
                     TO = value.Split(',');
                     for (int i = 0; i < TO.Length; i++)
                     {
-                        TO[i] = Utility.DecodeLine(TO[i].Trim());
+                        TO[i] = Utility.DecodeLineWithEncodedWords(TO[i].Trim());
                     }
                     break;
 
@@ -983,7 +911,7 @@ namespace OpenPOP.MIMEParser
                     CC = value.Split(',');
                     for (int i = 0; i < CC.Length; i++)
                     {
-                        CC[i] = Utility.DecodeLine(CC[i].Trim());
+                        CC[i] = Utility.DecodeLineWithEncodedWords(CC[i].Trim());
                     }
                     break;
 
@@ -992,7 +920,7 @@ namespace OpenPOP.MIMEParser
                     BCC = value.Split(',');
                     for (int i = 0; i < BCC.Length; i++)
                     {
-                        BCC[i] = Utility.DecodeLine(BCC[i].Trim());
+                        BCC[i] = Utility.DecodeLineWithEncodedWords(BCC[i].Trim());
                     }
                     break;
 
@@ -1000,7 +928,7 @@ namespace OpenPOP.MIMEParser
                 case "FROM":
                     string fromTemp;
                     string fromEmailTemp;
-                    Utility.ParseEmailAddress(value, out fromTemp, out fromEmailTemp);
+                    HeaderFieldParser.ParseEmailAddress(value, out fromTemp, out fromEmailTemp);
                     From = fromTemp;
                     FromEmail = fromEmailTemp;
                     break;
@@ -1010,7 +938,7 @@ namespace OpenPOP.MIMEParser
                 case "REPLY-TO":
                     string replyToTemp;
                     string replyToEmailTemp;
-                    Utility.ParseEmailAddress(value, out replyToTemp, out replyToEmailTemp);
+                    HeaderFieldParser.ParseEmailAddress(value, out replyToTemp, out replyToEmailTemp);
                     ReplyTo = replyToTemp;
                     ReplyToEmail = replyToEmailTemp;
                     break;
@@ -1026,7 +954,7 @@ namespace OpenPOP.MIMEParser
                     for (int i = 0; i < KeywordsTemp.Length; i++)
                     {
                         // Remove the quote if there is any
-                        Keywords.Add(Utility.RemoveQuote(KeywordsTemp[i].Trim()));
+                        Keywords.Add(Utility.RemoveQuotes(KeywordsTemp[i].Trim()));
                     }
                     break;
 
@@ -1050,7 +978,7 @@ namespace OpenPOP.MIMEParser
                 // See http://tools.ietf.org/html/rfc5322#section-3.6.5
                 case "SUBJECT":
                 case "THREAD-TOPIC":
-                    Subject = Utility.DecodeLine(value);
+                    Subject = Utility.DecodeLineWithEncodedWords(value);
                     break;
 
                 // See http://tools.ietf.org/html/rfc5322#section-3.6.7
@@ -1068,7 +996,7 @@ namespace OpenPOP.MIMEParser
                 // See http://tools.ietf.org/html/rfc5322#section-3.6.1
                 case "DATE":
                     DateTimeInfo = value.Trim();
-                    Date = Utility.ParseEmailDate(DateTimeInfo);
+                    Date = HeaderFieldParser.ParseEmailDate(DateTimeInfo);
                     break;
 
                 case "CONTENT-LENGTH":
@@ -1117,7 +1045,7 @@ namespace OpenPOP.MIMEParser
                         }
 
                         // The content might be qouted. Remove them if any
-                        ContentCharset = Utility.RemoveQuote(contentCharset);
+                        ContentCharset = Utility.RemoveQuotes(contentCharset);
                     }
                     else
                     {
@@ -1150,7 +1078,7 @@ namespace OpenPOP.MIMEParser
                             }
 
                             // Remove qoutes if any
-                            ReportType = Utility.RemoveQuote(reportType);
+                            ReportType = Utility.RemoveQuotes(reportType);
                         }
 
                         const string boundaryFind = "boundary=";
@@ -1176,7 +1104,7 @@ namespace OpenPOP.MIMEParser
                             }
 
                             // Remove qoutes if any
-                            MultipartBoundary = Utility.RemoveQuote(boundary);
+                            MultipartBoundary = Utility.RemoveQuotes(boundary);
                             isMultipart = true;
                         }
                     }

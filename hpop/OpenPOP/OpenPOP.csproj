@@ -4,29 +4,22 @@
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BD8B4861-D0C9-470A-8AA4-3094C5A086B3}</ProjectGuid>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <ProjectGuid>{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ApplicationIcon>App.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>OpenPOP.NET Sample App</AssemblyName>
+    <AssemblyName>OpenPOP</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>OpenPOP.NET_Sample_App</RootNamespace>
+    <OutputType>Library</OutputType>
+    <RootNamespace>OpenPOP</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
@@ -108,34 +101,34 @@
     <Reference Include="System.Drawing">
       <Name>System.Drawing</Name>
     </Reference>
-    <Reference Include="System.Windows.Forms">
-      <Name>System.Windows.Forms</Name>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
     </Reference>
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <ProjectReference Include="..\..\MIMEParser\MIMEParser.csproj">
-      <Project>{CC4C4334-335D-4369-B0ED-F3C17CD57364}</Project>
-      <Name>MIMEParser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OpenPOP.csproj">
-      <Name>OpenPOP</Name>
-      <Project>{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App.ico" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="frmTest.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <EmbeddedResource Include="frmTest.resx">
-      <DependentUpon>frmTest.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <Compile Include="MIME\Attachment.cs" />
+    <Compile Include="MIME\Decode\Base64.cs" />
+    <Compile Include="MIME\Decode\EncodedWord.cs" />
+    <Compile Include="MIME\Decode\QuotedPrintable.cs" />
+    <Compile Include="MIME\Message.cs" />
+    <Compile Include="MIME\MessageImportanceType.cs" />
+    <Compile Include="MIME\MIMETypes.cs" />
+    <Compile Include="MIME\Parse\HeaderFieldParser.cs" />
+    <Compile Include="MIME\Parse\HeaderParser.cs" />
+    <Compile Include="MIME\TNEFAttachment.cs" />
+    <Compile Include="MIME\TNEFParser.cs" />
+    <Compile Include="MIME\Utility.cs" />
+    <Compile Include="POP3\AuthenticationMethod.cs" />
+    <Compile Include="POP3\Exceptions.cs" />
+    <Compile Include="POP3\MD5.cs" />
+    <Compile Include="POP3\POPClient.cs" />
+    <Compile Include="POP3\Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -154,6 +147,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

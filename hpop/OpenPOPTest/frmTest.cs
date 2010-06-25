@@ -35,9 +35,6 @@ namespace OpenPOP.NET_Sample_App
 		private TreeView listAttachments;
 		private TreeView listMessages;
 		private SaveFileDialog saveFile;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
 		private ContextMenu ctmMessages;
 		private MenuItem mnuDeleteMessage;
 		private Button UIDLButton;
@@ -426,6 +423,7 @@ namespace OpenPOP.NET_Sample_App
 
 		private void ReceiveMails()
 		{
+            // Disable buttons while working
 		    ConnectAndRetrieveButton.Enabled = false;
 		    UIDLButton.Enabled = false;
 
@@ -449,7 +447,7 @@ namespace OpenPOP.NET_Sample_App
                 // This will fix the "Application is not responding" problem
                 Application.DoEvents();
 
-                MIMEParser.Message m = popClient.GetMessage(i, false);
+                MIME.Message m = popClient.GetMessage(i, false);
                 TreeNode node;
                 if (m != null)
                 {
@@ -464,10 +462,11 @@ namespace OpenPOP.NET_Sample_App
                 }
             }
 
+            // Enable the buttons again
             ConnectAndRetrieveButton.Enabled = true;
             UIDLButton.Enabled = true;
 
-		    MessageBox.Show(this, "mail received!\nSuccess: " + success + "\nFailed: " + fail);
+		    MessageBox.Show(this, "Mail received!\nSuccess: " + success + "\nFailed: " + fail);
 		}
 
 		private void ConnectAndRetrieveButtonClick(object sender, EventArgs e)
@@ -482,7 +481,7 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-		    MIMEParser.Message m = (MIMEParser.Message) msgs["msg" + listMessages.SelectedNode.Tag];
+		    MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
 			if(m != null)
 			{
 				if(m.MessageBody.Count>0)
@@ -492,7 +491,7 @@ namespace OpenPOP.NET_Sample_App
 				listAttachments.Nodes.Clear();
                 for (int i = 0; i < m.AttachmentCount; i++)
                 {
-                    MIMEParser.Attachment att = m.GetAttachment(i);
+                    MIME.Attachment att = m.GetAttachment(i);
                     listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
                 }
 
@@ -545,8 +544,8 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-		    MIMEParser.Attachment att = (MIMEParser.Attachment) listAttachments.SelectedNode.Tag;
-		    MIMEParser.Message m = (MIMEParser.Message) msgs["msg" + listMessages.SelectedNode.Tag];
+		    MIME.Attachment att = (MIME.Attachment) listAttachments.SelectedNode.Tag;
+		    MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
 			if(att!=null && m!=null)
 			{
 			    saveFile.FileName = m.GetAttachmentFileName(att);
@@ -554,17 +553,17 @@ namespace OpenPOP.NET_Sample_App
 				if(result != DialogResult.OK)
 					return;
 
-				if(MIMEParser.Message.IsMIMEMailFile(att))
+				if(MIME.Message.IsMIMEMailFile(att))
 				{
 				    result = MessageBox.Show(this, "OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?", "MIME mail", MessageBoxButtons.YesNo);
 					if(result == DialogResult.Yes)
 					{
-					    MIMEParser.Message m2 = att.DecodeAsMessage(true, false);
+					    MIME.Message m2 = att.DecodeAsMessage(true, false);
 					    string attachmentNames = "";
                         if (m2.AttachmentCount > 0)
                             for (int i = 0; i < m2.AttachmentCount; i++)
                             {
-                                MIMEParser.Attachment att2 = m2.GetAttachment(i);
+                                MIME.Attachment att2 = m2.GetAttachment(i);
                                 attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
                             }
 							bool blnRet = m.SaveAttachments(System.IO.Path.GetDirectoryName(saveFile.FileName));

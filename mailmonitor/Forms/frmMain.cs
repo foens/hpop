@@ -18,15 +18,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Data;
 using System.Threading;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-//using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.IO;
 using OpenPOP.POP3;
@@ -1026,7 +1023,7 @@ namespace MailMonitor
 			try
 			{
 
-				OpenPOP.POP3.Utility.Log=true;
+				OpenPOP.POP3.Logger.Log=true;
 				//_popClient.Disconnect();
                 if(_popClient.Connected)
                     _popClient.Disconnect();
