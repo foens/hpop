@@ -614,17 +614,17 @@ namespace OpenPOP.MIME
             // Genericly parse out header names and values
             // Also include the rawHeader text for later use
             string rawHeadersTemp;
-            NameValueCollection headersTest;
-            HeaderParser.ParseHeaders(input, out rawHeadersTemp, out headersTest);
+            NameValueCollection headers;
+            HeaderParser.ParseHeaders(input, out rawHeadersTemp, out headers);
             RawHeader = rawHeadersTemp;
 
             // Create a holder for custom headers
             CustomHeaders = new NameValueCollection();
 
             // Now specificly parse each header. Some headers require special parsing.
-            foreach (string headerName in headersTest.Keys)
+            foreach (string headerName in headers.Keys)
             {
-                string[] values = headersTest.GetValues(headerName);
+                string[] values = headers.GetValues(headerName);
                 if (values != null)
                     foreach (string headerValue in values)
                     {

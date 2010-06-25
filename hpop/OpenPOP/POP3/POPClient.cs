@@ -657,6 +657,7 @@ namespace OpenPOP.POP3
 			while (!".".Equals(line = reader.ReadLine()))
 			{
                 // This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
+                // http://tools.ietf.org/html/rfc1939#section-3
                 // It says that a line starting with "." and not having CRLF after it
                 // is a multi line, and the "." should be stripped
                 if (line.StartsWith("."))

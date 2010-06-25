@@ -15,59 +15,25 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			OpenPOP.MIMEParser.Attachment
-*Function:		Attachment
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Last Modified:	2004/6/26 15:5 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/6/26 15:5 GMT+8 by Unruled Boy
-*					1.Modified DecodeAsMessage() function and added RawContent property to make it handle forwarded email that treats original email as attachment
-*				2004/6/23 09:02 GMT+8 by grandepuffo via Unruled Boy
-*					1.Fixed a bug in verifying the null return line @ http://sourceforge.net/tracker/index.php?func=detail&aid=975232&group_id=92166&atid=599778
-*				2004/5/28 10:19 GMT+8 by grandepuffo via Unruled Boy
-*					1.Fixed a bug in parsing ContentFileName @ https://sourceforge.net/forum/message.php?msg_id=2589759
-*				2004/5/17 14:20 GMT+8 by Unruled Boy
-*					1.Fixed a bug in parsing FileName
-*				2004/5/8 17:00 GMT+8 by Unruled Boy
-*					1.Again, hopefully we have handled the NotAttachment property correctly
-*				2004/5/1 14:13 GMT+8 by Unruled Boy
-*					1.Adding three more constructors
-*					2.Adding descriptions to every public functions/property/void
-*				2004/4/29 19:05 GMT+8 by Unruled Boy
-*					1.Hopefully we have handled the NotAttachment property correctly
-*				2004/3/29 10:28 GMT+8 by Unruled Boy
-*					1.removing bugs in decoding attachment
-*				2004/3/29 17:32 GMT+8 by Unruled Boy
-*					1.support for reply message using ms-tnef 
-*					2.adding detail description for every function
-*					3.cleaning up the codes
-*/
 using System;
-using System.IO;
+using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME.Decode;
 
 namespace OpenPOP.MIME
 {
-	public class Attachment : IComparable
+	public class Attachment : IComparable<Attachment>
 	{
 		#region Member Variables
-
 	    private const string _defaultMSTNEFFileName="winmail.dat";
         private const string _defaultMIMEFileName = "body.eml";
         private const string _defaultReportFileName = "report.htm";
         private const string _defaultFileName2 = "body*.htm";
         private const string _defaultFileName = "body.htm";
-
 	    #endregion
 
-
 		#region Properties
-
 	    /// <summary>
 	    /// raw attachment content bytes
 	    /// </summary>
@@ -167,11 +133,13 @@ namespace OpenPOP.MIME
 
 	    /// <summary>
 	    /// Raw Content
+	    /// Full Attachment, with headers and everthing.
+	    /// The raw string used to create this attachment
 	    /// </summary>
 	    public string RawContent { get; private set; }
 
 	    /// <summary>
-	    /// Raw Attachment
+	    /// Raw Attachment Content (headers removed if was specified at creation)
 	    /// </summary>
 	    public string RawAttachment { get; private set; }
 
@@ -187,6 +155,7 @@ namespace OpenPOP.MIME
 		}
 		#endregion
 
+        #region Constructors
         /// <summary>
         /// Used to create a new attachment internally to avoid any
         /// duplicate code for setting up an attachment
@@ -267,126 +236,111 @@ namespace OpenPOP.MIME
 		{
 		    NewAttachment(strAttachment,true);
 		}
+        #endregion
 
-	    /// <summary>
-		/// create attachment
+        /// <summary>
+		/// Create attachment from a string
 		/// </summary>
 		/// <param name="strAttachment">raw attachment text</param>
 		/// <param name="blnParseHeader">parse header</param>
 		private void NewAttachment(string strAttachment, bool blnParseHeader)
 		{
-			InBytes=false;
+            InBytes = false;
 
-			if(strAttachment==null)
+			if(strAttachment == null)
 				throw new ArgumentNullException("strAttachment");
 
-			RawContent=strAttachment;
-
-			StringReader srReader=new StringReader(strAttachment);
+            RawContent = strAttachment;
 
 			if(blnParseHeader)
 			{
-				string strLine=srReader.ReadLine();
-				while(Utility.IsNotNullTextEx(strLine))
-				{
-					ParseHeader(srReader,ref strLine);
-					if(Utility.IsOrNullTextEx(strLine))
-						break;
-					
-					strLine=srReader.ReadLine();
-				}
+			    string rawHeaders;
+			    NameValueCollection headers;
+                Parse.HeaderParser.ParseHeaders(strAttachment, out rawHeaders, out headers);
+
+                // Now specificly parse each header. Some headers require special parsing.
+                foreach (string headerName in headers.Keys)
+                {
+                    string[] values = headers.GetValues(headerName);
+                    if (values != null)
+                        foreach (string headerValue in values)
+                        {
+                            // Parse the header
+                            ParseHeader(headerName, headerValue);
+                        }
+                }
+
+                // If we parsed headers, as we just did, the RawAttachment is found by removing the headers and trimmin
+			    RawAttachment = strAttachment.Replace(rawHeaders, "").Trim();
+			}
+			else
+			{
+                // Everything is though of as an attachment
+			    RawAttachment = strAttachment;
 			}
 
-			RawAttachment=srReader.ReadToEnd();
-			ContentLength=RawAttachment.Length;
+            ContentLength = RawAttachment.Length;
 		}
 
-		/// <summary>
-		/// Parse header fields and set member variables
-		/// </summary>
-		/// <param name="srReader">string reader</param>
-		/// <param name="strLine">header line</param>
-		private void ParseHeader(StringReader srReader,ref string strLine)
-		{
-			string []array=Utility.GetHeadersValue(strLine);//Regex.Split(strLine,":");
-			string []values=Regex.Split(array[1],";");//array[1].Split(';');
+        private void ParseHeader(string headerName, string headerValue)
+        {
+            string[] values = Regex.Split(headerValue, ";");
 
-		    switch(array[0].ToUpper())
-			{
-				case "CONTENT-TYPE":
-					if(values.Length>0)
-						ContentType=values[0].Trim();					
-					if(values.Length>1)
-					{
-						ContentCharset=Utility.GetQuotedValue(values[1],"=","charset");
-					}
-					if(values.Length>2)
-					{
-						ContentFormat=Utility.GetQuotedValue(values[2],"=","format");
-					}
-					ContentFileName=Utility.ParseFileName(strLine);
-					if(ContentFileName=="")
-					{
-						string strRet = srReader.ReadLine();
-						if(Utility.IsOrNullTextEx(strRet))
-						{
-							strLine="";
-							break;
-						}
-						ContentFileName=Utility.ParseFileName(strRet);
-						if(ContentFileName=="")
-							ParseHeader(srReader,ref strRet);
-					}
-					break;
-				case "CONTENT-TRANSFER-ENCODING":
-					ContentTransferEncoding=Utility.SplitOnSemiColon(array[1])[0].Trim();
-					break;
-				case "CONTENT-DESCRIPTION":
-					ContentDescription=EncodedWord.decode(Utility.SplitOnSemiColon(array[1])[0].Trim());
-					break;
-				case "CONTENT-DISPOSITION":
-					if(values.Length>0)
-						ContentDisposition=values[0].Trim();
+            switch (headerName.ToUpper())
+            {
+                case "CONTENT-TYPE":
+                    if (values.Length > 0)
+                        ContentType = values[0].Trim();
+                    if (values.Length > 1)
+                    {
+                        ContentCharset = Utility.GetQuotedValue(values[1], "=", "charset");
+                    }
+                    if (values.Length > 2)
+                    {
+                        ContentFormat = Utility.GetQuotedValue(values[2], "=", "format");
+                    }
+                    ContentFileName = Utility.ParseFileName(headerValue);
+                    break;
 
-                    ///bugfix reported by grandepuffo @ https://sourceforge.net/projects/hpop/forums/forum/318198/topic/1082917?message=2589759
-					//_contentFileName=values[1];
+                case "CONTENT-TRANSFER-ENCODING":
+                    ContentTransferEncoding = values[0].Trim();
+                    break;
+
+                case "CONTENT-DESCRIPTION":
+                    ContentDescription = EncodedWord.decode(values[0].Trim());
+                    break;
+
+                case "CONTENT-DISPOSITION":
+                    if (values.Length > 0)
+                        ContentDisposition = values[0].Trim();
 
                     if (string.IsNullOrEmpty(ContentFileName))
                     {
                         if (values.Length > 1)
-                        {
                             ContentFileName = values[1];
-                        }
                         else
                             ContentFileName = "";
-
-                        if (ContentFileName == "")
-                        {
-                            ContentFileName = srReader.ReadLine();
-                            strLine = ContentFileName;
-                        }
 
                         ContentFileName = ContentFileName.Replace("\t", "");
                         ContentFileName = Utility.GetQuotedValue(ContentFileName, "=", "filename");
                         ContentFileName = EncodedWord.decode(ContentFileName);
                     }
+                    break;
 
-			        
-					break;
-				case "CONTENT-ID":
-					ContentID=Utility.SplitOnSemiColon(array[1])[0].Trim('<').Trim('>');
-					break;
-			}
-		}
+                case "CONTENT-ID":
+                    ContentID = values[0].Trim('<').Trim('>');
+                    break;
+            }
+        }
 
 		/// <summary>
-		/// verify the encoding
+		/// Check if an encoding is the encoding used for this attachment
 		/// </summary>
-		/// <param name="encoding">encoding to verify</param>
-		/// <returns>true if encoding</returns>
-		private bool IsEncoding(string encoding)
+		/// <param name="encodingName">The name of the encoding to test for</param>
+		/// <returns>True if the string given is the encoding used, false otherwise</returns>
+		private bool IsEncoding(string encodingName)
 		{
-			return ContentTransferEncoding.ToLower().IndexOf(encoding.ToLower())!=-1;
+		    return ContentTransferEncoding.ToLower().Contains(encodingName.ToLower());
 		}
 
 		/// <summary>
@@ -397,36 +351,38 @@ namespace OpenPOP.MIME
 		{
 			string decodedAttachment;
 
-			try
-			{
-				if(ContentType.ToLower()=="message/rfc822".ToLower())
+            try
+            {
+                if (ContentType.ToLower() == "message/rfc822".ToLower())
                     decodedAttachment = EncodedWord.decode(RawAttachment);
-				else if(ContentTransferEncoding!=null)
-				{
-					decodedAttachment=RawAttachment;
+                else if (ContentTransferEncoding != null)
+                {
+                    decodedAttachment = RawAttachment;
 
-					if(!IsEncoding("7bit"))
-					{
-						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
-							decodedAttachment=Utility.ChangeEncoding(decodedAttachment,ContentCharset);
+                    if (!IsEncoding("7bit"))
+                    {
+                        if (IsEncoding("8bit") && ContentCharset != null & ContentCharset != "")
+                            decodedAttachment = Utility.ChangeEncoding(decodedAttachment, ContentCharset);
 
                         if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
-							decodedAttachment=QuotedPrintable.ConvertHexContent(decodedAttachment);
-						else if(IsEncoding("8bit"))
-						{ /* Do nothing, no decoding needed */ }
-						else
-							decodedAttachment=Base64.decode(Utility.RemoveNonB64(decodedAttachment));
-					}
-				}
-				else if(ContentCharset!=null)
-					decodedAttachment=Utility.ChangeEncoding(RawAttachment,ContentCharset);//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
-				else
-					decodedAttachment=RawAttachment;
-			}
-			catch
-			{
-				decodedAttachment=RawAttachment;
-			}
+                            decodedAttachment = QuotedPrintable.ConvertHexContent(decodedAttachment);
+                        else if (IsEncoding("8bit"))
+                        {
+                            /* Do nothing, no decoding needed */
+                        }
+                        else
+                            decodedAttachment = Base64.decode(Utility.RemoveNonB64(decodedAttachment));
+                    }
+                }
+                else if (ContentCharset != null)
+                    decodedAttachment = Utility.ChangeEncoding(RawAttachment, ContentCharset);
+                else
+                    decodedAttachment = RawAttachment;
+            }
+            catch
+            {
+                decodedAttachment = RawAttachment;
+            }
 			return decodedAttachment;
 		}
 
@@ -438,69 +394,62 @@ namespace OpenPOP.MIME
 		/// <returns>new message object</returns>
 		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine, bool blnUseRawContent)
 		{
-			string strContent=blnUseRawContent?RawContent:RawAttachment;
+		    string strContent = blnUseRawContent ? RawContent : RawAttachment;
 
-			/*if(blnRemoveHeaderBlankLine)
-			{
-				int intPos;
-				{
-					intPos=strContent.IndexOf("\r\n");
-					if(intPos!=-1)
-						strContent=strContent.Substring(intPos+2,strContent.Length-intPos-2);
-				}
-			}*/
-			if(blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
-				strContent=strContent.Substring(2,strContent.Length-2);					
-			return new Message(false ,strContent,false);
+            if (blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
+                strContent = strContent.Substring(2, strContent.Length - 2);
+		    return new Message(false, strContent, false);
 		}
 
 		/// <summary>
 		/// Decode the attachment to bytes
 		/// </summary>
+		/// <remarks>foens: Is it not possible to just call DecodeAsText and then get that string as bytes? Is that different from this?</remarks>
 		/// <returns>Decoded attachment bytes</returns>
 		public byte[] DecodedAsBytes()
 		{
-			if(RawAttachment==null)
-				return null;
-			if(ContentFileName!="")
-			{
-				byte []decodedBytes;
+            if (RawAttachment == null)
+                return null;
 
-				if(ContentType!=null && ContentType.ToLower()=="message/rfc822".ToLower())
+            if (ContentFileName != "")
+            {
+                byte[] decodedBytes;
+
+                if (ContentType != null && ContentType.ToLower() == "message/rfc822".ToLower())
                     decodedBytes = Encoding.Default.GetBytes(EncodedWord.decode(RawAttachment));
-				else if(ContentTransferEncoding!=null)
-				{
-					string bytContent=RawAttachment;
+                else if (ContentTransferEncoding != null)
+                {
+                    string bytContent = RawAttachment;
 
-					if(!IsEncoding("7bit"))
-					{
-						if(IsEncoding("8bit")&&ContentCharset!=null&ContentCharset!="")
-							bytContent=Utility.ChangeEncoding(bytContent,ContentCharset);
+                    if (!IsEncoding("7bit"))
+                    {
+                        if (IsEncoding("8bit") && ContentCharset != null & ContentCharset != "")
+                            bytContent = Utility.ChangeEncoding(bytContent, ContentCharset);
 
                         if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
-							decodedBytes=Encoding.Default.GetBytes(QuotedPrintable.ConvertHexContent(bytContent));
-						else if(IsEncoding("8bit"))
-							decodedBytes=Encoding.Default.GetBytes(bytContent);
-						else
-							decodedBytes=Convert.FromBase64String(Utility.RemoveNonB64(bytContent));
-					}
-					else
-						decodedBytes=Encoding.Default.GetBytes(bytContent);
-				}
-				else if(ContentCharset!=null)
-					decodedBytes=Encoding.Default.GetBytes(Utility.ChangeEncoding(RawAttachment,ContentCharset));//Encoding.Default.GetString(Encoding.GetEncoding(_contentCharset).GetBytes(_rawAttachment));
-				else
-					decodedBytes=Encoding.Default.GetBytes(RawAttachment);
+                            decodedBytes = Encoding.Default.GetBytes(QuotedPrintable.ConvertHexContent(bytContent));
+                        else if (IsEncoding("8bit"))
+                            decodedBytes = Encoding.Default.GetBytes(bytContent);
+                        else
+                            decodedBytes = Convert.FromBase64String(Utility.RemoveNonB64(bytContent));
+                    }
+                    else
+                        decodedBytes = Encoding.Default.GetBytes(bytContent);
+                }
+                else if (ContentCharset != null)
+                    decodedBytes = Encoding.Default.GetBytes(Utility.ChangeEncoding(RawAttachment, ContentCharset));
+                else
+                    decodedBytes = Encoding.Default.GetBytes(RawAttachment);
 
-				return decodedBytes;
-			}
-			
-			return null;
+                return decodedBytes;
+            }
+
+		    return null;
 		}
 
-		public int CompareTo(object attachment)
-		{
-			return (RawAttachment.CompareTo(((Attachment)(attachment)).RawAttachment));
-		}
+        public int CompareTo(Attachment attachment)
+        {
+            return RawAttachment.CompareTo(attachment.RawAttachment);
+        }
 	}
 }

@@ -280,7 +280,7 @@ namespace OpenPOP.MIME
 				return strText;
 
 			byte[] b = Encoding.Default.GetBytes(strText);
-			return new string(Encoding.GetEncoding(strCharset).GetChars(b));
+		    return new string(Encoding.GetEncoding(strCharset).GetChars(b));
 		}
 
 		/// <summary>
@@ -290,7 +290,7 @@ namespace OpenPOP.MIME
 		/// <returns>standard base 64 text</returns>
 		public static string RemoveNonB64(string strText)
 		{
-			return strText.Replace("\0","");
+		    return strText.Replace("\0", "");
 		}
 
 		/// <summary>

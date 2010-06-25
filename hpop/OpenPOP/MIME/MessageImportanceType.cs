@@ -21,8 +21,8 @@ namespace OpenPOP.MIME
 	/// 3 message importance types defined by RFC
 	/// </summary>
     /// <see cref="http://tools.ietf.org/html/rfc1911#page-8">Under "Importance" for more info.</see>
-	public enum MessageImportanceType
-	{
-		HIGH=5,NORMAL=3,LOW=1
-	}
+    public enum MessageImportanceType
+    {
+        HIGH = 5, NORMAL = 3, LOW = 1
+    }
 }

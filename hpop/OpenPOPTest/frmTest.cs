@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Data;
@@ -20,7 +21,7 @@ namespace OpenPOP.NET_Sample_App
 		private Panel panel3;
 		private Panel panel4;
 		private Panel panel5;
-		private Panel panel6;
+		private Panel attachmentPanel;
 		private Label label5;
 		private Label label7;
 		private TextBox txtPassword;
@@ -61,6 +62,19 @@ namespace OpenPOP.NET_Sample_App
 		    popClient.CommunicationLost       += popClient_CommunicationLost;
 		    popClient.MessageTransferBegan    += popClient_MessageTransferBegan;
 		    popClient.MessageTransferFinished += popClient_MessageTransferFinished;
+
+            // This is only for faster debugging purposes
+            string file = @"C:\Users\" + Environment.UserName + @"\Documents\OpenPOPLogin.txt";
+            if (File.Exists(file))
+            {
+                StreamReader reader = new StreamReader(File.OpenRead(file));
+                txtPOPServer.Text = reader.ReadLine();
+                txtPort.Text = reader.ReadLine();
+                useSsl.Checked = bool.Parse(reader.ReadLine());
+                txtLogin.Text = reader.ReadLine();
+                txtPassword.Text = reader.ReadLine();
+                reader.Close();
+            }
 		}
 
 		#region Windows Form Designer generated code
@@ -96,7 +110,7 @@ namespace OpenPOP.NET_Sample_App
             this.ctmMessages = new System.Windows.Forms.ContextMenu();
             this.mnuDeleteMessage = new System.Windows.Forms.MenuItem();
             this.label5 = new System.Windows.Forms.Label();
-            this.panel6 = new System.Windows.Forms.Panel();
+            this.attachmentPanel = new System.Windows.Forms.Panel();
             this.listAttachments = new System.Windows.Forms.TreeView();
             this.label3 = new System.Windows.Forms.Label();
             this.saveFile = new System.Windows.Forms.SaveFileDialog();
@@ -106,7 +120,7 @@ namespace OpenPOP.NET_Sample_App
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel5.SuspendLayout();
-            this.panel6.SuspendLayout();
+            this.attachmentPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -144,9 +158,9 @@ namespace OpenPOP.NET_Sample_App
             // 
             // UIDLButton
             // 
-            this.UIDLButton.Location = new System.Drawing.Point(460, 45);
+            this.UIDLButton.Location = new System.Drawing.Point(460, 42);
             this.UIDLButton.Name = "UIDLButton";
-            this.UIDLButton.Size = new System.Drawing.Size(80, 21);
+            this.UIDLButton.Size = new System.Drawing.Size(82, 21);
             this.UIDLButton.TabIndex = 6;
             this.UIDLButton.Text = "UIDL";
             this.UIDLButton.Click += new System.EventHandler(this.UIDLButtonClick);
@@ -201,7 +215,7 @@ namespace OpenPOP.NET_Sample_App
             // 
             this.ConnectAndRetrieveButton.Location = new System.Drawing.Point(460, 0);
             this.ConnectAndRetrieveButton.Name = "ConnectAndRetrieveButton";
-            this.ConnectAndRetrieveButton.Size = new System.Drawing.Size(82, 37);
+            this.ConnectAndRetrieveButton.Size = new System.Drawing.Size(82, 39);
             this.ConnectAndRetrieveButton.TabIndex = 5;
             this.ConnectAndRetrieveButton.Text = "Connect and Retreive";
             this.ConnectAndRetrieveButton.Click += new System.EventHandler(this.ConnectAndRetrieveButtonClick);
@@ -257,6 +271,7 @@ namespace OpenPOP.NET_Sample_App
             this.gridHeaders.Location = new System.Drawing.Point(0, 0);
             this.gridHeaders.Name = "gridHeaders";
             this.gridHeaders.PreferredColumnWidth = 400;
+            this.gridHeaders.ReadOnly = true;
             this.gridHeaders.Size = new System.Drawing.Size(804, 188);
             this.gridHeaders.TabIndex = 3;
             // 
@@ -264,7 +279,7 @@ namespace OpenPOP.NET_Sample_App
             // 
             this.panel3.Controls.Add(this.panel4);
             this.panel3.Controls.Add(this.panel5);
-            this.panel3.Controls.Add(this.panel6);
+            this.panel3.Controls.Add(this.attachmentPanel);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 64);
             this.panel3.Name = "panel3";
@@ -277,18 +292,18 @@ namespace OpenPOP.NET_Sample_App
             this.panel4.Controls.Add(this.txtMessage);
             this.panel4.Controls.Add(this.label4);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(136, 0);
+            this.panel4.Location = new System.Drawing.Point(175, 0);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(531, 196);
+            this.panel4.Size = new System.Drawing.Size(492, 196);
             this.panel4.TabIndex = 6;
             // 
             // lstEvents
             // 
             this.lstEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstEvents.Location = new System.Drawing.Point(7, 158);
+            this.lstEvents.Location = new System.Drawing.Point(7, 171);
             this.lstEvents.Name = "lstEvents";
-            this.lstEvents.Size = new System.Drawing.Size(514, 4);
+            this.lstEvents.Size = new System.Drawing.Size(475, 17);
             this.lstEvents.TabIndex = 8;
             // 
             // txtMessage
@@ -301,7 +316,7 @@ namespace OpenPOP.NET_Sample_App
             this.txtMessage.Multiline = true;
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtMessage.Size = new System.Drawing.Size(515, 129);
+            this.txtMessage.Size = new System.Drawing.Size(476, 143);
             this.txtMessage.TabIndex = 9;
             // 
             // label4
@@ -319,7 +334,7 @@ namespace OpenPOP.NET_Sample_App
             this.panel5.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel5.Location = new System.Drawing.Point(0, 0);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(136, 196);
+            this.panel5.Size = new System.Drawing.Size(175, 196);
             this.panel5.TabIndex = 5;
             // 
             // listMessages
@@ -330,7 +345,9 @@ namespace OpenPOP.NET_Sample_App
             this.listMessages.ContextMenu = this.ctmMessages;
             this.listMessages.Location = new System.Drawing.Point(8, 24);
             this.listMessages.Name = "listMessages";
-            this.listMessages.Size = new System.Drawing.Size(121, 160);
+            this.listMessages.ShowLines = false;
+            this.listMessages.ShowRootLines = false;
+            this.listMessages.Size = new System.Drawing.Size(160, 160);
             this.listMessages.TabIndex = 8;
             this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.listMessages_AfterSelect);
             // 
@@ -353,15 +370,16 @@ namespace OpenPOP.NET_Sample_App
             this.label5.TabIndex = 1;
             this.label5.Text = "Message Number";
             // 
-            // panel6
+            // attachmentPanel
             // 
-            this.panel6.Controls.Add(this.listAttachments);
-            this.panel6.Controls.Add(this.label3);
-            this.panel6.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel6.Location = new System.Drawing.Point(667, 0);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(137, 196);
-            this.panel6.TabIndex = 4;
+            this.attachmentPanel.Controls.Add(this.listAttachments);
+            this.attachmentPanel.Controls.Add(this.label3);
+            this.attachmentPanel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.attachmentPanel.Location = new System.Drawing.Point(667, 0);
+            this.attachmentPanel.Name = "attachmentPanel";
+            this.attachmentPanel.Size = new System.Drawing.Size(137, 196);
+            this.attachmentPanel.TabIndex = 4;
+            this.attachmentPanel.Visible = false;
             // 
             // listAttachments
             // 
@@ -370,6 +388,8 @@ namespace OpenPOP.NET_Sample_App
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.listAttachments.Location = new System.Drawing.Point(8, 24);
             this.listAttachments.Name = "listAttachments";
+            this.listAttachments.ShowLines = false;
+            this.listAttachments.ShowRootLines = false;
             this.listAttachments.Size = new System.Drawing.Size(121, 160);
             this.listAttachments.TabIndex = 10;
             this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.listAttachments_AfterSelect);
@@ -406,7 +426,7 @@ namespace OpenPOP.NET_Sample_App
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
             this.panel5.ResumeLayout(false);
-            this.panel6.ResumeLayout(false);
+            this.attachmentPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
 		}
@@ -443,6 +463,10 @@ namespace OpenPOP.NET_Sample_App
 		    int fail = 0;
             for (int i = Count; i >= 1; i -= 1)
             {
+                // Check if the form is clused while we are working. If so, abort
+                if(IsDisposed)
+                    return;
+
                 // Refresh the form while fetching emails
                 // This will fix the "Application is not responding" problem
                 Application.DoEvents();
@@ -453,7 +477,7 @@ namespace OpenPOP.NET_Sample_App
                 {
                     success++;
                     msgs.Add("msg" + i, m);
-                    node = listMessages.Nodes.Add(m.Subject);
+                    node = listMessages.Nodes.Add("[" + i + "] " + m.Subject);
                     node.Tag = i.ToString();
                 }
                 else
@@ -489,11 +513,16 @@ namespace OpenPOP.NET_Sample_App
 				    txtMessage.Text = m.MessageBody[m.MessageBody.Count - 1];
 				}
 				listAttachments.Nodes.Clear();
+
+			    bool hadAttachments = false;
                 for (int i = 0; i < m.AttachmentCount; i++)
                 {
+                    hadAttachments = true;
                     MIME.Attachment att = m.GetAttachment(i);
                     listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
                 }
+
+			    attachmentPanel.Visible = hadAttachments;
 
 			    DataSet ds = new DataSet();
 			    ds.Tables.Add("table1");
@@ -566,7 +595,7 @@ namespace OpenPOP.NET_Sample_App
                                 MIME.Attachment att2 = m2.GetAttachment(i);
                                 attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
                             }
-							bool blnRet = m.SaveAttachments(System.IO.Path.GetDirectoryName(saveFile.FileName));
+							bool blnRet = m.SaveAttachments(Path.GetDirectoryName(saveFile.FileName));
                             MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
