@@ -19,17 +19,17 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 
-namespace OpenPOP.MIME.Parse
+namespace OpenPOP.MIME.Header
 {
-    public static class HeaderParser
+    public static class HeaderExtractor
     {
         /// <summary>
-        /// Method that takes a full message and parses the headers from it.
+        /// Method that takes a full message and extract the headers from it.
         /// </summary>
-        /// <param name="message">The message to parse headers from</param>
+        /// <param name="message">The message to extract headers from</param>
         /// <param name="rawHeaders">The portion of the message that was headers</param>
         /// <param name="headers">A collection of Name and Value pairs of headers</param>
-        public static void ParseHeaders(string message, out string rawHeaders, out NameValueCollection headers)
+        public static void ExtractHeaders(string message, out string rawHeaders, out NameValueCollection headers)
         {
             headers = new NameValueCollection();
             StringBuilder rawHeadersBuilder = new StringBuilder();
