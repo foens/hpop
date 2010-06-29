@@ -20,6 +20,7 @@ using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME.Decode;
+using OpenPOP.MIME.Header;
 
 namespace OpenPOP.MIME
 {
@@ -134,17 +135,6 @@ namespace OpenPOP.MIME
 	    /// Raw Attachment Content (headers removed if was specified at creation)
 	    /// </summary>
 	    public string RawAttachment { get; private set; }
-
-	    /// <summary>
-		/// decoded attachment in bytes
-		/// </summary>
-		public byte[] DecodedAttachment
-		{
-			get
-			{
-				return DecodedAsBytes();
-			}
-		}
 		#endregion
 
         #region Constructors
@@ -195,16 +185,6 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// New Attachment
 		/// </summary>
-		/// <param name="bytAttachment">attachment bytes content</param>
-		/// <param name="strFileName">file name</param>
-		/// <param name="strContentType">content type</param>
-		public Attachment(byte[] bytAttachment, string strFileName, string strContentType)
-            : this(bytAttachment, bytAttachment.Length, strFileName, strContentType)
-		{ }
-
-		/// <summary>
-		/// New Attachment
-		/// </summary>
 		/// <param name="strAttachment">attachment content</param>
 		/// <param name="strContentType">content type</param>
 		/// <param name="blnParseHeader">whether only parse the header or not</param>
@@ -217,16 +197,6 @@ namespace OpenPOP.MIME
 				ContentType=strContentType;
 			}
 			NewAttachment(strAttachment,blnParseHeader);
-		}
-
-		/// <summary>
-		/// New Attachment
-		/// </summary>
-		/// <param name="strAttachment">attachment content</param>
-		public Attachment(string strAttachment)
-            : this(null, 0, "", null, false)
-		{
-		    NewAttachment(strAttachment,true);
 		}
         #endregion
 
@@ -248,7 +218,7 @@ namespace OpenPOP.MIME
 			{
 			    string rawHeaders;
 			    NameValueCollection headers;
-                Header.HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
+                HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
 
                 // Now specificly parse each header. Some headers require special parsing.
                 foreach (string headerName in headers.Keys)
@@ -299,7 +269,7 @@ namespace OpenPOP.MIME
                     break;
 
                 case "CONTENT-DESCRIPTION":
-                    ContentDescription = EncodedWord.decode(values[0].Trim());
+                    ContentDescription = EncodedWord.Decode(values[0].Trim());
                     break;
 
                 case "CONTENT-DISPOSITION":
@@ -315,7 +285,7 @@ namespace OpenPOP.MIME
 
                         ContentFileName = ContentFileName.Replace("\t", "");
                         ContentFileName = Utility.GetQuotedValue(ContentFileName, "=", "filename");
-                        ContentFileName = EncodedWord.decode(ContentFileName);
+                        ContentFileName = EncodedWord.Decode(ContentFileName);
                     }
                     break;
 
@@ -325,57 +295,25 @@ namespace OpenPOP.MIME
             }
         }
 
-		/// <summary>
-		/// Check if an encoding is the encoding used for this attachment
-		/// </summary>
-		/// <param name="encodingName">The name of the encoding to test for</param>
-		/// <returns>True if the string given is the encoding used, false otherwise</returns>
-		private bool IsEncoding(string encodingName)
-		{
-		    return ContentTransferEncoding.ToLower().Contains(encodingName.ToLower());
-		}
-
-		/// <summary>
+	    /// <summary>
 		/// Decode the attachment to text
 		/// </summary>
 		/// <returns>Decoded attachment text</returns>
 		public string DecodeAsText()
 		{
-			string decodedAttachment;
-
             try
             {
                 if (ContentType.ToLower() == "message/rfc822".ToLower())
-                    decodedAttachment = EncodedWord.decode(RawAttachment);
-                else if (ContentTransferEncoding != null)
-                {
-                    decodedAttachment = RawAttachment;
+                    return EncodedWord.Decode(RawAttachment);
 
-                    if (!IsEncoding("7bit"))
-                    {
-                        if (IsEncoding("8bit") && ContentCharset != null & ContentCharset != "")
-                            decodedAttachment = Utility.ChangeEncoding(decodedAttachment, ContentCharset);
-
-                        if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
-                            decodedAttachment = QuotedPrintable.ConvertHexContent(decodedAttachment);
-                        else if (IsEncoding("8bit"))
-                        {
-                            /* Do nothing, no decoding needed */
-                        }
-                        else
-                            decodedAttachment = Base64.decode(Utility.RemoveNonB64(decodedAttachment));
-                    }
-                }
-                else if (ContentCharset != null)
-                    decodedAttachment = Utility.ChangeEncoding(RawAttachment, ContentCharset);
-                else
-                    decodedAttachment = RawAttachment;
+                return Utility.DoDecode(RawAttachment, HeaderFieldParser.ParseContentTransferEncoding(ContentTransferEncoding), ContentCharset);
             }
-            catch
+            catch(Exception)
             {
-                decodedAttachment = RawAttachment;
+                // TODO It seems that the only time there is an exception here, is when the Content-Transfer-Encoding is QuotedPrintable. So it seems there is a bug therein
+                // TODO FIX QuotedPrintable and remove this try catch usage
+                return RawAttachment;
             }
-			return decodedAttachment;
 		}
 
 		/// <summary>
@@ -403,38 +341,9 @@ namespace OpenPOP.MIME
             if (RawAttachment == null)
                 return null;
 
+            // Todo Figure out why we look at the ContentFileName...
             if (ContentFileName != "")
-            {
-                byte[] decodedBytes;
-
-                if (ContentType != null && ContentType.ToLower() == "message/rfc822".ToLower())
-                    decodedBytes = Encoding.Default.GetBytes(EncodedWord.decode(RawAttachment));
-                else if (ContentTransferEncoding != null)
-                {
-                    string bytContent = RawAttachment;
-
-                    if (!IsEncoding("7bit"))
-                    {
-                        if (IsEncoding("8bit") && ContentCharset != null & ContentCharset != "")
-                            bytContent = Utility.ChangeEncoding(bytContent, ContentCharset);
-
-                        if (QuotedPrintable.IsQuotedPrintable(ContentTransferEncoding))
-                            decodedBytes = Encoding.Default.GetBytes(QuotedPrintable.ConvertHexContent(bytContent));
-                        else if (IsEncoding("8bit"))
-                            decodedBytes = Encoding.Default.GetBytes(bytContent);
-                        else
-                            decodedBytes = Convert.FromBase64String(Utility.RemoveNonB64(bytContent));
-                    }
-                    else
-                        decodedBytes = Encoding.Default.GetBytes(bytContent);
-                }
-                else if (ContentCharset != null)
-                    decodedBytes = Encoding.Default.GetBytes(Utility.ChangeEncoding(RawAttachment, ContentCharset));
-                else
-                    decodedBytes = Encoding.Default.GetBytes(RawAttachment);
-
-                return decodedBytes;
-            }
+                return Encoding.Default.GetBytes(DecodeAsText());
 
 		    return null;
 		}

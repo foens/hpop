@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIME.Decode
 {
-    public class EncodedWord
+    public static class EncodedWord
     {
         /// <summary>
 		/// Decode text that is encoded. See BNF below.
@@ -44,7 +44,7 @@ namespace OpenPOP.MIME.Decode
         /// <see cref="http://tools.ietf.org/html/rfc2047#section-2">RFC Part 2 "Syntax of encoded-words" for more detail</see>
 		/// <param name="encodedWords">Source text</param>
 		/// <returns>Decoded text</returns>
-        public static string decode(string encodedWords)
+        public static string Decode(string encodedWords)
 		{
             if(encodedWords == null)
                 return null;
@@ -80,7 +80,7 @@ namespace OpenPOP.MIME.Decode
                         // The "B" encoding is identical to the "BASE64" 
                         // encoding defined by RFC 2045.
                         case "B":
-                            decodedText = Base64.decode(encodedText, charset);
+                            decodedText = Base64.Decode(encodedText, charset);
                             break;
 
                         // RFC:

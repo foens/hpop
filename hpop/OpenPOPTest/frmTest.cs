@@ -588,7 +588,7 @@ namespace OpenPOP.NET_Sample_App
                             MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
-				MessageBox.Show(this,"Attachment saving "+((m.SaveAttachment(att,saveFile.FileName))?"succeeded":"failed")+"£¡");
+				MessageBox.Show(this,"Attachment saving "+((m.SaveAttachment(att,saveFile.FileName))?"succeeded":"failed"));
 			}
 			else
 				MessageBox.Show(this,"attachment object is null!");

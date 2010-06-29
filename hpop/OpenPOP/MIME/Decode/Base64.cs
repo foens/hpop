@@ -22,7 +22,7 @@ namespace OpenPOP.MIME.Decode
 {
     public static class Base64
     {
-        private static byte[] decodeToBytes(string strText)
+        private static byte[] DecodeToBytes(string strText)
         {
             try
             {
@@ -41,9 +41,9 @@ namespace OpenPOP.MIME.Decode
         /// </summary>
         /// <param name="base64Encoded">Source string to decode</param>
         /// <returns>A decoded string</returns>
-        public static string decode(string base64Encoded)
+        public static string Decode(string base64Encoded)
         {
-            return Encoding.Default.GetString(decodeToBytes(base64Encoded));
+            return Encoding.Default.GetString(DecodeToBytes(base64Encoded));
         }
 
         /// <summary>
@@ -52,16 +52,16 @@ namespace OpenPOP.MIME.Decode
         /// <param name="base64Encoded">Source string to decode</param>
         /// <param name="nameOfEncoding">The name of the encoding to use</param>
         /// <returns>A decoded string</returns>
-        public static string decode(string base64Encoded, string nameOfEncoding)
+        public static string Decode(string base64Encoded, string nameOfEncoding)
         {
             try
             {
-                return Encoding.GetEncoding(nameOfEncoding).GetString(decodeToBytes(base64Encoded));
+                return Encoding.GetEncoding(nameOfEncoding).GetString(DecodeToBytes(base64Encoded));
             }
             catch(Exception e)
             {
                 Utility.LogError("decode: " + e.Message);
-                return decode(base64Encoded);
+                return Decode(base64Encoded);
             }
         }
     }

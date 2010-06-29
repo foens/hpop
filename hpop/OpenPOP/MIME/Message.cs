@@ -642,7 +642,7 @@ namespace OpenPOP.MIME
             catch (Exception e)
             {
                 Utility.LogError("GetMessageBody():" + e.Message);
-                MessageBody.Add(Base64.decode(strBuffer));
+                MessageBody.Add(Base64.Decode(strBuffer));
             }
 
             if (MessageBody.Count > 1)

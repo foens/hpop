@@ -30,11 +30,8 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace OpenPOP
+namespace OpenPOP.MIME
 {
-	/// <summary>
-	/// MIMETypes
-	/// </summary>
 	public static class MIMETypes
 	{
 	    private const string MIMEType_MSTNEF="application/ms-tnef";
@@ -382,7 +379,5 @@ namespace OpenPOP
 			    return "application/octet-stream";
 			}
 		}
-
 	}
 }
-

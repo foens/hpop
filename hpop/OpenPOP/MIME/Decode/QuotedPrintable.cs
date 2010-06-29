@@ -27,25 +27,7 @@ namespace OpenPOP.MIME.Decode
     /// <see cref="http://tools.ietf.org/html/rfc2045#section-6.7">For more details on this encoding</see>
 	public static class QuotedPrintable
 	{
-		/// <summary>
-		/// Decode a Quoted-Printable string
-		/// </summary>
-		/// <param name="Hexstring">Quoted-Printable encoded string</param>
-        /// <param name="Encoding">encoding method</param>
-		/// <returns>decoded string</returns>
-		public static string ConvertHexToString(string Hexstring,string Encoding)
-		{
-			try
-            {
-                return ConvertHexToString(Hexstring, System.Text.Encoding.GetEncoding(Encoding));
-            }
-			catch
-            {
-                return ConvertHexContent(Hexstring);
-            }
-		}
-
-		/// <summary>
+	    /// <summary>
 		/// Decode a Quoted-Printable string
 		/// </summary>
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
@@ -83,6 +65,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="encode">encoding method, "Default" is suggested</param>
 		/// <param name="nStart">position to start, normally 0</param>
 		/// <returns>decoded string</returns>
+		/// TODO: This method does not cope with every QuotedPrintable string that is thrown at it therefore it should be looked more into
 		public static string ConvertHexContent(string Hexstring,Encoding encode,long nStart)
 		{
             if (nStart >= Hexstring.Length) return Hexstring;
@@ -147,7 +130,6 @@ namespace OpenPOP.MIME.Decode
 
 		    return sbEncoded.ToString();
 		}
-
 
 		/// <summary>
 		/// Decode a Quoted-Printable string using default encoding

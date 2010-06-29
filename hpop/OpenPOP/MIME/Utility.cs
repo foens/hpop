@@ -88,22 +88,7 @@ namespace OpenPOP.MIME
 			return false;
 		}
 
-		/// <summary>
-		/// Take the first part of a string up until the start of a specified string
-		/// </summary>
-		/// <param name="input">Text to do substring on</param>
-		/// <param name="endString">Text that specifies where to stop the returned string</param>
-		/// <returns>Substring(input, indexOf(endString)-1) or just input if endString is not found</returns>
-		public static string Substring(string input, string endString)
-		{
-			int indexOfTag=input.IndexOf(endString);
-			if(indexOfTag!=-1)
-				return input.Substring(0,indexOfTag-1);
-			
-			return input;
-		}
-
-		/// <summary>
+        /// <summary>
 		/// Parse file name from MIME header
 		/// </summary>
 		/// <param name="strHeader">MIME header</param>
@@ -284,27 +269,7 @@ namespace OpenPOP.MIME
 		    return Encoding.GetEncoding(strCharset).GetString(b);
 		}
 
-		/// <summary>
-		/// Remove non-standard base 64 characters
-		/// </summary>
-		/// <param name="strText">Source text</param>
-		/// <returns>standard base 64 text</returns>
-		public static string RemoveNonB64(string strText)
-		{
-		    return strText.Replace("\0", "");
-		}
-
-		/// <summary>
-		/// Remove white blank characters
-		/// </summary>
-		/// <param name="strText">Source text</param>
-		/// <returns>Text with white blanks</returns>
-		public static string RemoveWhiteBlanks(string strText)
-		{
-			return strText.Replace("\0","").Replace("\r\n","");
-		}
-
-		/// <summary>
+        /// <summary>
 		/// Remove quotes
 		/// </summary>
 		/// <param name="strText">Text with quotes</param>
@@ -321,45 +286,7 @@ namespace OpenPOP.MIME
 			return strRet;
 		}
 
-		/// <summary>
-		/// Decode one line of text
-		/// </summary>
-		/// <param name="strText">Encoded text</param>
-		/// <returns>Decoded text</returns>
-		public static string DecodeLineWithEncodedWords(string strText)
-		{
-			return EncodedWord.decode(RemoveWhiteBlanks(strText));
-		}
-
-		public static string[] SplitOnSemiColon(string strText)
-		{
-			if(strText==null)
-				throw new ArgumentNullException("strText","Argument was null");
-
-		    int indexOfColon=strText.IndexOf(";");
-
-            if (indexOfColon == -1)
-            {
-                // Return string[] with single value
-                return new[] { strText };
-            }
-
-		    string[] array = new string[2];
-		    if (strText.Length > indexOfColon + 1)
-		    {
-		        array[0] = strText.Substring(0, indexOfColon).Trim();
-		        array[1] = strText.Substring(indexOfColon + 1).Trim();
-		    }
-
-		    return array;
-		}
-
-		public static bool IsNotNullTextEx(string strText)
-		{
-			return strText != null && !strText.Trim().Equals("");
-		}
-
-		public static bool IsOrNullTextEx(string strText)
+        public static bool IsOrNullTextEx(string strText)
 		{
 		    return strText == null || strText.Trim().Equals("");
 		}
@@ -375,21 +302,20 @@ namespace OpenPOP.MIME
                     return QuotedPrintable.ConvertHexContent(input);
 
                 case ContentTransferEncoding.Base64:
-                    return Base64.decode(input);
+                    return Base64.Decode(input);
 
                 case ContentTransferEncoding.SevenBit:
                 case ContentTransferEncoding.Binary:
                 case ContentTransferEncoding.EightBit:
                     if (!string.IsNullOrEmpty(charSet))
                         return ChangeEncoding(input, charSet);
-                    break;
+
+                    // Nothing needed to be done
+                    return input;
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            // Nothing needed to be done
-            return input;
         }
 	}
 }

@@ -677,6 +677,7 @@ namespace OpenPOP.POP3
 		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
         /// <param name="headersOnly">Only return message header?</param>
 		/// <returns>The message or null if server did not accept the command</returns>
+		/// // TODO Remove the bool parameter
 		public Message GetMessage(int messageNumber, bool headersOnly)
 		{
 		    Message msg;
@@ -694,6 +695,7 @@ namespace OpenPOP.POP3
         /// </summary>
         /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
         /// <returns>Message object</returns>
+        /// TODO: Return a MessageHeader instead
         public Message GetMessageHeaders(int messageNumber)
         {
             // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
