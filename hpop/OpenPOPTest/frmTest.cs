@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using System.Net.Mail;
 using System.Text;
 using System.Windows.Forms;
 using System.Data;
@@ -417,7 +418,6 @@ namespace OpenPOP.NET_Sample_App
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "OpenPOP.NET Sample Application";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.Load += new System.EventHandler(this.frmTest_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -477,7 +477,7 @@ namespace OpenPOP.NET_Sample_App
                 {
                     success++;
                     msgs.Add("msg" + i, m);
-                    node = listMessages.Nodes.Add("[" + i + "] " + m.Subject);
+                    node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
                     node.Tag = i.ToString();
                 }
                 else
@@ -496,25 +496,20 @@ namespace OpenPOP.NET_Sample_App
 		private void ConnectAndRetrieveButtonClick(object sender, EventArgs e)
 		{
 			ReceiveMails();
-		}
-
-		private void frmTest_Load(object sender, EventArgs e)
-		{
-			
-		}		
+        }		
 
 		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 		    MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
-			if(m != null)
-			{
-				if(m.MessageBody.Count>0)
-				{
-				    txtMessage.Text = m.MessageBody[m.MessageBody.Count - 1];
-				}
-				listAttachments.Nodes.Clear();
+            if (m != null)
+            {
+                if (m.MessageBody.Count > 0)
+                {
+                    txtMessage.Text = m.MessageBody[m.MessageBody.Count - 1];
+                }
+                listAttachments.Nodes.Clear();
 
-			    bool hadAttachments = false;
+                bool hadAttachments = false;
                 for (int i = 0; i < m.AttachmentCount; i++)
                 {
                     hadAttachments = true;
@@ -522,53 +517,47 @@ namespace OpenPOP.NET_Sample_App
                     listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
                 }
 
-			    attachmentPanel.Visible = hadAttachments;
+                attachmentPanel.Visible = hadAttachments;
 
-			    DataSet ds = new DataSet();
-			    ds.Tables.Add("table1");
-			    ds.Tables[0].Columns.Add("Header");
-				ds.Tables[0].Columns.Add("Value");				
+                DataSet ds = new DataSet();
+                ds.Tables.Add("table1");
+                ds.Tables[0].Columns.Add("Header");
+                ds.Tables[0].Columns.Add("Value");
 
-				ds.Tables[0].Rows.Add(new object[]{"AttachmentBoundry",m.MultipartBoundary});
-				ds.Tables[0].Rows.Add(new object[]{"AttachmentCount",m.AttachmentCount});
+                ds.Tables[0].Rows.Add(new object[] {"ContentType", m.Headers.ContentType});
+                ds.Tables[0].Rows.Add(new object[] {"AttachmentCount", m.AttachmentCount});
 
-                for (int j = 0; j < m.CC.Length; j++)
-                    ds.Tables[0].Rows.Add(new object[] { "CC", m.CC[j] });
-                for (int j = 0; j < m.TO.Length; j++)
-                    ds.Tables[0].Rows.Add(new object[] { "TO", m.TO[j] });
+                foreach (MailAddress CC in m.Headers.CC)
+                    ds.Tables[0].Rows.Add(new object[] {"CC", CC});
+                foreach (MailAddress To in m.Headers.To)
+                    ds.Tables[0].Rows.Add(new object[] {"To", To});
 
-			    ds.Tables[0].Rows.Add(new object[] {"ContentEncoding", m.ContentEncoding});
-			    ds.Tables[0].Rows.Add(new object[] {"ContentTransferEncoding", m.ContentTransferEncoding});
-			    ds.Tables[0].Rows.Add(new object[] {"ContentLength", m.ContentLength});
-			    ds.Tables[0].Rows.Add(new object[] {"ContentCharset", m.ContentCharset});
-			    ds.Tables[0].Rows.Add(new object[] {"ContentType", m.ContentType});
-			    ds.Tables[0].Rows.Add(new object[] {"FROM", m.From});
-			    ds.Tables[0].Rows.Add(new object[] {"FromEmail", m.FromEmail});
-			    ds.Tables[0].Rows.Add(new object[] {"HasAttachment", m.isMultipart});
-			    ds.Tables[0].Rows.Add(new object[] {"MessageID", m.MessageID});
-			    ds.Tables[0].Rows.Add(new object[] {"MimeVersion", m.MimeVersion});
-			    ds.Tables[0].Rows.Add(new object[] {"ReturnPath", m.ReturnPath});
-			    ds.Tables[0].Rows.Add(new object[] {"Subject", m.Subject});
-			    ds.Tables[0].Rows.Add(new object[] {"Date", m.Date});
-			    ds.Tables[0].Rows.Add(new object[] {"Received", m.Received});
-			    ds.Tables[0].Rows.Add(new object[] {"HTML", m.HTML});
-			    ds.Tables[0].Rows.Add(new object[] {"Importance", m.Importance});
-			    ds.Tables[0].Rows.Add(new object[] {"ReplyTo", m.ReplyTo});
-			    ds.Tables[0].Rows.Add(new object[] {"ReplyToEmail", m.ReplyToEmail});
-                for (int j = 0; j < m.Keywords.Count; j++)
-                    ds.Tables[0].Rows.Add(new object[] { "Keyword", m.Keywords[j] });
-                foreach (string  key in m.CustomHeaders )
+                ds.Tables[0].Rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});
+                ds.Tables[0].Rows.Add(new object[] {"From", m.Headers.From});
+                ds.Tables[0].Rows.Add(new object[] {"MessageID", m.Headers.MessageID});
+                ds.Tables[0].Rows.Add(new object[] {"MimeVersion", m.Headers.MimeVersion});
+                ds.Tables[0].Rows.Add(new object[] {"ReturnPath", m.Headers.ReturnPath});
+                ds.Tables[0].Rows.Add(new object[] {"Subject", m.Headers.Subject});
+                ds.Tables[0].Rows.Add(new object[] {"Date", m.Headers.Date});
+                foreach(string received in m.Headers.Received)
+                    ds.Tables[0].Rows.Add(new object[] {"Received", received});
+                ds.Tables[0].Rows.Add(new object[] {"HTML", m.HTML});
+                ds.Tables[0].Rows.Add(new object[] {"Importance", m.Headers.Importance});
+                ds.Tables[0].Rows.Add(new object[] {"ReplyTo", m.Headers.ReplyTo});
+                foreach (string keyword in m.Headers.Keywords)
+                    ds.Tables[0].Rows.Add(new object[] {"Keyword", keyword});
+                foreach (string key in m.Headers.UnknownHeaders)
                 {
-                    string[] values = m.CustomHeaders.GetValues(key);
-                    if(values != null)
+                    string[] values = m.Headers.UnknownHeaders.GetValues(key);
+                    if (values != null)
                         foreach (string value in values)
                         {
-                            ds.Tables[0].Rows.Add(new object[] { key, value });				
+                            ds.Tables[0].Rows.Add(new object[] {key, value});
                         }
                 }
-			    gridHeaders.DataMember = ds.Tables[0].TableName;
-			    gridHeaders.DataSource = ds;
-			}
+                gridHeaders.DataMember = ds.Tables[0].TableName;
+                gridHeaders.DataSource = ds;
+            }
 		}
 
 		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
@@ -596,7 +585,7 @@ namespace OpenPOP.NET_Sample_App
                                 attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
                             }
 							bool blnRet = m.SaveAttachments(Path.GetDirectoryName(saveFile.FileName));
-                            MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
+                            MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
 				MessageBox.Show(this,"Attachment saving "+((m.SaveAttachment(att,saveFile.FileName))?"succeeded":"failed")+"£¡");

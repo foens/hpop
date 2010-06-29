@@ -64,18 +64,5 @@ namespace OpenPOP.MIME.Decode
                 return decode(base64Encoded);
             }
         }
-
-        /// <summary>
-        /// Checks if the Content-Type is base64
-        /// </summary>
-        /// <param name="contentType">The content type to be checked</param>
-        /// <returns>True if it is base64 or false otherwise</returns>
-        public static bool IsBase64(string contentType)
-        {
-            if (contentType != null)
-                return contentType.ToLower().Equals("base64");
-
-            return false;
-        }
     }
 }

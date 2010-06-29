@@ -94,154 +94,158 @@ namespace MailMonitor
 		#region Windows
 		private void InitializeComponent()
 		{
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMails));
-			this.lvwMailBoxes = new System.Windows.Forms.ListView();
-			this.ctmMails = new System.Windows.Forms.ContextMenu();
-			this.mnuDelete = new System.Windows.Forms.MenuItem();
-			this.mnuSaveAsEML = new System.Windows.Forms.MenuItem();
-			this.cmdCancel = new System.Windows.Forms.Button();
-			this.cmdPause = new System.Windows.Forms.Button();
-			this.cmdGet = new System.Windows.Forms.Button();
-			this.gbxHeader = new System.Windows.Forms.GroupBox();
-			this.lblDescription = new System.Windows.Forms.Label();
-			this.picIcon = new System.Windows.Forms.PictureBox();
-			this.lblTitle = new System.Windows.Forms.Label();
-			this.dlgSave = new System.Windows.Forms.SaveFileDialog();
-			this.gbxHeader.SuspendLayout();
-			this.SuspendLayout();
-			// 
-			// lvwMailBoxes
-			// 
-			this.lvwMailBoxes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.lvwMailBoxes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lvwMailBoxes.ContextMenu = this.ctmMails;
-			this.lvwMailBoxes.FullRowSelect = true;
-			this.lvwMailBoxes.GridLines = true;
-			this.lvwMailBoxes.HideSelection = false;
-			this.lvwMailBoxes.HoverSelection = true;
-			this.lvwMailBoxes.LabelWrap = false;
-			this.lvwMailBoxes.Location = new System.Drawing.Point(0, 48);
-			this.lvwMailBoxes.Name = "lvwMailBoxes";
-			this.lvwMailBoxes.Size = new System.Drawing.Size(496, 160);
-			this.lvwMailBoxes.TabIndex = 4;
-			this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
-			this.lvwMailBoxes.DoubleClick += new System.EventHandler(this.lvwMailBoxes_DoubleClick);
-			// 
-			// ctmMails
-			// 
-			this.ctmMails.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					 this.mnuDelete,
-																					 this.mnuSaveAsEML});
-			// 
-			// mnuDelete
-			// 
-			this.mnuDelete.Index = 0;
-			this.mnuDelete.Text = "&Delete Selected Mails";
-			this.mnuDelete.Click += new System.EventHandler(this.mnuDelete_Click);
-			// 
-			// mnuSaveAsEML
-			// 
-			this.mnuSaveAsEML.Index = 1;
-			this.mnuSaveAsEML.Text = "&Save As EML File";
-			this.mnuSaveAsEML.Click += new System.EventHandler(this.mnuSaveAsEML_Click);
-			// 
-			// cmdCancel
-			// 
-			this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdCancel.Location = new System.Drawing.Point(8, 216);
-			this.cmdCancel.Name = "cmdCancel";
-			this.cmdCancel.Size = new System.Drawing.Size(72, 24);
-			this.cmdCancel.TabIndex = 5;
-			this.cmdCancel.Text = "&Cancel";
-			this.cmdCancel.Visible = false;
-			this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
-			// 
-			// cmdPause
-			// 
-			this.cmdPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.cmdPause.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdPause.Location = new System.Drawing.Point(88, 216);
-			this.cmdPause.Name = "cmdPause";
-			this.cmdPause.Size = new System.Drawing.Size(72, 24);
-			this.cmdPause.TabIndex = 6;
-			this.cmdPause.Text = "&Pause";
-			this.cmdPause.Click += new System.EventHandler(this.cmdPause_Click);
-			// 
-			// cmdGet
-			// 
-			this.cmdGet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.cmdGet.Enabled = false;
-			this.cmdGet.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.cmdGet.Location = new System.Drawing.Point(168, 216);
-			this.cmdGet.Name = "cmdGet";
-			this.cmdGet.Size = new System.Drawing.Size(72, 24);
-			this.cmdGet.TabIndex = 7;
-			this.cmdGet.Text = "&Get";
-			this.cmdGet.Click += new System.EventHandler(this.cmdGet_Click);
-			// 
-			// gbxHeader
-			// 
-			this.gbxHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.gbxHeader.BackColor = System.Drawing.Color.White;
-			this.gbxHeader.Controls.Add(this.lblDescription);
-			this.gbxHeader.Controls.Add(this.picIcon);
-			this.gbxHeader.Controls.Add(this.lblTitle);
-			this.gbxHeader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.gbxHeader.Location = new System.Drawing.Point(0, -8);
-			this.gbxHeader.Name = "gbxHeader";
-			this.gbxHeader.Size = new System.Drawing.Size(496, 48);
-			this.gbxHeader.TabIndex = 8;
-			this.gbxHeader.TabStop = false;
-			// 
-			// lblDescription
-			// 
-			this.lblDescription.AutoSize = true;
-			this.lblDescription.Location = new System.Drawing.Point(104, 24);
-			this.lblDescription.Name = "lblDescription";
-			this.lblDescription.Size = new System.Drawing.Size(202, 17);
-			this.lblDescription.TabIndex = 6;
-			this.lblDescription.Text = "Get mails from remote pop server";
-			// 
-			// picIcon
-			// 
-			this.picIcon.Image = ((System.Drawing.Image)(resources.GetObject("picIcon.Image")));
-			this.picIcon.Location = new System.Drawing.Point(8, 12);
-			this.picIcon.Name = "picIcon";
-			this.picIcon.Size = new System.Drawing.Size(32, 32);
-			this.picIcon.TabIndex = 5;
-			this.picIcon.TabStop = false;
-			// 
-			// lblTitle
-			// 
-			this.lblTitle.AutoSize = true;
-			this.lblTitle.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.lblTitle.Location = new System.Drawing.Point(44, 8);
-			this.lblTitle.Name = "lblTitle";
-			this.lblTitle.Size = new System.Drawing.Size(53, 26);
-			this.lblTitle.TabIndex = 4;
-			this.lblTitle.Text = "Mails";
-			// 
-			// frmMails
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-			this.ClientSize = new System.Drawing.Size(496, 245);
-			this.Controls.Add(this.gbxHeader);
-			this.Controls.Add(this.cmdGet);
-			this.Controls.Add(this.cmdPause);
-			this.Controls.Add(this.cmdCancel);
-			this.Controls.Add(this.lvwMailBoxes);
-			this.Name = "frmMails";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Mail Monitor - MailBox Info";
-			this.Resize += new System.EventHandler(this.frmMails_Resize);
-			this.Load += new System.EventHandler(this.frmMails_Load);
-			this.Closed += new System.EventHandler(this.frmMails_Closed);
-			this.gbxHeader.ResumeLayout(false);
-			this.ResumeLayout(false);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMails));
+            this.lvwMailBoxes = new System.Windows.Forms.ListView();
+            this.ctmMails = new System.Windows.Forms.ContextMenu();
+            this.mnuDelete = new System.Windows.Forms.MenuItem();
+            this.mnuSaveAsEML = new System.Windows.Forms.MenuItem();
+            this.cmdCancel = new System.Windows.Forms.Button();
+            this.cmdPause = new System.Windows.Forms.Button();
+            this.cmdGet = new System.Windows.Forms.Button();
+            this.gbxHeader = new System.Windows.Forms.GroupBox();
+            this.lblDescription = new System.Windows.Forms.Label();
+            this.picIcon = new System.Windows.Forms.PictureBox();
+            this.lblTitle = new System.Windows.Forms.Label();
+            this.dlgSave = new System.Windows.Forms.SaveFileDialog();
+            this.gbxHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // lvwMailBoxes
+            // 
+            this.lvwMailBoxes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvwMailBoxes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lvwMailBoxes.ContextMenu = this.ctmMails;
+            this.lvwMailBoxes.FullRowSelect = true;
+            this.lvwMailBoxes.GridLines = true;
+            this.lvwMailBoxes.HideSelection = false;
+            this.lvwMailBoxes.HoverSelection = true;
+            this.lvwMailBoxes.LabelWrap = false;
+            this.lvwMailBoxes.Location = new System.Drawing.Point(0, 45);
+            this.lvwMailBoxes.Name = "lvwMailBoxes";
+            this.lvwMailBoxes.Size = new System.Drawing.Size(496, 166);
+            this.lvwMailBoxes.TabIndex = 4;
+            this.lvwMailBoxes.UseCompatibleStateImageBehavior = false;
+            this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
+            this.lvwMailBoxes.DoubleClick += new System.EventHandler(this.lvwMailBoxes_DoubleClick);
+            // 
+            // ctmMails
+            // 
+            this.ctmMails.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuDelete,
+            this.mnuSaveAsEML});
+            // 
+            // mnuDelete
+            // 
+            this.mnuDelete.Index = 0;
+            this.mnuDelete.Text = "&Delete Selected Mails";
+            this.mnuDelete.Click += new System.EventHandler(this.mnuDelete_Click);
+            // 
+            // mnuSaveAsEML
+            // 
+            this.mnuSaveAsEML.Index = 1;
+            this.mnuSaveAsEML.Text = "&Save As EML File";
+            this.mnuSaveAsEML.Click += new System.EventHandler(this.mnuSaveAsEML_Click);
+            // 
+            // cmdCancel
+            // 
+            this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdCancel.Location = new System.Drawing.Point(7, 219);
+            this.cmdCancel.Name = "cmdCancel";
+            this.cmdCancel.Size = new System.Drawing.Size(60, 22);
+            this.cmdCancel.TabIndex = 5;
+            this.cmdCancel.Text = "&Cancel";
+            this.cmdCancel.Visible = false;
+            this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
+            // 
+            // cmdPause
+            // 
+            this.cmdPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cmdPause.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdPause.Location = new System.Drawing.Point(73, 219);
+            this.cmdPause.Name = "cmdPause";
+            this.cmdPause.Size = new System.Drawing.Size(60, 22);
+            this.cmdPause.TabIndex = 6;
+            this.cmdPause.Text = "&Pause";
+            this.cmdPause.Click += new System.EventHandler(this.cmdPause_Click);
+            // 
+            // cmdGet
+            // 
+            this.cmdGet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cmdGet.Enabled = false;
+            this.cmdGet.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdGet.Location = new System.Drawing.Point(140, 219);
+            this.cmdGet.Name = "cmdGet";
+            this.cmdGet.Size = new System.Drawing.Size(60, 22);
+            this.cmdGet.TabIndex = 7;
+            this.cmdGet.Text = "&Get";
+            this.cmdGet.Click += new System.EventHandler(this.cmdGet_Click);
+            // 
+            // gbxHeader
+            // 
+            this.gbxHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbxHeader.BackColor = System.Drawing.Color.White;
+            this.gbxHeader.Controls.Add(this.lblDescription);
+            this.gbxHeader.Controls.Add(this.picIcon);
+            this.gbxHeader.Controls.Add(this.lblTitle);
+            this.gbxHeader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.gbxHeader.Location = new System.Drawing.Point(0, -7);
+            this.gbxHeader.Name = "gbxHeader";
+            this.gbxHeader.Size = new System.Drawing.Size(496, 44);
+            this.gbxHeader.TabIndex = 8;
+            this.gbxHeader.TabStop = false;
+            // 
+            // lblDescription
+            // 
+            this.lblDescription.AutoSize = true;
+            this.lblDescription.Location = new System.Drawing.Point(87, 22);
+            this.lblDescription.Name = "lblDescription";
+            this.lblDescription.Size = new System.Drawing.Size(161, 13);
+            this.lblDescription.TabIndex = 6;
+            this.lblDescription.Text = "Get mails from remote pop server";
+            // 
+            // picIcon
+            // 
+            this.picIcon.Image = ((System.Drawing.Image)(resources.GetObject("picIcon.Image")));
+            this.picIcon.Location = new System.Drawing.Point(7, 11);
+            this.picIcon.Name = "picIcon";
+            this.picIcon.Size = new System.Drawing.Size(26, 30);
+            this.picIcon.TabIndex = 5;
+            this.picIcon.TabStop = false;
+            // 
+            // lblTitle
+            // 
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitle.Location = new System.Drawing.Point(37, 7);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(56, 23);
+            this.lblTitle.TabIndex = 4;
+            this.lblTitle.Text = "Mails";
+            // 
+            // frmMails
+            // 
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.ClientSize = new System.Drawing.Size(496, 245);
+            this.Controls.Add(this.gbxHeader);
+            this.Controls.Add(this.cmdGet);
+            this.Controls.Add(this.cmdPause);
+            this.Controls.Add(this.cmdCancel);
+            this.Controls.Add(this.lvwMailBoxes);
+            this.Name = "frmMails";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Mail Monitor - MailBox Info";
+            this.Closed += new System.EventHandler(this.frmMails_Closed);
+            this.Load += new System.EventHandler(this.frmMails_Load);
+            this.Resize += new System.EventHandler(this.frmMails_Resize);
+            this.gbxHeader.ResumeLayout(false);
+            this.gbxHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon)).EndInit();
+            this.ResumeLayout(false);
 
 		}
 		#endregion
@@ -280,12 +284,15 @@ namespace MailMonitor
 					_msg=_popClient.GetMessageHeaders(i);
 					if(_msg!=null)
 					{
-						lvi=lvwMailBoxes.Items.Add(_msg.From+"("+_msg.FromEmail+")");
+					    string from = null;
+                        if (_msg.Headers.From != null)
+                            from = _msg.Headers.From.ToString();
+						lvi=lvwMailBoxes.Items.Add(from);
 						lvi.Tag=i;
-						lvi.SubItems.Add(_msg.Subject);
-						lvi.SubItems.Add(_msg.Date);
-						lvi.SubItems.Add(_msg.ContentLength.ToString());
-						lvi.SubItems.Add(_msg.MessageID);
+						lvi.SubItems.Add(_msg.Headers.Subject);
+                        lvi.SubItems.Add(_msg.Headers.Date);
+                        lvi.SubItems.Add(_msg.RawMessage.Length.ToString());
+                        lvi.SubItems.Add(_msg.Headers.MessageID);
 					}
 					Thread.Sleep(50);
 				}
@@ -295,10 +302,10 @@ namespace MailMonitor
 			}
 			catch(Exception e)
 			{
-				Utilities.BeepIt();
+				Utilities.PlayBeep();
 				try
 				{
-					MessageBox.Show(this,e.Message);
+					MessageBox.Show(this,e.ToString());
 				}
 				catch
 				{}
@@ -408,7 +415,7 @@ namespace MailMonitor
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
 				_mail=new frmMail();
-				_mail.MessageIndex=(int)lvwMailBoxes.SelectedItems[0].Index;
+				_mail.MessageIndex=lvwMailBoxes.SelectedItems[0].Index;
 				_mail.MailBox=_mailBox;
 				_mail.POPClient=_popClient;
 				_mail.Settings=_settings;
@@ -419,9 +426,9 @@ namespace MailMonitor
 
 		private void frmMails_Resize(object sender, EventArgs e)
 		{
-			_settings.MailsWindow.State=this.WindowState;
-			_settings.MailsWindow.Size=this.Size;
-			_settings.MailsWindow.Location=this.Location;
+			_settings.MailsWindow.State=WindowState;
+			_settings.MailsWindow.Size=Size;
+			_settings.MailsWindow.Location=Location;
 		}
 
 		private void cmdCancel_Click(object sender, System.EventArgs e)
@@ -458,7 +465,7 @@ namespace MailMonitor
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
 				OpenPOP.MIME.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag,false);
-				dlgSave.FileName=_msg.Subject;
+                dlgSave.FileName = _msg.Headers.Subject;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)			
 					msg.SaveToMIMEEmailFile(dlgSave.FileName,true);

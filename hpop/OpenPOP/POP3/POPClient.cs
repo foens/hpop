@@ -200,6 +200,7 @@ namespace OpenPOP.POP3
 		/// <param name="strCommand">command to send to server</param>
 		/// <param name="blnSilent">Do not give error</param>
 		/// <returns>true if server responded "+OK"</returns>
+        /// TODO: Should this really use catch(Exception e)?
 		private bool SendCommand(string strCommand, bool blnSilent)
 		{
 			try

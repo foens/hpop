@@ -135,450 +135,466 @@ namespace MailMonitor
 		#region Windows
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMain));
-			this.tbrMain = new System.Windows.Forms.ToolBar();
-			this.btnCheckAllMailBoxes = new System.Windows.Forms.ToolBarButton();
-			this.btnCheckCurrentMailBox = new System.Windows.Forms.ToolBarButton();
-			this.btnStopChecking = new System.Windows.Forms.ToolBarButton();
-			this.btnGetInfo = new System.Windows.Forms.ToolBarButton();
-			this.btnSchedule = new System.Windows.Forms.ToolBarButton();
-			this.btnSettings = new System.Windows.Forms.ToolBarButton();
-			this.imlToolBar = new System.Windows.Forms.ImageList(this.components);
-			this.mmMain = new System.Windows.Forms.MainMenu();
-			this.mnuFile = new System.Windows.Forms.MenuItem();
-			this.mnuCheckAll = new System.Windows.Forms.MenuItem();
-			this.mnuCheckCurrent = new System.Windows.Forms.MenuItem();
-			this.mnuHR4 = new System.Windows.Forms.MenuItem();
-			this.mnuStopChecking = new System.Windows.Forms.MenuItem();
-			this.mnuHR5 = new System.Windows.Forms.MenuItem();
-			this.mnuOpenEML = new System.Windows.Forms.MenuItem();
-			this.mnuHR7 = new System.Windows.Forms.MenuItem();
-			this.mnuGetInfo = new System.Windows.Forms.MenuItem();
-			this.mnuRunClient = new System.Windows.Forms.MenuItem();
-			this.mnuHR6 = new System.Windows.Forms.MenuItem();
-			this.mnuExit = new System.Windows.Forms.MenuItem();
-			this.mnuView = new System.Windows.Forms.MenuItem();
-			this.mnuShowToolbar = new System.Windows.Forms.MenuItem();
-			this.mnuShowStatusbar = new System.Windows.Forms.MenuItem();
-			this.mnuHR3 = new System.Windows.Forms.MenuItem();
-			this.mnuHideWindow = new System.Windows.Forms.MenuItem();
-			this.mnuOptions = new System.Windows.Forms.MenuItem();
-			this.mnuSchedule = new System.Windows.Forms.MenuItem();
-			this.mnuHR2 = new System.Windows.Forms.MenuItem();
-			this.mnuSettings = new System.Windows.Forms.MenuItem();
-			this.mnuHelp = new System.Windows.Forms.MenuItem();
-			this.mnuWebsite = new System.Windows.Forms.MenuItem();
-			this.mnuFeedback = new System.Windows.Forms.MenuItem();
-			this.mnuHR = new System.Windows.Forms.MenuItem();
-			this.mnuAbout = new System.Windows.Forms.MenuItem();
-			this.sbrMain = new System.Windows.Forms.StatusBar();
-			this.sbpMain = new System.Windows.Forms.StatusBarPanel();
-			this.lvwMailBoxes = new System.Windows.Forms.ListView();
-			this.nicPopup = new System.Windows.Forms.NotifyIcon(this.components);
-			this.cmuPopup = new System.Windows.Forms.ContextMenu();
-			this.mnuShowMainWindow = new System.Windows.Forms.MenuItem();
-			this.mnuRunClient2 = new System.Windows.Forms.MenuItem();
-			this.mnuHR8 = new System.Windows.Forms.MenuItem();
-			this.mnuCheckAll2 = new System.Windows.Forms.MenuItem();
-			this.mnuStopChecking2 = new System.Windows.Forms.MenuItem();
-			this.mnuHR9 = new System.Windows.Forms.MenuItem();
-			this.mnuSchedule2 = new System.Windows.Forms.MenuItem();
-			this.mnuOptions2 = new System.Windows.Forms.MenuItem();
-			this.mnuHR10 = new System.Windows.Forms.MenuItem();
-			this.mnuExit2 = new System.Windows.Forms.MenuItem();
-			this.tmrSchedule = new System.Windows.Forms.Timer(this.components);
-			this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
-			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).BeginInit();
-			this.SuspendLayout();
-			// 
-			// tbrMain
-			// 
-			this.tbrMain.Appearance = System.Windows.Forms.ToolBarAppearance.Flat;
-			this.tbrMain.Buttons.AddRange(new System.Windows.Forms.ToolBarButton[] {
-																					   this.btnCheckAllMailBoxes,
-																					   this.btnCheckCurrentMailBox,
-																					   this.btnStopChecking,
-																					   this.btnGetInfo,
-																					   this.btnSchedule,
-																					   this.btnSettings});
-			this.tbrMain.Divider = false;
-			this.tbrMain.DropDownArrows = true;
-			this.tbrMain.ImageList = this.imlToolBar;
-			this.tbrMain.Location = new System.Drawing.Point(0, 0);
-			this.tbrMain.Name = "tbrMain";
-			this.tbrMain.ShowToolTips = true;
-			this.tbrMain.Size = new System.Drawing.Size(496, 42);
-			this.tbrMain.TabIndex = 0;
-			this.tbrMain.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.tbrMain_ButtonClick);
-			// 
-			// btnCheckAllMailBoxes
-			// 
-			this.btnCheckAllMailBoxes.ImageIndex = 0;
-			this.btnCheckAllMailBoxes.Tag = "CheckAllMailBoxes";
-			this.btnCheckAllMailBoxes.ToolTipText = "Check All Mail Boxes";
-			// 
-			// btnCheckCurrentMailBox
-			// 
-			this.btnCheckCurrentMailBox.ImageIndex = 1;
-			this.btnCheckCurrentMailBox.Tag = "CheckCurrentMailBox";
-			this.btnCheckCurrentMailBox.ToolTipText = "Check Current Mail Box";
-			// 
-			// btnStopChecking
-			// 
-			this.btnStopChecking.ImageIndex = 2;
-			this.btnStopChecking.Tag = "StopChecking";
-			this.btnStopChecking.ToolTipText = "Stop Checking";
-			// 
-			// btnGetInfo
-			// 
-			this.btnGetInfo.ImageIndex = 3;
-			this.btnGetInfo.Tag = "GetInfo";
-			this.btnGetInfo.ToolTipText = "Get Info";
-			// 
-			// btnSchedule
-			// 
-			this.btnSchedule.ImageIndex = 4;
-			this.btnSchedule.Pushed = true;
-			this.btnSchedule.Tag = "Schedule";
-			this.btnSchedule.ToolTipText = "Schedule";
-			// 
-			// btnSettings
-			// 
-			this.btnSettings.ImageIndex = 5;
-			this.btnSettings.Tag = "Settings";
-			this.btnSettings.ToolTipText = "Settings";
-			// 
-			// imlToolBar
-			// 
-			this.imlToolBar.ImageSize = new System.Drawing.Size(32, 32);
-			this.imlToolBar.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlToolBar.ImageStream")));
-			this.imlToolBar.TransparentColor = System.Drawing.Color.Transparent;
-			// 
-			// mmMain
-			// 
-			this.mmMain.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																				   this.mnuFile,
-																				   this.mnuView,
-																				   this.mnuOptions,
-																				   this.mnuHelp});
-			// 
-			// mnuFile
-			// 
-			this.mnuFile.Index = 0;
-			this.mnuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					this.mnuCheckAll,
-																					this.mnuCheckCurrent,
-																					this.mnuHR4,
-																					this.mnuStopChecking,
-																					this.mnuHR5,
-																					this.mnuOpenEML,
-																					this.mnuHR7,
-																					this.mnuGetInfo,
-																					this.mnuRunClient,
-																					this.mnuHR6,
-																					this.mnuExit});
-			this.mnuFile.Text = "&File";
-			// 
-			// mnuCheckAll
-			// 
-			this.mnuCheckAll.Index = 0;
-			this.mnuCheckAll.Shortcut = System.Windows.Forms.Shortcut.F2;
-			this.mnuCheckAll.Text = "Check &All Mail Boxes";
-			this.mnuCheckAll.Click += new System.EventHandler(this.mnuCheckAll_Click);
-			// 
-			// mnuCheckCurrent
-			// 
-			this.mnuCheckCurrent.Index = 1;
-			this.mnuCheckCurrent.Shortcut = System.Windows.Forms.Shortcut.F3;
-			this.mnuCheckCurrent.Text = "Check &Current Mail Box";
-			this.mnuCheckCurrent.Click += new System.EventHandler(this.mnuCheckCurrent_Click);
-			// 
-			// mnuHR4
-			// 
-			this.mnuHR4.Index = 2;
-			this.mnuHR4.Text = "-";
-			// 
-			// mnuStopChecking
-			// 
-			this.mnuStopChecking.Index = 3;
-			this.mnuStopChecking.Shortcut = System.Windows.Forms.Shortcut.F4;
-			this.mnuStopChecking.Text = "&Stop Checking";
-			this.mnuStopChecking.Click += new System.EventHandler(this.mnuStopChecking_Click);
-			// 
-			// mnuHR5
-			// 
-			this.mnuHR5.Index = 4;
-			this.mnuHR5.Text = "-";
-			// 
-			// mnuOpenEML
-			// 
-			this.mnuOpenEML.Index = 5;
-			this.mnuOpenEML.Text = "&Open EML File";
-			this.mnuOpenEML.Click += new System.EventHandler(this.mnuOpenEML_Click);
-			// 
-			// mnuHR7
-			// 
-			this.mnuHR7.Index = 6;
-			this.mnuHR7.Text = "-";
-			// 
-			// mnuGetInfo
-			// 
-			this.mnuGetInfo.Index = 7;
-			this.mnuGetInfo.Shortcut = System.Windows.Forms.Shortcut.F5;
-			this.mnuGetInfo.Text = "Get MailBox &Info";
-			this.mnuGetInfo.Click += new System.EventHandler(this.mnuGetInfo_Click);
-			// 
-			// mnuRunClient
-			// 
-			this.mnuRunClient.Index = 8;
-			this.mnuRunClient.Text = "&Run Mail Client";
-			this.mnuRunClient.Click += new System.EventHandler(this.mnuRunClient_Click);
-			// 
-			// mnuHR6
-			// 
-			this.mnuHR6.Index = 9;
-			this.mnuHR6.Text = "-";
-			// 
-			// mnuExit
-			// 
-			this.mnuExit.Index = 10;
-			this.mnuExit.Text = "E&xit";
-			this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
-			// 
-			// mnuView
-			// 
-			this.mnuView.Index = 1;
-			this.mnuView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					this.mnuShowToolbar,
-																					this.mnuShowStatusbar,
-																					this.mnuHR3,
-																					this.mnuHideWindow});
-			this.mnuView.Text = "&View";
-			// 
-			// mnuShowToolbar
-			// 
-			this.mnuShowToolbar.Checked = true;
-			this.mnuShowToolbar.Index = 0;
-			this.mnuShowToolbar.Text = "Show &Toolbar";
-			this.mnuShowToolbar.Click += new System.EventHandler(this.mnuShowToolbar_Click);
-			// 
-			// mnuShowStatusbar
-			// 
-			this.mnuShowStatusbar.Checked = true;
-			this.mnuShowStatusbar.Index = 1;
-			this.mnuShowStatusbar.Text = "Show &Statusbar";
-			this.mnuShowStatusbar.Click += new System.EventHandler(this.mnuShowStatusbar_Click);
-			// 
-			// mnuHR3
-			// 
-			this.mnuHR3.Index = 2;
-			this.mnuHR3.Text = "-";
-			// 
-			// mnuHideWindow
-			// 
-			this.mnuHideWindow.Index = 3;
-			this.mnuHideWindow.Shortcut = System.Windows.Forms.Shortcut.F9;
-			this.mnuHideWindow.Text = "&Hide Main Window";
-			this.mnuHideWindow.Click += new System.EventHandler(this.mnuHideWindow_Click);
-			// 
-			// mnuOptions
-			// 
-			this.mnuOptions.Index = 2;
-			this.mnuOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					   this.mnuSchedule,
-																					   this.mnuHR2,
-																					   this.mnuSettings});
-			this.mnuOptions.Text = "&Options";
-			// 
-			// mnuSchedule
-			// 
-			this.mnuSchedule.Checked = true;
-			this.mnuSchedule.Index = 0;
-			this.mnuSchedule.Shortcut = System.Windows.Forms.Shortcut.F6;
-			this.mnuSchedule.Text = "Schedule &Checking";
-			this.mnuSchedule.Click += new System.EventHandler(this.mnuSchedule_Click);
-			// 
-			// mnuHR2
-			// 
-			this.mnuHR2.Index = 1;
-			this.mnuHR2.Text = "-";
-			// 
-			// mnuSettings
-			// 
-			this.mnuSettings.Index = 2;
-			this.mnuSettings.Text = "&Settings";
-			this.mnuSettings.Click += new System.EventHandler(this.mnuSettings_Click);
-			// 
-			// mnuHelp
-			// 
-			this.mnuHelp.Index = 3;
-			this.mnuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					this.mnuWebsite,
-																					this.mnuFeedback,
-																					this.mnuHR,
-																					this.mnuAbout});
-			this.mnuHelp.Text = "&Help";
-			// 
-			// mnuWebsite
-			// 
-			this.mnuWebsite.Index = 0;
-			this.mnuWebsite.Text = "&Website";
-			this.mnuWebsite.Click += new System.EventHandler(this.mnuWebsite_Click);
-			// 
-			// mnuFeedback
-			// 
-			this.mnuFeedback.Index = 1;
-			this.mnuFeedback.Text = "&Feedback";
-			this.mnuFeedback.Click += new System.EventHandler(this.mnuFeedback_Click);
-			// 
-			// mnuHR
-			// 
-			this.mnuHR.Index = 2;
-			this.mnuHR.Text = "-";
-			// 
-			// mnuAbout
-			// 
-			this.mnuAbout.Index = 3;
-			this.mnuAbout.Text = "&About...";
-			this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
-			// 
-			// sbrMain
-			// 
-			this.sbrMain.Location = new System.Drawing.Point(0, 223);
-			this.sbrMain.Name = "sbrMain";
-			this.sbrMain.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
-																					   this.sbpMain});
-			this.sbrMain.ShowPanels = true;
-			this.sbrMain.Size = new System.Drawing.Size(496, 22);
-			this.sbrMain.TabIndex = 1;
-			this.sbrMain.Text = "Welcome!";
-			// 
-			// sbpMain
-			// 
-			this.sbpMain.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Spring;
-			this.sbpMain.Width = 480;
-			// 
-			// lvwMailBoxes
-			// 
-			this.lvwMailBoxes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.lvwMailBoxes.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvwMailBoxes.FullRowSelect = true;
-			this.lvwMailBoxes.GridLines = true;
-			this.lvwMailBoxes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-			this.lvwMailBoxes.HideSelection = false;
-			this.lvwMailBoxes.HoverSelection = true;
-			this.lvwMailBoxes.LabelWrap = false;
-			this.lvwMailBoxes.Location = new System.Drawing.Point(0, 42);
-			this.lvwMailBoxes.MultiSelect = false;
-			this.lvwMailBoxes.Name = "lvwMailBoxes";
-			this.lvwMailBoxes.Size = new System.Drawing.Size(496, 181);
-			this.lvwMailBoxes.TabIndex = 3;
-			this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
-			this.lvwMailBoxes.DoubleClick += new System.EventHandler(this.lvwMailBoxes_DoubleClick);
-			// 
-			// nicPopup
-			// 
-			this.nicPopup.ContextMenu = this.cmuPopup;
-			this.nicPopup.Text = "Mail Monitor";
-			this.nicPopup.DoubleClick += new System.EventHandler(this.nicPopup_DoubleClick);
-			// 
-			// cmuPopup
-			// 
-			this.cmuPopup.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					 this.mnuShowMainWindow,
-																					 this.mnuRunClient2,
-																					 this.mnuHR8,
-																					 this.mnuCheckAll2,
-																					 this.mnuStopChecking2,
-																					 this.mnuHR9,
-																					 this.mnuSchedule2,
-																					 this.mnuOptions2,
-																					 this.mnuHR10,
-																					 this.mnuExit2});
-			// 
-			// mnuShowMainWindow
-			// 
-			this.mnuShowMainWindow.Index = 0;
-			this.mnuShowMainWindow.Text = "&Show Main Window";
-			this.mnuShowMainWindow.Click += new System.EventHandler(this.mnuShowMainWindow_Click);
-			// 
-			// mnuRunClient2
-			// 
-			this.mnuRunClient2.Index = 1;
-			this.mnuRunClient2.Text = "&Run Mail Client";
-			this.mnuRunClient2.Click += new System.EventHandler(this.mnuRunClient2_Click);
-			// 
-			// mnuHR8
-			// 
-			this.mnuHR8.Index = 2;
-			this.mnuHR8.Text = "-";
-			// 
-			// mnuCheckAll2
-			// 
-			this.mnuCheckAll2.Index = 3;
-			this.mnuCheckAll2.Text = "&Check All MailBoxes";
-			this.mnuCheckAll2.Click += new System.EventHandler(this.mnuCheckAll2_Click);
-			// 
-			// mnuStopChecking2
-			// 
-			this.mnuStopChecking2.Index = 4;
-			this.mnuStopChecking2.Text = "&Stop Checking";
-			this.mnuStopChecking2.Click += new System.EventHandler(this.mnuStopChecking2_Click);
-			// 
-			// mnuHR9
-			// 
-			this.mnuHR9.Index = 5;
-			this.mnuHR9.Text = "-";
-			// 
-			// mnuSchedule2
-			// 
-			this.mnuSchedule2.Index = 6;
-			this.mnuSchedule2.RadioCheck = true;
-			this.mnuSchedule2.Text = "&Schedule";
-			this.mnuSchedule2.Click += new System.EventHandler(this.mnuSchedule2_Click);
-			// 
-			// mnuOptions2
-			// 
-			this.mnuOptions2.Index = 7;
-			this.mnuOptions2.Text = "&Options";
-			this.mnuOptions2.Click += new System.EventHandler(this.mnuOptions2_Click);
-			// 
-			// mnuHR10
-			// 
-			this.mnuHR10.Index = 8;
-			this.mnuHR10.Text = "-";
-			// 
-			// mnuExit2
-			// 
-			this.mnuExit2.Index = 9;
-			this.mnuExit2.Text = "E&xit";
-			this.mnuExit2.Click += new System.EventHandler(this.mnuExit2_Click);
-			// 
-			// tmrSchedule
-			// 
-			this.tmrSchedule.Enabled = true;
-			this.tmrSchedule.Interval = 60000;
-			this.tmrSchedule.Tick += new System.EventHandler(this.tmrSchedule_Tick);
-			// 
-			// frmMain
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-			this.ClientSize = new System.Drawing.Size(496, 245);
-			this.Controls.Add(this.lvwMailBoxes);
-			this.Controls.Add(this.sbrMain);
-			this.Controls.Add(this.tbrMain);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Menu = this.mmMain;
-			this.Name = "frmMain";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Mail Monitor";
-			this.Resize += new System.EventHandler(this.frmMain_Resize);
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.frmMain_Closing);
-			this.Load += new System.EventHandler(this.frmMain_Load);
-			this.Closed += new System.EventHandler(this.frmMain_Closed);
-			((System.ComponentModel.ISupportInitialize)(this.sbpMain)).EndInit();
-			this.ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+            this.tbrMain = new System.Windows.Forms.ToolBar();
+            this.btnCheckAllMailBoxes = new System.Windows.Forms.ToolBarButton();
+            this.btnCheckCurrentMailBox = new System.Windows.Forms.ToolBarButton();
+            this.btnStopChecking = new System.Windows.Forms.ToolBarButton();
+            this.btnGetInfo = new System.Windows.Forms.ToolBarButton();
+            this.btnSchedule = new System.Windows.Forms.ToolBarButton();
+            this.btnSettings = new System.Windows.Forms.ToolBarButton();
+            this.imlToolBar = new System.Windows.Forms.ImageList(this.components);
+            this.mmMain = new System.Windows.Forms.MainMenu(this.components);
+            this.mnuFile = new System.Windows.Forms.MenuItem();
+            this.mnuCheckAll = new System.Windows.Forms.MenuItem();
+            this.mnuCheckCurrent = new System.Windows.Forms.MenuItem();
+            this.mnuHR4 = new System.Windows.Forms.MenuItem();
+            this.mnuStopChecking = new System.Windows.Forms.MenuItem();
+            this.mnuHR5 = new System.Windows.Forms.MenuItem();
+            this.mnuOpenEML = new System.Windows.Forms.MenuItem();
+            this.mnuHR7 = new System.Windows.Forms.MenuItem();
+            this.mnuGetInfo = new System.Windows.Forms.MenuItem();
+            this.mnuRunClient = new System.Windows.Forms.MenuItem();
+            this.mnuHR6 = new System.Windows.Forms.MenuItem();
+            this.mnuExit = new System.Windows.Forms.MenuItem();
+            this.mnuView = new System.Windows.Forms.MenuItem();
+            this.mnuShowToolbar = new System.Windows.Forms.MenuItem();
+            this.mnuShowStatusbar = new System.Windows.Forms.MenuItem();
+            this.mnuHR3 = new System.Windows.Forms.MenuItem();
+            this.mnuHideWindow = new System.Windows.Forms.MenuItem();
+            this.mnuOptions = new System.Windows.Forms.MenuItem();
+            this.mnuSchedule = new System.Windows.Forms.MenuItem();
+            this.mnuHR2 = new System.Windows.Forms.MenuItem();
+            this.mnuSettings = new System.Windows.Forms.MenuItem();
+            this.mnuHelp = new System.Windows.Forms.MenuItem();
+            this.mnuWebsite = new System.Windows.Forms.MenuItem();
+            this.mnuFeedback = new System.Windows.Forms.MenuItem();
+            this.mnuHR = new System.Windows.Forms.MenuItem();
+            this.mnuAbout = new System.Windows.Forms.MenuItem();
+            this.sbrMain = new System.Windows.Forms.StatusBar();
+            this.sbpMain = new System.Windows.Forms.StatusBarPanel();
+            this.lvwMailBoxes = new System.Windows.Forms.ListView();
+            this.nicPopup = new System.Windows.Forms.NotifyIcon(this.components);
+            this.cmuPopup = new System.Windows.Forms.ContextMenu();
+            this.mnuShowMainWindow = new System.Windows.Forms.MenuItem();
+            this.mnuRunClient2 = new System.Windows.Forms.MenuItem();
+            this.mnuHR8 = new System.Windows.Forms.MenuItem();
+            this.mnuCheckAll2 = new System.Windows.Forms.MenuItem();
+            this.mnuStopChecking2 = new System.Windows.Forms.MenuItem();
+            this.mnuHR9 = new System.Windows.Forms.MenuItem();
+            this.mnuSchedule2 = new System.Windows.Forms.MenuItem();
+            this.mnuOptions2 = new System.Windows.Forms.MenuItem();
+            this.mnuHR10 = new System.Windows.Forms.MenuItem();
+            this.mnuExit2 = new System.Windows.Forms.MenuItem();
+            this.tmrSchedule = new System.Windows.Forms.Timer(this.components);
+            this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
+            ((System.ComponentModel.ISupportInitialize)(this.sbpMain)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // tbrMain
+            // 
+            this.tbrMain.Appearance = System.Windows.Forms.ToolBarAppearance.Flat;
+            this.tbrMain.Buttons.AddRange(new System.Windows.Forms.ToolBarButton[] {
+            this.btnCheckAllMailBoxes,
+            this.btnCheckCurrentMailBox,
+            this.btnStopChecking,
+            this.btnGetInfo,
+            this.btnSchedule,
+            this.btnSettings});
+            this.tbrMain.Divider = false;
+            this.tbrMain.DropDownArrows = true;
+            this.tbrMain.ImageList = this.imlToolBar;
+            this.tbrMain.Location = new System.Drawing.Point(0, 0);
+            this.tbrMain.Name = "tbrMain";
+            this.tbrMain.ShowToolTips = true;
+            this.tbrMain.Size = new System.Drawing.Size(496, 42);
+            this.tbrMain.TabIndex = 0;
+            this.tbrMain.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.tbrMain_ButtonClick);
+            // 
+            // btnCheckAllMailBoxes
+            // 
+            this.btnCheckAllMailBoxes.ImageIndex = 0;
+            this.btnCheckAllMailBoxes.Name = "btnCheckAllMailBoxes";
+            this.btnCheckAllMailBoxes.Tag = "CheckAllMailBoxes";
+            this.btnCheckAllMailBoxes.ToolTipText = "Check All Mail Boxes";
+            // 
+            // btnCheckCurrentMailBox
+            // 
+            this.btnCheckCurrentMailBox.ImageIndex = 1;
+            this.btnCheckCurrentMailBox.Name = "btnCheckCurrentMailBox";
+            this.btnCheckCurrentMailBox.Tag = "CheckCurrentMailBox";
+            this.btnCheckCurrentMailBox.ToolTipText = "Check Current Mail Box";
+            // 
+            // btnStopChecking
+            // 
+            this.btnStopChecking.ImageIndex = 2;
+            this.btnStopChecking.Name = "btnStopChecking";
+            this.btnStopChecking.Tag = "StopChecking";
+            this.btnStopChecking.ToolTipText = "Stop Checking";
+            // 
+            // btnGetInfo
+            // 
+            this.btnGetInfo.ImageIndex = 3;
+            this.btnGetInfo.Name = "btnGetInfo";
+            this.btnGetInfo.Tag = "GetInfo";
+            this.btnGetInfo.ToolTipText = "Get Info";
+            // 
+            // btnSchedule
+            // 
+            this.btnSchedule.ImageIndex = 4;
+            this.btnSchedule.Name = "btnSchedule";
+            this.btnSchedule.Pushed = true;
+            this.btnSchedule.Tag = "Schedule";
+            this.btnSchedule.ToolTipText = "Schedule";
+            // 
+            // btnSettings
+            // 
+            this.btnSettings.ImageIndex = 5;
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Tag = "Settings";
+            this.btnSettings.ToolTipText = "Settings";
+            // 
+            // imlToolBar
+            // 
+            this.imlToolBar.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlToolBar.ImageStream")));
+            this.imlToolBar.TransparentColor = System.Drawing.Color.Transparent;
+            this.imlToolBar.Images.SetKeyName(0, "");
+            this.imlToolBar.Images.SetKeyName(1, "");
+            this.imlToolBar.Images.SetKeyName(2, "");
+            this.imlToolBar.Images.SetKeyName(3, "");
+            this.imlToolBar.Images.SetKeyName(4, "");
+            this.imlToolBar.Images.SetKeyName(5, "");
+            this.imlToolBar.Images.SetKeyName(6, "");
+            this.imlToolBar.Images.SetKeyName(7, "");
+            // 
+            // mmMain
+            // 
+            this.mmMain.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuFile,
+            this.mnuView,
+            this.mnuOptions,
+            this.mnuHelp});
+            // 
+            // mnuFile
+            // 
+            this.mnuFile.Index = 0;
+            this.mnuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuCheckAll,
+            this.mnuCheckCurrent,
+            this.mnuHR4,
+            this.mnuStopChecking,
+            this.mnuHR5,
+            this.mnuOpenEML,
+            this.mnuHR7,
+            this.mnuGetInfo,
+            this.mnuRunClient,
+            this.mnuHR6,
+            this.mnuExit});
+            this.mnuFile.Text = "&File";
+            // 
+            // mnuCheckAll
+            // 
+            this.mnuCheckAll.Index = 0;
+            this.mnuCheckAll.Shortcut = System.Windows.Forms.Shortcut.F2;
+            this.mnuCheckAll.Text = "Check &All Mail Boxes";
+            this.mnuCheckAll.Click += new System.EventHandler(this.mnuCheckAll_Click);
+            // 
+            // mnuCheckCurrent
+            // 
+            this.mnuCheckCurrent.Index = 1;
+            this.mnuCheckCurrent.Shortcut = System.Windows.Forms.Shortcut.F3;
+            this.mnuCheckCurrent.Text = "Check &Current Mail Box";
+            this.mnuCheckCurrent.Click += new System.EventHandler(this.mnuCheckCurrent_Click);
+            // 
+            // mnuHR4
+            // 
+            this.mnuHR4.Index = 2;
+            this.mnuHR4.Text = "-";
+            // 
+            // mnuStopChecking
+            // 
+            this.mnuStopChecking.Index = 3;
+            this.mnuStopChecking.Shortcut = System.Windows.Forms.Shortcut.F4;
+            this.mnuStopChecking.Text = "&Stop Checking";
+            this.mnuStopChecking.Click += new System.EventHandler(this.mnuStopChecking_Click);
+            // 
+            // mnuHR5
+            // 
+            this.mnuHR5.Index = 4;
+            this.mnuHR5.Text = "-";
+            // 
+            // mnuOpenEML
+            // 
+            this.mnuOpenEML.Index = 5;
+            this.mnuOpenEML.Text = "&Open EML File";
+            this.mnuOpenEML.Click += new System.EventHandler(this.mnuOpenEML_Click);
+            // 
+            // mnuHR7
+            // 
+            this.mnuHR7.Index = 6;
+            this.mnuHR7.Text = "-";
+            // 
+            // mnuGetInfo
+            // 
+            this.mnuGetInfo.Index = 7;
+            this.mnuGetInfo.Shortcut = System.Windows.Forms.Shortcut.F5;
+            this.mnuGetInfo.Text = "Get MailBox &Info";
+            this.mnuGetInfo.Click += new System.EventHandler(this.mnuGetInfo_Click);
+            // 
+            // mnuRunClient
+            // 
+            this.mnuRunClient.Index = 8;
+            this.mnuRunClient.Text = "&Run Mail Client";
+            this.mnuRunClient.Click += new System.EventHandler(this.mnuRunClient_Click);
+            // 
+            // mnuHR6
+            // 
+            this.mnuHR6.Index = 9;
+            this.mnuHR6.Text = "-";
+            // 
+            // mnuExit
+            // 
+            this.mnuExit.Index = 10;
+            this.mnuExit.Text = "E&xit";
+            this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
+            // 
+            // mnuView
+            // 
+            this.mnuView.Index = 1;
+            this.mnuView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuShowToolbar,
+            this.mnuShowStatusbar,
+            this.mnuHR3,
+            this.mnuHideWindow});
+            this.mnuView.Text = "&View";
+            // 
+            // mnuShowToolbar
+            // 
+            this.mnuShowToolbar.Checked = true;
+            this.mnuShowToolbar.Index = 0;
+            this.mnuShowToolbar.Text = "Show &Toolbar";
+            this.mnuShowToolbar.Click += new System.EventHandler(this.mnuShowToolbar_Click);
+            // 
+            // mnuShowStatusbar
+            // 
+            this.mnuShowStatusbar.Checked = true;
+            this.mnuShowStatusbar.Index = 1;
+            this.mnuShowStatusbar.Text = "Show &Statusbar";
+            this.mnuShowStatusbar.Click += new System.EventHandler(this.mnuShowStatusbar_Click);
+            // 
+            // mnuHR3
+            // 
+            this.mnuHR3.Index = 2;
+            this.mnuHR3.Text = "-";
+            // 
+            // mnuHideWindow
+            // 
+            this.mnuHideWindow.Index = 3;
+            this.mnuHideWindow.Shortcut = System.Windows.Forms.Shortcut.F9;
+            this.mnuHideWindow.Text = "&Hide Main Window";
+            this.mnuHideWindow.Click += new System.EventHandler(this.mnuHideWindow_Click);
+            // 
+            // mnuOptions
+            // 
+            this.mnuOptions.Index = 2;
+            this.mnuOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuSchedule,
+            this.mnuHR2,
+            this.mnuSettings});
+            this.mnuOptions.Text = "&Options";
+            // 
+            // mnuSchedule
+            // 
+            this.mnuSchedule.Checked = true;
+            this.mnuSchedule.Index = 0;
+            this.mnuSchedule.Shortcut = System.Windows.Forms.Shortcut.F6;
+            this.mnuSchedule.Text = "Schedule &Checking";
+            this.mnuSchedule.Click += new System.EventHandler(this.mnuSchedule_Click);
+            // 
+            // mnuHR2
+            // 
+            this.mnuHR2.Index = 1;
+            this.mnuHR2.Text = "-";
+            // 
+            // mnuSettings
+            // 
+            this.mnuSettings.Index = 2;
+            this.mnuSettings.Text = "&Settings";
+            this.mnuSettings.Click += new System.EventHandler(this.mnuSettings_Click);
+            // 
+            // mnuHelp
+            // 
+            this.mnuHelp.Index = 3;
+            this.mnuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuWebsite,
+            this.mnuFeedback,
+            this.mnuHR,
+            this.mnuAbout});
+            this.mnuHelp.Text = "&Help";
+            // 
+            // mnuWebsite
+            // 
+            this.mnuWebsite.Index = 0;
+            this.mnuWebsite.Text = "&Website";
+            this.mnuWebsite.Click += new System.EventHandler(this.mnuWebsite_Click);
+            // 
+            // mnuFeedback
+            // 
+            this.mnuFeedback.Index = 1;
+            this.mnuFeedback.Text = "&Feedback";
+            this.mnuFeedback.Click += new System.EventHandler(this.mnuFeedback_Click);
+            // 
+            // mnuHR
+            // 
+            this.mnuHR.Index = 2;
+            this.mnuHR.Text = "-";
+            // 
+            // mnuAbout
+            // 
+            this.mnuAbout.Index = 3;
+            this.mnuAbout.Text = "&About...";
+            this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
+            // 
+            // sbrMain
+            // 
+            this.sbrMain.Location = new System.Drawing.Point(0, 225);
+            this.sbrMain.Name = "sbrMain";
+            this.sbrMain.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
+            this.sbpMain});
+            this.sbrMain.ShowPanels = true;
+            this.sbrMain.Size = new System.Drawing.Size(496, 20);
+            this.sbrMain.TabIndex = 1;
+            this.sbrMain.Text = "Welcome!";
+            // 
+            // sbpMain
+            // 
+            this.sbpMain.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Spring;
+            this.sbpMain.Name = "sbpMain";
+            this.sbpMain.Width = 479;
+            // 
+            // lvwMailBoxes
+            // 
+            this.lvwMailBoxes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lvwMailBoxes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lvwMailBoxes.FullRowSelect = true;
+            this.lvwMailBoxes.GridLines = true;
+            this.lvwMailBoxes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.lvwMailBoxes.HideSelection = false;
+            this.lvwMailBoxes.HoverSelection = true;
+            this.lvwMailBoxes.LabelWrap = false;
+            this.lvwMailBoxes.Location = new System.Drawing.Point(0, 42);
+            this.lvwMailBoxes.MultiSelect = false;
+            this.lvwMailBoxes.Name = "lvwMailBoxes";
+            this.lvwMailBoxes.Size = new System.Drawing.Size(496, 183);
+            this.lvwMailBoxes.TabIndex = 3;
+            this.lvwMailBoxes.UseCompatibleStateImageBehavior = false;
+            this.lvwMailBoxes.View = System.Windows.Forms.View.Details;
+            this.lvwMailBoxes.DoubleClick += new System.EventHandler(this.lvwMailBoxes_DoubleClick);
+            // 
+            // nicPopup
+            // 
+            this.nicPopup.ContextMenu = this.cmuPopup;
+            this.nicPopup.Text = "Mail Monitor";
+            this.nicPopup.DoubleClick += new System.EventHandler(this.nicPopup_DoubleClick);
+            // 
+            // cmuPopup
+            // 
+            this.cmuPopup.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuShowMainWindow,
+            this.mnuRunClient2,
+            this.mnuHR8,
+            this.mnuCheckAll2,
+            this.mnuStopChecking2,
+            this.mnuHR9,
+            this.mnuSchedule2,
+            this.mnuOptions2,
+            this.mnuHR10,
+            this.mnuExit2});
+            // 
+            // mnuShowMainWindow
+            // 
+            this.mnuShowMainWindow.Index = 0;
+            this.mnuShowMainWindow.Text = "&Show Main Window";
+            this.mnuShowMainWindow.Click += new System.EventHandler(this.mnuShowMainWindow_Click);
+            // 
+            // mnuRunClient2
+            // 
+            this.mnuRunClient2.Index = 1;
+            this.mnuRunClient2.Text = "&Run Mail Client";
+            this.mnuRunClient2.Click += new System.EventHandler(this.mnuRunClient2_Click);
+            // 
+            // mnuHR8
+            // 
+            this.mnuHR8.Index = 2;
+            this.mnuHR8.Text = "-";
+            // 
+            // mnuCheckAll2
+            // 
+            this.mnuCheckAll2.Index = 3;
+            this.mnuCheckAll2.Text = "&Check All MailBoxes";
+            this.mnuCheckAll2.Click += new System.EventHandler(this.mnuCheckAll2_Click);
+            // 
+            // mnuStopChecking2
+            // 
+            this.mnuStopChecking2.Index = 4;
+            this.mnuStopChecking2.Text = "&Stop Checking";
+            this.mnuStopChecking2.Click += new System.EventHandler(this.mnuStopChecking2_Click);
+            // 
+            // mnuHR9
+            // 
+            this.mnuHR9.Index = 5;
+            this.mnuHR9.Text = "-";
+            // 
+            // mnuSchedule2
+            // 
+            this.mnuSchedule2.Index = 6;
+            this.mnuSchedule2.RadioCheck = true;
+            this.mnuSchedule2.Text = "&Schedule";
+            this.mnuSchedule2.Click += new System.EventHandler(this.mnuSchedule2_Click);
+            // 
+            // mnuOptions2
+            // 
+            this.mnuOptions2.Index = 7;
+            this.mnuOptions2.Text = "&Options";
+            this.mnuOptions2.Click += new System.EventHandler(this.mnuOptions2_Click);
+            // 
+            // mnuHR10
+            // 
+            this.mnuHR10.Index = 8;
+            this.mnuHR10.Text = "-";
+            // 
+            // mnuExit2
+            // 
+            this.mnuExit2.Index = 9;
+            this.mnuExit2.Text = "E&xit";
+            this.mnuExit2.Click += new System.EventHandler(this.mnuExit2_Click);
+            // 
+            // tmrSchedule
+            // 
+            this.tmrSchedule.Enabled = true;
+            this.tmrSchedule.Interval = 60000;
+            this.tmrSchedule.Tick += new System.EventHandler(this.tmrSchedule_Tick);
+            // 
+            // frmMain
+            // 
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.ClientSize = new System.Drawing.Size(496, 245);
+            this.Controls.Add(this.lvwMailBoxes);
+            this.Controls.Add(this.sbrMain);
+            this.Controls.Add(this.tbrMain);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Menu = this.mmMain;
+            this.Name = "frmMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Mail Monitor";
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.frmMain_Closing);
+            this.Closed += new System.EventHandler(this.frmMain_Closed);
+            this.Load += new System.EventHandler(this.frmMain_Load);
+            this.Resize += new System.EventHandler(this.frmMain_Resize);
+            ((System.ComponentModel.ISupportInitialize)(this.sbpMain)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion
@@ -626,7 +642,7 @@ namespace MailMonitor
 			}
 			catch(Exception ex)
 			{
-				Utilities.BeepIt();
+				Utilities.PlayBeep();
 				MessageBox.Show(this,"Failed to send email because "+ex.Message);
 			}
 		}
@@ -914,14 +930,6 @@ namespace MailMonitor
 			
 			tmrSchedule.Interval=_settings.CheckInterval*1000*60;
 
-			MailBox mailBox=new MailBox();
-			//			mailBox.Name="unruledboy@netease.com";
-			//			mailBox.Password="";
-			//			mailBox.Port=110;
-			//			mailBox.UserName="unruledboy";
-			//			mailBox.ServerAddress="pop3.netease.com";
-			//			_mailBoxes.Items.Add(mailBox);
-			//			_mailBoxes.Save();
 			lvwMailBoxes.AutoArrange=true;
 			lvwMailBoxes.Columns.Clear();
 			lvwMailBoxes.Columns.Add("Mail Box",180,HorizontalAlignment.Left);
@@ -954,7 +962,7 @@ namespace MailMonitor
 				for(int i=0;i<_settings.MailBoxes.Count;i++)
 				{
 					lvi=new ListViewItem();
-					mb=(MailBox)_settings.MailBoxes[i];
+					mb=_settings.MailBoxes[i];
 					lvi.Text=mb.Name;
 					lvwMailBoxes.Items.Add(lvi);
 				}
@@ -966,9 +974,9 @@ namespace MailMonitor
 			if(lvwMailBoxes.SelectedItems!=null)
 			{
 				_frmMails=new frmMails();
-				_frmMails.MailBox=((MailBox)_settings.MailBoxes[lvwMailBoxes.SelectedItems[0].Index]);
+				_frmMails.MailBox=_settings.MailBoxes[lvwMailBoxes.SelectedItems[0].Index];
 				_frmMails.Settings=_settings;
-				_frmMails.ShowDialog(this);
+                _frmMails.ShowDialog(this); // When this method is called, the code following it is not executed until after the form is closed
 				_frmMails.Dispose();
 				_frmMails=null;
 			}
@@ -997,7 +1005,7 @@ namespace MailMonitor
 				{
 					//lock(this)
 					{
-						if(((MailBox)_settings.MailBoxes[i]).Use)
+						if(_settings.MailBoxes[i].Use)
 						{
 							_currentMailBox=i;
 							GetMailInfo();
@@ -1013,9 +1021,9 @@ namespace MailMonitor
 
 		private void GetMailInfo()
 		{
-			MailBox mailBox=((MailBox)_settings.MailBoxes[_currentMailBox]);
+			MailBox mailBox = _settings.MailBoxes[_currentMailBox];
 
-			ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
+            ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
 			lvi.SubItems.Add("");
 			lvi.SubItems.Add("");
 			lvi.SubItems.Add("");
@@ -1024,7 +1032,7 @@ namespace MailMonitor
 			{
 
 				OpenPOP.POP3.Logger.Log=true;
-				//_popClient.Disconnect();
+				
                 if(_popClient.Connected)
                     _popClient.Disconnect();
 
@@ -1058,7 +1066,7 @@ namespace MailMonitor
 				
 				sbrMain.Panels[0].Text=intNewMessages.ToString() + " new mail(s).";
 				if(_settings.Beep)
-					Utilities.BeepIt();
+					Utilities.PlayBeep();
 				if(intNewMessages>0)
 				{
 					Bitmap bitmap=new Bitmap(imlToolBar.Images[6]);
@@ -1072,7 +1080,7 @@ namespace MailMonitor
 			}
 			catch(Exception e)
 			{
-				Utilities.BeepIt();
+				Utilities.PlayBeep();
 				//MessageBox.Show(this,e.Message);
 				string strRet;
 				if(e is InvalidPasswordException)

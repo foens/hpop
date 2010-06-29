@@ -23,11 +23,10 @@ namespace OpenPOP.MIME.Decode
 {
     public class EncodedWord
     {
-        
-            /// <summary>
+        /// <summary>
 		/// Decode text that is encoded. See BNF below.
 		/// This will decode any encoded-word found in the string.
-		/// All unencoded parts will not be touched.	
+		/// All unencoded parts will not be touched.
 		/// 
         /// From http://tools.ietf.org/html/rfc2047:
         /// Generally, an "encoded-word" is a sequence of printable ASCII

@@ -113,14 +113,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MIME\Attachment.cs" />
+    <Compile Include="MIME\Header\ContentTransferEncoding.cs" />
     <Compile Include="MIME\Decode\Base64.cs" />
     <Compile Include="MIME\Decode\EncodedWord.cs" />
     <Compile Include="MIME\Decode\QuotedPrintable.cs" />
     <Compile Include="MIME\Message.cs" />
-    <Compile Include="MIME\MessageImportanceType.cs" />
+    <Compile Include="MIME\Header\MessageHeader.cs" />
+    <Compile Include="MIME\Header\MessageImportanceType.cs" />
     <Compile Include="MIME\MIMETypes.cs" />
-    <Compile Include="MIME\Parse\HeaderFieldParser.cs" />
-    <Compile Include="MIME\Parse\HeaderParser.cs" />
+    <Compile Include="MIME\Header\HeaderFieldParser.cs" />
+    <Compile Include="MIME\Header\HeaderExtractor.cs" />
     <Compile Include="MIME\TNEFAttachment.cs" />
     <Compile Include="MIME\TNEFParser.cs" />
     <Compile Include="MIME\Utility.cs" />

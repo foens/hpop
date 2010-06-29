@@ -15,14 +15,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*******************************************************************************/
 
-/*
-*Name:			Assembly
-*Function:		Assembly
-*Author:		Hamid Qureshi
-*Created:		2003/8
-*Modified:		2004/6/20 18:38 GMT+8 GMT+8 by Unruled Boy
-*Description	:
-*/
 using System.Reflection;
 
 [assembly: AssemblyTitle("OpenPOP")]

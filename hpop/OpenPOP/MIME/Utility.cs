@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.IO;
 using OpenPOP.MIME.Decode;
+using OpenPOP.MIME.Header;
 
 namespace OpenPOP.MIME
 {
@@ -280,7 +281,7 @@ namespace OpenPOP.MIME
 				return strText;
 
 			byte[] b = Encoding.Default.GetBytes(strText);
-		    return new string(Encoding.GetEncoding(strCharset).GetChars(b));
+		    return Encoding.GetEncoding(strCharset).GetString(b);
 		}
 
 		/// <summary>
@@ -362,5 +363,33 @@ namespace OpenPOP.MIME
 		{
 		    return strText == null || strText.Trim().Equals("");
 		}
+
+        public static string DoDecode(string input, ContentTransferEncoding contentTransferEncoding, string charSet)
+        {
+            switch (contentTransferEncoding)
+            {
+                case ContentTransferEncoding.QuotedPrintable:
+                    if (!string.IsNullOrEmpty((charSet)))
+                        return QuotedPrintable.ConvertHexContent(input, Encoding.GetEncoding(charSet), 0);
+
+                    return QuotedPrintable.ConvertHexContent(input);
+
+                case ContentTransferEncoding.Base64:
+                    return Base64.decode(input);
+
+                case ContentTransferEncoding.SevenBit:
+                case ContentTransferEncoding.Binary:
+                case ContentTransferEncoding.EightBit:
+                    if (!string.IsNullOrEmpty(charSet))
+                        return ChangeEncoding(input, charSet);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            // Nothing needed to be done
+            return input;
+        }
 	}
 }

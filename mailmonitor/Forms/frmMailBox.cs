@@ -47,7 +47,6 @@ namespace MailMonitor
 		private bool _dirty;
 		private System.Windows.Forms.CheckBox chkUse;
         private CheckBox useSsl;
-		private bool _new=false;
 //		private bool _auto;
 //		private bool _driven;
 
@@ -84,12 +83,10 @@ namespace MailMonitor
 				txtDescription.Text=_mailBox.Desccription;
 				chkUse.Checked=_mailBox.Use;
                 useSsl.Checked=_mailBox.UseSsl;
-				_new=true;
 			}
 			else
 			{
 				_mailBox=new MailBox();
-				_new=false;
 			}
 			_loaded=true;
 			//_auto=false;

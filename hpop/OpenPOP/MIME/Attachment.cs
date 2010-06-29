@@ -53,23 +53,15 @@ namespace OpenPOP.MIME
 		/// verify the attachment whether it is a real attachment or not
 		/// </summary>
 		/// <remarks>this is so far not comprehensive and needs more work to finish</remarks>
-		public bool NotAttachment
-		{
-			get
-			{
-			    /*				if (_contentDisposition==null||_contentType==null)
-									return true;
-								else
-									return (_contentDisposition.IndexOf("attachment")==-1 && _contentType.IndexOf("text/plain")!=-1); */
-				/*				if (_contentType==null)
-									return true;
-								else
-									return (_contentFileName!="");*/
-				if ((ContentType==null||ContentFileName=="") && ContentID==null)//&&_contentType.ToLower().IndexOf("text/")!=-1)
-					return true;
-			    return false;
-			}
-		}
+        public bool NotAttachment
+        {
+            get
+            {
+                if ((ContentType == null || ContentFileName == "") && ContentID == null)
+                    return true;
+                return false;
+            }
+        }
 
 	    /// <summary>
 	    /// Content format
@@ -256,7 +248,7 @@ namespace OpenPOP.MIME
 			{
 			    string rawHeaders;
 			    NameValueCollection headers;
-                Parse.HeaderParser.ParseHeaders(strAttachment, out rawHeaders, out headers);
+                Header.HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
 
                 // Now specificly parse each header. Some headers require special parsing.
                 foreach (string headerName in headers.Keys)
