@@ -119,7 +119,7 @@
     <Compile Include="MIME\Decode\QuotedPrintable.cs" />
     <Compile Include="MIME\Message.cs" />
     <Compile Include="MIME\Header\MessageHeader.cs" />
-    <Compile Include="MIME\Header\MessageImportanceType.cs" />
+    <Compile Include="MIME\Header\MessageImportance.cs" />
     <Compile Include="MIME\MIMETypes.cs" />
     <Compile Include="MIME\Header\HeaderFieldParser.cs" />
     <Compile Include="MIME\Header\HeaderExtractor.cs" />

@@ -37,15 +37,12 @@ namespace OpenPOP.MIME
 	{
 		#region Properties
         /// <summary>
-	    /// whether auto decoding MS-TNEF attachment files
+	    /// Whether to auto decode MS-TNEF attachment files
 	    /// </summary>
 	    public bool AutoDecodeMSTNEF { get; set; }
 
         public MessageHeader Headers { get; private set; }
 
-	    /// <summary>
-	    /// Message Bodies
-	    /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
 	    public List<Attachment> Attachments { get; private set; }
@@ -54,7 +51,7 @@ namespace OpenPOP.MIME
 
 	    /// <summary>
 	    /// The raw message body part of the RawMessage that this message was constructed with.
-	    /// The Raw message is simply the message body of the message, but the message body has NOT
+	    /// The Raw message is simply the message body part of the message, but the message body has NOT
 	    /// been decoded or converted in any way.
 	    /// You properly want to <see cref="MessageBody"/> instead.
 	    /// </summary>

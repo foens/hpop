@@ -64,7 +64,7 @@ namespace OpenPOP.MIME.Header
 		/// The importance level is set to normal, if no such header field was mentioned or it contained
 		/// unknown information. This is the expected behavior according to the RFC.
 		/// </summary>
-        public MessageImportanceType Importance { get; private set; }
+        public MessageImportance Importance { get; private set; }
 
 	    /// <summary>
 	    /// The CONTENT-TRANSFER-ENCODING header field
@@ -169,7 +169,7 @@ namespace OpenPOP.MIME.Header
             UnknownHeaders = new NameValueCollection();
 
             // Default importancetype is Normal (assumed if not set)
-            Importance = MessageImportanceType.Normal;
+            Importance = MessageImportance.Normal;
 
             // 7BIT is the default ContentTransferEncoding (assumed if not set)
             ContentTransferEncoding = ContentTransferEncoding.SevenBit;
