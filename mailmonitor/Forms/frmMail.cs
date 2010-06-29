@@ -412,8 +412,8 @@ namespace MailMonitor
 							OpenPOP.MIME.Message  m2=att.DecodeAsMessage(true,false);
 							string attachmentNames="";
 							bool blnRet=false;
-							if(m2.AttachmentCount>0)
-								for(int i=0;i<m2.AttachmentCount;i++)
+							if(m2.Attachments.Count>0)
+								for(int i=0;i<m2.Attachments.Count;i++)
 								{
 									Attachment att2=m2.Attachments[i];
 									attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";

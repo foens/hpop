@@ -48,8 +48,6 @@ namespace OpenPOP.MIME
 	    /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
-	    public int AttachmentCount { get; private set; }
-
 	    public List<Attachment> Attachments { get; private set; }
 
 	    public bool HTML { get; private set; }
@@ -83,7 +81,6 @@ namespace OpenPOP.MIME
             RawHeader = null;
             RawMessageBody = null;
             Attachments = new List<Attachment>();
-            AttachmentCount = 0;
             MessageBody = new List<string>();
             AutoDecodeMSTNEF = false;
         }
@@ -444,7 +441,7 @@ namespace OpenPOP.MIME
 				if(indexOfAttachmentEnd!=-1)
 				{
 				}
-				else if(indexOfAttachmentEnd==-1&&AttachmentCount==0) 
+				else if(indexOfAttachmentEnd==-1&&Attachments.Count==0) 
 				{
 					processed=true;
 					indexOfAttachmentEnd=RawMessageBody.Length;
@@ -476,7 +473,6 @@ namespace OpenPOP.MIME
 						    foreach (TNEFAttachment tatt in tnef.Attachments())
 						    {
                                 Attachment attNew = new Attachment(tatt.FileContent, tatt.FileLength, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
-                                AttachmentCount++;
                                 Attachments.Add(attNew);
 						    }
 						}
@@ -489,16 +485,14 @@ namespace OpenPOP.MIME
 				else if(IsMIMEMailFile2(att))
 				{
 				    Message m = att.DecodeAsMessage(true,true);
-				    for(int i=0;i<m.AttachmentCount;i++)
+				    for(int i=0;i<m.Attachments.Count;i++)
 				    {
 				        att = m.Attachments[i];
-						AttachmentCount++;
 						Attachments.Add(att);
 					}
 				}
 				else
 				{
-					AttachmentCount++;
 					Attachments.Add(att);
 				}
 

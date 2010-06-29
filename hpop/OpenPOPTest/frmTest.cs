@@ -524,7 +524,7 @@ namespace OpenPOP.NET_Sample_App
                 ds.Tables[0].Columns.Add("Value");
 
                 ds.Tables[0].Rows.Add(new object[] {"ContentType", m.Headers.ContentType});
-                ds.Tables[0].Rows.Add(new object[] {"AttachmentCount", m.AttachmentCount});
+                ds.Tables[0].Rows.Add(new object[] {"AttachmentCount", m.Attachments.Count});
 
                 foreach (MailAddress CC in m.Headers.CC)
                     ds.Tables[0].Rows.Add(new object[] {"CC", CC});
@@ -577,7 +577,7 @@ namespace OpenPOP.NET_Sample_App
 					{
 					    MIME.Message m2 = att.DecodeAsMessage(true, false);
 					    string attachmentNames = "";
-                        if (m2.AttachmentCount > 0)
+                        if (m2.Attachments.Count > 0)
                             foreach (MIME.Attachment att2 in m2.Attachments)
                             {
                                 attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
