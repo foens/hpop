@@ -510,10 +510,9 @@ namespace OpenPOP.NET_Sample_App
                 listAttachments.Nodes.Clear();
 
                 bool hadAttachments = false;
-                for (int i = 0; i < m.AttachmentCount; i++)
+                foreach(MIME.Attachment att in m.Attachments)
                 {
                     hadAttachments = true;
-                    MIME.Attachment att = m.GetAttachment(i);
                     listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
                 }
 
@@ -579,9 +578,8 @@ namespace OpenPOP.NET_Sample_App
 					    MIME.Message m2 = att.DecodeAsMessage(true, false);
 					    string attachmentNames = "";
                         if (m2.AttachmentCount > 0)
-                            for (int i = 0; i < m2.AttachmentCount; i++)
+                            foreach (MIME.Attachment att2 in m2.Attachments)
                             {
-                                MIME.Attachment att2 = m2.GetAttachment(i);
                                 attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.ContentLength + " bytes)\r\n";
                             }
 							bool blnRet = m.SaveAttachments(Path.GetDirectoryName(saveFile.FileName));

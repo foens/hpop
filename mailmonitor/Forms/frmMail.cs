@@ -377,7 +377,7 @@ namespace MailMonitor
 				ListViewItem lvi;
 				for(int i=0;i<_msg.Attachments.Count;i++)
 				{
-					lvi=lvwAttachments.Items.Add(_msg.GetAttachmentFileName(_msg.GetAttachment(i)),1);
+					lvi=lvwAttachments.Items.Add(_msg.GetAttachmentFileName(_msg.Attachments[i]),1);
 				}
 
 			    strBodyFile = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + Path.DirectorySeparatorChar + "mail.htm";
@@ -397,7 +397,7 @@ namespace MailMonitor
 
 		private void SaveAttachment()
 		{
-			Attachment att=_msg.GetAttachment((int)lvwAttachments.SelectedItems[0].Index);
+			Attachment att=_msg.Attachments[(int)lvwAttachments.SelectedItems[0].Index];
 			if(att!=null && _msg!=null)
 			{
 				dlgSave.FileName=_msg.GetAttachmentFileName(att);
@@ -415,7 +415,7 @@ namespace MailMonitor
 							if(m2.AttachmentCount>0)
 								for(int i=0;i<m2.AttachmentCount;i++)
 								{
-									Attachment att2=m2.GetAttachment(i);
+									Attachment att2=m2.Attachments[i];
 									attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";
 								}
 							blnRet=_msg.SaveAttachments(System.IO.Path.GetDirectoryName(dlgSave.FileName));

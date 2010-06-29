@@ -48,19 +48,10 @@ namespace OpenPOP.MIME
 	    /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
-	    /// <summary>
-	    /// Attachment Count
-	    /// </summary>
 	    public int AttachmentCount { get; private set; }
 
-	    /// <summary>
-	    /// Attachments
-	    /// </summary>
 	    public List<Attachment> Attachments { get; private set; }
 
-	    /// <summary>
-	    /// HTML
-	    /// </summary>
 	    public bool HTML { get; private set; }
 
 	    /// <summary>
@@ -97,22 +88,22 @@ namespace OpenPOP.MIME
             AutoDecodeMSTNEF = false;
         }
 
-		/// <summary>
-		/// New Message
-		/// </summary>
-		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
-		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		/// <param name="strEMLFile">file of email content to load from</param>
-		public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
+        /// <summary>
+        /// New Message
+        /// </summary>
+        /// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+        /// <param name="blnOnlyHeader">whether only decode the header without body</param>
+        /// <param name="strEMLFile">file of email content to load from</param>
+        public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
             : this()
-		{
-		    string strMessage=null;
-			if(Utility.ReadPlainTextFromFile(strEMLFile,ref strMessage))
-			{
-			    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
-				InitializeMessage(strMessage,blnOnlyHeader);
-			}
-		}
+        {
+            string strMessage = null;
+            if (Utility.ReadPlainTextFromFile(strEMLFile, ref strMessage))
+            {
+                AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
+                InitializeMessage(strMessage, blnOnlyHeader);
+            }
+        }
 
 		/// <summary>
 		/// New Message
@@ -126,44 +117,9 @@ namespace OpenPOP.MIME
 		    AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
 		    InitializeMessage(strMessage,blnOnlyHeader);
 		}
-
-	    /// <summary>
-		/// New Message
-		/// </summary>
-		/// <param name="strMessage">raw message content</param>
-		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		public Message(string strMessage, bool blnOnlyHeader)
-            : this()
-	    {
-            InitializeMessage(strMessage, blnOnlyHeader);
-	    }
-
-	    /// <summary>
-		/// New Message
-		/// </summary>
-		/// <param name="strMessage">raw message content</param>
-		public Message(string strMessage)
-            : this()
-	    {
-	        InitializeMessage(strMessage,false);
-        }
         #endregion
 
         #region Public functions
-        /// <summary>
-        /// get valid attachment
-        /// </summary>
-        /// <param name="intAttachmentNumber">attachment index in the attachments collection</param>
-        /// <returns>attachment</returns>
-        public Attachment GetAttachment(int intAttachmentNumber)
-        {
-            if (intAttachmentNumber < 0 || intAttachmentNumber > AttachmentCount || intAttachmentNumber > Attachments.Count)
-            {
-                Utility.LogError("GetAttachment():attachment not exist");
-                throw new ArgumentOutOfRangeException("intAttachmentNumber");
-            }
-            return Attachments[intAttachmentNumber];
-        }
 
 		/// <summary>
 		/// verify if the message is a report
@@ -219,16 +175,15 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-				for(int i=0;i<AttachmentCount;i++)
+				foreach(Attachment attachment in Attachments)
 				{
-				    Attachment att = GetAttachment(i);
-					if(Utility.IsPictureFile(att.ContentFileName))
+					if(Utility.IsPictureFile(attachment.ContentFileName))
 					{
-                        if (!string.IsNullOrEmpty(att.ContentID))
+                        if (!string.IsNullOrEmpty(attachment.ContentID))
                             //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + att.ContentID, hsbFiles[att.ContentFileName].ToString());
+                            strBody = strBody.Replace("cid:" + attachment.ContentID, hsbFiles[attachment.ContentFileName].ToString());
 
-					    strBody = strBody.Replace(att.ContentFileName, hsbFiles[att.ContentFileName].ToString());
+					    strBody = strBody.Replace(attachment.ContentFileName, hsbFiles[attachment.ContentFileName].ToString());
 					}
 				}
 			}
@@ -253,15 +208,14 @@ namespace OpenPOP.MIME
 				{
 				    strPath += "\\";
 				}			
-				for(int i=0;i<AttachmentCount;i++)
+				foreach(Attachment attachment in Attachments)
 				{
-					Attachment att=GetAttachment(i);
-					if(Utility.IsPictureFile(att.ContentFileName))
+					if(Utility.IsPictureFile(attachment.ContentFileName))
 					{
-                        if (!string.IsNullOrEmpty(att.ContentID))
+                        if (!string.IsNullOrEmpty(attachment.ContentID))
                             //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + att.ContentID, strPath + att.ContentFileName);
-					    strBody = strBody.Replace(att.ContentFileName, strPath + att.ContentFileName);
+                            strBody = strBody.Replace("cid:" + attachment.ContentID, strPath + attachment.ContentFileName);
+					    strBody = strBody.Replace(attachment.ContentFileName, strPath + attachment.ContentFileName);
 					}
 				}
 			}			
@@ -371,10 +325,9 @@ namespace OpenPOP.MIME
 					{
 					    strPath += "\\";
 					}
-                    for (int i = 0; i < Attachments.Count; i++)
+                    foreach (Attachment attachment in Attachments)
                     {
-                        Attachment att = GetAttachment(i);
-                        blnRet = SaveAttachment(att, strPath + GetAttachmentFileName(att));
+                        blnRet = SaveAttachment(attachment, strPath + GetAttachmentFileName(attachment));
                         if (!blnRet)
                             break;
                     }
@@ -438,14 +391,14 @@ namespace OpenPOP.MIME
                     if (Attachments.Count > 0)
                     {
                         // Check if the first attachment is the message
-                        Attachment at = GetAttachment(0);
+                        Attachment at = Attachments[0];
                         if (at != null && at.NotAttachment)
                             GetMessageBody(at.DecodeAsText());
 
                         // In case body parts as text[0] html[1]
                         if (Attachments.Count > 1 && !IsReport())
                         {
-                            at = GetAttachment(1);
+                            at = Attachments[1];
                             if (at != null && at.NotAttachment)
                                 GetMessageBody(at.DecodeAsText());
                         }
@@ -537,8 +490,8 @@ namespace OpenPOP.MIME
 				{
 				    Message m = att.DecodeAsMessage(true,true);
 				    for(int i=0;i<m.AttachmentCount;i++)
-					{
-						att=m.GetAttachment(i);
+				    {
+				        att = m.Attachments[i];
 						AttachmentCount++;
 						Attachments.Add(att);
 					}

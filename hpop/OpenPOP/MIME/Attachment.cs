@@ -317,7 +317,7 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
-		/// decode attachment to be a message object
+		/// Decode attachment to be a message object
 		/// </summary>
 		/// <param name="blnRemoveHeaderBlankLine"></param>
 		/// <param name="blnUseRawContent"></param>
@@ -334,7 +334,6 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Decode the attachment to bytes
 		/// </summary>
-		/// <remarks>foens: Is it not possible to just call DecodeAsText and then get that string as bytes? Is that different from this?</remarks>
 		/// <returns>Decoded attachment bytes</returns>
 		public byte[] DecodedAsBytes()
 		{
