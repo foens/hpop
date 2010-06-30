@@ -66,7 +66,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="nStart">position to start, normally 0</param>
 		/// <returns>decoded string</returns>
 		/// TODO: This method does not cope with every QuotedPrintable string that is thrown at it therefore it should be looked more into
-		public static string ConvertHexContent(string Hexstring,Encoding encode,long nStart)
+		public static string ConvertHexContent(string Hexstring, Encoding encode, long nStart)
 		{
             if (nStart >= Hexstring.Length) return Hexstring;
 
@@ -143,18 +143,5 @@ namespace OpenPOP.MIME.Decode
 
 		    return ConvertHexContent(Hexstring, Encoding.Default, 0);
 		}
-
-	    /// <summary>
-        /// Checks if the Content-Type is quoted-printable
-        /// </summary>
-        /// <param name="contentType">The content type to be checked</param>
-        /// <returns>True if it is quoted-printable or false otherwise</returns>
-        public static bool IsQuotedPrintable(string contentType)
-	    {
-	        if (contentType != null)
-	            return contentType.ToLower().Equals("quoted-printable");
-
-	        return false;
-	    }
 	}
 }

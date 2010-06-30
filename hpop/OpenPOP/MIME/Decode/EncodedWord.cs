@@ -52,7 +52,7 @@ namespace OpenPOP.MIME.Decode
 		    string strRet = encodedWords;
 
             // This is the regex that should fit the BNF
-            // RFC Says that NO WHITESPACE is allowed in this encoding. Again, see RFC for details.
+            // RFC Says that NO WHITESPACE is allowed in this encoding. See RFC for details.
 		    const string strRegEx = @"\=\?(?<Charset>\S+?)\?(?<Encoding>\w)\?(?<Content>\S+?)\?\=";
             // \w	Matches any word character including underscore. Equivalent to "[A-Za-z0-9_]".
             // \S	Matches any nonwhite space character. Equivalent to "[^ \f\n\r\t\v]".
@@ -101,9 +101,9 @@ namespace OpenPOP.MIME.Decode
                                 decodedText = fullMatchValue;
                             }
                             break;
+
                         default:
-                            decodedText = encodedText;
-                            break;
+                            throw new ArgumentException("The encoding " + encoding + " was not recognized");
                     }
 
                     // Repalce our encoded value with our decoded value

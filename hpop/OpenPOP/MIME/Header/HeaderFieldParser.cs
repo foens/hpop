@@ -36,7 +36,7 @@ namespace OpenPOP.MIME.Header
         /// "Eksperten mailrobot" <noreply@mail.eksperten.dk>
         /// <noreply@mail.eksperten.dk>
         /// noreply@mail.eksperten.dk
-        /// Some name
+        /// Some name (will return null on this)
         /// 
         /// 
         /// It might also contain encoded text.

@@ -114,7 +114,6 @@ namespace OpenPOP.MIME
         #endregion
 
         #region Public functions
-
 		/// <summary>
 		/// verify if the message is a report
 		/// </summary>
@@ -369,18 +368,18 @@ namespace OpenPOP.MIME
             RawHeader = rawHeadersTemp;
 
             // Parse the headers
-            Headers = MessageHeader.ParseHeaders(headersUnparsedCollection);
+            Headers = new MessageHeader(headersUnparsedCollection);
 
             if (onlyParseHeaders == false)
             {
                 // The message body must be the full raw message, with headers removed.
                 // Also remove any CRLF in top or bottom.
-                RawMessageBody = RawMessage.Replace(RawHeader, "").Trim();
+                RawMessageBody = Utility.ReplaceFirstOccurrance(RawMessage, RawHeader, "").Trim();
 
                 // Check if the message is a multipart message (which means, has multiple message bodies)
-                if (Headers.ContentType != null && (Headers.ContentType.MediaType.Contains("multipart") || MIMETypes.IsMSTNEF(Headers.ContentType.MediaType)))
+                if (Headers.ContentType.MediaType.ToLower().Contains("multipart"))
                 {
-                    SetAttachments();
+                    ParseMultipartMessageBody();
 
                     if (Attachments.Count > 0)
                     {
@@ -411,62 +410,62 @@ namespace OpenPOP.MIME
 
         #region Body parser functions
         /// <summary>
-		/// set attachments
+		/// Parses the MessageBody as a Multipart message.
+		/// This method will add these parts as Attachments
 		/// </summary>
-		private void SetAttachments()
+		private void ParseMultipartMessageBody()
 		{
-            int indexOfAttachmentStart = 0;
-            bool processed = false;
-
             string multipartBoundary = Headers.ContentType.Boundary;
 
-            while(!processed)
+            if (string.IsNullOrEmpty(multipartBoundary))
+                throw new ArgumentException("The body is a multipart message, but there is no multipart boundary");
+
+            int indexOfAttachmentStart = 0;
+            bool moreParts = true;
+
+            // Keep working until we have parsed every message part in this message
+            while(moreParts)
 			{
-			    int indexOfAttachmentEnd;
-			    if(!string.IsNullOrEmpty(multipartBoundary))
-				{
-				    indexOfAttachmentStart = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart) + multipartBoundary.Length;
-                    if (RawMessageBody.Equals("") || indexOfAttachmentStart < 0) return;
+                // Find the start of the message parts multipartBoundary
+			    indexOfAttachmentStart = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart);
 
-				    indexOfAttachmentEnd = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart + 1);
-				}
-				else
-				{
-				    indexOfAttachmentEnd = -1;
-				}
+                if(indexOfAttachmentStart == -1)
+                    throw new ArgumentException("The start of the attachment could not be found");
 
-				if(indexOfAttachmentEnd!=-1)
-				{
-				}
-				else if(indexOfAttachmentEnd==-1&&Attachments.Count==0) 
-				{
-					processed=true;
-					indexOfAttachmentEnd=RawMessageBody.Length;
-				}
-				else
-					return;
+                // Find the start of this message part - which does not include the multipartBoundary or the trailing CRLF
+                indexOfAttachmentStart = indexOfAttachmentStart + multipartBoundary.Length + "\r\n".Length;
 
-				if(indexOfAttachmentStart==indexOfAttachmentEnd-9)
-				{
-					indexOfAttachmentStart=0;
-					processed=true;
-				}
+			    // Find the end of the attachment, were we do not want the last line
+			    int indexOfAttachmentEnd = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart);
 
-			    string strLine = RawMessageBody.Substring(indexOfAttachmentStart, indexOfAttachmentEnd - indexOfAttachmentStart - 2);
-			    bool isMSTNEF = MIMETypes.IsMSTNEF(Headers.ContentType.MediaType);
-                Attachment att = new Attachment(strLine.Trim(), Headers.ContentType.MediaType, !isMSTNEF);
+			    if(indexOfAttachmentEnd == -1)
+                    throw new ArgumentException("The end of the attachment could not be found");
 
-				//ms-tnef format might contain multiple attachments
-			    if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF && !isMSTNEF) 
+                // Check if this is the last part, which ends with the multipartBoundary followed by "--"
+                if(RawMessageBody.Substring(indexOfAttachmentEnd).StartsWith(multipartBoundary + "--"))
+                    moreParts = false;
+
+                // Calculate the length. We do not want to include the last "\r\n" in the attachment
+			    int attachmentLength = indexOfAttachmentEnd - indexOfAttachmentStart - "\r\n".Length;
+
+                string messagePart = RawMessageBody.Substring(indexOfAttachmentStart, attachmentLength);
+			    Attachment att = new Attachment(messagePart);
+
+				// Check if this is the MS-TNEF attachment type
+                // which has ContentType application/ms-tnef
+                // and also if we should decode it
+			    if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF) 
 				{
-				    Utility.LogError("SetAttachments():found ms-tnef file");
+                    // TODO TNEFParser should have a constructor, to which bytes are sent, these are parsed and thereafter attachments can be pulled out
+                    // It was a MS-TNEF attachment. Parse it.
 				    TNEFParser tnef = new TNEFParser();
-				    tnef.Verbose=false;
+				    tnef.Verbose = false;
 
 					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
 					{
 						if(tnef.Parse())
 						{
+                            // ms-tnef attachment might contain multiple attachments inside it
 						    foreach (TNEFAttachment tatt in tnef.Attachments())
 						    {
                                 Attachment attNew = new Attachment(tatt.FileContent, tatt.FileLength, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
@@ -474,26 +473,28 @@ namespace OpenPOP.MIME
 						    }
 						}
 						else
-							Utility.LogError("SetAttachments():ms-tnef file parse failed");
+                            // TODO: Should throw exception instead
+							Utility.LogError("ParseMultipartMessageBody():ms-tnef file parse failed");
 					}
 					else
-						Utility.LogError("SetAttachments():ms-tnef file open failed");
+                        // TODO: Should throw exception instead
+						Utility.LogError("ParseMultipartMessageBody():ms-tnef file open failed");
 				}
 				else if(IsMIMEMailFile2(att))
 				{
+                    // The attachment itself is a multipart message
+                    // Parse it as such, and take the attachments from it
+                    // and add it to our message
+                    // This will in reality flatten the structure
 				    Message m = att.DecodeAsMessage(true,true);
-				    for(int i=0;i<m.Attachments.Count;i++)
-				    {
-				        att = m.Attachments[i];
-						Attachments.Add(att);
-					}
+				    foreach (Attachment attachment in m.Attachments)
+				        Attachments.Add(attachment);
 				}
 				else
 				{
+                    // This must be an attachment
 					Attachments.Add(att);
 				}
-
-				indexOfAttachmentStart++;
 			}
         }
 

@@ -254,21 +254,6 @@ namespace OpenPOP.MIME
 			return null;
 		}
 
-		/// <summary>
-		/// Change text encoding
-		/// </summary>
-		/// <param name="strText">Source encoded text</param>
-		/// <param name="strCharset">New charset</param>
-		/// <returns>Encoded text with new charset</returns>
-		public static string ChangeEncoding(string strText, string strCharset)
-		{
-			if (string.IsNullOrEmpty(strCharset))
-				return strText;
-
-			byte[] b = Encoding.Default.GetBytes(strText);
-		    return Encoding.GetEncoding(strCharset).GetString(b);
-		}
-
         /// <summary>
 		/// Remove quotes
 		/// </summary>
@@ -317,5 +302,47 @@ namespace OpenPOP.MIME
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        /// <summary>
+        /// Change text encoding
+        /// </summary>
+        /// <param name="strText">Source encoded text</param>
+        /// <param name="strCharset">New charset</param>
+        /// <returns>Encoded text with new charset</returns>
+        private static string ChangeEncoding(string strText, string strCharset)
+        {
+            if (string.IsNullOrEmpty(strCharset))
+                return strText;
+
+            byte[] b = Encoding.Default.GetBytes(strText);
+            return Encoding.GetEncoding(strCharset).GetString(b);
+        }
+
+        /// <summary>
+        /// Replace the first occurence of a string in a string
+        /// </summary>
+        /// <param name="original">The original string to replace in</param>
+        /// <param name="toReplace">The string that is to be replaced</param>
+        /// <param name="toReplaceWith">The string that is to be placed instead of the replaced string</param>
+        /// <returns>
+        /// The original string with the first occurrance of toReplace replaced with toReplaceWith.
+        /// The original is returned if toReplace was not found.
+        /// </returns>
+        /// <see cref="http://fortycal.blogspot.com/2007/07/replace-first-occurrence-of-string-in-c.html">For author</see>
+        public static string ReplaceFirstOccurrance(string original, string toReplace, string toReplaceWith)
+        {
+            if (String.IsNullOrEmpty(original))
+                return String.Empty;
+            if (String.IsNullOrEmpty(toReplace))
+                return original;
+            if (String.IsNullOrEmpty(toReplaceWith))
+                toReplaceWith = String.Empty;
+            int loc = original.IndexOf(toReplace);
+
+            if (loc == -1)
+                return original;
+            return original.Remove(loc, toReplace.Length).Insert(loc, toReplaceWith);
+        }
+
 	}
 }

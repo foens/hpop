@@ -31,6 +31,7 @@
 *					1.Adding descriptions to every public functions/property/void
 */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Collections;
@@ -45,22 +46,22 @@ namespace OpenPOP.MIME
 	public class TNEFParser
 	{
 		#region Member Variables
-		private const int TNEF_SIGNATURE  =0x223e9f78;
-		private const int LVL_MESSAGE     =0x01;
-		private const int LVL_ATTACHMENT  =0x02;
-		private const int _string		  =0x00010000;
-		private const int _BYTE			  =0x00060000;
-		private const int _WORD			  =0x00070000;
-		private const int _DWORD		  =0x00080000;
+		private const int TNEF_SIGNATURE  = 0x223e9f78;
+		private const int LVL_MESSAGE     = 0x01;
+		private const int LVL_ATTACHMENT  = 0x02;
+		private const int _string		  = 0x00010000;
+		private const int _BYTE			  = 0x00060000;
+		private const int _WORD			  = 0x00070000;
+		private const int _DWORD		  = 0x00080000;
 
-		private const int AVERSION      =(_DWORD|0x9006);   // Unused?
-        private const int AMCLASS       = (_WORD | 0x8008); // Unused?
-		private const int ASUBJECT      =(_DWORD|0x8004);
-		private const int AFILENAME     =(_string|0x8010);
-		private const int ATTACHDATA    =(_BYTE|0x800f);
+		private const int AVERSION      = (_DWORD  | 0x9006);   // Unused?
+        private const int AMCLASS       = (_WORD   | 0x8008); // Unused?
+		private const int ASUBJECT      = (_DWORD  | 0x8004);
+		private const int AFILENAME     = (_string | 0x8010);
+		private const int ATTACHDATA    = (_BYTE   | 0x800f);
 
 		private Stream fsTNEF;
-		private Hashtable _attachments=new Hashtable();
+		private List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
 		private TNEFAttachment _attachment=null;
 
 	    //private string _logFile="OpenPOP.TNEF.log";
@@ -359,7 +360,7 @@ namespace OpenPOP.MIME
 					//new attachment found because attachment data goes before attachment name
 					_attachment.FileName=strFileName;
 					_attachment.Subject=strSubject;
-					_attachments.Add(_attachment.FileName,_attachment);
+					_attachments.Add(_attachment);
 
 					geti16();     /* checksum */ 
 
@@ -399,7 +400,7 @@ namespace OpenPOP.MIME
 		/// decoded attachments
 		/// </summary>
 		/// <returns>attachment array</returns>
-		public Hashtable Attachments()
+		public List<TNEFAttachment> Attachments()
 		{
 			return _attachments;
 		}
@@ -411,12 +412,11 @@ namespace OpenPOP.MIME
 		public bool SaveAttachments(string pathToSaveTo)
 		{
 			bool blnRet=false;
-			IDictionaryEnumerator ideAttachments=_attachments.GetEnumerator();
 
-			while(ideAttachments.MoveNext())
-			{
-				blnRet=SaveAttachment((TNEFAttachment)ideAttachments.Value, pathToSaveTo);
-			}
+		    foreach (TNEFAttachment tnefAttachment in _attachments)
+		    {
+		        blnRet = SaveAttachment(tnefAttachment, pathToSaveTo);
+		    }
 
 			return blnRet;
 		}

@@ -156,7 +156,9 @@ namespace OpenPOP.MIME.Header
 	    public string Subject { get; private set; }
 	    #endregion
 
-        // This header is not to be constructed by others
+        /// <summary>
+        /// Used to set up default values
+        /// </summary>
         private MessageHeader()
         {
             // Create empty lists as defaults. We do not like null values
@@ -178,19 +180,40 @@ namespace OpenPOP.MIME.Header
             ContentType = new ContentType("text/plain; charset=us-ascii");
         }
 
-        #region HeaderPaser
         /// <summary>
         /// Parses a NameValueCollection to a MessageHeader
         /// </summary>
         /// <param name="headers">The collection that should be traversed and parsed</param>
         /// <returns>A valid MessageHeader object</returns>
-        public static MessageHeader ParseHeaders(NameValueCollection headers)
+        /// <exception cref="ArgumentNullException">If headers is null</exception>
+        public MessageHeader(NameValueCollection headers) : this()
         {
-            if(headers == null)
+            ParseHeaders(headers);
+        }
+
+        /// <summary>
+        /// Parses a NameValueCollection to a MessageHeader, but with some other default values
+        /// </summary>
+        /// <param name="headers">The collection that should be traversed and parsed</param>
+        /// <param name="contentType">A ContentType to use as default, which might get overwitten</param>
+        /// <param name="contentTransferEncoding">A ContentTransferEncoding to use as default, which might get overwitten</param>
+        /// <returns>A valid MessageHeader object</returns>
+        /// <exception cref="ArgumentNullException">If headers is null</exception>
+        public MessageHeader(NameValueCollection headers, ContentType contentType, ContentTransferEncoding contentTransferEncoding)
+            : this()
+        {
+            ContentType = contentType;
+            ContentTransferEncoding = contentTransferEncoding;
+
+            ParseHeaders(headers);
+        }
+
+        private void ParseHeaders(NameValueCollection headers)
+        {
+            if (headers == null)
                 throw new ArgumentNullException();
 
-            MessageHeader returner = new MessageHeader();
-
+            // Now begin to parse the header values
             foreach (string headerName in headers.Keys)
             {
                 string[] headerValues = headers.GetValues(headerName);
@@ -198,14 +221,11 @@ namespace OpenPOP.MIME.Header
                 {
                     foreach (string headerValue in headerValues)
                     {
-                        returner.ParseHeader(headerName, headerValue);
+                        ParseHeader(headerName, headerValue);
                     }
                 }
             }
-
-            return returner;
         }
-        #endregion
 
         #region Header fields parsing
         /// <summary>

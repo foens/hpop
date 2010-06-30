@@ -32,13 +32,6 @@ namespace OpenPOP.POP3
     { }
 
     /// <summary>
-    /// Thrown when the attachment is not in a format supported by OpenPOP.NET
-    /// </summary>
-    /// <remarks>Supported attachment encodings are Base64,Quoted Printable,MS TNEF</remarks>
-    public class AttachmentEncodingNotSupportedException : Exception
-    { }
-
-    /// <summary>
     /// Thrown when the supplied login doesn't exist on the server
     /// </summary>
     /// <remarks>Should be used only when using USER/PASS Authentication Method</remarks>

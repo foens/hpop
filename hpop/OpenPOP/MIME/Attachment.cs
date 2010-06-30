@@ -27,7 +27,6 @@ namespace OpenPOP.MIME
 	public class Attachment : IComparable<Attachment>
 	{
 		#region Member Variables
-	    private const string _defaultMSTNEFFileName="winmail.dat";
         private const string _defaultMIMEFileName = "body.eml";
         private const string _defaultReportFileName = "report.htm";
         private const string _defaultFileName2 = "body*.htm";
@@ -38,12 +37,12 @@ namespace OpenPOP.MIME
 	    /// <summary>
 	    /// raw attachment content bytes
 	    /// </summary>
-	    public byte[] RawBytes { get; set; }
+	    public byte[] RawBytes { get; private set; }
 
 	    /// <summary>
 	    /// whether attachment is in bytes
 	    /// </summary>
-	    public bool InBytes { get; set; }
+	    public bool InBytes { get; private set; }
 
 	    /// <summary>
 	    /// Content length
@@ -172,7 +171,7 @@ namespace OpenPOP.MIME
         }
 
 		/// <summary>
-		/// New Attachment
+		/// Create an Attachment from byte contents. These are NOT parsed in any way, but assumed to be correct.
 		/// </summary>
 		/// <param name="bytAttachment">attachment bytes content</param>
 		/// <param name="lngFileLength">file length</param>
@@ -183,66 +182,44 @@ namespace OpenPOP.MIME
 		{ }
 
 		/// <summary>
-		/// New Attachment
+		/// Create an attachment from a string, with some headers use from the message it is inside
 		/// </summary>
 		/// <param name="strAttachment">attachment content</param>
-		/// <param name="strContentType">content type</param>
-		/// <param name="blnParseHeader">whether only parse the header or not</param>
-		public Attachment(string strAttachment,string strContentType, bool blnParseHeader)
+		public Attachment(string strAttachment)
             : this(null, 0, "", null, false)
 		{
-		    if(!blnParseHeader)
-			{
-				ContentFileName=_defaultMSTNEFFileName;
-				ContentType=strContentType;
-			}
-			NewAttachment(strAttachment,blnParseHeader);
-		}
-        #endregion
+            if (strAttachment == null)
+                throw new ArgumentNullException("strAttachment");
 
-        /// <summary>
-		/// Create attachment from a string
-		/// </summary>
-		/// <param name="strAttachment">raw attachment text</param>
-		/// <param name="blnParseHeader">parse header</param>
-		private void NewAttachment(string strAttachment, bool blnParseHeader)
-		{
+            // The attachment was not specified by using bytes
             InBytes = false;
-
-			if(strAttachment == null)
-				throw new ArgumentNullException("strAttachment");
 
             RawContent = strAttachment;
 
-			if(blnParseHeader)
-			{
-			    string rawHeaders;
-			    NameValueCollection headers;
-                HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
+            string rawHeaders;
+            NameValueCollection headers;
+            HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
 
-                // Now specificly parse each header. Some headers require special parsing.
-                foreach (string headerName in headers.Keys)
+            // Now specificly parse each header. Some headers require special parsing.
+            foreach (string headerName in headers.Keys)
+            {
+                string[] values = headers.GetValues(headerName);
+                if (values != null)
                 {
-                    string[] values = headers.GetValues(headerName);
-                    if (values != null)
-                        foreach (string headerValue in values)
-                        {
-                            // Parse the header
-                            ParseHeader(headerName, headerValue);
-                        }
+                    foreach (string headerValue in values)
+                    {
+                        // Parse the header
+                        ParseHeader(headerName, headerValue);
+                    }
                 }
+            }
 
-                // If we parsed headers, as we just did, the RawAttachment is found by removing the headers and trimmin
-			    RawAttachment = strAttachment.Replace(rawHeaders, "").Trim();
-			}
-			else
-			{
-                // Everything is though of as an attachment
-			    RawAttachment = strAttachment;
-			}
+            // If we parsed headers, as we just did, the RawAttachment is found by removing the headers and trimming
+		    RawAttachment = Utility.ReplaceFirstOccurrance(strAttachment, rawHeaders, "");
 
             ContentLength = RawAttachment.Length;
 		}
+        #endregion
 
         private void ParseHeader(string headerName, string headerValue)
         {
