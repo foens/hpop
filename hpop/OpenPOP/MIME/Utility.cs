@@ -88,35 +88,6 @@ namespace OpenPOP.MIME
 			return false;
 		}
 
-        /// <summary>
-		/// Parse file name from MIME header
-		/// </summary>
-		/// <param name="strHeader">MIME header</param>
-		/// <returns>Decoded file name</returns>
-		public static string ParseFileName(string strHeader)
-		{
-		    string strTag = "filename=";
-			int intPos=strHeader.ToLower().IndexOf(strTag);
-			if(intPos==-1)
-			{
-				strTag="name=";
-				intPos=strHeader.ToLower().IndexOf(strTag);
-			}
-			string strRet;
-			if(intPos!=-1)
-			{
-				strRet=strHeader.Substring(intPos+strTag.Length);
-				intPos=strRet.ToLower().IndexOf(";");
-				if(intPos!=-1)
-					strRet=strRet.Substring(1,intPos-1);
-				strRet=RemoveQuotes(strRet);
-			}
-			else
-				strRet="";
-
-			return strRet;
-		}
-
         #region Saving/loading to/from files
         /// <summary>
 		/// Save byte content to a file.
@@ -218,42 +189,6 @@ namespace OpenPOP.MIME
 			return array;
 		}
 
-		/// <summary>
-		/// Get quoted text
-		/// </summary>
-		/// <param name="strText">Text with quotes</param>
-		/// <param name="strSplitter">Splitter</param>
-		/// <param name="strTag">Target tag</param>
-		/// <returns>Text without quote</returns>
-		public static string GetQuotedValue(string strText, string strSplitter, string strTag)
-		{
-			if(strText == null)
-				throw new ArgumentNullException("strText", "Argument was null");
-
-			string[] array = new[] {"",""};
-			int indexOfstrSplitter=strText.IndexOf(strSplitter);
-
-            if (indexOfstrSplitter >= 0 && strText.Length > indexOfstrSplitter + 1)
-            {
-                array[0] = strText.Substring(0, indexOfstrSplitter).Trim();
-                array[1] = strText.Substring(indexOfstrSplitter + 1).Trim();
-
-                // Check for quoted value
-                int pos = array[1].IndexOf("\"");
-                if (pos != -1 && array[1].Length > pos + 1)
-                {
-                    int pos2 = array[1].IndexOf("\"", pos + 1);
-                    if (pos2 != -1)
-                        array[1] = array[1].Substring(pos + 1, pos2 - pos - 1);
-                }
-            }
-
-			if(array[0].ToLower() == strTag.ToLower())
-				return array[1].Trim();
-			
-			return null;
-		}
-
         /// <summary>
 		/// Remove quotes
 		/// </summary>
@@ -282,9 +217,9 @@ namespace OpenPOP.MIME
             {
                 case ContentTransferEncoding.QuotedPrintable:
                     if (!string.IsNullOrEmpty((charSet)))
-                        return QuotedPrintable.ConvertHexContent(input, Encoding.GetEncoding(charSet), 0);
+                        return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet), 0);
 
-                    return QuotedPrintable.ConvertHexContent(input);
+                    return QuotedPrintable.Decode(input);
 
                 case ContentTransferEncoding.Base64:
                     return Base64.Decode(input);

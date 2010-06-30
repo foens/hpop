@@ -33,7 +33,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <param name="encode">encoding method</param>
 		/// <returns>decoded string</returns>
-		public static string ConvertHexToString(string Hexstring, Encoding encode)
+	    private static string ConvertHexToString(string Hexstring, Encoding encode)
 		{			
 			try
 			{
@@ -66,7 +66,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="nStart">position to start, normally 0</param>
 		/// <returns>decoded string</returns>
 		/// TODO: This method does not cope with every QuotedPrintable string that is thrown at it therefore it should be looked more into
-		public static string ConvertHexContent(string Hexstring, Encoding encode, long nStart)
+		public static string Decode(string Hexstring, Encoding encode, long nStart)
 		{
             if (nStart >= Hexstring.Length) return Hexstring;
 
@@ -136,12 +136,12 @@ namespace OpenPOP.MIME.Decode
 		/// </summary>
 		/// <param name="Hexstring">Quoted-Printable encoded string</param>
 		/// <returns>decoded string</returns>
-        public static string ConvertHexContent(string Hexstring)
+        public static string Decode(string Hexstring)
 		{
 		    if (Hexstring == null || Hexstring.Equals(""))
 		        return Hexstring;
 
-		    return ConvertHexContent(Hexstring, Encoding.Default, 0);
+		    return Decode(Hexstring, Encoding.Default, 0);
 		}
 	}
 }

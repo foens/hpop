@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
+using System.Net.Mime;
 using OpenPOP.MIME.Decode;
 
 namespace OpenPOP.MIME.Header
@@ -178,6 +179,78 @@ namespace OpenPOP.MIME.Header
 
                 default:
                     return MessageImportance.Normal;
+            }
+        }
+
+        /// <summary>
+        /// Parses a the value for the header Content-Type to 
+        /// a ContentType object
+        /// </summary>
+        /// <param name="headerValue">The value to be parsed</param>
+        /// <returns>A valid ContentType object</returns>
+        public static ContentType ParseContentType(string headerValue)
+        {
+            try
+            {
+                return new ContentType(headerValue);
+            }
+            catch (Exception)
+            {
+                // Sometimes the header values are not accepted by the ContentType parser, so lets try different things
+
+                // There have been instances of headerValues that looks like:
+                // text/plain; charset = "UTF-8"
+                // therefore, lets try to remove any whitespace
+                return new ContentType(headerValue.Replace(" ", ""));
+            }
+        }
+
+        /// <summary>
+        /// Parses a the value for the header Content-Disposition to 
+        /// a ContentDisposition object
+        /// </summary>
+        /// <param name="headerValue">The value to be parsed</param>
+        /// <returns>A valid ContentDisposition object</returns>
+        public static ContentDisposition ParseContentDisposition(string headerValue)
+        {
+            try
+            {
+                return new ContentDisposition(headerValue);
+            }
+            catch (Exception)
+            {
+                // Sometimes the header values are not accepted by the ContentDisposition parser, so lets try different things
+
+                // There have been instances of headerValues that looks like:
+                // inline; filename="image001.png"; size=566;creation-date="Wed, 02 Jun 2010 15:39:38 GMT";modification-date="Wed, 02 Jun 2010 15:39:38 GMT"
+                // The problem here is the GMT part. According to the RFC http://www.ietf.org/rfc/rfc2183.txt section 2.
+                // quoted-date-time contents MUST be an RFC 822 `date-time'. Numeric timezones (+HHMM or -HHMM) MUST be used.
+                // But according to http://social.msdn.microsoft.com/Forums/en-US/netfxbcl/thread/a6547f67-8e68-467c-b062-3dee20a03218
+                // this is not enough, we have to change GMT to +0001, because of some obscure failure in the framework.
+                // which seems that the number 00 is not supported
+                // an input that confirms this is
+                // inline; filename="image001.jpg"; size=71596;creation-date="Thu, 18 Mar 2010 00:17:09 GMT";modification-date="Thu, 18 Mar 2010 00:17:09 GMT"
+                // if this is changed to 
+                // inline; filename="image001.jpg"; size=71596;creation-date="Thu, 18 Mar 2010 01:17:09 GMT";modification-date="Thu, 18 Mar 2010 01:17:09 GMT"
+                // it works, but if this is given:
+                // inline; filename="image001.jpg"; size=71596;creation-date="Thu, 18 Mar 2010 01:00:09 GMT";modification-date="Thu, 18 Mar 2010 01:00:09 GMT"
+                // then it fails!
+                // Since on
+                // https://connect.microsoft.com/VisualStudio/feedback/details/339010/contentdisposition-doesnt-respect-rfc-822-section-5
+                // the team says that GMT is translated to 0000, GMT fails. Therefore we replace that first
+                // and we also replace all 00 to 01, which WILL give WRONG times, but will now throw an exception.
+                // Also, this wrong time should not happen on platforms that has a correct implementation of ContentDisposition, since we try that first
+
+                // Lets first try with only GMT replaced
+                try
+                {
+                    return new ContentDisposition(headerValue.Replace("GMT", "+0001"));
+                }
+                catch (FormatException)
+                { }
+
+                // Then lets try to full 00 replacement
+                return new ContentDisposition(headerValue.Replace("00", "01").Replace("GMT", "+0001"));
             }
         }
     }

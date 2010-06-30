@@ -135,7 +135,7 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-			    return attItem.ContentType.ToLower() == "message/rfc822".ToLower() ||
+			    return attItem.Headers.ContentType.MediaType.ToLower() .Equals("message/rfc822") ||
 			           attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower());
 			}
 			catch(Exception e)
@@ -149,7 +149,7 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-			    return attItem.ContentType.ToLower().StartsWith("multipart/".ToLower()) && attItem.ContentFileName == "";
+			    return attItem.Headers.ContentType.MediaType.ToLower().StartsWith("multipart/") && attItem.ContentFileName == "";
 			}
 			catch(Exception e)
 			{
@@ -172,9 +172,9 @@ namespace OpenPOP.MIME
 				{
 					if(Utility.IsPictureFile(attachment.ContentFileName))
 					{
-                        if (!string.IsNullOrEmpty(attachment.ContentID))
+                        if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
                             //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + attachment.ContentID, hsbFiles[attachment.ContentFileName].ToString());
+                            strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, hsbFiles[attachment.ContentFileName].ToString());
 
 					    strBody = strBody.Replace(attachment.ContentFileName, hsbFiles[attachment.ContentFileName].ToString());
 					}
@@ -205,9 +205,9 @@ namespace OpenPOP.MIME
 				{
 					if(Utility.IsPictureFile(attachment.ContentFileName))
 					{
-                        if (!string.IsNullOrEmpty(attachment.ContentID))
+                        if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
                             //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + attachment.ContentID, strPath + attachment.ContentFileName);
+                            strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, strPath + attachment.ContentFileName);
 					    strBody = strBody.Replace(attachment.ContentFileName, strPath + attachment.ContentFileName);
 					}
 				}
@@ -253,8 +253,8 @@ namespace OpenPOP.MIME
                     if (IsMIMEMailFile(attItem))
                         return attItem.DefaultMIMEFileName;
 
-                    if (attItem.ContentID != null)
-                        return attItem.ContentID;
+                    if (attItem.Headers.ContentID != null)
+                        return attItem.Headers.ContentID;
 
 				    return attItem.DefaultFileName;
 				}
@@ -268,37 +268,9 @@ namespace OpenPOP.MIME
         /// <param name="attItem">Attachment</param>
         /// <param name="strFileName">File to be saved to</param>
         /// <returns>true if save successfully, false if failed</returns>
-        public bool SaveAttachment(Attachment attItem, string strFileName)
+        public static bool SaveAttachment(Attachment attItem, string strFileName)
         {
-            byte[] da;
-            try
-            {
-                if (attItem.InBytes)
-                {
-                    da = attItem.RawBytes;
-                }
-                else if (attItem.ContentFileName.Length > 0)
-                {
-                    da = attItem.DecodedAsBytes();
-                }
-                else if (attItem.ContentType.ToLower() == "message/rfc822")
-                {
-                    da = Encoding.Default.GetBytes(attItem.RawAttachment);
-                }
-                else
-                {
-                    GetMessageBody(attItem.DecodeAsText());
-                    da = Encoding.Default.GetBytes(MessageBody[MessageBody.Count - 1]);
-                }
-                return Utility.SaveByteContentToFile(strFileName, da);
-            }
-            catch
-            {
-                /*Utility.LogError("SaveAttachment():"+e.Message);
-                return false;*/
-                da = Encoding.Default.GetBytes(attItem.RawAttachment);
-                return Utility.SaveByteContentToFile(strFileName, da);
-            }
+            return Utility.SaveByteContentToFile(strFileName, attItem.DecodedAsBytes());
         }
 
 		/// <summary>
@@ -449,12 +421,12 @@ namespace OpenPOP.MIME
 			    int attachmentLength = indexOfAttachmentEnd - indexOfAttachmentStart - "\r\n".Length;
 
                 string messagePart = RawMessageBody.Substring(indexOfAttachmentStart, attachmentLength);
-			    Attachment att = new Attachment(messagePart);
+			    Attachment att = new Attachment(messagePart, Headers);
 
 				// Check if this is the MS-TNEF attachment type
                 // which has ContentType application/ms-tnef
                 // and also if we should decode it
-			    if(MIMETypes.IsMSTNEF(att.ContentType) && AutoDecodeMSTNEF) 
+			    if(MIMETypes.IsMSTNEF(att.Headers.ContentType.MediaType) && AutoDecodeMSTNEF) 
 				{
                     // TODO TNEFParser should have a constructor, to which bytes are sent, these are parsed and thereafter attachments can be pulled out
                     // It was a MS-TNEF attachment. Parse it.
@@ -468,7 +440,7 @@ namespace OpenPOP.MIME
                             // ms-tnef attachment might contain multiple attachments inside it
 						    foreach (TNEFAttachment tatt in tnef.Attachments())
 						    {
-                                Attachment attNew = new Attachment(tatt.FileContent, tatt.FileLength, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
+                                Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
                                 Attachments.Add(attNew);
 						    }
 						}

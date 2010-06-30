@@ -22,6 +22,7 @@ using System.Reflection;
 using System.IO;
 using OpenPOP.POP3;
 using OpenPOP.MIME;
+using Message = OpenPOP.MIME.Message;
 
 namespace MailMonitor
 {
@@ -416,7 +417,7 @@ namespace MailMonitor
 								for(int i=0;i<m2.Attachments.Count;i++)
 								{
 									Attachment att2=m2.Attachments[i];
-									attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.ContentLength+" bytes)\r\n";
+									attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.RawAttachment.Length+" bytes)\r\n";
 								}
 							blnRet=_msg.SaveAttachments(System.IO.Path.GetDirectoryName(dlgSave.FileName));
 							MessageBox.Show(this,"Parsing "+(blnRet==true?"succeeded":"failed")+"£¡\r\n\r\nsubject:"+m2.Headers.Subject+"\r\n\r\nAttachment:\r\n"+attachmentNames);
@@ -425,7 +426,7 @@ namespace MailMonitor
 						{
 						}
 					}
-					MessageBox.Show(this,"Attachment saving "+((_msg.SaveAttachment(att,dlgSave.FileName))?"succeeded":"failed")+"£¡");
+					MessageBox.Show(this,"Attachment saving "+((Message.SaveAttachment(att,dlgSave.FileName))?"succeeded":"failed")+"£¡");
 				}
 			}
 			else

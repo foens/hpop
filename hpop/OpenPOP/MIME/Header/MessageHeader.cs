@@ -186,7 +186,8 @@ namespace OpenPOP.MIME.Header
         /// <param name="headers">The collection that should be traversed and parsed</param>
         /// <returns>A valid MessageHeader object</returns>
         /// <exception cref="ArgumentNullException">If headers is null</exception>
-        public MessageHeader(NameValueCollection headers) : this()
+        public MessageHeader(NameValueCollection headers)
+            : this()
         {
             ParseHeaders(headers);
         }
@@ -208,6 +209,27 @@ namespace OpenPOP.MIME.Header
             ParseHeaders(headers);
         }
 
+        /// <summary>
+        /// Very simply header object.
+        /// It uses all defaults but sets the contentType
+        /// </summary>
+        /// <param name="contentType">The ContentType to use</param>
+        /// <exception cref="ArgumentNullException">If contentType was null</exception>
+        public MessageHeader(ContentType contentType)
+            : this()
+        {
+            if(contentType == null)
+                throw new ArgumentNullException();
+
+            ContentType = contentType;
+        }
+
+        /// <summary>
+        /// Parses a NameValueCollection to a MessageHeader
+        /// </summary>
+        /// <param name="headers">The collection that should be traversed and parsed</param>
+        /// <returns>A valid MessageHeader object</returns>
+        /// <exception cref="ArgumentNullException">If headers is null</exception>
         private void ParseHeaders(NameValueCollection headers)
         {
             if (headers == null)
@@ -339,12 +361,11 @@ namespace OpenPOP.MIME.Header
                 // See http://www.ietf.org/rfc/rfc2045.txt section 5.1.
                 // Example: Content-type: text/plain; charset="us-ascii"
                 case "CONTENT-TYPE":
-                    // Simply ues the inbuilt ContentType object
-                    ContentType = new ContentType(headerValue);
+                    ContentType = HeaderFieldParser.ParseContentType(headerValue);
                     break;
 
                 case "CONTENT-DISPOSITION":
-                    ContentDisposition = new ContentDisposition(headerValue);
+                    ContentDisposition = HeaderFieldParser.ParseContentDisposition(headerValue);
                     break;
 
                 // Example: <foo4*foo1@bar.net>

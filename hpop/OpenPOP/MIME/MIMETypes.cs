@@ -61,7 +61,7 @@ namespace OpenPOP.MIME
 			return false;
 		}
 
-		public static string ContentType(string strExtension)
+	    private static string ContentType(string strExtension)
 		{
 			if(MIMETypeList.ContainsKey(strExtension))
 				return MIMETypeList[strExtension].ToString();
@@ -69,7 +69,7 @@ namespace OpenPOP.MIME
 			return null;
 		}
 
-	    public static Hashtable MIMETypeList { get; private set; }
+	    private static Hashtable MIMETypeList { get; set; }
 
 		static MIMETypes()
 		{
