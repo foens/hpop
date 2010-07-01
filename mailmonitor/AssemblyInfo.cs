@@ -16,7 +16,6 @@
 /*******************************************************************************/
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("Mail Monitor")]
 [assembly: AssemblyDescription("Mail Monitor")]
