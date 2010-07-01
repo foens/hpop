@@ -471,7 +471,7 @@ namespace OpenPOP.NET_Sample_App
                 // This will fix the "Application is not responding" problem
                 Application.DoEvents();
 
-                MIME.Message m = popClient.GetMessage(i, false);
+                MIME.Message m = popClient.GetMessage(i);
                 TreeNode node;
                 if (m != null)
                 {
@@ -513,7 +513,7 @@ namespace OpenPOP.NET_Sample_App
                 foreach(MIME.Attachment att in m.Attachments)
                 {
                     hadAttachments = true;
-                    listAttachments.Nodes.Add(m.GetAttachmentFileName(att)).Tag = att;
+                    listAttachments.Nodes.Add(att.ContentFileName).Tag = att;
                 }
 
                 attachmentPanel.Visible = hadAttachments;
@@ -565,12 +565,12 @@ namespace OpenPOP.NET_Sample_App
 		    MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
 			if(att!=null && m!=null)
 			{
-			    saveFile.FileName = m.GetAttachmentFileName(att);
+			    saveFile.FileName = att.ContentFileName;
 			    DialogResult result = saveFile.ShowDialog();
 				if(result != DialogResult.OK)
 					return;
 
-				if(MIME.Message.IsMIMEMailFile(att))
+				if(att.IsMIMEMailFile())
 				{
 				    result = MessageBox.Show(this, "OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?", "MIME mail", MessageBoxButtons.YesNo);
 					if(result == DialogResult.Yes)
@@ -580,13 +580,13 @@ namespace OpenPOP.NET_Sample_App
                         if (m2.Attachments.Count > 0)
                             foreach (MIME.Attachment att2 in m2.Attachments)
                             {
-                                attachmentNames += m2.GetAttachmentFileName(att2) + "(" + att2.RawAttachment.Length + " bytes)\r\n";
+                                attachmentNames += att2.ContentFileName + "(" + att2.RawAttachment.Length + " bytes)\r\n";
                             }
 							bool blnRet = m.SaveAttachments(Path.GetDirectoryName(saveFile.FileName));
                             MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
-				MessageBox.Show(this,"Attachment saving "+((MIME.Message.SaveAttachment(att,saveFile.FileName))?"succeeded":"failed"));
+				MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(saveFile.FileName))?"succeeded":"failed"));
 			}
 			else
 				MessageBox.Show(this,"attachment object is null!");

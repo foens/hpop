@@ -18,6 +18,7 @@
 using System;
 using System.Windows.Forms;
 using System.Threading;
+using OpenPOP.MIME.Header;
 using OpenPOP.POP3;
 
 namespace MailMonitor
@@ -39,7 +40,6 @@ namespace MailMonitor
 		private Settings _settings;
 		private POPClient _popClient=new POPClient();
 		private frmMail _mail;
-		private OpenPOP.MIME.Message _msg;
 		private MailBox _mailBox;
 		private Thread _thread;
 		private System.Windows.Forms.SaveFileDialog dlgSave;
@@ -281,18 +281,18 @@ namespace MailMonitor
 				for(int i=1;i<=_count;i++)
 				{
 					this.Text="MailBox Info("+i.ToString()+"/"+_count.ToString() + ")";
-					_msg=_popClient.GetMessageHeaders(i);
-					if(_msg!=null)
+					MessageHeader headers = _popClient.GetMessageHeaders(i);
+                    if (headers != null)
 					{
 					    string from = null;
-                        if (_msg.Headers.From != null)
-                            from = _msg.Headers.From.ToString();
+                        if (headers.From != null)
+                            from = headers.From.ToString();
 						lvi=lvwMailBoxes.Items.Add(from);
 						lvi.Tag=i;
-						lvi.SubItems.Add(_msg.Headers.Subject);
-                        lvi.SubItems.Add(_msg.Headers.Date);
-                        lvi.SubItems.Add(_msg.RawMessage.Length.ToString());
-                        lvi.SubItems.Add(_msg.Headers.MessageID);
+						lvi.SubItems.Add(headers.Subject);
+                        lvi.SubItems.Add(headers.Date);
+                        lvi.SubItems.Add(_popClient.GetMessageSize(i).ToString()); // Fetch the size of the message
+                        lvi.SubItems.Add(headers.MessageID);
 					}
 					Thread.Sleep(50);
 				}
@@ -464,8 +464,8 @@ namespace MailMonitor
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
-				OpenPOP.MIME.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag,false);
-                dlgSave.FileName = _msg.Headers.Subject;
+				OpenPOP.MIME.Message msg=_popClient.GetMessage((int)lvwMailBoxes.SelectedItems[0].Tag);
+                dlgSave.FileName = msg.Headers.Subject;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)			
 					msg.SaveToMIMEEmailFile(dlgSave.FileName,true);

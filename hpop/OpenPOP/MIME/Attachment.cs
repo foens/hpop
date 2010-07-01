@@ -28,7 +28,6 @@ namespace OpenPOP.MIME
 		#region Member Variables
         private const string _defaultMIMEFileName = "body.eml";
         private const string _defaultReportFileName = "report.htm";
-        private const string _defaultFileName2 = "body*.htm";
         private const string _defaultFileName = "body.htm";
 	    #endregion
 
@@ -39,39 +38,18 @@ namespace OpenPOP.MIME
         public MessageHeader Headers { get; private set; }
 
 	    /// <summary>
-		/// verify the attachment whether it is a real attachment or not
+		/// Verify wheter the attachment is a real attachment or not
 		/// </summary>
 		/// <remarks>this is so far not comprehensive and needs more work to finish</remarks>
         public bool NotAttachment
         {
             get
             {
-                if (Headers != null && (Headers.ContentType.MediaType == null || ContentFileName == "") && Headers.ContentID == null)
+                if (Headers != null && (Headers.ContentType.MediaType == null) && Headers.ContentID == null)
                     return true;
                 return false;
             }
         }
-
-	    /// <summary>
-	    /// default file name
-	    /// </summary>
-	    public string DefaultFileName { get; set; }
-
-	    /// <summary>
-	    /// default file name 2
-	    /// </summary>
-	    public string DefaultFileName2 { get; set; }
-
-	    /// <summary>
-	    /// default report file name
-	    /// </summary>
-	    public string DefaultReportFileName { get; set; }
-
-	    /// <summary>
-	    /// default MIME File Name
-	    /// </summary>
-	    public string DefaultMIMEFileName { get; set; }
-
 	    /// <summary>
 	    /// Content File Name
 	    /// </summary>
@@ -101,10 +79,6 @@ namespace OpenPOP.MIME
             // Setup defaults
             RawAttachment = null;
             RawContent = null;
-            DefaultMIMEFileName = _defaultMIMEFileName;
-            DefaultReportFileName = _defaultReportFileName;
-            DefaultFileName2 = _defaultFileName2;
-            DefaultFileName = _defaultFileName;
 
             // Setup parameters
             ContentFileName = strFileName;
@@ -149,12 +123,47 @@ namespace OpenPOP.MIME
 		    RawAttachment = Utility.ReplaceFirstOccurrance(strAttachment, rawHeaders, "");
 
             // Set the filename
-            if (!string.IsNullOrEmpty(Headers.ContentType.Name))
-                ContentFileName = Headers.ContentType.Name;
-            else if(Headers.ContentDisposition != null)
-                ContentFileName = Headers.ContentDisposition.FileName;
+	        ContentFileName = FigureOutFilename(Headers);
 		}
         #endregion
+
+        /// <summary>
+        /// This method is responsible for picking a good name for an Attachment
+        /// based on the headers of it
+        /// </summary>
+        /// <param name="headers">The headers that can be used to give a reasonable name</param>
+        /// <returns>A name to use for an Attachment with the headers given</returns>
+        private static string FigureOutFilename(MessageHeader headers)
+        {
+            // There is a name field in the ContentType
+            if (!string.IsNullOrEmpty(headers.ContentType.Name))
+                return headers.ContentType.Name;
+            
+            // There is a FileName in the ContentDisposition
+            if(headers.ContentDisposition != null)
+                return headers.ContentDisposition.FileName;
+
+            // We could not find any given name. Instead we will try
+            // to give a name based on the MediaType
+            if(headers.ContentType.MediaType != null)
+            {
+                if (headers.ContentType.MediaType.ToLower().Contains("report"))
+                    return _defaultReportFileName;
+
+                if (headers.ContentType.MediaType.ToLower().Contains("multipart/"))
+                    return _defaultMIMEFileName;
+
+                if(headers.ContentType.MediaType.ToLower().Contains("message/rfc822"))
+                    return _defaultMIMEFileName;
+            }
+
+            // If it was not possible with the MediaType, use the ContentID as a name
+            if(headers.ContentID != null)
+                return headers.ContentID;
+
+            // If everything else fails, just use the default name
+            return _defaultFileName;
+		}
 
 	    /// <summary>
 		/// Decode the attachment to text
@@ -201,9 +210,30 @@ namespace OpenPOP.MIME
             return Encoding.Default.GetBytes(DecodeAsText());
 		}
 
+        /// <summary>
+        /// Save this Attachment to a file
+        /// </summary>
+        /// <param name="strFileName">File to write Attachment to</param>
+        /// <returns>true if save was successfull, false if save failed</returns>
+        public bool SaveToFile(string strFileName)
+        {
+            return Utility.SaveByteContentToFile(strFileName, DecodedAsBytes());
+        }
+
         public int CompareTo(Attachment attachment)
         {
             return RawAttachment.CompareTo(attachment.RawAttachment);
+        }
+
+        /// <summary>
+        /// Verify if the attachment is an RFC822 message.
+        /// </summary>
+        /// <returns>true if Attachment is a RFC822 message, false otherwise</returns>
+        public bool IsMIMEMailFile()
+        {
+            return (Headers.ContentType.MediaType != null &&
+                    Headers.ContentType.MediaType.ToLower().Contains("message/rfc822")) ||
+                   ContentFileName.ToLower().EndsWith(".eml");
         }
 	}
 }

@@ -360,7 +360,7 @@ namespace MailMonitor
 						_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port, _mailBox.UseSsl);
 						_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
 					//}
-					_msg=_popClient.GetMessage(_messageIndex,false);
+					_msg=_popClient.GetMessage(_messageIndex);
 					MailInfo mi=new MailInfo();
                     mi.ID = _msg.Headers.MessageID;
                     mi.File = Settings.GetMessageFile(_msg.Headers.MessageID);
@@ -378,7 +378,7 @@ namespace MailMonitor
 				ListViewItem lvi;
 				for(int i=0;i<_msg.Attachments.Count;i++)
 				{
-					lvi=lvwAttachments.Items.Add(_msg.GetAttachmentFileName(_msg.Attachments[i]),1);
+					lvi=lvwAttachments.Items.Add(_msg.Attachments[i].ContentFileName,1);
 				}
 
 			    strBodyFile = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + Path.DirectorySeparatorChar + "mail.htm";
@@ -401,11 +401,11 @@ namespace MailMonitor
 			Attachment att=_msg.Attachments[(int)lvwAttachments.SelectedItems[0].Index];
 			if(att!=null && _msg!=null)
 			{
-				dlgSave.FileName=_msg.GetAttachmentFileName(att);
+				dlgSave.FileName=att.ContentFileName;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)
 				{
-					if(OpenPOP.MIME.Message.IsMIMEMailFile(att))
+					if(att.IsMIMEMailFile())
 					{
 						result=MessageBox.Show(this,"Mail Monitor has found the attachment is a MIME mail, do you want to extract it?","MIME mail",MessageBoxButtons.YesNo);
 						if(result==DialogResult.Yes)
@@ -417,7 +417,7 @@ namespace MailMonitor
 								for(int i=0;i<m2.Attachments.Count;i++)
 								{
 									Attachment att2=m2.Attachments[i];
-									attachmentNames+=m2.GetAttachmentFileName(att2)+"("+att2.RawAttachment.Length+" bytes)\r\n";
+									attachmentNames+=att2.ContentFileName+"("+att2.RawAttachment.Length+" bytes)\r\n";
 								}
 							blnRet=_msg.SaveAttachments(System.IO.Path.GetDirectoryName(dlgSave.FileName));
 							MessageBox.Show(this,"Parsing "+(blnRet==true?"succeeded":"failed")+"£¡\r\n\r\nsubject:"+m2.Headers.Subject+"\r\n\r\nAttachment:\r\n"+attachmentNames);
@@ -426,7 +426,7 @@ namespace MailMonitor
 						{
 						}
 					}
-					MessageBox.Show(this,"Attachment saving "+((Message.SaveAttachment(att,dlgSave.FileName))?"succeeded":"failed")+"£¡");
+					MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(dlgSave.FileName))?"succeeded":"failed"));
 				}
 			}
 			else

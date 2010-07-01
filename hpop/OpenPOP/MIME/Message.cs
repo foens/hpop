@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
-using System.Text;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
 
@@ -115,9 +114,9 @@ namespace OpenPOP.MIME
 
         #region Public functions
 		/// <summary>
-		/// verify if the message is a report
+		/// Verify if the message is a report
 		/// </summary>
-		/// <returns>if it is a report message, return true, else, false</returns>
+		/// <returns>true if message is a report message, false otherwise</returns>
 		public bool IsReport()
 		{
 			if(!string.IsNullOrEmpty(Headers.ContentType.MediaType))
@@ -126,26 +125,7 @@ namespace OpenPOP.MIME
 			return false;
 		}
 
-		/// <summary>
-		/// verify if the attachment is MIME Email file
-		/// </summary>
-		/// <param name="attItem">attachment</param>
-		/// <returns>if MIME Email file, return true, else, false</returns>
-		public static bool IsMIMEMailFile(Attachment attItem)
-		{
-			try
-			{
-			    return attItem.Headers.ContentType.MediaType.ToLower() .Equals("message/rfc822") ||
-			           attItem.ContentFileName.ToLower().EndsWith(".eml".ToLower());
-			}
-			catch(Exception e)
-			{
-			    Utility.LogError("IsMIMEMailFile():" + e.Message);
-				return false;
-			}
-		}
-
-		public static bool IsMIMEMailFile2(Attachment attItem)
+	    private static bool IsMIMEMailFile2(Attachment attItem)
 		{
 			try
 			{
@@ -166,154 +146,85 @@ namespace OpenPOP.MIME
 		/// <returns>translated message body</returns>
 		public string TranslateHTMLPictureFiles(string strBody, Hashtable hsbFiles)
 		{
-			try
+			foreach(Attachment attachment in Attachments)
 			{
-				foreach(Attachment attachment in Attachments)
+				if(Utility.IsPictureFile(attachment.ContentFileName))
 				{
-					if(Utility.IsPictureFile(attachment.ContentFileName))
-					{
-                        if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
-                            //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, hsbFiles[attachment.ContentFileName].ToString());
-
-					    strBody = strBody.Replace(attachment.ContentFileName, hsbFiles[attachment.ContentFileName].ToString());
-					}
+                    if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
+                        strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, hsbFiles[attachment.ContentFileName].ToString());
+                    else
+                        strBody = strBody.Replace(attachment.ContentFileName, hsbFiles[attachment.ContentFileName].ToString());
 				}
 			}
-			catch(Exception e)
-			{
-			    Utility.LogError("TranslateHTMLPictureFiles():" + e.Message);
-			}
+			
 			return strBody;
 		}
 
 		/// <summary>
-		/// translate pictures url within the body
+		/// Translate inline pictures within the body to a path where the images are saved
+		/// under their ContentFileName.
 		/// </summary>
-		/// <param name="strBody">message body</param>
-		/// <param name="strPath">path of the pictures</param>
-		/// <returns>translated message body</returns>
+		/// <param name="strBody">The body to be changedy</param>
+		/// <param name="strPath">Path to the location of the pictures</param>
+		/// <returns>A Translated message body</returns>
 		public string TranslateHTMLPictureFiles(string strBody, string strPath)
 		{
-			try
+			if(!strPath.EndsWith("\\"))
+				strPath += "\\";
+			
+			foreach(Attachment attachment in Attachments)
 			{
-				if(!strPath.EndsWith("\\"))
+				if(Utility.IsPictureFile(attachment.ContentFileName))
 				{
-				    strPath += "\\";
-				}			
-				foreach(Attachment attachment in Attachments)
-				{
-					if(Utility.IsPictureFile(attachment.ContentFileName))
-					{
-                        if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
-                            //support for embedded pictures
-                            strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, strPath + attachment.ContentFileName);
+                    if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
+                        strBody = strBody.Replace("cid:" + attachment.Headers.ContentID, strPath + attachment.ContentFileName);
+                    else
 					    strBody = strBody.Replace(attachment.ContentFileName, strPath + attachment.ContentFileName);
-					}
 				}
-			}			
-			catch(Exception e)
-			{
-			    Utility.LogError("TranslateHTMLPictureFiles():" + e.Message);
 			}
+
 			return strBody;
 		}
 
 		/// <summary>
-		/// Get the proper attachment file name
+		/// Save all Attachments included in this message to a defined path.
+		/// The attachments name will be appended to the path, and saved under that name.
 		/// </summary>
-		/// <param name="attItem">attachment</param>
-		/// <returns>propery attachment file name</returns>
-		public string GetAttachmentFileName(Attachment attItem)
-		{
-			int items=0;
-
-			//return unique body file names
-            for (int i = 0; i < Attachments.Count; i++)
-            {
-                if (attItem.ContentFileName == attItem.DefaultFileName)
-                {
-                    items++;
-                    attItem.ContentFileName = attItem.DefaultFileName2.Replace("*", items.ToString());
-                }
-            }
-		    string name = attItem.ContentFileName;
-			
-			//return (name==null||name==""?(IsReport()==true?(this.IsMIMEMailFile(attItem)==true?attItem.DefaultMIMEFileName:attItem.DefaultReportFileName):(attItem.ContentID!=null?attItem.ContentID:attItem.DefaultFileName)):name);
-			if(string.IsNullOrEmpty(name))
-				if(IsReport())
-				{
-                    if (IsMIMEMailFile(attItem))
-                        return attItem.DefaultMIMEFileName;
-
-					return attItem.DefaultReportFileName;
-				}
-				else
-				{
-                    if (IsMIMEMailFile(attItem))
-                        return attItem.DefaultMIMEFileName;
-
-                    if (attItem.Headers.ContentID != null)
-                        return attItem.Headers.ContentID;
-
-				    return attItem.DefaultFileName;
-				}
-			
-			return name;
-		}
-
-        /// <summary>
-        /// save attachment to file
-        /// </summary>
-        /// <param name="attItem">Attachment</param>
-        /// <param name="strFileName">File to be saved to</param>
-        /// <returns>true if save successfully, false if failed</returns>
-        public static bool SaveAttachment(Attachment attItem, string strFileName)
-        {
-            return Utility.SaveByteContentToFile(strFileName, attItem.DecodedAsBytes());
-        }
-
-		/// <summary>
-		/// save attachments to a defined path
-		/// </summary>
-		/// <param name="strPath">path to have attachments to be saved to</param>
-		/// <returns>true if save successfully, false if failed</returns>
+		/// <param name="strPath">Path to place the attachments</param>
+		/// <returns>true if all attachments was saved successfully, false if just one failed</returns>
 		public bool SaveAttachments(string strPath)
 		{
-            if (!string.IsNullOrEmpty(strPath))
-			{
-				try
-				{
-					bool blnRet=true;
-
-					if(!strPath.EndsWith("\\"))
-					{
-					    strPath += "\\";
-					}
-                    foreach (Attachment attachment in Attachments)
-                    {
-                        blnRet = SaveAttachment(attachment, strPath + GetAttachmentFileName(attachment));
-                        if (!blnRet)
-                            break;
-                    }
-					return blnRet;
-				}
-				catch(Exception e)
-				{
-					Utility.LogError(e.Message);
-					return false;
-				}
-			}
+            if (string.IsNullOrEmpty(strPath))
+                return false;
 			
-			return false;
+			try
+			{
+                bool blnRet = true;
+
+				if(!strPath.EndsWith("\\"))
+					strPath += "\\";
+				
+                foreach (Attachment attachment in Attachments)
+                {
+                    blnRet = attachment.SaveToFile(strPath + attachment.ContentFileName);
+                    if (blnRet == false)
+                        break;
+                }
+				return blnRet;
+			}
+			catch(Exception e)
+			{
+				Utility.LogError(e.Message);
+				return false;
+			}
         }
 
         /// <summary>
-        /// Save message content to eml file
+        /// Save message content to an eml file
         /// </summary>
-        /// <param name="strFile"></param>
-        /// <param name="blnReplaceExists"></param>
-        /// <returns></returns>
+        /// <param name="strFile">The File location to save the message to</param>
+        /// <param name="blnReplaceExists">Should the file be replaced if it exists?</param>
+        /// <returns>True on success, false otherwsie</returns>
         public bool SaveToMIMEEmailFile(string strFile, bool blnReplaceExists)
         {
             return Utility.SavePlainTextToFile(strFile, RawMessage, blnReplaceExists);

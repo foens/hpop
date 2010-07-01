@@ -23,6 +23,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME;
+using OpenPOP.MIME.Header;
 
 namespace OpenPOP.POP3
 {
@@ -675,33 +676,23 @@ namespace OpenPOP.POP3
 		/// Fetches a message from the server and parses it
 		/// </summary>
 		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
-        /// <param name="headersOnly">Only return message header?</param>
 		/// <returns>The message or null if server did not accept the command</returns>
-		/// // TODO Remove the bool parameter
-		public Message GetMessage(int messageNumber, bool headersOnly)
+		public Message GetMessage(int messageNumber)
 		{
-		    Message msg;
-
-            if (headersOnly)
-                msg = GetMessageHeaders(messageNumber);
-            else
-                msg = FetchMessage("RETR " + messageNumber, false);
-
-			return msg;
+		    return FetchMessage("RETR " + messageNumber, false);
 		}
 
-        /// <summary>
+	    /// <summary>
         /// Get all the headers for a message
         /// </summary>
         /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
-        /// <returns>Message object</returns>
-        /// TODO: Return a MessageHeader instead
-        public Message GetMessageHeaders(int messageNumber)
+        /// <returns>MessageHeaders object</returns>
+        public MessageHeader GetMessageHeaders(int messageNumber)
         {
             // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
             Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
 
-            return msg;
+            return msg.Headers;
         }
 
 		/// <summary>
