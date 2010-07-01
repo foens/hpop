@@ -42,8 +42,7 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblTitle;
 		private System.Windows.Forms.TextBox txtDescription;
 		private System.Windows.Forms.Button cmdApply;
-		private MailBox _mailBox;
-		private bool _loaded;
+	    private bool _loaded;
 		private bool _dirty;
 		private System.Windows.Forms.CheckBox chkUse;
         private CheckBox useSsl;
@@ -53,7 +52,6 @@ namespace MailMonitor
 
 
 		#region Entry
-
 		public frmMailBox()
 		{
 			InitializeComponent();
@@ -71,28 +69,26 @@ namespace MailMonitor
 			base.Dispose( disposing );
 		}
 
-		private void frmMailBox_Load(object sender, System.EventArgs e)
+		private void frmMailBox_Load(object sender, EventArgs e)
 		{
-			if(!_mailBox.Equals(null))
+			if(!MailBox.Equals(null))
 			{
-				txtName.Text=_mailBox.Name;
-				txtServerAddress.Text=_mailBox.ServerAddress;
-				txtPort.Text=_mailBox.Port.ToString();
-				txtUserName.Text=_mailBox.UserName;
-				txtPassword.Text=_mailBox.Password;
-				txtDescription.Text=_mailBox.Desccription;
-				chkUse.Checked=_mailBox.Use;
-                useSsl.Checked=_mailBox.UseSsl;
+				txtName.Text=MailBox.Name;
+				txtServerAddress.Text=MailBox.ServerAddress;
+				txtPort.Text=MailBox.Port.ToString();
+				txtUserName.Text=MailBox.UserName;
+				txtPassword.Text=MailBox.Password;
+				txtDescription.Text=MailBox.Desccription;
+				chkUse.Checked=MailBox.Use;
+                useSsl.Checked=MailBox.UseSsl;
 			}
 			else
 			{
-				_mailBox=new MailBox();
+				MailBox=new MailBox();
 			}
 			_loaded=true;
 			//_auto=false;
 		}
-
-
 		#endregion
 
 		#region Windows
@@ -372,32 +368,28 @@ namespace MailMonitor
 		#endregion
 
 		#region Functions
-		public MailBox MailBox
-		{
-			get{return _mailBox;}
-			set{_mailBox=value;}
-		}
+	    public MailBox MailBox { get; set; }
 
-		private bool ApplySettings()
+	    private bool ApplySettings()
 		{
 			int intPort=Convert.ToInt32(txtPort.Text);
 			if(intPort>0 && intPort<65535)
 			{
-				_mailBox.Name=txtName.Text;
-				_mailBox.ServerAddress=txtServerAddress.Text;
-				_mailBox.Port=Convert.ToInt32(txtPort.Text);
-				_mailBox.UserName=txtUserName.Text;
-				_mailBox.Password=txtPassword.Text;
-				_mailBox.Desccription=txtDescription.Text;
-				_mailBox.Use=chkUse.Checked;
-			    _mailBox.UseSsl=useSsl.Checked;
+				MailBox.Name=txtName.Text;
+				MailBox.ServerAddress=txtServerAddress.Text;
+				MailBox.Port=Convert.ToInt32(txtPort.Text);
+				MailBox.UserName=txtUserName.Text;
+				MailBox.Password=txtPassword.Text;
+				MailBox.Desccription=txtDescription.Text;
+				MailBox.Use=chkUse.Checked;
+			    MailBox.UseSsl=useSsl.Checked;
 				_dirty=false;
 				//_new=false;
 				cmdApply.Enabled=false;
 				return true;
 			}
-			else
-				return false;
+			
+            return false;
 		}
 
 		private void CloseMe()
@@ -407,19 +399,19 @@ namespace MailMonitor
 				if(MessageBox.Show(this,"Something has been changed. Do you want save it before exit?","Save",MessageBoxButtons.YesNo)==DialogResult.Yes)
 					ApplySettings();
 			}
-			this.Close();
+			Close();
 		}
 
 		#endregion
 
 		#region Controls
 
-		private void cmdCancel_Click(object sender, System.EventArgs e)
+		private void cmdCancel_Click(object sender, EventArgs e)
 		{
 			Close();
 		}
 
-		private void cmdSave_Click(object sender, System.EventArgs e)
+		private void cmdSave_Click(object sender, EventArgs e)
 		{
 			if(ApplySettings())
 				this.Close();
@@ -427,7 +419,7 @@ namespace MailMonitor
 				MessageBox.Show(this,"Please input a valid port number!");
 		}
 
-		private void ContentChanged(object sender, System.EventArgs e)
+		private void ContentChanged(object sender, EventArgs e)
 		{
 			if(_loaded)
 			{
@@ -455,7 +447,7 @@ namespace MailMonitor
 			}
 		}
 
-		private void cmdApply_Click(object sender, System.EventArgs e)
+		private void cmdApply_Click(object sender, EventArgs e)
 		{
 			ApplySettings();
 		}
@@ -464,8 +456,6 @@ namespace MailMonitor
 		{
 			CloseMe();
 		}
-
 		#endregion
-
 	}
 }

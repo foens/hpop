@@ -37,11 +37,9 @@ namespace MailMonitor
 		private System.Windows.Forms.Label lblDescription;
 		private System.Windows.Forms.PictureBox picIcon;
 		private System.Windows.Forms.Label lblTitle;
-		private Settings _settings;
-		private POPClient _popClient=new POPClient();
+	    private POPClient _popClient=new POPClient();
 		private frmMail _mail;
-		private MailBox _mailBox;
-		private Thread _thread;
+	    private Thread _thread;
 		private System.Windows.Forms.SaveFileDialog dlgSave;
 		private int _count;
 
@@ -76,11 +74,11 @@ namespace MailMonitor
 			base.Dispose( disposing );
 		}
 
-		private void frmMails_Load(object sender, System.EventArgs e)
+		private void frmMails_Load(object sender, EventArgs e)
 		{
-			this.WindowState=_settings.MailsWindow.State;
-			if(this.WindowState!=FormWindowState.Maximized)
-				this.Size=_settings.MailsWindow.Size;
+			WindowState=Settings.MailsWindow.State;
+			if(WindowState!=FormWindowState.Maximized)
+				Size=Settings.MailsWindow.Size;
 			InitEMails();
 		}
 
@@ -88,7 +86,6 @@ namespace MailMonitor
 		{
 			Abort();
 		}
-
 		#endregion
 
 		#region Windows
@@ -251,24 +248,18 @@ namespace MailMonitor
 		#endregion
 
 		#region Functions
-		public MailBox MailBox
-		{
-			set{_mailBox=value;}
-		}
+	    public MailBox MailBox { private get; set; }
 
-		public Settings Settings
-		{
-			set{_settings=value;}
-		}
+	    public Settings Settings { private get; set; }
 
-		private void DownloadEMails()
+	    private void DownloadEMails()
 		{
 			try
 			{
-				OpenPOP.POP3.Logger.Log=true;
+				Logger.Log=true;
 				_popClient.Disconnect();
-				_popClient.Connect(_mailBox.ServerAddress,_mailBox.Port, _mailBox.UseSsl);
-				_popClient.Authenticate(_mailBox.UserName,_mailBox.Password);
+				_popClient.Connect(MailBox.ServerAddress,MailBox.Port, MailBox.UseSsl);
+				_popClient.Authenticate(MailBox.UserName,MailBox.Password);
 
 				_count=_popClient.GetMessageCount();
 
@@ -280,7 +271,7 @@ namespace MailMonitor
 
 				for(int i=1;i<=_count;i++)
 				{
-					this.Text="MailBox Info("+i.ToString()+"/"+_count.ToString() + ")";
+				    Text = "MailBox Info(" + i + "/" + _count + ")";
 					MessageHeader headers = _popClient.GetMessageHeaders(i);
                     if (headers != null)
 					{
@@ -298,7 +289,7 @@ namespace MailMonitor
 				}
 				//lvwMailBoxes.Visible=true;
 				lvwMailBoxes.Update();
-				this.Text="MailBox Info(" + _count.ToString() + " mails)";
+				Text="MailBox Info(" + _count + " mails)";
 			}
 			catch(Exception e)
 			{
@@ -367,7 +358,6 @@ namespace MailMonitor
 		#endregion
 
 		#region Progress
-
 		private void AddEvent(string strEvent)
 		{
 			//lstEvents.Items.Add(strEvent);
@@ -416,9 +406,9 @@ namespace MailMonitor
 			{
 				_mail=new frmMail();
 				_mail.MessageIndex=lvwMailBoxes.SelectedItems[0].Index;
-				_mail.MailBox=_mailBox;
+				_mail.MailBox=MailBox;
 				_mail.POPClient=_popClient;
-				_mail.Settings=_settings;
+				_mail.Settings=Settings;
 				_mail.MessageID=lvwMailBoxes.SelectedItems[0].SubItems[4].Text;
 				_mail.ShowDialog(this);
 			}
@@ -426,29 +416,29 @@ namespace MailMonitor
 
 		private void frmMails_Resize(object sender, EventArgs e)
 		{
-			_settings.MailsWindow.State=WindowState;
-			_settings.MailsWindow.Size=Size;
-			_settings.MailsWindow.Location=Location;
+			Settings.MailsWindow.State=WindowState;
+			Settings.MailsWindow.Size=Size;
+			Settings.MailsWindow.Location=Location;
 		}
 
-		private void cmdCancel_Click(object sender, System.EventArgs e)
+		private void cmdCancel_Click(object sender, EventArgs e)
 		{
 			Abort();
 		}
 
-		private void cmdPause_Click(object sender, System.EventArgs e)
+		private void cmdPause_Click(object sender, EventArgs e)
 		{
 			Pause();
 		}
 
-		private void cmdGet_Click(object sender, System.EventArgs e)
+		private void cmdGet_Click(object sender, EventArgs e)
 		{
 			cmdGet.Enabled=false;
 			cmdCancel.Enabled=true;
 			InitEMails();
 		}
 
-		private void mnuDelete_Click(object sender, System.EventArgs e)
+		private void mnuDelete_Click(object sender, EventArgs e)
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
@@ -460,7 +450,7 @@ namespace MailMonitor
 			}
 		}
 
-		private void mnuSaveAsEML_Click(object sender, System.EventArgs e)
+		private void mnuSaveAsEML_Click(object sender, EventArgs e)
 		{
 			if(lvwMailBoxes.SelectedItems.Count>0)
 			{
@@ -472,6 +462,5 @@ namespace MailMonitor
 			}
 		}
 		#endregion
-
 	}
 }

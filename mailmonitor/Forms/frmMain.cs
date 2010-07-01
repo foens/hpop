@@ -95,7 +95,6 @@ namespace MailMonitor
 		private string _path=Assembly.GetEntryAssembly().Location+".cfg";
 		private bool _exit=false;
 
-
 		#region Entry
 		[STAThread]
 		static void Main() 
@@ -595,12 +594,10 @@ namespace MailMonitor
             ((System.ComponentModel.ISupportInitialize)(this.sbpMain)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
 		}
 		#endregion
 
 		#region Controls
-
 		private void frmMain_Closed(object sender, EventArgs e)
 		{
 			SetSchedule(false);
@@ -609,12 +606,12 @@ namespace MailMonitor
 
 		private void frmMain_Resize(object sender, EventArgs e)
 		{
-			_settings.MainWindow.State=this.WindowState;
-			_settings.MainWindow.Size=this.Size;
-			_settings.MainWindow.Location=this.Location;
+			_settings.MainWindow.State=WindowState;
+			_settings.MainWindow.Size=Size;
+			_settings.MainWindow.Location=Location;
 		}
 
-		private void mnuStopChecking_Click(object sender, System.EventArgs e)
+		private void mnuStopChecking_Click(object sender, EventArgs e)
 		{
 			Abort();
 		}
@@ -624,17 +621,17 @@ namespace MailMonitor
 			GetMailInfoEx();
 		}
 
-		private void mnuAbout_Click(object sender, System.EventArgs e)
+		private void mnuAbout_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show(this,"Mail Monitor and OpenPOP.NET are copyrights of Hamid Qureshi and Unruled Boy");
 		}
 
-		private void mnuWebsite_Click(object sender, System.EventArgs e)
+		private void mnuWebsite_Click(object sender, EventArgs e)
 		{
 			Process.Start("http://sourceforge.net/projects/hpop/");
 		}
 
-		private void mnuFeedback_Click(object sender, System.EventArgs e)
+		private void mnuFeedback_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -647,19 +644,19 @@ namespace MailMonitor
 			}
 		}
 
-		private void mnuShowToolbar_Click(object sender, System.EventArgs e)
+		private void mnuShowToolbar_Click(object sender, EventArgs e)
 		{
 			mnuShowToolbar.Checked=!mnuShowToolbar.Checked;
 			tbrMain.Visible=mnuShowToolbar.Checked;
 		}
 
-		private void mnuShowStatusbar_Click(object sender, System.EventArgs e)
+		private void mnuShowStatusbar_Click(object sender, EventArgs e)
 		{
 			mnuShowStatusbar.Checked=!mnuShowStatusbar.Checked;
 			sbrMain.Visible=mnuShowStatusbar.Checked;
 		}
 
-		private void mnuSettings_Click(object sender, System.EventArgs e)
+		private void mnuSettings_Click(object sender, EventArgs e)
 		{
 			ShowSettings();
 		}
@@ -673,7 +670,7 @@ namespace MailMonitor
 			}
 		}
 
-		private void frmMain_Load(object sender, System.EventArgs e)
+		private void frmMain_Load(object sender, EventArgs e)
 		{			
 			LoadMailBoxes();
 			this.WindowState=_settings.MainWindow.State;
@@ -682,23 +679,17 @@ namespace MailMonitor
 			GetMailInfoAllThread();
 		}
 
-		private void dgdMailBoxes_DoubleClick(object sender, EventArgs e)
-		{
-			_frmMails.Settings=_settings;
-			_frmMails.ShowDialog(this);
-		}
-
-		private void lvwMailBoxes_DoubleClick(object sender, EventArgs e)
+	    private void lvwMailBoxes_DoubleClick(object sender, EventArgs e)
 		{
 			GetMailInfoEx();
 		}
 
-		private void mnuCheckCurrent_Click(object sender, System.EventArgs e)
+		private void mnuCheckCurrent_Click(object sender, EventArgs e)
 		{
 			GetMailInfoThread();
 		}
 
-		private void mnuHideWindow_Click(object sender, System.EventArgs e)
+		private void mnuHideWindow_Click(object sender, EventArgs e)
 		{
 			HideWindow();
 		}
@@ -706,23 +697,23 @@ namespace MailMonitor
 		private void nicPopup_DoubleClick(object sender, EventArgs e)
 		{
 			Bitmap bitmap=new Bitmap(imlToolBar.Images[7]);
-			this.Icon=Icon.FromHandle(bitmap.GetHicon());
-			this.Visible=true;
+			Icon=Icon.FromHandle(bitmap.GetHicon());
+			Visible=true;
 			nicPopup.Visible=false;
 		}
 
-		private void mnuExit_Click(object sender, System.EventArgs e)
+		private void mnuExit_Click(object sender, EventArgs e)
 		{
 			_exit=true;
-			this.Close();
+			Close();
 		}
 
-		private void tmrSchedule_Tick(object sender, System.EventArgs e)
+		private void tmrSchedule_Tick(object sender, EventArgs e)
 		{
 			GetMailInfoAllThread();
 		}
 
-		private void mnuOpenEML_Click(object sender, System.EventArgs e)
+		private void mnuOpenEML_Click(object sender, EventArgs e)
 		{
 			dlgOpen.CheckFileExists=true;
 			dlgOpen.CheckPathExists=true;
@@ -734,12 +725,12 @@ namespace MailMonitor
 			}
 		}
 
-		private void mnuCheckAll_Click(object sender, System.EventArgs e)
+		private void mnuCheckAll_Click(object sender, EventArgs e)
 		{
 			GetMailInfoAllThread();
 		}
 
-		private void tbrMain_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
+		private void tbrMain_ButtonClick(object sender, ToolBarButtonClickEventArgs e)
 		{
 			switch(e.Button.Tag.ToString())
 			{
@@ -762,64 +753,62 @@ namespace MailMonitor
 			}
 		}
 
-		private void mnuSchedule_Click(object sender, System.EventArgs e)
+		private void mnuSchedule_Click(object sender, EventArgs e)
 		{
 			mnuSchedule.Checked=!mnuSchedule.Checked;
 			SetSchedule(mnuSchedule.Checked);
 		}
 
-		private void mnuSchedule2_Click(object sender, System.EventArgs e)
+		private void mnuSchedule2_Click(object sender, EventArgs e)
 		{
 			mnuSchedule2.Checked=!mnuSchedule2.Checked;
 			SetSchedule(mnuSchedule2.Checked);
 		}
 
-		private void mnuOptions2_Click(object sender, System.EventArgs e)
+		private void mnuOptions2_Click(object sender, EventArgs e)
 		{
 			ShowSettings();
 		}
 
-		private void mnuExit2_Click(object sender, System.EventArgs e)
+		private void mnuExit2_Click(object sender, EventArgs e)
 		{
 			_exit=true;
-			this.Close();
+			Close();
 		}
 
-		private void mnuShowMainWindow_Click(object sender, System.EventArgs e)
+		private void mnuShowMainWindow_Click(object sender, EventArgs e)
 		{
-			this.Visible=true;
+			Visible=true;
 			nicPopup.Visible=false;
 		}
 
-		private void mnuRunClient_Click(object sender, System.EventArgs e)
+		private void mnuRunClient_Click(object sender, EventArgs e)
 		{
 			RunMailClient();
 		}
 
-		private void mnuRunClient2_Click(object sender, System.EventArgs e)
+		private void mnuRunClient2_Click(object sender, EventArgs e)
 		{
 			RunMailClient();
 		}
 
-		private void mnuCheckAll2_Click(object sender, System.EventArgs e)
+		private void mnuCheckAll2_Click(object sender, EventArgs e)
 		{
 			GetMailInfoAllThread();
 		}
 
-		private void mnuStopChecking2_Click(object sender, System.EventArgs e)
+		private void mnuStopChecking2_Click(object sender, EventArgs e)
 		{
 			Abort();
 		}
-
 		#endregion
 
 		#region Functions
-
 		private void HideWindow()
 		{
-			this.Visible=false;
-			nicPopup.Icon=this.Icon;
-			nicPopup.Text=this.Text;
+			Visible=false;
+			nicPopup.Icon=Icon;
+			nicPopup.Text=Text;
 			nicPopup.Visible=true;		
 		}
 
@@ -897,7 +886,7 @@ namespace MailMonitor
 				if(lvwMailBoxes.SelectedItems.Count>0)
 				{
 					_currentMailBox=lvwMailBoxes.SelectedItems[0].Index;
-					_thread=new Thread(new ThreadStart(GetMailInfo));
+					_thread=new Thread(GetMailInfo);
 					_thread.Start();
 				}
 				else
@@ -992,7 +981,7 @@ namespace MailMonitor
 
 		private void GetMailInfoAllThread()
 		{
-			_thread=new Thread(new ThreadStart(GetMailInfoAll));
+			_thread=new Thread(GetMailInfoAll);
 			_thread.IsBackground=true;
 			_thread.Start();
 		}
@@ -1031,7 +1020,7 @@ namespace MailMonitor
 			try
 			{
 
-				OpenPOP.POP3.Logger.Log=true;
+				Logger.Log=true;
 				
                 if(_popClient.Connected)
                     _popClient.Disconnect();
@@ -1064,16 +1053,16 @@ namespace MailMonitor
 
 				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
 				
-				sbrMain.Panels[0].Text=intNewMessages.ToString() + " new mail(s).";
+				sbrMain.Panels[0].Text=intNewMessages + " new mail(s).";
 				if(_settings.Beep)
 					Utilities.PlayBeep();
 				if(intNewMessages>0)
 				{
 					Bitmap bitmap=new Bitmap(imlToolBar.Images[6]);
-					this.Icon=Icon.FromHandle(bitmap.GetHicon());
+					Icon=Icon.FromHandle(bitmap.GetHicon());
 					if(_settings.ShowMainWindow)
 					{
-						this.Visible=true;
+						Visible=true;
 						nicPopup.Visible=false;
 					}
 				}				
@@ -1112,11 +1101,9 @@ namespace MailMonitor
 				catch{}
 			}
 		}
-
 		#endregion
 
 		#region Progress
-
 		private void AddEvent(string strEvent)
 		{
 			try
@@ -1165,6 +1152,5 @@ namespace MailMonitor
 			AddEvent("Communication Lost");
 		}
 		#endregion
-
 	}
 }

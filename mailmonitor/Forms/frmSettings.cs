@@ -57,10 +57,8 @@ namespace MailMonitor
 		private System.Windows.Forms.CheckBox chkShowPopup;
 		private frmMailBox _frmMailBox;
 		private MailBox _mailBox;
-		private Settings _settings;
 
-
-		#region Entry
+	    #region Entry
 		public frmSettings()
 		{
 			InitializeComponent();
@@ -333,7 +331,6 @@ namespace MailMonitor
             this.tbrMailBoxes.Size = new System.Drawing.Size(332, 26);
             this.tbrMailBoxes.TabIndex = 1;
             this.tbrMailBoxes.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.tbrMailBoxes_ButtonClick);
-            this.tbrMailBoxes.DoubleClick += new System.EventHandler(this.tbrMailBoxes_DoubleClick);
             // 
             // btnAdd
             // 
@@ -460,12 +457,12 @@ namespace MailMonitor
 			EditMailBox();
 		}
 
-		private void cmdCancel_Click(object sender, System.EventArgs e)
+		private void cmdCancel_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
-		private void frmSettings_Load(object sender, System.EventArgs e)
+		private void frmSettings_Load(object sender, EventArgs e)
 		{
 			for(int i=1;i<360;i++)
 			{
@@ -481,13 +478,7 @@ namespace MailMonitor
 
 			InitSettings();
 		}
-
-		private void tbrMailBoxes_DoubleClick(object sender, EventArgs e)
-		{
-			//
-		}
-
-		private void cmdOK_Click(object sender, System.EventArgs e)
+		private void cmdOK_Click(object sender, EventArgs e)
 		{
 //			RegistryPermission f = new RegistryPermission(RegistryPermissionAccess.AllAccess,@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
 //			f.Demand();
@@ -500,11 +491,11 @@ namespace MailMonitor
 			
 			extKey.Close();
 
-			_settings.MailClient=txtClient.Text;
-			_settings.ShowMainWindow=chkShowMainWindow.Checked;
-			_settings.Beep=chkBeep.Checked;
-			_settings.CheckInterval=Convert.ToInt32(dudCheckNew.Text);
-			_settings.ServerTimeout=Convert.ToInt32(dudServerTimeout.Text);
+			Settings.MailClient=txtClient.Text;
+			Settings.ShowMainWindow=chkShowMainWindow.Checked;
+			Settings.Beep=chkBeep.Checked;
+			Settings.CheckInterval=Convert.ToInt32(dudCheckNew.Text);
+			Settings.ServerTimeout=Convert.ToInt32(dudServerTimeout.Text);
 			//Settings.Save(Assembly.GetEntryAssembly().Location+".cfg",_settings);
 
 			this.Close();
@@ -516,16 +507,16 @@ namespace MailMonitor
 			{
 				_frmMailBox=new frmMailBox();
 				int intIndex=Convert.ToInt32(lvwMailBoxes.SelectedItems[0].Index);
-				_mailBox=(MailBox)_settings.MailBoxes[intIndex];
+				_mailBox=Settings.MailBoxes[intIndex];
 				_frmMailBox.MailBox=_mailBox;
 				_frmMailBox.ShowDialog();
-				_settings.MailBoxes[intIndex]=_frmMailBox.MailBox;
+				Settings.MailBoxes[intIndex]=_frmMailBox.MailBox;
 			}
 			else
 				MessageBox.Show(this,"Select mailbox first!");
 		}
 
-		private void tbrMailBoxes_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
+		private void tbrMailBoxes_ButtonClick(object sender, ToolBarButtonClickEventArgs e)
 		{
 			switch(e.Button.Tag.ToString())
 			{
@@ -534,15 +525,15 @@ namespace MailMonitor
 					_frmMailBox=new frmMailBox();
 					_frmMailBox.MailBox=_mailBox;
 					_frmMailBox.ShowDialog();
-					_settings.MailBoxes.Add(_settings.MailBoxes.Count,_frmMailBox.MailBox);
+					Settings.MailBoxes.Add(Settings.MailBoxes.Count,_frmMailBox.MailBox);
 					break;
 				case "Edit":
 					EditMailBox();
 					break;
 				case "Del":
-					if(_settings.MailBoxes.Count>0)
+					if(Settings.MailBoxes.Count>0)
 					{
-						_settings.MailBoxes.Remove(lvwMailBoxes.SelectedItems[0].Index);
+						Settings.MailBoxes.Remove(lvwMailBoxes.SelectedItems[0].Index);
 					}
 					else
 						MessageBox.Show(this,"There is no mailbox!");
@@ -556,7 +547,7 @@ namespace MailMonitor
 			InitMailBoxes();
 		}
 
-		private void cmdSelectClient_Click(object sender, System.EventArgs e)
+		private void cmdSelectClient_Click(object sender, EventArgs e)
 		{
 			dlgOpen.CheckFileExists=true;
 			dlgOpen.CheckPathExists=true;
@@ -565,21 +556,15 @@ namespace MailMonitor
 			if(dlgOpen.ShowDialog()==DialogResult.OK)
 			{
 				txtClient.Text=dlgOpen.FileName;
-				_settings.MailClient=txtClient.Text;
+				Settings.MailClient=txtClient.Text;
 			}		
 		}
-
 		#endregion
 
 		#region Functions
+	    public Settings Settings { get; set; }
 
-		public Settings Settings
-		{
-			get{return _settings;}
-			set{_settings=value;}
-		}
-
-		private void InitMailBoxes()
+	    private void InitMailBoxes()
 		{
 			lvwMailBoxes.Columns.Clear();
 			lvwMailBoxes.Columns.Add("Name",150,HorizontalAlignment.Left);
@@ -589,11 +574,11 @@ namespace MailMonitor
 			lvwMailBoxes.Items.Clear();
 			ListViewItem lvi;
 			MailBox mailBox;
-			if(_settings!=null)
+			if(Settings!=null)
 			{
-				for(int i=0;i<_settings.MailBoxes.Count;i++)
+				for(int i=0;i<Settings.MailBoxes.Count;i++)
 				{				
-					mailBox=(MailBox)_settings.MailBoxes[i];
+					mailBox=(MailBox)Settings.MailBoxes[i];
 					lvi=new ListViewItem();
 					lvi.Text=mailBox.Name;
 					lvi.SubItems.Add(mailBox.ServerAddress);
@@ -614,14 +599,13 @@ namespace MailMonitor
 
 			extKey.Close();
 
-			txtClient.Text=_settings.MailClient;
-			dudCheckNew.Text=_settings.CheckInterval.ToString();
-			dudServerTimeout.Text=_settings.ServerTimeout.ToString();
-			chkShowMainWindow.Checked=_settings.ShowMainWindow;
-			chkBeep.Checked=_settings.Beep;
+			txtClient.Text=Settings.MailClient;
+			dudCheckNew.Text=Settings.CheckInterval.ToString();
+			dudServerTimeout.Text=Settings.ServerTimeout.ToString();
+			chkShowMainWindow.Checked=Settings.ShowMainWindow;
+			chkBeep.Checked=Settings.Beep;
 
 		}
 		#endregion
-
 	}
 }
