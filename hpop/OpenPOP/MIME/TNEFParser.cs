@@ -19,22 +19,10 @@
 * Based on tnef.c from Thomas Boll 
 **********************************************************************/
 
-/*
-*Name:			OpenPOP.MIMEParser.TNEFParser
-*Function:		MS TNEF Parser
-*Author:		Thomas Boll(c version), Unruled Boy(c# version)
-*Created:		2004/3
-*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/5/1 14:13 GMT+8 by Unruled Boy
-*					1.Adding descriptions to every public functions/property/void
-*/
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Collections;
 
 namespace OpenPOP.MIME
 {
@@ -54,14 +42,14 @@ namespace OpenPOP.MIME
 		private const int _WORD			  = 0x00070000;
 		private const int _DWORD		  = 0x00080000;
 
-		private const int AVERSION      = (_DWORD  | 0x9006);   // Unused?
+		private const int AVERSION      = (_DWORD  | 0x9006); // Unused?
         private const int AMCLASS       = (_WORD   | 0x8008); // Unused?
 		private const int ASUBJECT      = (_DWORD  | 0x8004);
 		private const int AFILENAME     = (_string | 0x8010);
 		private const int ATTACHDATA    = (_BYTE   | 0x800f);
 
 		private Stream fsTNEF;
-		private List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
+		private readonly List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
 		private TNEFAttachment _attachment=null;
 
 	    //private string _logFile="OpenPOP.TNEF.log";
@@ -88,6 +76,44 @@ namespace OpenPOP.MIME
 
 	    #endregion
 
+        #region Constructors
+        /// <summary>
+        /// Used the set up default values
+        /// </summary>
+        private TNEFParser()
+        {
+            Verbose = false;
+            TNEFFile = "";
+        }
+
+        /// <summary>
+        /// Create a TNEFParser which loads its content from a file
+        /// </summary>
+        /// <param name="strFile">MS-TNEF file</param>
+        public TNEFParser(string strFile)
+            : this()
+        {
+            if (!OpenTNEFStream(strFile))
+                throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Create a TNEFParser which loads its content from a byte array
+        /// </summary>
+        /// <param name="bytContents">MS-TNEF bytes</param>
+        public TNEFParser(byte[] bytContents)
+            : this()
+        {
+            if (!OpenTNEFStream(bytContents))
+                throw new ArgumentException();
+        }
+
+        ~TNEFParser()
+        {
+            CloseTNEFStream();
+        }
+        #endregion
+
 
 		private static int GETINT32(byte[] p)
 		{
@@ -99,7 +125,7 @@ namespace OpenPOP.MIME
 			return (short)(p[0]+(p[1]<<8));
 		}
 
-		private int geti32 () 
+		private int geti32() 
 		{
 			byte[] buf=new byte[4];
 
@@ -111,7 +137,7 @@ namespace OpenPOP.MIME
 			return GETINT32(buf);
 		}
 
-		private int geti16 () 
+		private int geti16() 
 		{
 			byte[] buf=new byte[2];
 
@@ -123,7 +149,7 @@ namespace OpenPOP.MIME
 			return GETINT16(buf);
 		}
 
-		private int geti8 () 
+		private int geti8() 
 		{
 			byte[] buf=new byte[1];
 
@@ -171,10 +197,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strFile">MS-TNEF file</param>
 		/// <returns></returns>
-		public bool OpenTNEFStream(string strFile)
+		private bool OpenTNEFStream(string strFile)
 		{
-			//Utility.LogFilePath=LogFilePath;
-
 			TNEFFile=strFile;
 			try
 			{
@@ -195,10 +219,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="bytContents">MS-TNEF bytes</param>
 		/// <returns></returns>
-		public bool OpenTNEFStream(byte[] bytContents)
+		private bool OpenTNEFStream(byte[] bytContents)
 		{
-			//Utility.LogFilePath=LogFilePath;
-
 			try
 			{
 				fsTNEF=new MemoryStream(bytContents);
@@ -309,16 +331,14 @@ namespace OpenPOP.MIME
 			geti16();     /* checksum */
 		}
 
-		private void decode_message() 
-		{  
-			int d;
+		private void decode_message()
+		{
+		    int d = geti32();
 
-			d = geti32();
-
-			decode_attribute(d);
+		    decode_attribute(d);
 		}
 
-		private void decode_attachment() 
+        private void decode_attachment() 
 		{  
 			byte[] buf=new byte[4096];
 		    int len;
@@ -351,11 +371,7 @@ namespace OpenPOP.MIME
 					byte[] _fileNameBuffer=new byte[len-1];
 					Array.Copy(buf,_fileNameBuffer,(long)len-1);
 
-                    // BUG? foens: This is never null. What was the intention?
-					if (_fileNameBuffer == null) _fileNameBuffer = Encoding.Default.GetBytes("tnef.dat");
 					string strFileName=Encoding.Default.GetString(_fileNameBuffer);
-
-					//PrintResult("{0}: WRITING {1}\n", BasePath, strFileName);
 
 					//new attachment found because attachment data goes before attachment name
 					_attachment.FileName=strFileName;
@@ -421,12 +437,13 @@ namespace OpenPOP.MIME
 			return blnRet;
 		}
 
-		/// <summary>
-		/// save a decoded attachment to file
-		/// </summary>
-		/// <param name="attachment">decoded attachment</param>
-		/// <returns>true is succeded, vice versa</returns>
-		public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
+        /// <summary>
+        /// save a decoded attachment to file
+        /// </summary>
+        /// <param name="attachment">decoded attachment</param>
+        /// <param name="pathToSaveTo">Where to save the attachment to</param>
+        /// <returns>true is succeded, vice versa</returns>
+        public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
 		{
 			try
 			{
@@ -509,36 +526,5 @@ namespace OpenPOP.MIME
 			if (Verbose) 
 				Utility.LogError(strRet);
 		}
-
-		~TNEFParser()
-		{
-			_attachments=null;
-			CloseTNEFStream();
-		}
-
-		public TNEFParser()
-		{
-		    TNEFFile = "";
-		}
-
-	    /// <summary>
-	    /// open MS-TNEF stream from a file
-	    /// </summary>
-	    /// <param name="strFile">MS-TNEF file</param>
-	    public TNEFParser(string strFile)
-	        : this()
-	    {
-	        OpenTNEFStream(strFile);
-	    }
-
-	    /// <summary>
-		/// open MS-TNEF stream from bytes
-		/// </summary>
-		/// <param name="bytContents">MS-TNEF bytes</param>
-		public TNEFParser(byte[] bytContents)
-            : this()
-	    {
-	        OpenTNEFStream(bytContents);
-	    }
 	}
 }

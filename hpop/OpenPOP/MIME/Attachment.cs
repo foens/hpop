@@ -38,26 +38,13 @@ namespace OpenPOP.MIME
         public MessageHeader Headers { get; private set; }
 
 	    /// <summary>
-		/// Verify wheter the attachment is a real attachment or not
-		/// </summary>
-		/// <remarks>this is so far not comprehensive and needs more work to finish</remarks>
-        public bool NotAttachment
-        {
-            get
-            {
-                if (Headers != null && (Headers.ContentType.MediaType == null) && Headers.ContentID == null)
-                    return true;
-                return false;
-            }
-        }
-	    /// <summary>
 	    /// Content File Name
 	    /// </summary>
-	    public string ContentFileName { get; set; }
+	    public string ContentFileName { get; private set; }
 
 	    /// <summary>
 	    /// Raw Content
-	    /// Full Attachment, with headers and everthing.
+	    /// Full Attachment, with headers and everything.
 	    /// The raw string used to create this attachment
 	    /// </summary>
 	    public string RawContent { get; private set; }

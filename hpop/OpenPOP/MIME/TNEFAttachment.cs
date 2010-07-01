@@ -19,18 +19,6 @@
 * Based on tnef.c from Thomas Boll 
 **********************************************************************/
 
-/*
-*Name:			OpenPOP.MIMEParser.TNEFAttachment
-*Function:		TNEFAttachment
-*Author:		Thomas Boll(c version), Unruled Boy(c# version)
-*Created:		2004/3
-*Modified:		2004/5/1 14:13 GMT+8 by Unruled Boy
-*Description:
-*Changes:		
-*				2004/5/1 14:13 GMT+8 by Unruled Boy
-*					1.Adding descriptions to every public functions/property/void
-*/
-
 namespace OpenPOP.MIME
 {
 	/// <summary>

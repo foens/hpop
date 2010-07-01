@@ -33,8 +33,11 @@ namespace OpenPOP.MIME
         /// <summary>
 	    /// Whether to auto decode MS-TNEF attachment files
 	    /// </summary>
-	    public bool AutoDecodeMSTNEF { get; set; }
+        private bool AutoDecodeMSTNEF { get; set; }
 
+        /// <summary>
+        /// Headers of the Message.
+        /// </summary>
         public MessageHeader Headers { get; private set; }
 
         /// <summary>
@@ -44,6 +47,9 @@ namespace OpenPOP.MIME
         /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
+        /// <summary>
+        /// Attachments for the Message
+        /// </summary>
 	    public List<Attachment> Attachments { get; private set; }
 
 	    /// <summary>
@@ -345,29 +351,20 @@ namespace OpenPOP.MIME
                 // and also if we should decode it
 			    if(MIMETypes.IsMSTNEF(att.Headers.ContentType.MediaType) && AutoDecodeMSTNEF) 
 				{
-                    // TODO TNEFParser should have a constructor, to which bytes are sent, these are parsed and thereafter attachments can be pulled out
-                    // It was a MS-TNEF attachment. Parse it.
-				    TNEFParser tnef = new TNEFParser();
-				    tnef.Verbose = false;
+                    // It was a MS-TNEF attachment. Now we should parse it.
+                    TNEFParser tnef = new TNEFParser(att.DecodedAsBytes());
 
-					if (tnef.OpenTNEFStream(att.DecodedAsBytes()))
-					{
-						if(tnef.Parse())
-						{
-                            // ms-tnef attachment might contain multiple attachments inside it
-						    foreach (TNEFAttachment tatt in tnef.Attachments())
-						    {
-                                Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
-                                Attachments.Add(attNew);
-						    }
-						}
-						else
-                            // TODO: Should throw exception instead
-							Utility.LogError("ParseMultipartMessageBody():ms-tnef file parse failed");
-					}
-					else
-                        // TODO: Should throw exception instead
-						Utility.LogError("ParseMultipartMessageBody():ms-tnef file open failed");
+                    if (tnef.Parse())
+                    {
+                        // ms-tnef attachment might contain multiple attachments inside it
+                        foreach (TNEFAttachment tatt in tnef.Attachments())
+                        {
+                            Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
+                            Attachments.Add(attNew);
+                        }
+                    }
+                    else
+                        throw new ArgumentException("Could not parse TNEF attachment");
 				}
 				else if(IsMIMEMailFile2(att))
 				{
