@@ -60,10 +60,7 @@ namespace MailMonitor
 		}
 
 		protected override void Dispose( bool disposing )
-		{	
-			_popClient.Disconnect();
-			_popClient=null;
-
+		{
 			if( disposing )
 			{
 				if(components != null)
@@ -257,9 +254,11 @@ namespace MailMonitor
 			try
 			{
 				Logger.Log=true;
-				_popClient.Disconnect();
-				_popClient.Connect(MailBox.ServerAddress,MailBox.Port, MailBox.UseSsl);
-				_popClient.Authenticate(MailBox.UserName,MailBox.Password);
+                if(_popClient.Connected)
+				    _popClient.Disconnect();
+
+			    _popClient.Connect(MailBox.ServerAddress, MailBox.Port, MailBox.UseSsl);
+			    _popClient.Authenticate(MailBox.UserName, MailBox.Password);
 
 				_count=_popClient.GetMessageCount();
 
@@ -269,27 +268,62 @@ namespace MailMonitor
 
 				ListViewItem lvi;
 
-				for(int i=1;i<=_count;i++)
+                for (int i = _count; i >= 1; i--)
 				{
-				    Text = "MailBox Info(" + i + "/" + _count + ")";
-					MessageHeader headers = _popClient.GetMessageHeaders(i);
+				    string newTitle = "MailBox Info(" + (_count-i) + "/" + _count + ")";
+                    if (!InvokeRequired)
+                    {
+                        Text = newTitle;
+                    }
+                    else
+                    {
+                        Invoke(new SetTitleCaptionDelegate(SetTitleCaption), newTitle);
+                    }
+				    MessageHeader headers = _popClient.GetMessageHeaders(i);
                     if (headers != null)
 					{
 					    string from = null;
                         if (headers.From != null)
                             from = headers.From.ToString();
-						lvi=lvwMailBoxes.Items.Add(from);
-						lvi.Tag=i;
-						lvi.SubItems.Add(headers.Subject);
+
+                        int size = _popClient.GetMessageSize(i); // Fetch the size of the message
+
+                        lvi = new ListViewItem(from);
+                        lvi.Tag = i;
+                        lvi.SubItems.Add(headers.Subject);
                         lvi.SubItems.Add(headers.Date);
-                        lvi.SubItems.Add(_popClient.GetMessageSize(i).ToString()); // Fetch the size of the message
+                        lvi.SubItems.Add(size.ToString());
                         lvi.SubItems.Add(headers.MessageID);
+
+                        if (!InvokeRequired)
+                        {
+                            lvwMailBoxes.Items.Add(lvi);
+                        }
+                        else
+                        {
+                            Invoke(new AddDelegate(lvwMailBoxes.Items.Add), lvi);
+                        }
 					}
-					Thread.Sleep(50);
+					Application.DoEvents();
 				}
-				//lvwMailBoxes.Visible=true;
-				lvwMailBoxes.Update();
-				Text="MailBox Info(" + _count + " mails)";
+
+                if(!lvwMailBoxes.InvokeRequired)
+                {
+                    lvwMailBoxes.Update();
+                }else
+                {
+                    lvwMailBoxes.Invoke(new DoUpdateDelegate(lvwMailBoxes.Update));
+                }
+			    string caption = "MailBox Info(" + _count + " mails)";
+				if(!InvokeRequired)
+				{
+				    Text = caption;
+				}
+                else
+				{
+                    Invoke(new SetTitleCaptionDelegate(SetTitleCaption), caption);
+				}
+                _popClient.Disconnect();
 			}
 			catch(Exception e)
 			{
@@ -302,6 +336,16 @@ namespace MailMonitor
 				{}
 			}
 		}
+
+        private delegate void DoUpdateDelegate();
+
+	    private delegate ListViewItem AddDelegate(ListViewItem item);
+
+        private delegate void SetTitleCaptionDelegate(string newTitle);
+        private void SetTitleCaption(string newTitle)
+        {
+            Text = newTitle;
+        }
 
 		private void Abort()
 		{

@@ -333,11 +333,11 @@ namespace MailMonitor
 				}
 				else
 				{
-					//if(!_popClient.Connected)
-					//{
+                    if (!POPClient.Connected)
+					{
 						POPClient.Connect(MailBox.ServerAddress,MailBox.Port, MailBox.UseSsl);
 						POPClient.Authenticate(MailBox.UserName,MailBox.Password);
-					//}
+					}
 					_msg=POPClient.GetMessage(MessageIndex);
 					MailInfo mi=new MailInfo();
                     mi.ID = _msg.Headers.MessageID;

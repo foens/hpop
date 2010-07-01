@@ -1012,30 +1012,30 @@ namespace MailMonitor
 		{
 			MailBox mailBox = _settings.MailBoxes[_currentMailBox];
 
-            ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
+            //ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
+		    ListViewItem lvi = new ListViewItem();
 			lvi.SubItems.Add("");
 			lvi.SubItems.Add("");
 			lvi.SubItems.Add("");
 
 			try
 			{
-
 				Logger.Log=true;
 				
                 if(_popClient.Connected)
                     _popClient.Disconnect();
 
 			    _popClient = new POPClient(_settings.ServerTimeout*1000, _settings.ServerTimeout*1000);
-				_popClient.Connect(mailBox.ServerAddress,mailBox.Port,  mailBox.UseSsl);
-				_popClient.Authenticate(mailBox.UserName,mailBox.Password);
+			    _popClient.Connect(mailBox.ServerAddress, mailBox.Port, mailBox.UseSsl);
+			    _popClient.Authenticate(mailBox.UserName, mailBox.Password);
 
-				int intCount=_popClient.GetMessageCount();
-				lvi.SubItems[1].Text=intCount.ToString();
+			    int intCount = _popClient.GetMessageCount();
+			    lvi.SubItems[1].Text = intCount.ToString();
 
-			    int intNewMessages=0;
+			    int intNewMessages = 0;
 				MailInfo mi;
 
-				List<string> alUIDs=_popClient.GetMessageUIDs();
+			    List<string> alUIDs = _popClient.GetMessageUIDs();
 
 				for(int i=0;i<intCount;i++)
 				{
@@ -1051,16 +1051,36 @@ namespace MailMonitor
 				}
 			    _popClient.Disconnect();
 
-				lvi.SubItems[2].Text=DateTime.Now.ToShortTimeString();
-				
-				sbrMain.Panels[0].Text=intNewMessages + " new mail(s).";
-				if(_settings.Beep)
+			    lvi.SubItems[2].Text = DateTime.Now.ToShortTimeString();
+
+			    string textToWrite = intNewMessages + " new mail(s).";
+
+                // A thread my not change form objects it has not created
+                // check if we need to invoke
+                if (!sbrMain.InvokeRequired)
+                {
+                    sbrMain.Panels[0].Text = textToWrite;
+                } else
+                {
+                    lvwMailBoxes.Invoke(new SetStatusbarTextDelegate(SetStatusbarText), new object[] { textToWrite });
+                }
+			    if(_settings.Beep)
 					Utilities.PlayBeep();
 				if(intNewMessages>0)
 				{
 					Bitmap bitmap=new Bitmap(imlToolBar.Images[6]);
-					Icon=Icon.FromHandle(bitmap.GetHicon());
-					if(_settings.ShowMainWindow)
+                    Icon temp = Icon.FromHandle(bitmap.GetHicon());
+
+                    // A thread my not change form objects it has not created
+                    // check if we need to invoke
+                    if (!InvokeRequired)
+                    {
+                        Icon = temp;
+                    } else
+                    {
+                        Invoke(new SetIconDelegate(SetIcon), temp);
+                    }
+				    if(_settings.ShowMainWindow)
 					{
 						Visible=true;
 						nicPopup.Visible=false;
@@ -1084,13 +1104,53 @@ namespace MailMonitor
 					strRet="POP server is locked";
 				else
 					strRet=e.Message;
-				sbrMain.Panels[0].Text=strRet;
+
+                // A thread my not change form objects it has not created
+                // check if we need to invoke
+                if (!sbrMain.InvokeRequired)
+                {
+                    sbrMain.Panels[0].Text = strRet;
+                } else
+                {
+                    lvwMailBoxes.Invoke(new SetStatusbarTextDelegate(SetStatusbarText), new object[] { strRet });
+                }
 			}
 
 			lvi.SubItems[3].Text="Checking Finished!";
+
+            // A thread my not change form objects it has not created
+            // check if we need to invoke
+            if(!lvwMailBoxes.InvokeRequired)
+            {
+                lvwMailBoxes.Items[_currentMailBox] = lvi;
+            }
+            else
+            {
+                lvwMailBoxes.Invoke(new SetMailBoxInfoDelegate(SetMailBoxInfo), new object[] { _currentMailBox, lvi});
+            }
 		}
 
-		private void RunMailClient()
+        #region Private methods used to set varius items on this form, mostly used so that threads that did not create the form can change the fields
+        private delegate void SetMailBoxInfoDelegate(int mailboxItem, ListViewItem itemToSet);
+        private void SetMailBoxInfo(int mailboxItem, ListViewItem itemToSet)
+        {
+            lvwMailBoxes.Items[mailboxItem] = itemToSet;
+        }
+
+	    private delegate void SetStatusbarTextDelegate(string text);
+	    private void SetStatusbarText(string text)
+	    {
+	        sbrMain.Panels[0].Text = text;
+	    }
+
+	    private delegate void SetIconDelegate(Icon icon);
+        private void SetIcon(Icon icon)
+        {
+            Icon = icon;
+        }
+        #endregion
+
+        private void RunMailClient()
 		{
 			if(File.Exists(_settings.MailClient))
 			{
