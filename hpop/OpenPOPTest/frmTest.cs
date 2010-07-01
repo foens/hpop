@@ -540,7 +540,6 @@ namespace OpenPOP.NET_Sample_App
                 ds.Tables[0].Rows.Add(new object[] {"Date", m.Headers.Date});
                 foreach(string received in m.Headers.Received)
                     ds.Tables[0].Rows.Add(new object[] {"Received", received});
-                ds.Tables[0].Rows.Add(new object[] {"HTML", m.HTML});
                 ds.Tables[0].Rows.Add(new object[] {"Importance", m.Headers.Importance});
                 ds.Tables[0].Rows.Add(new object[] {"ReplyTo", m.Headers.ReplyTo});
                 foreach (string keyword in m.Headers.Keywords)

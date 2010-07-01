@@ -171,19 +171,10 @@ namespace OpenPOP.MIME
 		/// <returns>Decoded attachment text</returns>
 		public string DecodeAsText()
 		{
-            try
-            {
-                if (Headers.ContentType.MediaType.ToLower().Equals("message/rfc822"))
-                    return EncodedWord.Decode(RawAttachment);
+            if (!string.IsNullOrEmpty(Headers.ContentType.MediaType) && Headers.ContentType.MediaType.ToLower().Equals("message/rfc822"))
+                return EncodedWord.Decode(RawAttachment);
 
-                return Utility.DoDecode(RawAttachment, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
-            }
-            catch(Exception)
-            {
-                // TODO It seems that the only time there is an exception here, is when the Content-Transfer-Encoding is QuotedPrintable. So it seems there is a bug therein
-                // TODO FIX QuotedPrintable and remove this try catch usage
-                return RawAttachment;
-            }
+            return Utility.DoDecode(RawAttachment, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
 		}
 
 		/// <summary>

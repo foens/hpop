@@ -25,12 +25,7 @@ using OpenPOP.MIME.Header;
 namespace OpenPOP.MIME
 {
 	/// <summary>
-	/// Message Parser.
-	/// 
-	/// foens: This class has become a big big blob class with unrelated methods
-	/// My idea is to make a Message class that just hold messages
-	/// Then we should have a messageparser which can create a Message class from string,
-	/// file and should also be able to save to file.
+	/// The class represents a MIME Message
 	/// </summary>
 	public class Message
 	{
@@ -42,11 +37,14 @@ namespace OpenPOP.MIME
 
         public MessageHeader Headers { get; private set; }
 
+        /// <summary>
+        /// These are the text/plain and text/html bodies that could be found in the message
+        /// The last message should be the message most faithfull to what the user sent
+        /// Commonly the last message is HTML and the first is plain text
+        /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
 	    public List<Attachment> Attachments { get; private set; }
-
-	    public bool HTML { get; private set; }
 
 	    /// <summary>
 	    /// The raw message body part of the RawMessage that this message was constructed with.
@@ -262,21 +260,29 @@ namespace OpenPOP.MIME
                 // Check if the message is a multipart message (which means, has multiple message bodies)
                 if (Headers.ContentType.MediaType.ToLower().Contains("multipart"))
                 {
+                    // Set up attachments
                     ParseMultipartMessageBody();
 
+                    // Some of the attachments can be text and html, these we want in our MessageBody instead
                     if (Attachments.Count > 0)
                     {
-                        // Check if the first attachment is the message
-                        Attachment at = Attachments[0];
-                        if (at != null && at.NotAttachment)
-                            GetMessageBody(at.DecodeAsText());
+                        List<Attachment> toRemoveFromAttachments = new List<Attachment>();
 
-                        // In case body parts as text[0] html[1]
-                        if (Attachments.Count > 1 && !IsReport())
+                        // Check if the first attachment is the message
+                        foreach (Attachment attachment in Attachments)
                         {
-                            at = Attachments[1];
-                            if (at != null && at.NotAttachment)
-                                GetMessageBody(at.DecodeAsText());
+                            if (attachment.Headers.ContentType != null &&
+                                (attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
+                                attachment.Headers.ContentType.MediaType.Contains("text/html")))
+                            {
+                                MessageBody.Add(attachment.DecodeAsText());
+                                toRemoveFromAttachments.Add(attachment);
+                            }
+                        }
+
+                        foreach (Attachment removeFromAttachment in toRemoveFromAttachments)
+                        {
+                            Attachments.Remove(removeFromAttachment);
                         }
                     }
                 }
@@ -472,9 +478,6 @@ namespace OpenPOP.MIME
                 Utility.LogError("GetMessageBody():" + e.Message);
                 MessageBody.Add(Base64.Decode(strBuffer));
             }
-
-            if (MessageBody.Count > 1)
-                HTML = true;
         }
         #endregion
     }
