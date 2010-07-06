@@ -89,8 +89,9 @@ namespace OpenPOP.MIME
 
             Headers = new MessageHeader(headers, headersFromMessage.ContentType, headersFromMessage.ContentTransferEncoding);
 
-            // If we parsed headers, as we just did, the RawAttachment is found by removing the headers and trimming
-		    RawAttachment = Utility.ReplaceFirstOccurrance(strAttachment, rawHeaders, "");
+            // If we parsed headers, as we just did, the RawAttachment is found by removing the headers
+            // We also want to remove the line just after the headers, that tells the headers ended
+		    RawAttachment = Utility.ReplaceFirstOccurrance(strAttachment, rawHeaders + "\r\n\r\n", "");
 
             // Set the filename
 	        ContentFileName = FigureOutFilename(Headers);
