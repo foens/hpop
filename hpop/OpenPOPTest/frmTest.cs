@@ -43,6 +43,7 @@ namespace OpenPOP.NET_Sample_App
         private readonly POPClient popClient = new POPClient();
 		private ListBox lstEvents;
         private CheckBox useSsl;
+        private MenuItem mnuViewSource;
 	    private readonly Hashtable msgs = new Hashtable();
 
 
@@ -115,6 +116,7 @@ namespace OpenPOP.NET_Sample_App
             this.listAttachments = new System.Windows.Forms.TreeView();
             this.label3 = new System.Windows.Forms.Label();
             this.saveFile = new System.Windows.Forms.SaveFileDialog();
+            this.mnuViewSource = new System.Windows.Forms.MenuItem();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -355,7 +357,8 @@ namespace OpenPOP.NET_Sample_App
             // ctmMessages
             // 
             this.ctmMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.mnuDeleteMessage});
+            this.mnuDeleteMessage,
+            this.mnuViewSource});
             // 
             // mnuDeleteMessage
             // 
@@ -406,6 +409,12 @@ namespace OpenPOP.NET_Sample_App
             // saveFile
             // 
             this.saveFile.Title = "Save Attachment";
+            // 
+            // mnuViewSource
+            // 
+            this.mnuViewSource.Index = 1;
+            this.mnuViewSource.Text = "View source";
+            this.mnuViewSource.Click += new System.EventHandler(this.mnuDeleteMessageClick);
             // 
             // frmTest
             // 
@@ -505,7 +514,8 @@ namespace OpenPOP.NET_Sample_App
             {
                 if (m.MessageBody.Count > 0)
                 {
-                    txtMessage.Text = m.MessageBody[m.MessageBody.Count - 1];
+                    // 0 should be a text/plain version of the message
+                    txtMessage.Text = m.MessageBody[0];
                 }
                 listAttachments.Nodes.Clear();
 
@@ -593,17 +603,20 @@ namespace OpenPOP.NET_Sample_App
 
 		private void mnuDeleteMessage_Click(object sender, EventArgs e)
 		{
-		    DialogResult drRet = MessageBox.Show(this, "Are you sure to delete the email?", "Delete email", MessageBoxButtons.YesNo);
-			if(drRet == DialogResult.Yes)
-			{
-			    popClient.DeleteMessage(Convert.ToInt32(listMessages.SelectedNode.Tag));
+            if (listMessages.SelectedNode != null)
+            {
+                DialogResult drRet = MessageBox.Show(this, "Are you sure to delete the email?", "Delete email", MessageBoxButtons.YesNo);
+                if (drRet == DialogResult.Yes)
+                {
+                    popClient.DeleteMessage(Convert.ToInt32(listMessages.SelectedNode.Tag));
 
-			    listMessages.SelectedNode.Remove();
+                    listMessages.SelectedNode.Remove();
 
-			    drRet = MessageBox.Show(this, "Do you want to receive email again?", "Receive email", MessageBoxButtons.YesNo);
-				if(drRet == DialogResult.Yes)
-					ReceiveMails();
-			}
+                    drRet = MessageBox.Show(this, "Do you want to receive email again?", "Receive email", MessageBoxButtons.YesNo);
+                    if (drRet == DialogResult.Yes)
+                        ReceiveMails();
+                }
+            }
 		}
 
 		private void UIDLButtonClick(object sender, EventArgs e)
@@ -659,6 +672,17 @@ namespace OpenPOP.NET_Sample_App
         private void popClient_CommunicationLost(POPClient sender)
 		{
 			AddEvent("CommunicationLost");
-		}
+        }
+
+        private void mnuDeleteMessageClick(object sender, EventArgs e)
+        {
+            if (listMessages.SelectedNode != null)
+            {
+                MIME.Message m = (MIME.Message)msgs["msg" + listMessages.SelectedNode.Tag];
+
+                ShowSourceForm sourceForm = new ShowSourceForm(m.RawMessage);
+                sourceForm.ShowDialog();
+            }
+        }
 	}
 }
