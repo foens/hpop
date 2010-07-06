@@ -26,7 +26,7 @@ namespace OpenPOP.MIME
         /// <summary>
         /// These are the text/plain and text/html bodies that could be found in the message
         /// The last message should be the message most faithfull to what the user sent
-        /// Commonly the last message is HTML and the first is plain text
+        /// Commonly the second message is HTML and the first is plain text
         /// </summary>
 	    public List<string> MessageBody { get; private set; }
 
@@ -110,19 +110,6 @@ namespace OpenPOP.MIME
                 return (Headers.ContentType.MediaType.ToLower().IndexOf("report".ToLower()) != -1);
 			
 			return false;
-		}
-
-	    private static bool IsMIMEMailFile2(Attachment attItem)
-		{
-			try
-			{
-			    return attItem.Headers.ContentType.MediaType.ToLower().StartsWith("multipart/") && attItem.ContentFileName == "";
-			}
-			catch(Exception e)
-			{
-				Utility.LogError("IsMIMEMailFile2():"+e.Message);
-				return false;
-			}
 		}
 
 		/// <summary>
@@ -349,13 +336,18 @@ namespace OpenPOP.MIME
                     else
                         throw new ArgumentException("Could not parse TNEF attachment");
 				}
-				else if(IsMIMEMailFile2(att))
+				else if(att.isMultipartAttachment())
 				{
                     // The attachment itself is a multipart message
                     // Parse it as such, and take the attachments from it
                     // and add it to our message
                     // This will in reality flatten the structure
 				    Message m = att.DecodeAsMessage(true,true);
+				    foreach (string body in m.MessageBody)
+				    {
+				        MessageBody.Add(body);
+				    }
+
 				    foreach (Attachment attachment in m.Attachments)
 				        Attachments.Add(attachment);
 				}

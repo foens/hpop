@@ -197,5 +197,10 @@ namespace OpenPOP.MIME
                     Headers.ContentType.MediaType.ToLower().Contains("message/rfc822")) ||
                    ContentFileName.ToLower().EndsWith(".eml");
         }
+
+        public bool isMultipartAttachment()
+        {
+            return Headers.ContentType.MediaType != null && Headers.ContentType.MediaType.ToLower().Contains("multipart/");
+        }
 	}
 }
