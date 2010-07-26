@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
+using System.IO;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
 
@@ -69,11 +70,11 @@ namespace OpenPOP.MIME
         }
 
         /// <summary>
-        /// New Message
+        /// Initializes a message from a .eml file
         /// </summary>
         /// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
         /// <param name="blnOnlyHeader">whether only decode the header without body</param>
-        /// <param name="strEMLFile">file of email content to load from</param>
+        /// <param name="strEMLFile">File with email content to load from</param>
         public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
             : this()
         {
@@ -82,11 +83,14 @@ namespace OpenPOP.MIME
             {
                 AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
                 InitializeMessage(strMessage, blnOnlyHeader);
+            } else
+            {
+                throw new FileNotFoundException("Could not find file " + strEMLFile);
             }
         }
 
 		/// <summary>
-		/// New Message
+		/// Creates a new message from a string
 		/// </summary>
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="strMessage">raw message content</param>
