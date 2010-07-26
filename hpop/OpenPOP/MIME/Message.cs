@@ -25,11 +25,11 @@ namespace OpenPOP.MIME
         public MessageHeader Headers { get; private set; }
 
         /// <summary>
-        /// These are the text/plain and text/html bodies that could be found in the message
+        /// These are the message bodies that could be found in the message.
         /// The last message should be the message most faithfull to what the user sent
         /// Commonly the second message is HTML and the first is plain text
         /// </summary>
-	    public List<string> MessageBody { get; private set; }
+	    public List<MessageBody> MessageBody { get; private set; }
 
         /// <summary>
         /// Attachments for the Message
@@ -65,7 +65,7 @@ namespace OpenPOP.MIME
             RawHeader = null;
             RawMessageBody = null;
             Attachments = new List<Attachment>();
-            MessageBody = new List<string>();
+            MessageBody = new List<MessageBody>();
             AutoDecodeMSTNEF = false;
         }
 
@@ -255,7 +255,7 @@ namespace OpenPOP.MIME
                                 (attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
                                 attachment.Headers.ContentType.MediaType.Contains("text/html")))
                             {
-                                MessageBody.Add(attachment.DecodeAsText());
+                                MessageBody.Add(new MessageBody(attachment.DecodeAsText(), attachment.Headers.ContentType.MediaType));
                                 toRemoveFromAttachments.Add(attachment);
                             }
                         }
@@ -347,7 +347,7 @@ namespace OpenPOP.MIME
                     // and add it to our message
                     // This will in reality flatten the structure
 				    Message m = att.DecodeAsMessage(true,true);
-				    foreach (string body in m.MessageBody)
+				    foreach (MessageBody body in m.MessageBody)
 				    {
 				        MessageBody.Add(body);
 				    }
@@ -378,11 +378,12 @@ namespace OpenPOP.MIME
 
                 if (Utility.IsOrNullTextEx(Headers.ContentType.MediaType) && Headers.ContentTransferEncoding == ContentTransferEncoding.EightBit)
                 {
-                    MessageBody.Add(strBuffer);
+                    // Assume text/plain
+                    MessageBody.Add(new MessageBody(strBuffer, "text/plain"));
                 }
                 else if (Headers.ContentType.MediaType != null && Headers.ContentType.MediaType.ToLower().Contains("digest"))
                 {
-                    MessageBody.Add(strBuffer);
+                    MessageBody.Add(new MessageBody(strBuffer, Headers.ContentType.MediaType));
                 }
                 else
                 {
@@ -396,7 +397,7 @@ namespace OpenPOP.MIME
                         // Now we only need to decode the text according to encoding
                         body = Utility.DoDecode(body, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
 
-                        MessageBody.Add(body);
+                        MessageBody.Add(new MessageBody(body, Headers.ContentType.MediaType));
                     }
                     else
                     {
@@ -413,8 +414,13 @@ namespace OpenPOP.MIME
                             begin = strBuffer.IndexOf("--" + multipartBoundary, begin);
                             if (begin != -1)
                             {
-                                // Find the encoding of this part
-                                ContentTransferEncoding encoding = HeaderFieldParser.ParseContentTransferEncoding(MIMETypes.GetContentTransferEncoding(strBuffer, begin));
+                                // Genericly parse out header names and values
+                                string rawHeadersTemp;
+                                NameValueCollection headersUnparsedCollection;
+                                HeaderExtractor.ExtractHeaders(strBuffer.Substring(begin), out rawHeadersTemp, out headersUnparsedCollection);
+
+                                // Parse the header name and values into strong types
+                                MessageHeader multipartHeaders = new MessageHeader(headersUnparsedCollection);
 
                                 // The message itself is located after the MultipartBoundary. It may contain headers, which is ended
                                 // by a empty line, which corrosponds to "\r\n\r\n". We don't want to include the "\r\n", so skip them.
@@ -430,10 +436,14 @@ namespace OpenPOP.MIME
                                 // Now get the body out of the full message
                                 body = strBuffer.Substring(begin, messageLength);
 
-                                // Decode the body
-                                body = Utility.DoDecode(body, encoding, Headers.ContentType.CharSet);
+                                string charSet = Headers.ContentType.CharSet;
+                                if (multipartHeaders.ContentType.CharSet != null)
+                                    charSet = multipartHeaders.ContentType.CharSet;
 
-                                MessageBody.Add(body);
+                                // Decode the body
+                                body = Utility.DoDecode(body, multipartHeaders.ContentTransferEncoding, charSet);
+
+                                MessageBody.Add(new MessageBody(body, multipartHeaders.ContentType.MediaType));
                             }
                             else
                             {
@@ -441,7 +451,8 @@ namespace OpenPOP.MIME
                                 // We just add everything as a message
                                 if (MessageBody.Count == 0)
                                 {
-                                    MessageBody.Add(strBuffer);
+                                    // Assume text/plain
+                                    MessageBody.Add(new MessageBody(strBuffer, "text/plain"));
                                 }
                                 break;
                             }
@@ -452,7 +463,7 @@ namespace OpenPOP.MIME
             catch (Exception e)
             {
                 Utility.LogError("GetMessageBody():" + e.Message);
-                MessageBody.Add(Base64.Decode(strBuffer));
+                MessageBody.Add(new MessageBody(Base64.Decode(strBuffer), "text/plain")); // Assume text/plain
             }
         }
         #endregion

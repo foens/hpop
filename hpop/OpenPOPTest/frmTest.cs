@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Windows.Forms;
 using System.Data;
+using OpenPOP.MIME;
 using OpenPOP.POP3;
 
 namespace OpenPOP.NET_Sample_App
@@ -514,8 +515,20 @@ namespace OpenPOP.NET_Sample_App
             {
                 if (m.MessageBody.Count > 0)
                 {
-                    // 0 should be a text/plain version of the message
-                    txtMessage.Text = m.MessageBody[0];
+                    // Find the first text/plain version
+                    bool messageSet = false;
+                    foreach (MessageBody messageBody in m.MessageBody)
+                    {
+                        if (messageBody.Type.ToLower().Equals("text/plain"))
+                        {
+                            txtMessage.Text = messageBody.Body;
+                            messageSet = true;
+                            break;
+                        }
+                    }
+
+                    if (!messageSet)
+                        txtMessage.Text = m.MessageBody[0].Body;
                 }
                 listAttachments.Nodes.Clear();
 

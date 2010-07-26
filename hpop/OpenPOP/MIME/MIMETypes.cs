@@ -7,22 +7,8 @@ namespace OpenPOP.MIME
 	public static class MIMETypes
 	{
 	    private const string MIMEType_MSTNEF="application/ms-tnef";
-		private const string Content_Transfer_Encoding_Tag="Content-Transfer-Encoding";
 
-
-	    public static string GetContentTransferEncoding(string strBuffer, int pos)
-		{
-	        int begin = strBuffer.ToLower().IndexOf(Content_Transfer_Encoding_Tag.ToLower(), pos);
-			if(begin != -1)
-			{
-			    int end = strBuffer.ToLower().IndexOf("\r\n".ToLower(), begin + 1);
-			    return strBuffer.Substring(begin + Content_Transfer_Encoding_Tag.Length + 1, end - begin - Content_Transfer_Encoding_Tag.Length).Trim();
-			}
-
-	        return "";
-		}
-
-		public static bool IsMSTNEF(string strContentType)
+        public static bool IsMSTNEF(string strContentType)
 		{
 			if(!string.IsNullOrEmpty(strContentType))
 				if(strContentType.ToLower() == MIMEType_MSTNEF.ToLower())

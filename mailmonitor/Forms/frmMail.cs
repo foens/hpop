@@ -342,7 +342,7 @@ namespace MailMonitor
 				}
 
 			    strBodyFile = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + Path.DirectorySeparatorChar + "mail.htm";
-				string strBodyText=Utilities.ToFormattedHTML(_msg.MessageBody[_msg.MessageBody.Count-1]);
+				string strBodyText=Utilities.ToFormattedHTML(_msg.MessageBody[_msg.MessageBody.Count-1].Body);
 				Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
