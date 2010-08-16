@@ -182,43 +182,24 @@ namespace OpenPOP.POP3
 		/// Sends a command to the POP server.
 		/// </summary>
 		/// <param name="strCommand">command to send to server</param>
-		/// <param name="blnSilent">Do not give error</param>
-		/// <returns>true if server responded "+OK"</returns>
-        /// TODO: Should this really use catch(Exception e)?
-		private bool SendCommand(string strCommand, bool blnSilent)
-		{
-			try
-			{
-				if(writer.BaseStream.CanWrite)
-				{
-                    // Write a command with CRLF afterwards as per RFC.
-					writer.Write(strCommand + "\r\n");
-					writer.Flush(); // Flush the content as we now wait for a response
-
-					_lastCommandResponse = reader.ReadLine();				
-					return IsOkResponse(_lastCommandResponse);
-				}
-				
-				return false;
-			}
-			catch(Exception e)
-			{
-				if(!blnSilent)
-				{
-					Logger.LogError(strCommand + ":" +e.Message);
-				}
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Sends a command to the POP server.
-		/// </summary>
-		/// <param name="strCommand">command to send to server</param>
 		/// <returns>true if server responded "+OK"</returns>
 		private bool SendCommand(string strCommand)
 		{
-		    return SendCommand(strCommand, false);
+			if(writer.BaseStream.CanWrite)
+			{
+                // Write a command with CRLF afterwards as per RFC.
+				writer.Write(strCommand + "\r\n");
+				writer.Flush(); // Flush the content as we now wait for a response
+
+				_lastCommandResponse = reader.ReadLine();
+
+                if (_lastCommandResponse == null)
+                    throw new NullReferenceException("The server must have closed the connection");
+
+				return IsOkResponse(_lastCommandResponse);
+			}
+				
+			return false;
 		}
 
 		/// <summary>
@@ -316,7 +297,7 @@ namespace OpenPOP.POP3
 		{
 			try
 			{
-			    SendCommand("QUIT", true);
+			    SendCommand("QUIT");
 				reader.Close();
 				writer.Close();
 			}
