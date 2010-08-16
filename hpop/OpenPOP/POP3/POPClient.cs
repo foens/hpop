@@ -14,14 +14,16 @@ namespace OpenPOP.POP3
 	/// POP3 complient POPClient
 	/// 
 	/// This implementation does not support threads at all.
-	/// 
-	/// Here is an example how the POPClient could be used:
-	/// POPClient client = new POPClient();
-	/// client.Connect(serverHostName, serverPort, useSsl);
-	/// client.Authenticate(username, password);
+	/// </summary>
+	/// <example>
+    /// Here is an example how the POPClient could be used:
+    /// 
+    /// POPClient client = new POPClient();
+    /// client.Connect(serverHostName, serverPort, useSsl);
+    /// client.Authenticate(username, password);
     /// Message messageNumber1 = client.GetMessage(1, false);
     /// client.Disconnect();
-	/// </summary>
+	/// </example>
 	public class POPClient
     {
         #region Events
@@ -172,34 +174,35 @@ namespace OpenPOP.POP3
 		/// The method does only check if it starts with an "+OK"
 		/// </summary>
 		/// <param name="strResponse">The string to examine</param>
-		/// <returns>true if response is an "+OK" string</returns>
-		private static bool IsOkResponse(string strResponse)
+        /// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
+		private static void IsOkResponse(string strResponse)
 		{
-			return strResponse.StartsWith("+OK");
+            if (strResponse.StartsWith("+OK"))
+                return;
+
+            throw new PopServerException(strResponse);
 		}
 
 		/// <summary>
 		/// Sends a command to the POP server.
+		/// If this fails, an exception is thrown
 		/// </summary>
 		/// <param name="strCommand">command to send to server</param>
-		/// <returns>true if server responded "+OK"</returns>
-		private bool SendCommand(string strCommand)
+		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
+		private void SendCommand(string strCommand)
 		{
-			if(writer.BaseStream.CanWrite)
-			{
-                // Write a command with CRLF afterwards as per RFC.
-				writer.Write(strCommand + "\r\n");
-				writer.Flush(); // Flush the content as we now wait for a response
+            // Write a command with CRLF afterwards as per RFC.
+			writer.Write(strCommand + "\r\n");
+			writer.Flush(); // Flush the content as we now wait for a response
 
-				_lastCommandResponse = reader.ReadLine();
+			_lastCommandResponse = reader.ReadLine();
 
-                if (_lastCommandResponse == null)
-                    throw new NullReferenceException("The server must have closed the connection");
+            // Just a sanity check, catching the error before the response might
+            // be used somewhere else
+            if (_lastCommandResponse == null)
+                throw new NullReferenceException("The server must have closed the connection");
 
-				return IsOkResponse(_lastCommandResponse);
-			}
-				
-			return false;
+			IsOkResponse(_lastCommandResponse);
 		}
 
 		/// <summary>
@@ -213,15 +216,13 @@ namespace OpenPOP.POP3
         /// Set intLocation=1 to get 2
         /// Set intLocation=2 to get 200
 		/// </param>
-		/// <returns>integer value in the reply or -1 if server did not accept the command</returns>
+		/// <returns>integer value in the reply</returns>
+		/// <exception cref="PopServerException">If the server did not accept the command</exception>
 		private int SendCommandIntResponse(string strCommand, int intLocation)
 		{
-			if(SendCommand(strCommand))
-			{
-				return int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
-			}
-
-		    return -1;
+		    SendCommand(strCommand);
+			
+			return int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
 		}
 
 		/// <summary>
@@ -230,6 +231,8 @@ namespace OpenPOP.POP3
 		/// <param name="hostname">The hostname of the POP3 server</param>
 		/// <param name="port">The port of the POP3 server</param>
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
+		/// <exception cref="PopServerNotAvailableException">If the server did not send an OK message when a connection was estabelished</exception>
+        /// <exception cref="PopServerNotFoundException">If it was not possible to connect to the server</exception>
 		public void Connect(string hostname, int port, bool useSsl)
 		{
             CommunicationBegan(this);
@@ -274,24 +277,25 @@ namespace OpenPOP.POP3
             string strResponse = reader.ReadLine();
 
             // Check if the response was an OK response
-            if (IsOkResponse(strResponse))
-            {
+		    try
+		    {
+		        IsOkResponse(strResponse);
                 ExtractApopTimestamp(strResponse);
                 Connected = true;
                 CommunicationOccured(this);
-            }
-            else
-            {
-                // If not close down the connection and abort
+		    }
+		    catch (PopServerException)
+		    {
+		        // If not close down the connection and abort
                 Disconnect();
                 Logger.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
-                throw new PopServerNotAvailableException();
-            }
+                throw new PopServerNotAvailableException();   
+		    }
 		}
 
 		/// <summary>
-		/// Disconnects from POP3 server
-		/// Sends the QUIT command before closing the connection.
+		/// Disconnects from POP3 server.
+		/// Sends the QUIT command before closing the connection, which deletes all the messages that was marked as such.
 		/// </summary>
 		public void Disconnect()
 		{
@@ -326,9 +330,12 @@ namespace OpenPOP.POP3
 
 		/// <summary>
 		/// Authenticates a user towards the POP server using AuthenticationMethod.TRYBOTH
+		/// which is the most secure method to use.
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
+        /// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+        /// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password)
 		{
 			Authenticate(username, password, AuthenticationMethod.TRYBOTH);
@@ -341,6 +348,8 @@ namespace OpenPOP.POP3
         /// <param name="password">The user password</param>
 		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
         /// <exception cref="NotSupportedException">If AuthenticationMethod.APOP is used, but not supported by the server</exception>
+        /// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+        /// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			if(authenticationMethod == AuthenticationMethod.USERPASS)
@@ -366,19 +375,28 @@ namespace OpenPOP.POP3
         /// </summary>
         /// <param name="username">The username</param>
         /// <param name="password">The user password</param>
+        /// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+        /// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingUSER(string username, string password)
 		{				
 			AuthenticationBegan(this);
-
-			if(!SendCommand("USER " + username))
-			{
-				Logger.LogError("AuthenticateUsingUSER():wrong user");
+            try
+            {
+                SendCommand("USER " + username);
+            }
+            catch (PopServerException)
+            {
+                Logger.LogError("AuthenticateUsingUSER():wrong user");
 				throw new InvalidLoginException();
-			}
+            }
 
-			if(!SendCommand("PASS " + password))	
-			{
-				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
+            try
+            {
+                SendCommand("PASS " + password);
+            }
+            catch (PopServerException)
+            {
+                if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
 				{
 					Logger.LogError("AuthenticateUsingUSER():maildrop is locked");
 					throw new PopServerLockException();			
@@ -388,7 +406,7 @@ namespace OpenPOP.POP3
                 // S: -ERR maildrop already locked
 			    Logger.LogError("AuthenticateUsingUSER(): wrong password. Server responded: " + _lastCommandResponse);
 			    throw new InvalidPasswordException();
-			}
+            }
 			
 			AuthenticationFinished(this);
 		}
@@ -399,6 +417,8 @@ namespace OpenPOP.POP3
         /// <param name="username">The username</param>
         /// <param name="password">The user password</param>
         /// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
+        /// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+        /// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingAPOP(string username, string password)
 		{
             if(!APOPSupported)
@@ -406,11 +426,21 @@ namespace OpenPOP.POP3
 
 			AuthenticationBegan(this);
 
-			if(!SendCommand("APOP " + username + " " + MD5.ComputeHashHex(APOPTimestamp + password)))
-			{
-				Logger.LogError("AuthenticateUsingAPOP():wrong user or password");
-				throw new InvalidLoginOrPasswordException();
-			}
+            try
+            {
+                SendCommand("APOP " + username + " " + MD5.ComputeHashHex(APOPTimestamp + password));
+            }
+            catch (PopServerException)
+            {
+                if (_lastCommandResponse.ToLower().IndexOf("lock") != -1)
+                {
+                    Logger.LogError("AuthenticateUsingUSER():maildrop is locked");
+                    throw new PopServerLockException();
+                }
+
+                Logger.LogError("AuthenticateUsingAPOP():wrong user or password");
+                throw new InvalidLoginOrPasswordException();
+            }
 
 			AuthenticationFinished(this);
 		}
@@ -418,7 +448,8 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Get the number of messages on the server using a STAT command
 		/// </summary>
-		/// <returns>The message count or -1 if the server did not respond with an OK message</returns>
+		/// <returns>The message count on the server</returns>
+		/// <exception cref="PopServerException">If the server did not accept the STAT command</exception>
 		public int GetMessageCount()
 		{
 			return SendCommandIntResponse("STAT", 1);
@@ -430,32 +461,27 @@ namespace OpenPOP.POP3
 		/// This is done on disconnect.
 		/// </summary>
 		/// <param name="messageNumber">The number of the message to be deleted. This message may not already have been deleted</param>
-		/// <returns>True on success, false on failure of deletion</returns>
-		public bool DeleteMessage(int messageNumber) 
+		/// <exception cref="PopServerException">If the server did not accept the delete command</exception>
+		public void DeleteMessage(int messageNumber) 
 		{
-			return SendCommand("DELE " + messageNumber);
+            SendCommand("DELE " + messageNumber);
 		}
 
 		/// <summary>
         /// Marks all messages as deleted.
         /// The messages will not be deleted until a QUIT command is sent to the server.
         /// This is done on disconnect.
+        /// Assumes that no prior message has been marked as deleted.
 		/// </summary>
-		/// <returns>True if all messages was marked as deleted successfully, false if one message could not be marked. Messages following that message will not be tried to be deleted</returns>
-		public bool DeleteAllMessages() 
+		/// <exception cref="PopServerException">If the server did not accept one of the delete commands. All prior marked messages will still be marked.</exception>
+		public void DeleteAllMessages() 
 		{
 		    int messageCount = GetMessageCount();
 
-            // Maybe the server did not response OK to the message count
-            if(messageCount == -1)
-                return false;
-
             for (int messageItem = messageCount; messageItem > 0; messageItem--)
             {
-                if (!DeleteMessage(messageItem))
-                    return false;
+                DeleteMessage(messageItem);
             }
-			return true;
 		}
 
 		/// <summary>
@@ -467,11 +493,11 @@ namespace OpenPOP.POP3
 		/// The POP3 server removes all messages marked as deleted from the maildrop and replies as to the status of this operation.
 		/// The server is required to release any exclusive-access locks on the mailbox and close the TCP connection
 		/// </summary>
-		/// <returns>True on OK message from server. False otherwise.</returns>
+		/// <exception cref="PopServerException">If the server did not accept the QUIT command</exception>
         [Obsolete("You should use the disconnect method instead. It also sends the QUIT command and closes the streams correctly.")]
-		public bool QUIT()
+		public void QUIT()
 		{
-			return SendCommand("QUIT");
+			SendCommand("QUIT");
 		}
 
 		/// <summary>
@@ -480,9 +506,10 @@ namespace OpenPOP.POP3
 		/// RFC:
 		/// The POP3 server does nothing, it merely replies with a positive response
 		/// </summary>
-		public bool NOOP()
+        /// <exception cref="PopServerException">If the server did not accept the NOOP command</exception>
+		public void NOOP()
 		{
-			return SendCommand("NOOP");
+			SendCommand("NOOP");
 		}
 
 		/// <summary>
@@ -493,30 +520,28 @@ namespace OpenPOP.POP3
         /// server, they are unmarked.  The POP3 server then replies
         /// with a positive response.
 		/// </summary>
-		public bool RSET()
+        /// <exception cref="PopServerException">If the server did not accept the RSET command</exception>
+		public void RSET()
 		{
-			return SendCommand("RSET");
+			SendCommand("RSET");
 		}
 
 		/// <summary>
 		/// Get a unique ID for a single message
 		/// </summary>
         /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
-        /// <returns>The unique ID for the message, or null if the message does not exist</returns>
+        /// <returns>The unique ID for the message</returns>
+        /// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the messageNumber does not exist</exception>
 		public string GetMessageUID(int messageNumber)
 		{
             // Example from RFC:
             //C: UIDL 2
             //S: +OK 2 QhdPYR:00WBw1Ph7x7
 
-			if(SendCommand("UIDL " + messageNumber))
-			{
-                // Parse out the unique ID
-                return _lastCommandResponse.Split(' ')[2];
-			}
-
-		    // The command was not accepted. The message did properly not exist
-		    return null;
+		    SendCommand("UIDL " + messageNumber);
+			
+            // Parse out the unique ID
+            return _lastCommandResponse.Split(' ')[2];
 		}
 
 		/// <summary>
@@ -525,8 +550,8 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <returns>
 		/// A list containing the unique ID's in sorted order from message number 1 and upwards.
-		/// Returns null if the server did not accept the UIDL command.
 		/// </returns>
+        /// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
 		public List<string> GetMessageUIDs()
 		{
             // RFC Example:
@@ -536,29 +561,26 @@ namespace OpenPOP.POP3
             // S: 2 QhdPYR:00WBw1Ph7x7
             // S: .      // this is the end
 
-			if(SendCommand("UIDL"))
-			{
-                List<string> uids = new List<string>();
-
-			    string strResponse;
-                // Keep reading until multi-line ends with a "."
-				while (!".".Equals(strResponse = reader.ReadLine()))
-				{
-                    // Add the unique ID to the list
-					uids.Add(strResponse.Split(' ')[1]);
-				}
-				return uids;
-			}
+		    SendCommand("UIDL");
 			
-            // Server did not accept command.
-            return null;
+            List<string> uids = new List<string>();
+
+			string strResponse;
+            // Keep reading until multi-line ends with a "."
+			while (!".".Equals(strResponse = reader.ReadLine()))
+			{
+                // Add the unique ID to the list
+				uids.Add(strResponse.Split(' ')[1]);
+			}
+			return uids;
 		}
 
         /// <summary>
         /// Gets the size of a single message
         /// </summary>
         /// <param name="messageNumber">The number of a message which may not be a message marked as deleted</param>
-        /// <returns>Size of the message or -1 if the server did not respond with an OK message</returns>
+        /// <returns>Size of the message</returns>
+        /// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
         public int GetMessageSize(int messageNumber)
         {
             // RFC Example:
@@ -571,10 +593,8 @@ namespace OpenPOP.POP3
 		/// Get the sizes of all the messages.
         /// Messages marked as deleted are not listed
 		/// </summary>
-		/// <returns>
-		/// Size of each message excluding deleted ones.
-		/// If the server did not accept the LIST command, null is returned.
-		/// </returns>
+		/// <returns>Size of each message excluding deleted ones</returns>
+        /// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
         public List<int> GetMessageSizes()
 		{
 		    // RFC Example:
@@ -584,21 +604,18 @@ namespace OpenPOP.POP3
 		    // S: 2 200
 		    // S: .       // End of multi-line
 
-		    if (SendCommand("LIST"))
+		    SendCommand("LIST");
+		    
+		    List<int> sizes = new List<int>();
+
+		    string strResponse;
+		    // Read until end of multi-line
+		    while (!".".Equals(strResponse = reader.ReadLine()))
 		    {
-		        List<int> sizes = new List<int>();
-
-		        string strResponse;
-		        // Read until end of multi-line
-		        while (!".".Equals(strResponse = reader.ReadLine()))
-		        {
-		            sizes.Add(int.Parse(strResponse.Split(' ')[1]));
-		        }
-
-		        return sizes;
+		        sizes.Add(int.Parse(strResponse.Split(' ')[1]));
 		    }
 
-		    return null;
+		    return sizes;
 		}
 
 	    /// <summary>
@@ -640,7 +657,8 @@ namespace OpenPOP.POP3
 		/// Fetches a message from the server and parses it
 		/// </summary>
 		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
-		/// <returns>The message or null if server did not accept the command</returns>
+        /// <returns>The message, containing the email message</returns>
+        /// <exception cref="PopServerException">If the server did not accept the RETR command</exception>
 		public Message GetMessage(int messageNumber)
 		{
 		    return FetchMessage("RETR " + messageNumber, false);
@@ -651,6 +669,7 @@ namespace OpenPOP.POP3
         /// </summary>
         /// <param name="messageNumber">Message number, which may not be marked as deleted</param>
         /// <returns>MessageHeaders object</returns>
+        /// <exception cref="PopServerException">If the server did not accept the TOP command</exception>
         public MessageHeader GetMessageHeaders(int messageNumber)
         {
             // 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
@@ -664,13 +683,13 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="command">Command to send to POP server</param>
 		/// <param name="headersOnly">Only return message header?</param>
-		/// <returns>Message object or null if the server did not accept the command</returns>
+		/// <returns>The message, containing the email message</returns>
+        /// <exception cref="PopServerException">If the server did not accept the fetch message command</exception>
 		private Message FetchMessage(string command, bool headersOnly)
 		{
             MessageTransferBegan(this);
 
-		    if(!SendCommand(command))			
-				return null;
+		    SendCommand(command);
 
             // Receive the message from the server
 			string receivedContent = ReceiveRETRMessage();
@@ -679,7 +698,7 @@ namespace OpenPOP.POP3
             Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly);
 
             MessageTransferFinished(this);
-			return msg;	
+			return msg;
 		}
 	}
 }

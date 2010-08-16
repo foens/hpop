@@ -41,4 +41,15 @@ namespace OpenPOP.POP3
     /// <remarks>The mail boxes are locked when an existing session is open on the mail server. Lock conditions are also met in case of aborted sessions</remarks>
     public class PopServerLockException : Exception
     { }
+
+    /// <summary>
+    /// Thrown when the server does not return +OK to a command.
+    /// The server response is then placed inside.
+    /// </summary>
+    public class PopServerException : Exception
+    {
+        public PopServerException(String message)
+            : base(message)
+        { }
+    }
 }
