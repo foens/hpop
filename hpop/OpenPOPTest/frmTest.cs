@@ -481,16 +481,16 @@ namespace OpenPOP.NET_Sample_App
                 // This will fix the "Application is not responding" problem
                 Application.DoEvents();
 
-                MIME.Message m = popClient.GetMessage(i);
-                TreeNode node;
-                if (m != null)
+                try
                 {
+                    MIME.Message m = popClient.GetMessage(i);
+
                     success++;
                     msgs.Add("msg" + i, m);
-                    node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
+                    TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
                     node.Tag = i.ToString();
                 }
-                else
+                catch (Exception)
                 {
                     fail++;
                 }
