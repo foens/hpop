@@ -69,8 +69,14 @@ namespace OpenPOP.MIME.Header
             }
 
             // This might be on the form noreply@mail.eksperten.dk
-            if(input.Contains("@"))
-                return new MailAddress(input);
+            // Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
+            try
+            {
+                if (input.Contains("@"))
+                    return new MailAddress(input);
+            }
+            catch (FormatException)
+            { }
 
             // This is not a MailAddress
             // It could be that the format used was simply a name
