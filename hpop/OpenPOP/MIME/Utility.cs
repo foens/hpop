@@ -205,7 +205,7 @@ namespace OpenPOP.MIME
                     return QuotedPrintable.Decode(input);
 
                 case ContentTransferEncoding.Base64:
-                    return Base64.Decode(input);
+                    return Base64.Decode(input, charSet);
 
                 case ContentTransferEncoding.SevenBit:
                 case ContentTransferEncoding.Binary:
