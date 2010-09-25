@@ -252,8 +252,18 @@ namespace OpenPOP.MIME
                         foreach (Attachment attachment in Attachments)
                         {
                             if (attachment.Headers.ContentType != null &&
-                                (attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
-                                attachment.Headers.ContentType.MediaType.Contains("text/html")))
+                                // The content type must be plain or html
+                                 (
+                                    attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
+                                    attachment.Headers.ContentType.MediaType.Contains("text/html")
+                                 ) 
+                                 &&
+                                // But if the attachment is a message, it cannot have a filename/name
+                                !(
+                                    (attachment.Headers.ContentType.Parameters != null && attachment.Headers.ContentType.Parameters.ContainsKey("name")) ||
+                                    (attachment.Headers.ContentDisposition != null && attachment.Headers.ContentDisposition.Parameters.ContainsKey("filename"))
+                                 )
+                               )
                             {
                                 MessageBody.Add(new MessageBody(attachment.DecodeAsText(), attachment.Headers.ContentType.MediaType));
                                 toRemoveFromAttachments.Add(attachment);
