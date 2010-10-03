@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Data;
 using OpenPOP.MIME;
 using OpenPOP.POP3;
+using OpenPOP.Shared;
 
 namespace OpenPOP.NET_Sample_App
 {
@@ -457,7 +458,7 @@ namespace OpenPOP.NET_Sample_App
 			ConnectAndRetrieveButton.Enabled = false;
 			UIDLButton.Enabled = false;
 
-			Logger.Log=true;
+			Logger.Log = true;
 			if(popClient.Connected)
 				popClient.Disconnect();
 			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text), useSsl.Checked);
@@ -473,7 +474,7 @@ namespace OpenPOP.NET_Sample_App
 			int fail = 0;
 			for (int i = Count; i >= 1; i -= 1)
 			{
-				// Check if the form is clused while we are working. If so, abort
+				// Check if the form is closed while we are working. If so, abort
 				if(IsDisposed)
 					return;
 

@@ -132,7 +132,9 @@
     <Compile Include="POP3\Exceptions.cs" />
     <Compile Include="POP3\MD5.cs" />
     <Compile Include="POP3\POPClient.cs" />
-    <Compile Include="POP3\Logger.cs" />
+    <Compile Include="Shared\Logger.cs" />
+    <Compile Include="Shared\DefaultLogger.cs" />
+    <Compile Include="Shared\ILog.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

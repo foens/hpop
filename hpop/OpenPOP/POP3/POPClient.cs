@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME;
 using OpenPOP.MIME.Header;
+using OpenPOP.Shared;
 
 namespace OpenPOP.POP3
 {
@@ -75,6 +76,7 @@ namespace OpenPOP.POP3
 		private StreamReader reader;
 		private StreamWriter writer;
 		private string _lastCommandResponse;
+		private ILog logger;
 
 		/// <summary>
 		/// The APOP timestamp sent by the server in it's welcome
@@ -115,7 +117,8 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Constructs a new POPClient with default settings.
 		/// </summary>
-		public POPClient()
+		/// <param name="log">Set this parameter to use your own logger</param>
+		public POPClient(ILog log = null)
 		{
 			// We have not seen the APOPTimestamp yet
 			APOPTimestamp = null;
@@ -133,18 +136,23 @@ namespace OpenPOP.POP3
 			// APOP is not supported before we check on login
 			APOPSupported = false;
 
-			// Do not log any failures
-			Logger.Log = false;
+			// Was a logger specified, if so, use it. Otherwise create a deafult logger
+			logger = log ?? new DefaultLogger();
 		}
 
 		/// <summary>
 		/// Creates a new POPClient with special settings for socket timeouts.
 		/// </summary>
-		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading</param>
-		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending</param>
-		public POPClient(int receiveTimeout, int sendTimeout)
-			: this()
+		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading. Set to 0 or -1 to specify infinite timeout.</param>
+		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending. Set to 0 or -1 to specify infinite timeout.</param>
+		/// <param name="log">Set this parameter to use your own logger</param>
+		/// <exception cref="ArgumentOutOfRangeException">If any of the timeouts is less than -1.</exception>
+		public POPClient(int receiveTimeout, int sendTimeout, ILog log = null)
+			: this(log)
 		{
+			if(receiveTimeout < -1 || sendTimeout < -1)
+				throw new ArgumentOutOfRangeException();
+
 			ReceiveTimeOut = receiveTimeout;
 			SendTimeOut = sendTimeout;
 		}
@@ -265,7 +273,7 @@ namespace OpenPOP.POP3
 			catch (SocketException e) 
 			{
 				Disconnect();
-				Logger.LogError("Connect():" + e.Message);
+				logger.LogError("Connect():" + e.Message);
 				throw new PopServerNotFoundException();
 			}
 
@@ -305,7 +313,8 @@ namespace OpenPOP.POP3
 			{
 				// If not close down the connection and abort
 				Disconnect();
-				Logger.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+				logger.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+				logger.LogDebug("Last response from server was: " + _lastCommandResponse);
 				throw new PopServerNotAvailableException();   
 			}
 		}
@@ -403,7 +412,7 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				Logger.LogError("AuthenticateUsingUSER():wrong user");
+				logger.LogError("AuthenticateUsingUSER():wrong user: " + username);
 				throw new InvalidLoginException();
 			}
 
@@ -413,15 +422,16 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				if(_lastCommandResponse.ToLower().IndexOf("lock")!=-1)
+				if(_lastCommandResponse.ToLower().Contains("lock"))
 				{
-					Logger.LogError("AuthenticateUsingUSER():maildrop is locked");
+					logger.LogError("AuthenticateUsingUSER(): maildrop is locked");
 					throw new PopServerLockException();			
 				}
 
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
-				Logger.LogError("AuthenticateUsingUSER(): wrong password. Server responded: " + _lastCommandResponse);
+				logger.LogError("AuthenticateUsingUSER(): wrong password.");
+				logger.LogDebug("Server response was: " + _lastCommandResponse);
 				throw new InvalidPasswordException();
 			}
 			
@@ -449,13 +459,14 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				if (_lastCommandResponse.ToLower().IndexOf("lock") != -1)
+				if (_lastCommandResponse.ToLower().Contains("lock"))
 				{
-					Logger.LogError("AuthenticateUsingUSER():maildrop is locked");
+					logger.LogError("AuthenticateUsingAPOP(): maildrop is locked");
 					throw new PopServerLockException();
 				}
 
-				Logger.LogError("AuthenticateUsingAPOP():wrong user or password");
+				logger.LogError("AuthenticateUsingAPOP(): wrong user or password");
+				logger.LogDebug("Server response was: " + _lastCommandResponse);
 				throw new InvalidLoginOrPasswordException();
 			}
 

@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace OpenPOP.POP3
+namespace OpenPOP.Shared
 {
 	/// <summary>
 	/// Logger which can be used for debugging purposes
@@ -33,9 +33,7 @@ namespace OpenPOP.POP3
 					// We want to open the file and append some text to it
 					FileInfo file = new FileInfo(logFile);
 					sw = file.AppendText();
-					sw.WriteLine(DateTime.Now);
-					sw.WriteLine(toLog);
-					sw.WriteLine();
+					sw.WriteLine(DateTime.Now + toLog);
 					sw.Flush();
 				}
 				finally
