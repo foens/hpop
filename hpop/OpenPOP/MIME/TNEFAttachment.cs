@@ -3,43 +3,43 @@ namespace OpenPOP.MIME
 	/// <summary>
 	/// TNEFAttachment
 	/// 
-    /// Based on tnef.c from Thomas Boll 
+	/// Based on tnef.c from Thomas Boll 
 	/// </summary>
 	public class TNEFAttachment
 	{
 		#region Properties
 
-	    /// <summary>
-	    /// attachment subject
-	    /// </summary>
-	    public string Subject { get; set; }
+		/// <summary>
+		/// attachment subject
+		/// </summary>
+		public string Subject { get; set; }
 
-	    /// <summary>
-	    /// attachment file length
-	    /// </summary>
-	    public long FileLength { get; set; }
+		/// <summary>
+		/// attachment file length
+		/// </summary>
+		public long FileLength { get; set; }
 
-	    /// <summary>
-	    /// attachment file name
-	    /// </summary>
-	    public string FileName { get; set; }
+		/// <summary>
+		/// attachment file name
+		/// </summary>
+		public string FileName { get; set; }
 
-	    /// <summary>
-	    /// attachment file content
-	    /// </summary>
-	    public byte[] FileContent { get; set; }
+		/// <summary>
+		/// attachment file content
+		/// </summary>
+		public byte[] FileContent { get; set; }
 
-	    #endregion
+		#endregion
 
 
 		public TNEFAttachment()
 		{
-		    FileContent = null;
-		    FileName = "";
-		    Subject = "";
+			FileContent = null;
+			FileName = "";
+			Subject = "";
 		}
 
-	    ~TNEFAttachment()
+		~TNEFAttachment()
 		{
 			FileContent=null;
 		}

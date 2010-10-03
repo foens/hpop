@@ -5,13 +5,13 @@ using System.Text;
 
 namespace OpenPOP.MIME
 {
-    /// <summary>
-    /// Used to parse attachments that have the MIME-type Application/MS-TNEF
-    /// TNEF stands for Transport Neutral Encapsulation Format, and is proprietary Microsoft attachment format.
-    ///
-    /// Based on tnef.c from Thomas Boll.
-    /// </summary>
-    /// <see cref="http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format">For more details</see>
+	/// <summary>
+	/// Used to parse attachments that have the MIME-type Application/MS-TNEF
+	/// TNEF stands for Transport Neutral Encapsulation Format, and is proprietary Microsoft attachment format.
+	///
+	/// Based on tnef.c from Thomas Boll.
+	/// </summary>
+	/// <see cref="http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format">For more details</see>
 	public class TNEFParser
 	{
 		#region Member Variables
@@ -24,7 +24,7 @@ namespace OpenPOP.MIME
 		private const int _DWORD		  = 0x00080000;
 
 		private const int AVERSION      = (_DWORD  | 0x9006); // Unused?
-        private const int AMCLASS       = (_WORD   | 0x8008); // Unused?
+		private const int AMCLASS       = (_WORD   | 0x8008); // Unused?
 		private const int ASUBJECT      = (_DWORD  | 0x8004);
 		private const int AFILENAME     = (_string | 0x8010);
 		private const int ATTACHDATA    = (_BYTE   | 0x800f);
@@ -33,9 +33,9 @@ namespace OpenPOP.MIME
 		private readonly List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
 		private TNEFAttachment _attachment=null;
 
-	    //private string _logFile="OpenPOP.TNEF.log";
-	    private long _fileLength=0;
-	    private string strSubject;
+		//private string _logFile="OpenPOP.TNEF.log";
+		private long _fileLength=0;
+		private string strSubject;
 		#endregion
 
 		#region Properties
@@ -45,55 +45,55 @@ namespace OpenPOP.MIME
 		//			set{_logFile=value;}
 		//		}
 
-	    public string TNEFFile { get; set; }
+		public string TNEFFile { get; set; }
 
-	    public bool Verbose { get; set; }
+		public bool Verbose { get; set; }
 
-	    public int SkipSignature { get; set; }
+		public int SkipSignature { get; set; }
 
-	    public bool SearchSignature { get; set; }
+		public bool SearchSignature { get; set; }
 
-	    public long Offset { get; set; }
+		public long Offset { get; set; }
 
-	    #endregion
+		#endregion
 
-        #region Constructors
-        /// <summary>
-        /// Used the set up default values
-        /// </summary>
-        private TNEFParser()
-        {
-            Verbose = false;
-            TNEFFile = "";
-        }
+		#region Constructors
+		/// <summary>
+		/// Used the set up default values
+		/// </summary>
+		private TNEFParser()
+		{
+			Verbose = false;
+			TNEFFile = "";
+		}
 
-        /// <summary>
-        /// Create a TNEFParser which loads its content from a file
-        /// </summary>
-        /// <param name="strFile">MS-TNEF file</param>
-        public TNEFParser(string strFile)
-            : this()
-        {
-            if (!OpenTNEFStream(strFile))
-                throw new ArgumentException();
-        }
+		/// <summary>
+		/// Create a TNEFParser which loads its content from a file
+		/// </summary>
+		/// <param name="strFile">MS-TNEF file</param>
+		public TNEFParser(string strFile)
+			: this()
+		{
+			if (!OpenTNEFStream(strFile))
+				throw new ArgumentException();
+		}
 
-        /// <summary>
-        /// Create a TNEFParser which loads its content from a byte array
-        /// </summary>
-        /// <param name="bytContents">MS-TNEF bytes</param>
-        public TNEFParser(byte[] bytContents)
-            : this()
-        {
-            if (!OpenTNEFStream(bytContents))
-                throw new ArgumentException();
-        }
+		/// <summary>
+		/// Create a TNEFParser which loads its content from a byte array
+		/// </summary>
+		/// <param name="bytContents">MS-TNEF bytes</param>
+		public TNEFParser(byte[] bytContents)
+			: this()
+		{
+			if (!OpenTNEFStream(bytContents))
+				throw new ArgumentException();
+		}
 
-        ~TNEFParser()
-        {
-            CloseTNEFStream();
-        }
-        #endregion
+		~TNEFParser()
+		{
+			CloseTNEFStream();
+		}
+		#endregion
 
 
 		private static int GETINT32(byte[] p)
@@ -186,7 +186,7 @@ namespace OpenPOP.MIME
 				fsTNEF=new FileStream(strFile,FileMode.Open,FileAccess.Read);
 				FileInfo fi=new FileInfo(strFile);
 				_fileLength=fi.Length;
-			    return true;
+				return true;
 			}
 			catch(Exception e)
 			{
@@ -224,7 +224,7 @@ namespace OpenPOP.MIME
 			bool ret;
 			long lpos=0;
 
-		    try
+			try
 			{
 				for (lpos=0; ; lpos++) 
 				{
@@ -258,7 +258,7 @@ namespace OpenPOP.MIME
 		private void decode_attribute (int d) 
 		{
 			byte[] buf=new byte[4000];
-		    int v;
+			int v;
 			int i;
 
 			int len = geti32();
@@ -314,17 +314,17 @@ namespace OpenPOP.MIME
 
 		private void decode_message()
 		{
-		    int d = geti32();
+			int d = geti32();
 
-		    decode_attribute(d);
+			decode_attribute(d);
 		}
 
-        private void decode_attachment() 
+		private void decode_attachment() 
 		{  
 			byte[] buf=new byte[4096];
-		    int len;
+			int len;
 
-		    int d = geti32();
+			int d = geti32();
 
 			switch (d) 
 			{
@@ -371,7 +371,7 @@ namespace OpenPOP.MIME
 					_attachment.FileContent=new byte[len];
 					_attachment.FileLength=len;
 
-			        for (int i = 0; i < len; ) 
+					for (int i = 0; i < len; ) 
 					{
 						int chunk = len-i;
 						if (chunk > buf.Length) chunk = buf.Length;
@@ -410,25 +410,25 @@ namespace OpenPOP.MIME
 		{
 			bool blnRet=false;
 
-		    foreach (TNEFAttachment tnefAttachment in _attachments)
-		    {
-		        blnRet = SaveAttachment(tnefAttachment, pathToSaveTo);
-		    }
+			foreach (TNEFAttachment tnefAttachment in _attachments)
+			{
+				blnRet = SaveAttachment(tnefAttachment, pathToSaveTo);
+			}
 
 			return blnRet;
 		}
 
-        /// <summary>
-        /// save a decoded attachment to file
-        /// </summary>
-        /// <param name="attachment">decoded attachment</param>
-        /// <param name="pathToSaveTo">Where to save the attachment to</param>
-        /// <returns>true is succeded, vice versa</returns>
-        public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
+		/// <summary>
+		/// save a decoded attachment to file
+		/// </summary>
+		/// <param name="attachment">decoded attachment</param>
+		/// <param name="pathToSaveTo">Where to save the attachment to</param>
+		/// <returns>true is succeded, vice versa</returns>
+		public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
 		{
 			try
 			{
-                string strOutFile = pathToSaveTo + attachment.FileName;
+				string strOutFile = pathToSaveTo + attachment.FileName;
 
 				if(File.Exists(strOutFile))
 					File.Delete(strOutFile);
@@ -455,10 +455,10 @@ namespace OpenPOP.MIME
 		{
 			byte[] buf=new byte[4];
 
-		    if(FindSignature())
+			if(FindSignature())
 			{
-			    int d;
-			    if (SkipSignature < 2) 
+				int d;
+				if (SkipSignature < 2) 
 				{
 					d = geti32();
 					if (SkipSignature < 1) 

@@ -12,7 +12,7 @@ namespace MailMonitor
 		private static readonly HTMLTag[] _htmlTags=new HTMLTag[4];
 		private static readonly string[] _htmlTagText={"<html", "</html>", "<body", "</body>", "<p", "</p>", "<div", "</div>"};
 
-	    public static string ToFormattedHTML(string strHTML)
+		public static string ToFormattedHTML(string strHTML)
 		{
 			for(int i=0; i<_htmlTagText.Length;i+=2)
 			{
@@ -28,7 +28,7 @@ namespace MailMonitor
 			return strRet;
 		}
 
-	    private static bool IsHTML(string strHTML)
+		private static bool IsHTML(string strHTML)
 		{
 			string strRet = strHTML.ToLower();
 			bool blnRet= false;
@@ -66,7 +66,7 @@ namespace MailMonitor
 			return strFile;
 		}
 
-	    private static string ReplaceChars(string strText, char[] chrItems)
+		private static string ReplaceChars(string strText, char[] chrItems)
 		{
 			for(int i=0;i<chrItems.Length;i++)
 			{
@@ -77,7 +77,7 @@ namespace MailMonitor
 
 		public static void PlayBeep()
 		{
-            SystemSounds.Beep.Play();
+			SystemSounds.Beep.Play();
 		}
 	}
 }
