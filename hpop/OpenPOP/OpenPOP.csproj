@@ -128,6 +128,7 @@
     <Compile Include="MIME\TNEFParser.cs" />
     <Compile Include="MIME\Utility.cs" />
     <Compile Include="POP3\AuthenticationMethod.cs" />
+    <Compile Include="POP3\Disposable.cs" />
     <Compile Include="POP3\Exceptions.cs" />
     <Compile Include="POP3\MD5.cs" />
     <Compile Include="POP3\POPClient.cs" />

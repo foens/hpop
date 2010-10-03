@@ -24,7 +24,7 @@ namespace OpenPOP.POP3
 	/// Message messageNumber1 = client.GetMessage(1, false);
 	/// client.Disconnect();
 	/// </example>
-	public class POPClient
+	public class POPClient : Disposable
 	{
 		#region Events
 		/// <summary>
@@ -147,6 +147,23 @@ namespace OpenPOP.POP3
 		{
 			ReceiveTimeOut = receiveTimeout;
 			SendTimeOut = sendTimeout;
+		}
+
+		/// <summary>
+		/// Disposes the POPClient. This is the implementation of the IDisposable interface.
+		/// </summary>
+		/// <param name="disposing">True if managed and unmanged code should be diposed, false if only managed code should be disposed</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && !IsDisposed)
+			{
+				if(Connected)
+				{
+					Disconnect();
+				}
+			}
+
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
