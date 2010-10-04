@@ -68,17 +68,21 @@ namespace OpenPOP.NET_Sample_App
 			popClient.MessageTransferFinished += popClient_MessageTransferFinished;
 
 			// This is only for faster debugging purposes
-			string file = @"C:\Users\" + Environment.UserName + @"\Documents\OpenPOPLogin.txt";
+			string myDocs = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+			string file = Path.Combine( myDocs, "OpenPOPLogin.txt" );
 			if (File.Exists(file))
 			{
-				StreamReader reader = new StreamReader(File.OpenRead(file));
-				txtPOPServer.Text = reader.ReadLine();
-				txtPort.Text = reader.ReadLine();
-				useSsl.Checked = bool.Parse(reader.ReadLine());
-				txtLogin.Text = reader.ReadLine();
-				txtPassword.Text = reader.ReadLine();
-				reader.Close();
+				using(StreamReader reader = new StreamReader(File.OpenRead(file)))
+				{
+					txtPOPServer.Text = reader.ReadLine();
+					txtPort.Text = reader.ReadLine();
+					useSsl.Checked = bool.Parse(reader.ReadLine());
+					txtLogin.Text = reader.ReadLine();
+					txtPassword.Text = reader.ReadLine();
+				}
 			}
+
+			Logger.Log = true;
 		}
 
 		#region Windows Form Designer generated code
@@ -458,50 +462,69 @@ namespace OpenPOP.NET_Sample_App
 			ConnectAndRetrieveButton.Enabled = false;
 			UIDLButton.Enabled = false;
 
-			Logger.Log = true;
-			if(popClient.Connected)
-				popClient.Disconnect();
-			popClient.Connect(txtPOPServer.Text,int.Parse(txtPort.Text), useSsl.Checked);
-			popClient.Authenticate(txtLogin.Text,txtPassword.Text);
-			int Count=popClient.GetMessageCount();
-			txtTotalMessages.Text=Count.ToString();
-			txtMessage.Text="";
-			msgs.Clear();
-			listMessages.Nodes.Clear();
-			listAttachments.Nodes.Clear();
-
-			int success = 0;
-			int fail = 0;
-			for (int i = Count; i >= 1; i -= 1)
+			try
 			{
-				// Check if the form is closed while we are working. If so, abort
-				if(IsDisposed)
-					return;
+				if (popClient.Connected)
+					popClient.Disconnect();
+				popClient.Connect( txtPOPServer.Text, int.Parse( txtPort.Text ), useSsl.Checked );
+				popClient.Authenticate( txtLogin.Text, txtPassword.Text );
+				int Count = popClient.GetMessageCount();
+				txtTotalMessages.Text = Count.ToString();
+				txtMessage.Text = "";
+				msgs.Clear();
+				listMessages.Nodes.Clear();
+				listAttachments.Nodes.Clear();
 
-				// Refresh the form while fetching emails
-				// This will fix the "Application is not responding" problem
-				Application.DoEvents();
-
-				try
+				int success = 0;
+				int fail = 0;
+				for (int i = Count; i >= 1; i -= 1)
 				{
-					MIME.Message m = popClient.GetMessage(i);
+					// Check if the form is closed while we are working. If so, abort
+					if (IsDisposed)
+						return;
 
-					success++;
-					msgs.Add("msg" + i, m);
-					TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
-					node.Tag = i.ToString();
+					// Refresh the form while fetching emails
+					// This will fix the "Application is not responding" problem
+					Application.DoEvents();
+
+					try
+					{
+						MIME.Message m = popClient.GetMessage( i );
+
+						success++;
+						msgs.Add( "msg" + i, m );
+						TreeNode node = listMessages.Nodes.Add( "[" + i + "] " + m.Headers.Subject );
+						node.Tag = i.ToString();
+					}
+					catch (Exception)
+					{
+						fail++;
+					}
 				}
-				catch (Exception)
-				{
-					fail++;
-				}
+				MessageBox.Show(this, "Mail received!\nSuccess: " + success + "\nFailed: " + fail);
 			}
-
-			// Enable the buttons again
-			ConnectAndRetrieveButton.Enabled = true;
-			UIDLButton.Enabled = true;
-
-			MessageBox.Show(this, "Mail received!\nSuccess: " + success + "\nFailed: " + fail);
+			catch (InvalidLoginException)
+			{
+				MessageBox.Show( this, "Unknown username!", "POP3 Server Authentication" );
+			}
+			catch (InvalidPasswordException)
+			{
+				MessageBox.Show( this, "Invalid password!", "POP3 Server Authentication" );
+			}
+			catch(PopServerNotFoundException)
+			{
+				MessageBox.Show( this, "The server could not be found", "POP3 Retrieval" );
+			}
+			catch(Exception e)
+			{
+				MessageBox.Show( this, "Error occurred retrieving mail. " + e.Message, "POP3 Retrieval" );
+			}
+			finally
+			{
+				// Enable the buttons again
+				ConnectAndRetrieveButton.Enabled = true;
+				UIDLButton.Enabled = true;
+			}
 		}
 
 		private void ConnectAndRetrieveButtonClick(object sender, EventArgs e)
