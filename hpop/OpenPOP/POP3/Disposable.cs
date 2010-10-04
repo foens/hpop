@@ -7,8 +7,6 @@ namespace OpenPOP.POP3
 	/// </summary>
 	public abstract class Disposable : IDisposable
 	{
-		private bool isDisposed = false;
-
 		/// <summary>
 		/// Returns true if this instance has been disposed of, false otherwise
 		/// </summary>
@@ -28,23 +26,44 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public void Dispose()
 		{
-			if (!isDisposed)
+			if (!IsDisposed)
 			{
-				Dispose(true);
-				GC.SuppressFinalize(this);
+				try
+				{
+					Dispose(true);
+				}
+				finally
+				{
+					IsDisposed = true;
+					GC.SuppressFinalize(this);
+				}
 			}
 		}
 
 		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources. Rember to call this method from your derived class.
+		/// Releases unmanaged and - optionally - managed resources. Rember to call this method from your derived classes.
 		/// </summary>
 		/// <param name="disposing">
 		/// Set to <c>true</c> to release both managed and unmanaged resources.
 		/// Set to <c>false</c> to release only unmanaged resources.</param>
 		protected virtual void Dispose(bool disposing)
 		{
-			if(disposing)
-				isDisposed = true;
 		}
+
+		/// <summary>
+		/// Used to assert that the object has not been disposed
+		/// </summary>
+		/// <exception cref="ObjectDisposedException">Thrown if the object is in a disposed state.</exception>
+		/// <remarks>The method is to be used by the subclasses in order to provide a simple method for checking the 
+		/// disposal state of the object.</remarks>
+		protected void AssertDisposed()
+		{
+			if (IsDisposed)
+			{
+				string typeName = GetType().FullName;
+				throw new ObjectDisposedException( typeName, String.Format( System.Globalization.CultureInfo.InvariantCulture, "Cannot access a disposed {0}.", typeName ) );
+			}
+		}
+
 	}
 }
