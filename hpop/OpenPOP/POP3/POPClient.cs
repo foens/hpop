@@ -346,15 +346,6 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Releases any resources that this POPClient has.
-		/// </summary>
-		~POPClient()
-		{
-			if(Connected)
-				Disconnect();
-		}
-
-		/// <summary>
 		/// Authenticates a user towards the POP server using AuthenticationMethod.TRYBOTH
 		/// which is the most secure method to use.
 		/// </summary>
