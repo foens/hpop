@@ -9,7 +9,7 @@ namespace OpenPOP.MIME
 	/// <summary>
 	/// foens: This class should be reworked.
 	/// Right now it is just like "The blob" - which
-	/// is lots of code that is totally unrelated to eachother
+	/// is lots of code that is totally unrelated to each other
 	/// </summary>
 	public static class Utility
 	{
@@ -54,7 +54,7 @@ namespace OpenPOP.MIME
 		/// checking what the extension is
 		/// </summary>
 		/// <param name="filename">Filename to be checked</param>
-		/// <returns>True if filename is of picture type, false if not</returns>
+		/// <returns><see langword="true"/> if filename is of picture type, <see langword="false"/> if not</returns>
 		public static bool IsPictureFile( string filename )
 		{
 			if (!string.IsNullOrEmpty( filename ))
@@ -78,7 +78,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strFile">File to be saved to</param>
 		/// <param name="bytContent">Byte array content</param>
-		/// <returns>True if saving succeeded, false if failed</returns>
+		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
 		public static bool SaveByteContentToFile( string strFile, byte[] bytContent )
 		{
 			try
@@ -104,7 +104,7 @@ namespace OpenPOP.MIME
 		/// <param name="strFile">File to be saved to</param>
 		/// <param name="strText">Text content</param>
 		/// <param name="blnReplaceExists">Replace file if exists</param>
-		/// <returns>True if saving succeeded, false if failed</returns>
+		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
 		public static bool SavePlainTextToFile( string strFile, string strText, bool blnReplaceExists )
 		{
 			try
@@ -136,7 +136,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strFile">File to be read from</param>
 		/// <param name="strText">This is where the content of the file is placed</param>
-		/// <returns>True if reading succeeded, false if failed</returns>
+		/// <returns><see langword="true"/> if reading succeeded, <see langword="false"/> if failed</returns>
 		public static bool ReadPlainTextFromFile( string strFile, ref string strText )
 		{
 			if (File.Exists( strFile ))
@@ -152,7 +152,7 @@ namespace OpenPOP.MIME
 		#endregion
 
 		/// <summary>
-		/// Seperate header name and header value
+		/// Separate header name and header value
 		/// </summary>
 		public static string[] GetHeadersValue( string strRawHeader )
 		{
@@ -193,7 +193,7 @@ namespace OpenPOP.MIME
 		/// Checks to see if a string is null, empty, only whitespace
 		/// </summary>
 		/// <param name="strText">The string to check</param>
-		/// <returns>Returns True if <para>strText</para> is null, empty, or contains only whitespace.</returns>
+		/// <returns>Returns True if <paramref name="strText"/> is <see langword="null"/>, empty, or contains only whitespace.</returns>
 		public static bool IsOrNullTextEx( string strText )
 		{
 			return strText == null || strText.Trim().Equals( "" );
@@ -203,10 +203,10 @@ namespace OpenPOP.MIME
 		/// Decodes a string based upon the Content Transfer encoding
 		/// </summary>
 		/// <param name="input">The string to decode</param>
-		/// <param name="contentTransferEncoding">The ContentTransferEncoding of the string</param>
+		/// <param name="contentTransferEncoding">The <see cref="ContentTransferEncoding"/> of the string</param>
 		/// <param name="charSet">The name of the character set encoding</param>
 		/// <returns>The decoded string</returns>
-		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <para>contentTransferEncoding</para> is unsupported</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="contentTransferEncoding"/> is unsupported</exception>
 		public static string DoDecode( string input, ContentTransferEncoding contentTransferEncoding, string charSet )
 		{
 			switch (contentTransferEncoding)
@@ -250,17 +250,17 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
-		/// Replace the first occurence of a string in a string
+		/// Replace the first occurrence of a string in a string
 		/// </summary>
 		/// <param name="original">The original string to replace in</param>
 		/// <param name="toReplace">The string that is to be replaced</param>
 		/// <param name="toReplaceWith">The string that is to be placed instead of the replaced string</param>
 		/// <returns>
-		/// The original string with the first occurrance of toReplace replaced with toReplaceWith.
-		/// The original is returned if toReplace was not found.
+		/// The original string with the first occurrence of <paramref name="toReplace"/> replaced with <paramref name="toReplaceWith"/>.
+		/// The original is returned if <paramref name="toReplace"/> was not found.
 		/// </returns>
 		/// <remarks><a href="http://fortycal.blogspot.com/2007/07/replace-first-occurrence-of-string-in-c.html">See For author</a></remarks>
-		public static string ReplaceFirstOccurrance( string original, string toReplace, string toReplaceWith )
+		public static string ReplaceFirstOccurrence( string original, string toReplace, string toReplaceWith )
 		{
 			if (String.IsNullOrEmpty( original ))
 				return String.Empty;

@@ -3,7 +3,7 @@ using System;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Thrown when the POP3 Server sends an error (-ERR) during intial handshake (HELO)
+	/// Thrown when the POP3 Server sends an error (-ERR) during initial handshake (HELO)
 	/// </summary>
 	public class PopServerNotAvailableException : Exception
 	{ }
@@ -48,6 +48,10 @@ namespace OpenPOP.POP3
 	/// </summary>
 	public class PopServerException : Exception
 	{
+		///<summary>
+		/// Creates a PopServerException with the given message
+		///</summary>
+		///<param name="message">The message to include in the exception</param>
 		public PopServerException(String message)
 			: base(message)
 		{ }

@@ -12,7 +12,7 @@ using OpenPOP.Shared;
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// POP3 complient POPClient
+	/// POP3 compliant POPClient
 	/// 
 	/// This implementation does not support threads at all.
 	/// </summary>
@@ -29,7 +29,7 @@ namespace OpenPOP.POP3
 	{
 		#region Events
 		/// <summary>
-		/// Basic delegate which is used for alle events
+		/// Basic delegate which is used for all events
 		/// </summary>
 		/// <param name="client">The client from which the event happened</param>
 		public delegate void POPClientEvent(POPClient client);
@@ -44,7 +44,7 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Event that fires when connected with target POP3 server.
 		/// </summary>
-		public event POPClientEvent CommunicationOccured = delegate { };
+		public event POPClientEvent CommunicationOccurred = delegate { };
 
 		/// <summary>
 		/// Event that fires when disconnected with target POP3 server.
@@ -76,7 +76,7 @@ namespace OpenPOP.POP3
 		private StreamReader reader;
 		private StreamWriter writer;
 		private string _lastCommandResponse;
-		private ILog logger;
+		private readonly ILog logger;
 
 		/// <summary>
 		/// The APOP timestamp sent by the server in it's welcome
@@ -87,7 +87,7 @@ namespace OpenPOP.POP3
 
 		#region Public member variables
 		/// <summary>
-		/// Tells whether the POPClient is connected to a POP server or not
+		/// Tells whether the <see cref="POPClient"/> is connected to a POP server or not
 		/// </summary>
 		public bool Connected { get; private set; }
 
@@ -158,9 +158,9 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Disposes the POPClient. This is the implementation of the IDisposable interface.
+		/// Disposes the <see cref="POPClient"/>. This is the implementation of the <see cref="IDisposable"/> interface.
 		/// </summary>
-		/// <param name="disposing">True if managed and unmanged code should be diposed, false if only managed code should be disposed</param>
+		/// <param name="disposing"><see langword="true"/> if managed and unmanaged code should be disposed, <see langword="false"/> if only managed code should be disposed</param>
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing && !IsDisposed)
@@ -176,7 +176,7 @@ namespace OpenPOP.POP3
 
 		/// <summary>
 		/// Examines string to see if it contains a timestamp to use with the APOP command
-		/// If it does, sets the ApopTimestamp property to this value
+		/// If it does, sets the <see cref="APOPTimestamp"/> property to this value
 		/// </summary>
 		/// <param name="response">The string to examine</param>
 		private void ExtractApopTimestamp(string response)
@@ -238,8 +238,8 @@ namespace OpenPOP.POP3
 		/// The location of the int to return.
 		/// Example:
 		/// S: +OK 2 200
-		/// Set intLocation=1 to get 2
-		/// Set intLocation=2 to get 200
+		/// Set <paramref name="intLocation"/>=1 to get 2
+		/// Set <paramref name="intLocation"/>=2 to get 200
 		/// </param>
 		/// <returns>integer value in the reply</returns>
 		/// <exception cref="PopServerException">If the server did not accept the command</exception>
@@ -253,10 +253,10 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Connects to a remote POP3 server
 		/// </summary>
-		/// <param name="hostname">The hostname of the POP3 server</param>
+		/// <param name="hostname">The <paramref name="hostname"/> of the POP3 server</param>
 		/// <param name="port">The port of the POP3 server</param>
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
-		/// <exception cref="PopServerNotAvailableException">If the server did not send an OK message when a connection was estabelished</exception>
+		/// <exception cref="PopServerNotAvailableException">If the server did not send an OK message when a connection was established</exception>
 		/// <exception cref="PopServerNotFoundException">If it was not possible to connect to the server</exception>
 		public void Connect(string hostname, int port, bool useSsl)
 		{
@@ -308,7 +308,7 @@ namespace OpenPOP.POP3
 				IsOkResponse(strResponse);
 				ExtractApopTimestamp(strResponse);
 				Connected = true;
-				CommunicationOccured(this);
+				CommunicationOccurred(this);
 			}
 			catch (PopServerException)
 			{
@@ -348,7 +348,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Authenticates a user towards the POP server using AuthenticationMethod.TRYBOTH
+		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.TRYBOTH"/>
 		/// which is the most secure method to use.
 		/// </summary>
 		/// <param name="username">The username</param>
@@ -362,12 +362,12 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Authenticates a user towards the POP server using some AuthenticationMethod.
+		/// Authenticates a user towards the POP server using some <see cref="AuthenticationMethod"/>.
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
-		/// <exception cref="NotSupportedException">If AuthenticationMethod.APOP is used, but not supported by the server</exception>
+		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.APOP"/> is used, but not supported by the server</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
@@ -560,7 +560,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="messageNumber">Message number, which may not be marked as deleted</param>
 		/// <returns>The unique ID for the message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the messageNumber does not exist</exception>
+		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the <paramref name="messageNumber"/> does not exist</exception>
 		public string GetMessageUID(int messageNumber)
 		{
 			AssertDisposed();
@@ -575,11 +575,11 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Gets a list of unique ID's for all messages.
+		/// Gets a list of unique IDs for all messages.
 		/// Messages marked as deleted are not listed.
 		/// </summary>
 		/// <returns>
-		/// A list containing the unique ID's in sorted order from message number 1 and upwards.
+		/// A list containing the unique IDs in sorted order from message number 1 and upwards.
 		/// </returns>
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
 		public List<string> GetMessageUIDs()

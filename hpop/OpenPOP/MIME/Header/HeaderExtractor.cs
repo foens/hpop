@@ -4,6 +4,9 @@ using System.Text;
 
 namespace OpenPOP.MIME.Header
 {
+	///<summary>
+	/// Includes methods that pulls out the headers of an email message.
+	///</summary>
 	public static class HeaderExtractor
 	{
 		/// <summary>

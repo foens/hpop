@@ -3,12 +3,12 @@
 namespace OpenPOP.POP3
 {
 	/// <summary>
-	/// Utility class that simplifies the usage of IDisposable
+	/// Utility class that simplifies the usage of <see cref="IDisposable"/>
 	/// </summary>
 	public abstract class Disposable : IDisposable
 	{
 		/// <summary>
-		/// Returns true if this instance has been disposed of, false otherwise
+		/// Returns <see langword="true"/> if this instance has been disposed of, <see langword="false"/> otherwise
 		/// </summary>
 		public bool IsDisposed { get; private set; }
 
@@ -41,7 +41,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources. Rember to call this method from your derived classes.
+		/// Releases unmanaged and - optionally - managed resources. Remember to call this method from your derived classes.
 		/// </summary>
 		/// <param name="disposing">
 		/// Set to <c>true</c> to release both managed and unmanaged resources.

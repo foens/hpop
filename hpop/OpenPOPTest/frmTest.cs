@@ -62,7 +62,7 @@ namespace OpenPOP.NET_Sample_App
 			popClient.AuthenticationBegan     += popClient_AuthenticationBegan;
 			popClient.AuthenticationFinished  += popClient_AuthenticationFinished;
 			popClient.CommunicationBegan      += popClient_CommunicationBegan;
-			popClient.CommunicationOccured    += popClient_CommunicationOccured;
+			popClient.CommunicationOccurred    += popClient_CommunicationOccurred;
 			popClient.CommunicationLost       += popClient_CommunicationLost;
 			popClient.MessageTransferBegan    += popClient_MessageTransferBegan;
 			popClient.MessageTransferFinished += popClient_MessageTransferFinished;
@@ -682,9 +682,9 @@ namespace OpenPOP.NET_Sample_App
 			AddEvent("CommunicationBegan");
 		}
 
-		private void popClient_CommunicationOccured(POPClient sender)
+		private void popClient_CommunicationOccurred(POPClient sender)
 		{
-			AddEvent("CommunicationOccured");
+			AddEvent("CommunicationOccurred");
 		}
 
 		private void popClient_AuthenticationBegan(POPClient sender)

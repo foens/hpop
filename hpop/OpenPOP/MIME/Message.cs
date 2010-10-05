@@ -26,7 +26,7 @@ namespace OpenPOP.MIME
 
 		/// <summary>
 		/// These are the message bodies that could be found in the message.
-		/// The last message should be the message most faithfull to what the user sent
+		/// The last message should be the message most faithful to what the user sent
 		/// Commonly the second message is HTML and the first is plain text
 		/// </summary>
 		public List<MessageBody> MessageBody { get; private set; }
@@ -37,7 +37,7 @@ namespace OpenPOP.MIME
 		public List<Attachment> Attachments { get; private set; }
 
 		/// <summary>
-		/// The raw message body part of the RawMessage that this message was constructed with.
+		/// The raw message body part of the <see cref="RawMessage"/> that this message was constructed with.
 		/// The Raw message is simply the message body part of the message, but the message body has NOT
 		/// been decoded or converted in any way.
 		/// You properly want to <see cref="MessageBody"/> instead.
@@ -45,7 +45,7 @@ namespace OpenPOP.MIME
 		public string RawMessageBody { get; private set; }
 
 		/// <summary>
-		/// The header part from the RawMessage that this message was constructed with
+		/// The header part from the <see cref="RawMessage"/> that this message was constructed with
 		/// </summary>
 		public string RawHeader { get; private set; }
 
@@ -107,7 +107,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Verify if the message is a report
 		/// </summary>
-		/// <returns>true if message is a report message, false otherwise</returns>
+		/// <returns><see langword="true"/> if message is a report message, <see langword="false"/> otherwise</returns>
 		public bool IsReport()
 		{
 			if(!string.IsNullOrEmpty(Headers.ContentType.MediaType))
@@ -142,7 +142,7 @@ namespace OpenPOP.MIME
 		/// Translate inline pictures within the body to a path where the images are saved
 		/// under their ContentFileName.
 		/// </summary>
-		/// <param name="strBody">The body to be changedy</param>
+		/// <param name="strBody">The body to be changed</param>
 		/// <param name="strPath">Path to the location of the pictures</param>
 		/// <returns>A Translated message body</returns>
 		public string TranslateHTMLPictureFiles(string strBody, string strPath)
@@ -169,7 +169,7 @@ namespace OpenPOP.MIME
 		/// The attachments name will be appended to the path, and saved under that name.
 		/// </summary>
 		/// <param name="strPath">Path to place the attachments</param>
-		/// <returns>true if all attachments was saved successfully, false if just one failed</returns>
+		/// <returns><see langword="true"/> if all attachments was saved successfully, <see langword="false"/> if just one failed</returns>
 		public bool SaveAttachments(string strPath)
 		{
 			if (string.IsNullOrEmpty(strPath))
@@ -202,7 +202,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strFile">The File location to save the message to</param>
 		/// <param name="blnReplaceExists">Should the file be replaced if it exists?</param>
-		/// <returns>True on success, false otherwsie</returns>
+		/// <returns><see langword="true"/> on success, <see langword="false"/> otherwise</returns>
 		public bool SaveToMIMEEmailFile(string strFile, bool blnReplaceExists)
 		{
 			return Utility.SavePlainTextToFile(strFile, RawMessage, blnReplaceExists);
@@ -212,7 +212,7 @@ namespace OpenPOP.MIME
 		#region Main parser function
 		/// <summary>
 		/// Initializes a new message from raw MIME content.
-		/// This method parses headers, messagebody and attachments.
+		/// This method parses headers, message body and attachments.
 		/// </summary>
 		/// <param name="input">Raw message content from which parsing will begin</param>
 		/// <param name="onlyParseHeaders">Whether only to parse and decode headers</param>
@@ -235,7 +235,7 @@ namespace OpenPOP.MIME
 			{
 				// The message body must be the full raw message, with headers removed.
 				// Also remove any CRLF in top or bottom.
-				RawMessageBody = Utility.ReplaceFirstOccurrance(RawMessage, RawHeader, "").Trim();
+				RawMessageBody = Utility.ReplaceFirstOccurrence(RawMessage, RawHeader, "").Trim();
 
 				// Check if the message is a multipart message (which means, has multiple message bodies)
 				if (Headers.ContentType.MediaType.ToLower().Contains("multipart"))
@@ -289,7 +289,7 @@ namespace OpenPOP.MIME
 
 		#region Body parser functions
 		/// <summary>
-		/// Parses the MessageBody as a Multipart message.
+		/// Parses the <see cref="MessageBody"/> as a Multipart message.
 		/// This method will add these parts as Attachments
 		/// </summary>
 		private void ParseMultipartMessageBody()

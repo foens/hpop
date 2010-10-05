@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Threading;
 using OpenPOP.MIME.Header;
 using OpenPOP.POP3;
+using OpenPOP.Shared;
 
 namespace MailMonitor
 {
@@ -36,7 +37,7 @@ namespace MailMonitor
 			_popClient.AuthenticationBegan += popClient_AuthenticationBegan;
 			_popClient.AuthenticationFinished += popClient_AuthenticationFinished;
 			_popClient.CommunicationBegan += popClient_CommunicationBegan;
-			_popClient.CommunicationOccured += popClient_CommunicationOccured;
+			_popClient.CommunicationOccurred += popClient_CommunicationOccurred;
 			_popClient.CommunicationLost += popClient_CommunicationLost;
 			_popClient.MessageTransferBegan += popClient_MessageTransferBegan;
 			_popClient.MessageTransferFinished += popClient_MessageTransferFinished;
@@ -395,9 +396,9 @@ namespace MailMonitor
 			AddEvent("CommunicationBegan");
 		}
 
-		private void popClient_CommunicationOccured(POPClient sender)
+		private void popClient_CommunicationOccurred(POPClient sender)
 		{
-			AddEvent("CommunicationOccured");
+			AddEvent("CommunicationOccurred");
 		}
 
 		private void popClient_AuthenticationBegan(POPClient sender)

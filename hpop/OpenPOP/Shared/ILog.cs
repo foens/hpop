@@ -1,7 +1,7 @@
 ﻿namespace OpenPOP.Shared
 {
 	/// <summary>
-	/// Defines an OpenPOP logger for managing system logging output  
+	/// Defines a logger for managing system logging output  
 	/// </summary>
 	public interface ILog
 	{

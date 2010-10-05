@@ -16,9 +16,9 @@ namespace OpenPOP.MIME.Header
 		/// http://tools.ietf.org/html/rfc5322#section-3.4
 		/// 
 		/// Examples of input:
-		/// Eksperten mailrobot <noreply@mail.eksperten.dk>
-		/// "Eksperten mailrobot" <noreply@mail.eksperten.dk>
-		/// <noreply@mail.eksperten.dk>
+		/// Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;
+		/// "Eksperten mailrobot" &lt;noreply@mail.eksperten.dk&gt;
+		/// &lt;noreply@mail.eksperten.dk&gt;
 		/// noreply@mail.eksperten.dk
 		/// Some name (will return null on this)
 		/// 
@@ -27,7 +27,7 @@ namespace OpenPOP.MIME.Header
 		/// <see cref="EncodedWord.Decode">For more information about encoded text</see>
 		/// </summary>
 		/// <param name="input">The value to parse out and email and/or a username</param>
-		/// <returns>A valid MailAddress where the input has been parsed into or null if the input is not valid</returns>
+		/// <returns>A valid <see cref="MailAddress"/> where the input has been parsed into or <see langword="null"/> if the input is not valid</returns>
 		public static MailAddress ParseMailAddress(string input)
 		{
 			// Remove exesive whitespace
@@ -88,7 +88,7 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// Parses input of the form
-		/// Eksperten mailrobot <noreply@mail.eksperten.dk>, ...
+		/// Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;, ...
 		/// to a list of MailAddresses
 		/// </summary>
 		/// <param name="input">The input that is a comma-seperated list of EmailAddresses to parse</param>
@@ -117,7 +117,7 @@ namespace OpenPOP.MIME.Header
 		/// Parses the Content-Transfer-Encoding header
 		/// </summary>
 		/// <param name="headerValue">The value for the header to be parsed</param>
-		/// <returns>A ContentTransferEncoding</returns>
+		/// <returns>A <see cref="ContentTransferEncoding"/></returns>
 		public static ContentTransferEncoding ParseContentTransferEncoding(string headerValue)
 		{
 			if (headerValue == null)
@@ -149,7 +149,7 @@ namespace OpenPOP.MIME.Header
 		/// Parses an ImportanceType from a given Importance header value
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
-		/// <returns>A valid importancetype. If the headerValue is not recognized, Normal is returned.</returns>
+		/// <returns>A <see cref="MessageImportance"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
 		public static MessageImportance ParseImportance(string headerValue)
 		{
 			switch (headerValue.ToUpper())
@@ -173,10 +173,10 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// Parses a the value for the header Content-Type to 
-		/// a ContentType object
+		/// a <see cref="ContentType"/> object
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
-		/// <returns>A valid ContentType object</returns>
+		/// <returns>A <see cref="ContentType"/> object</returns>
 		public static ContentType ParseContentType(string headerValue)
 		{
 			try
@@ -196,10 +196,10 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// Parses a the value for the header Content-Disposition to 
-		/// a ContentDisposition object
+		/// a <see cref="ContentDisposition"/> object
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
-		/// <returns>A valid ContentDisposition object</returns>
+		/// <returns>A <see cref="ContentDisposition"/> object</returns>
 		public static ContentDisposition ParseContentDisposition(string headerValue)
 		{
 			try

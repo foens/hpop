@@ -122,14 +122,14 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// The Date when the email was sent.
-		/// This is the raw value. <see cref="DateSent"/> for a parsed up DateTime value of this field
+		/// This is the raw value. <see cref="DateSent"/> for a parsed up <see cref="DateTime"/> value of this field
 		/// </summary>
 		/// <see cref="http://tools.ietf.org/html/rfc5322#section-3.6.1">For more details</see>
 		public string Date { get; private set; }
 
 		/// <summary>
 		/// The Date when the email was sent.
-		/// This is the parsed equavalent of <see cref="Date"/>.
+		/// This is the parsed equivalent of <see cref="Date"/>.
 		/// Notice that the TimeZone of the DateTime object is in UTC and has NOT been converted
 		/// to local TimeZone.
 		/// </summary>
@@ -151,7 +151,7 @@ namespace OpenPOP.MIME.Header
 		public string MimeVersion { get; private set; }
 
 		/// <summary>
-		/// A single MailAddress with no username inside
+		/// A single <see cref="MailAddress"/> with no username inside
 		/// This is a trace header field, that should be in all messages
 		/// Null if not set
 		/// </summary>
@@ -159,7 +159,7 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// The subject line of the message in decoded, one line state.
-		/// This should be in alle messages.
+		/// This should be in all messages.
 		/// Null if not set
 		/// </summary>
 		public string Subject { get; private set; }
@@ -190,11 +190,11 @@ namespace OpenPOP.MIME.Header
 		}
 
 		/// <summary>
-		/// Parses a NameValueCollection to a MessageHeader
+		/// Parses a <see cref="NameValueCollection"/> to a MessageHeader
 		/// </summary>
 		/// <param name="headers">The collection that should be traversed and parsed</param>
 		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If headers is null</exception>
+		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
 		public MessageHeader(NameValueCollection headers)
 			: this()
 		{
@@ -202,13 +202,13 @@ namespace OpenPOP.MIME.Header
 		}
 
 		/// <summary>
-		/// Parses a NameValueCollection to a MessageHeader, but with some other default values
+		/// Parses a <see cref="NameValueCollection"/> to a MessageHeader, but with some other default values
 		/// </summary>
 		/// <param name="headers">The collection that should be traversed and parsed</param>
-		/// <param name="contentType">A ContentType to use as default, which might get overwitten</param>
-		/// <param name="contentTransferEncoding">A ContentTransferEncoding to use as default, which might get overwitten</param>
+		/// <param name="contentType">A <see cref="ContentType"/> to use as default, which might get overwritten</param>
+		/// <param name="contentTransferEncoding">A <see cref="ContentTransferEncoding"/> to use as default, which might get overwritten</param>
 		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If headers is null</exception>
+		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
 		public MessageHeader(NameValueCollection headers, ContentType contentType, ContentTransferEncoding contentTransferEncoding)
 			: this()
 		{
@@ -220,10 +220,10 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// Very simply header object.
-		/// It uses all defaults but sets the contentType
+		/// It uses all defaults but sets the <paramref name="contentType"/>
 		/// </summary>
-		/// <param name="contentType">The ContentType to use</param>
-		/// <exception cref="ArgumentNullException">If contentType was null</exception>
+		/// <param name="contentType">The <see cref="ContentType"/> to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="contentType"/> was <see langword="null"/></exception>
 		public MessageHeader(ContentType contentType)
 			: this()
 		{
@@ -234,11 +234,11 @@ namespace OpenPOP.MIME.Header
 		}
 
 		/// <summary>
-		/// Parses a NameValueCollection to a MessageHeader
+		/// Parses a <see cref="NameValueCollection"/> to a <see cref="MessageHeader"/>
 		/// </summary>
 		/// <param name="headers">The collection that should be traversed and parsed</param>
-		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If headers is null</exception>
+		/// <returns>A valid <see cref="MessageHeader"/> object</returns>
+		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
 		private void ParseHeaders(NameValueCollection headers)
 		{
 			if (headers == null)

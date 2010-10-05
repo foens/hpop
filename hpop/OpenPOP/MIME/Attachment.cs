@@ -6,6 +6,9 @@ using OpenPOP.MIME.Header;
 
 namespace OpenPOP.MIME
 {
+	///<summary>
+	/// This class represents an Attachment to an email message.
+	///</summary>
 	public class Attachment : IComparable<Attachment>
 	{
 		#region Member Variables
@@ -91,7 +94,7 @@ namespace OpenPOP.MIME
 
 			// If we parsed headers, as we just did, the RawAttachment is found by removing the headers
 			// We also want to remove the line just after the headers, that tells the headers ended
-			RawAttachment = Utility.ReplaceFirstOccurrance(strAttachment, rawHeaders + "\r\n\r\n", "");
+			RawAttachment = Utility.ReplaceFirstOccurrence(strAttachment, rawHeaders + "\r\n\r\n", "");
 
 			// Set the filename
 			ContentFileName = FigureOutFilename(Headers);
@@ -176,7 +179,7 @@ namespace OpenPOP.MIME
 		/// Save this Attachment to a file
 		/// </summary>
 		/// <param name="strFileName">File to write Attachment to</param>
-		/// <returns>true if save was successfull, false if save failed</returns>
+		/// <returns><see langword="true"/> if save was successful, <see langword="false"/> if save failed</returns>
 		public bool SaveToFile(string strFileName)
 		{
 			return Utility.SaveByteContentToFile(strFileName, DecodedAsBytes());
@@ -190,7 +193,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Verify if the attachment is an RFC822 message.
 		/// </summary>
-		/// <returns>true if Attachment is a RFC822 message, false otherwise</returns>
+		/// <returns><see langword="true"/> if Attachment is a RFC822 message, <see langword="false"/> otherwise</returns>
 		public bool IsMIMEMailFile()
 		{
 			return (Headers.ContentType.MediaType != null &&
@@ -198,6 +201,10 @@ namespace OpenPOP.MIME
 				   ContentFileName.ToLower().EndsWith(".eml");
 		}
 
+		///<summary>
+		/// Checks if this Attachment is a multi part attachment
+		///</summary>
+		///<returns><see langword="true"/> if attachment is a multi part attachment, <see langword="false"/> otherwise</returns>
 		public bool isMultipartAttachment()
 		{
 			return Headers.ContentType.MediaType != null && Headers.ContentType.MediaType.ToLower().Contains("multipart/");

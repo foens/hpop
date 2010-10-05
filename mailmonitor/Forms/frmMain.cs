@@ -10,6 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
 using OpenPOP.POP3;
+using OpenPOP.Shared;
 
 namespace MailMonitor
 {
@@ -92,7 +93,7 @@ namespace MailMonitor
 			_popClient.AuthenticationBegan += popClient_AuthenticationBegan;
 			_popClient.AuthenticationFinished += popClient_AuthenticationFinished;
 			_popClient.CommunicationBegan += popClient_CommunicationBegan;
-			_popClient.CommunicationOccured += popClient_CommunicationOccured;
+			_popClient.CommunicationOccurred += popClient_CommunicationOccurred;
 			_popClient.CommunicationLost += popClient_CommunicationLost;
 			_popClient.MessageTransferBegan += popClient_MessageTransferBegan;
 			_popClient.MessageTransferFinished += popClient_MessageTransferFinished;
@@ -1165,9 +1166,9 @@ namespace MailMonitor
 			AddEvent("Communication Began");
 		}
 
-		private void popClient_CommunicationOccured(POPClient sender)
+		private void popClient_CommunicationOccurred(POPClient sender)
 		{
-			AddEvent("Communication Occured");
+			AddEvent("Communication Occurred");
 		}
 
 		private void popClient_AuthenticationBegan(POPClient sender)

@@ -1,6 +1,4 @@
-﻿using OpenPOP.POP3;
-
-namespace OpenPOP.Shared
+﻿namespace OpenPOP.Shared
 {
 	/// <summary>
 	/// Default logger used when no logger is specified.
