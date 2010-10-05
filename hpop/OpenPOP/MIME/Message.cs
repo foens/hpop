@@ -5,6 +5,7 @@ using System.Collections;
 using System.IO;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
+using OpenPOP.Shared;
 
 namespace OpenPOP.MIME
 {
@@ -53,14 +54,25 @@ namespace OpenPOP.MIME
 		/// The raw content from which this message has been constructed
 		/// </summary>
 		public string RawMessage { get; private set; }
+
+		/// <summary>
+		/// The logging interface used by the object
+		/// </summary>
+		protected ILog Log { get; private set; }
+
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Sets up a default new message
 		/// </summary>
-		private Message()
+		/// <param name="logger">The logging interface to use</param>
+		private Message( ILog logger )
 		{
+			if (logger == null)
+				throw new ArgumentNullException( "logger" );
+
+			Log = logger;
 			RawMessage = null;
 			RawHeader = null;
 			RawMessageBody = null;
@@ -75,15 +87,17 @@ namespace OpenPOP.MIME
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
 		/// <param name="strEMLFile">File with email content to load from</param>
-		public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile)
-			: this()
+		/// <param name="logger">The logging interface to use</param>
+		public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile, ILog logger)
+			: this(logger)
 		{
 			string strMessage = null;
 			if (Utility.ReadPlainTextFromFile(strEMLFile, ref strMessage))
 			{
 				AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
 				InitializeMessage(strMessage, blnOnlyHeader);
-			} else
+			}
+			else
 			{
 				throw new FileNotFoundException("Could not find file " + strEMLFile);
 			}
@@ -95,8 +109,9 @@ namespace OpenPOP.MIME
 		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="strMessage">raw message content</param>
 		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		public Message(bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader)
-			: this()
+		/// <param name="logger">The logging interface to use</param>
+		public Message(bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader, ILog logger)
+			: this(logger)
 		{
 			AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
 			InitializeMessage(strMessage,blnOnlyHeader);
@@ -110,10 +125,9 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> if message is a report message, <see langword="false"/> otherwise</returns>
 		public bool IsReport()
 		{
-			if(!string.IsNullOrEmpty(Headers.ContentType.MediaType))
-				return (Headers.ContentType.MediaType.ToLower().IndexOf("report".ToLower()) != -1);
-			
-			return false;
+			if (string.IsNullOrEmpty( Headers.ContentType.MediaType ))
+				return false;
+			return (Headers.ContentType.MediaType.IndexOf("report", StringComparison.InvariantCultureIgnoreCase) != -1);
 		}
 
 		/// <summary>
@@ -192,7 +206,7 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				Utility.LogError(e.Message);
+				Log.LogError( e.Message );
 				return false;
 			}
 		}
@@ -328,7 +342,7 @@ namespace OpenPOP.MIME
 				int attachmentLength = indexOfAttachmentEnd - indexOfAttachmentStart - "\r\n".Length;
 
 				string messagePart = RawMessageBody.Substring(indexOfAttachmentStart, attachmentLength);
-				Attachment att = new Attachment(messagePart, Headers);
+				Attachment att = new Attachment(messagePart, Headers, Log);
 
 				// Check if this is the MS-TNEF attachment type
 				// which has ContentType application/ms-tnef
@@ -336,19 +350,20 @@ namespace OpenPOP.MIME
 				if(MIMETypes.IsMSTNEF(att.Headers.ContentType.MediaType) && AutoDecodeMSTNEF) 
 				{
 					// It was a MS-TNEF attachment. Now we should parse it.
-					TNEFParser tnef = new TNEFParser(att.DecodedAsBytes());
-
-					if (tnef.Parse())
+					using (TNEFParser tnef = new TNEFParser(att.DecodedAsBytes(), Log))
 					{
-						// ms-tnef attachment might contain multiple attachments inside it
-						foreach (TNEFAttachment tatt in tnef.Attachments())
+						if (tnef.Parse( ))
 						{
-							Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName));
-							Attachments.Add(attNew);
+							// ms-tnef attachment might contain multiple attachments inside it
+							foreach (TNEFAttachment tatt in tnef.Attachments( ))
+							{
+								Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType( tatt.FileName ), Log);
+								Attachments.Add(attNew);
+							}
 						}
+						else
+							throw new ArgumentException("Could not parse TNEF attachment");
 					}
-					else
-						throw new ArgumentException("Could not parse TNEF attachment");
 				}
 				else if(att.isMultipartAttachment())
 				{
@@ -390,90 +405,97 @@ namespace OpenPOP.MIME
 				{
 					// Assume text/plain
 					MessageBody.Add(new MessageBody(strBuffer, "text/plain"));
+					return;
 				}
-				else if (Headers.ContentType.MediaType != null && Headers.ContentType.MediaType.ToLower().Contains("digest"))
+
+				if (Headers.ContentType.MediaType != null && Headers.ContentType.MediaType.ToLower().Contains("digest"))
 				{
 					MessageBody.Add(new MessageBody(strBuffer, Headers.ContentType.MediaType));
+					return;
 				}
-				else
+
+				string body;
+				if (Headers.ContentType.MediaType != null && !Headers.ContentType.MediaType.ToLower().Contains("multipart"))
 				{
-					string body;
-					if (Headers.ContentType.MediaType != null && !Headers.ContentType.MediaType.ToLower().Contains("multipart"))
+					// This is not a multipart message.
+					// It only contains some text
+					// Now we only need to decode the text according to encoding
+					body = Utility.DoDecode( strBuffer, Headers.ContentTransferEncoding, Headers.ContentType.CharSet );
+
+					MessageBody.Add(new MessageBody(body, Headers.ContentType.MediaType));
+					return;
+				}
+
+				// This is a multipart message with multiple message bodies or attachments
+				int begin = 0;
+
+				// Foreach part
+				while (begin != -1)
+				{
+					string multipartBoundary = Headers.ContentType.Boundary;
+
+					// The start of a part of the message body is indicated by a "--" and the MutlipartBoundary
+					// Find this start, which should not be included in the message
+					begin = strBuffer.IndexOf("--" + multipartBoundary, begin);
+					if (begin != -1)
 					{
-						// This is not a multipart message.
-						// It only contains some text
-						body = strBuffer;
+						// Genericly parse out header names and values
+						string rawHeadersTemp;
+						NameValueCollection headersUnparsedCollection;
+						HeaderExtractor.ExtractHeaders(strBuffer.Substring(begin), out rawHeadersTemp, out headersUnparsedCollection);
 
-						// Now we only need to decode the text according to encoding
-						body = Utility.DoDecode(body, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
+						// Parse the header name and values into strong types
+						MessageHeader multipartHeaders = new MessageHeader(headersUnparsedCollection);
 
-						MessageBody.Add(new MessageBody(body, Headers.ContentType.MediaType));
+						// The message itself is located after the MultipartBoundary. It may contain headers, which is ended
+						// by a empty line, which corrosponds to "\r\n\r\n". We don't want to include the "\r\n", so skip them.
+						begin = strBuffer.IndexOf("\r\n\r\n", begin) + "\r\n\r\n".Length;
+
+						// Find end of text
+						// This is again ended by the "--" and the MultipartBoundary, where we don't want the last line delimter in the message
+						int end = strBuffer.IndexOf("--" + multipartBoundary, begin) - "\r\n".Length;
+
+						// Calculate the message length
+						int messageLength = end - begin;
+
+						// Now get the body out of the full message
+						body = strBuffer.Substring(begin, messageLength);
+
+						string charSet = Headers.ContentType.CharSet;
+						if (multipartHeaders.ContentType.CharSet != null)
+							charSet = multipartHeaders.ContentType.CharSet;
+
+						// Decode the body
+						body = Utility.DoDecode(body, multipartHeaders.ContentTransferEncoding, charSet);
+
+						MessageBody.Add(new MessageBody(body, multipartHeaders.ContentType.MediaType));
 					}
 					else
 					{
-						// This is a multipart message with multiple message bodies or attachments
-						int begin = 0;
-
-						// Foreach part
-						while (begin != -1)
+						// If we did not find any parts in the multipart message
+						// We just add everything as a message
+						if (MessageBody.Count == 0)
 						{
-							string multipartBoundary = Headers.ContentType.Boundary;
-
-							// The start of a part of the message body is indicated by a "--" and the MutlipartBoundary
-							// Find this start, which should not be included in the message
-							begin = strBuffer.IndexOf("--" + multipartBoundary, begin);
-							if (begin != -1)
-							{
-								// Genericly parse out header names and values
-								string rawHeadersTemp;
-								NameValueCollection headersUnparsedCollection;
-								HeaderExtractor.ExtractHeaders(strBuffer.Substring(begin), out rawHeadersTemp, out headersUnparsedCollection);
-
-								// Parse the header name and values into strong types
-								MessageHeader multipartHeaders = new MessageHeader(headersUnparsedCollection);
-
-								// The message itself is located after the MultipartBoundary. It may contain headers, which is ended
-								// by a empty line, which corrosponds to "\r\n\r\n". We don't want to include the "\r\n", so skip them.
-								begin = strBuffer.IndexOf("\r\n\r\n", begin) + "\r\n\r\n".Length;
-
-								// Find end of text
-								// This is again ended by the "--" and the MultipartBoundary, where we don't want the last line delimter in the message
-								int end = strBuffer.IndexOf("--" + multipartBoundary, begin) - "\r\n".Length;
-
-								// Calculate the message length
-								int messageLength = end - begin;
-
-								// Now get the body out of the full message
-								body = strBuffer.Substring(begin, messageLength);
-
-								string charSet = Headers.ContentType.CharSet;
-								if (multipartHeaders.ContentType.CharSet != null)
-									charSet = multipartHeaders.ContentType.CharSet;
-
-								// Decode the body
-								body = Utility.DoDecode(body, multipartHeaders.ContentTransferEncoding, charSet);
-
-								MessageBody.Add(new MessageBody(body, multipartHeaders.ContentType.MediaType));
-							}
-							else
-							{
-								// If we did not find any parts in the multipart message
-								// We just add everything as a message
-								if (MessageBody.Count == 0)
-								{
-									// Assume text/plain
-									MessageBody.Add(new MessageBody(strBuffer, "text/plain"));
-								}
-								break;
-							}
+							// Assume text/plain
+							MessageBody.Add(new MessageBody(strBuffer, "text/plain"));
 						}
+						break;
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				Utility.LogError("GetMessageBody():" + e.Message);
-				MessageBody.Add(new MessageBody(Base64.Decode(strBuffer), "text/plain")); // Assume text/plain
+				Log.LogError( "GetMessageBody():" + e.Message );
+				string body;
+				try
+				{
+					body = Base64.Decode( strBuffer );
+				}
+				catch(Exception)
+				{
+					body = strBuffer;
+				}
+				MessageBody.Add(new MessageBody(body, "text/plain")); // Assume text/plain
 			}
 		}
 		#endregion

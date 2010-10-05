@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIME.Decode
 {
+	/// <summary>
+	/// Utility class for dealing with encoded word strings
+	/// </summary>
 	public static class EncodedWord
 	{
 		/// <summary>
@@ -11,7 +14,7 @@ namespace OpenPOP.MIME.Decode
 		/// This will decode any encoded-word found in the string.
 		/// All unencoded parts will not be touched.
 		/// 
-		/// From http://tools.ietf.org/html/rfc2047:
+		/// From <a href="http://tools.ietf.org/html/rfc2047">http://tools.ietf.org/html/rfc2047</a>:
 		/// Generally, an "encoded-word" is a sequence of printable ASCII
 		/// characters that begins with "=?", ends with "?=", and has two "?"s in
 		/// between.  It specifies a character set and an encoding method, and
@@ -24,7 +27,7 @@ namespace OpenPOP.MIME.Decode
 		/// Example:
 		/// =?iso-8859-1?q?this=20is=20some=20text?= other text here
 		/// </summary>
-		/// <see cref="http://tools.ietf.org/html/rfc2047#section-2">RFC Part 2 "Syntax of encoded-words" for more detail</see>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-2">http://tools.ietf.org/html/rfc2047#section-2</a> RFC Part 2 "Syntax of encoded-words" for more detail</remarks>
 		/// <param name="encodedWords">Source text</param>
 		/// <returns>Decoded text</returns>
 		public static string Decode(string encodedWords)
@@ -63,7 +66,15 @@ namespace OpenPOP.MIME.Decode
 						// The "B" encoding is identical to the "BASE64" 
 						// encoding defined by RFC 2045.
 						case "B":
-							decodedText = Base64.Decode(encodedText, charset);
+							try
+							{
+								decodedText = Base64.Decode( encodedText, charset );
+							}
+							catch (Exception)
+							{
+								// We cannot decode it.Simply return the encoded form.
+								decodedText = fullMatchValue;
+							}
 							break;
 
 						// RFC:

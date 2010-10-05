@@ -13,42 +13,6 @@ namespace OpenPOP.MIME
 	/// </summary>
 	public static class Utility
 	{
-		#region Logging
-		private const string m_strLogFile = "OpenPOP.log";
-
-		/// <summary>
-		/// Turns file logging on and off.
-		/// </summary>
-		/// <remarks>Comming soon.</remarks>
-		public static bool Log { get; set; }
-
-		internal static void LogError( string strText )
-		{
-			//Log=true;
-			if (Log)
-			{
-				FileInfo file;
-				StreamWriter sw = null;
-				try
-				{
-					file = new FileInfo( m_strLogFile );
-					sw = file.AppendText();
-					sw.WriteLine( DateTime.Now );
-					sw.WriteLine( strText );
-					sw.WriteLine( "\r\n" );
-					sw.Flush();
-				}
-				finally
-				{
-					if (sw != null)
-					{
-						sw.Close();
-					}
-				}
-			}
-		}
-		#endregion
-
 		/// <summary>
 		/// Verifies whether the filename is of picture type or not by
 		/// checking what the extension is
@@ -93,7 +57,7 @@ namespace OpenPOP.MIME
 			}
 			catch (Exception e)
 			{
-				LogError( "SaveByteContentToFile():" + e.Message );
+				System.Diagnostics.Trace.WriteLine( "SaveByteContentToFile():" + e.Message );
 				return false;
 			}
 		}
@@ -126,7 +90,7 @@ namespace OpenPOP.MIME
 			}
 			catch (Exception e)
 			{
-				LogError( "SavePlainTextToFile():" + e.Message );
+				System.Diagnostics.Trace.WriteLine( "SavePlainTextToFile():" + e.Message );
 				return false;
 			}
 		}
@@ -218,7 +182,15 @@ namespace OpenPOP.MIME
 					return QuotedPrintable.Decode( input );
 
 				case ContentTransferEncoding.Base64:
-					return Base64.Decode( input, charSet );
+					try
+					{
+						return Base64.Decode( input, charSet );
+					}
+					catch (Exception)
+					{
+						// We cannot decode it.Simply return the encoded form.
+						return input;
+					}
 
 				case ContentTransferEncoding.SevenBit:
 				case ContentTransferEncoding.Binary:

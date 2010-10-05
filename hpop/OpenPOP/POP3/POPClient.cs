@@ -730,7 +730,7 @@ namespace OpenPOP.POP3
 			string receivedContent = ReceiveRETRMessage();
 
 			// Parse the message from the received contet
-			Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly);
+			Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, logger);
 
 			MessageTransferFinished(this);
 			return msg;

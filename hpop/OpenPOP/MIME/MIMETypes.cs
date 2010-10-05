@@ -4,19 +4,23 @@ using System.Collections;
 
 namespace OpenPOP.MIME
 {
+	/// <summary>
+	/// Utility class for working with MIME Types
+	/// </summary>
 	public static class MIMETypes
 	{
 		private const string MIMEType_MSTNEF="application/ms-tnef";
 
+		/// <summary>
+		/// Determines in the content type is Microsoft Transport Neutral Encapsulation Format
+		/// </summary>
+		/// <param name="strContentType">The content type string to check</param>
+		/// <returns>True is the format is MS-TNEF, otherwise false</returns>
 		public static bool IsMSTNEF(string strContentType)
 		{
-			if(!string.IsNullOrEmpty(strContentType))
-				if(strContentType.ToLower() == MIMEType_MSTNEF.ToLower())
-					return true;
-				else
-					return false;
-			
-			return false;
+			if (string.IsNullOrEmpty( strContentType ))
+				return false;
+			return (strContentType.Equals( MIMEType_MSTNEF, StringComparison.InvariantCulture ));
 		}
 
 		private static string ContentType(string strExtension)

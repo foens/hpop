@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Text;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
+using OpenPOP.Shared;
 
 namespace OpenPOP.MIME
 {
@@ -39,6 +41,12 @@ namespace OpenPOP.MIME
 		/// Raw Attachment Content (headers removed if was specified at creation)
 		/// </summary>
 		public string RawAttachment { get; private set; }
+
+		/// <summary>
+		/// The logging interface used by the object
+		/// </summary>
+		protected ILog Log { get; private set; }
+
 		#endregion
 
 		#region Constructors
@@ -47,8 +55,14 @@ namespace OpenPOP.MIME
 		/// duplicate code for setting up an attachment
 		/// </summary>
 		/// <param name="strFileName">file name</param>
-		private Attachment(string strFileName)
+		/// <param name="logger">The logging interface to be used by the object</param>
+		private Attachment(string strFileName, ILog logger)
 		{
+			if ( logger == null )
+				throw new ArgumentNullException( "logger" );
+
+			Log = logger;
+
 			// Setup defaults
 			RawAttachment = null;
 			RawContent = null;
@@ -64,8 +78,9 @@ namespace OpenPOP.MIME
 		/// <param name="bytAttachment">attachment bytes content</param>
 		/// <param name="strFileName">file name</param>
 		/// <param name="strContentType">content type</param>
-		public Attachment(byte[] bytAttachment, string strFileName, string strContentType)
-			: this(strFileName)
+		/// <param name="logger">The logging interface to be used by the object</param>
+		public Attachment( byte[] bytAttachment, string strFileName, string strContentType, ILog logger )
+			: this(strFileName, logger)
 		{
 			string bytesInAString = Encoding.Default.GetString(bytAttachment);
 			RawContent = bytesInAString;
@@ -78,8 +93,9 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strAttachment">attachment content</param>
 		/// <param name="headersFromMessage">The attachments headers defaults to some of the message headers, this is the headers from the message</param>
-		public Attachment(string strAttachment, MessageHeader headersFromMessage)
-			: this("")
+		/// <param name="logger">The logging interface to be used by the object</param>
+		public Attachment( string strAttachment, MessageHeader headersFromMessage, ILog logger )
+			: this(string.Empty, logger)
 		{
 			if (strAttachment == null)
 				throw new ArgumentNullException("strAttachment");
@@ -121,13 +137,14 @@ namespace OpenPOP.MIME
 			// to give a name based on the MediaType
 			if(headers.ContentType.MediaType != null)
 			{
-				if (headers.ContentType.MediaType.ToLower().Contains("report"))
+				string type = headers.ContentType.MediaType.ToLower( );
+				if (type.Contains( "report" ))
 					return _defaultReportFileName;
 
-				if (headers.ContentType.MediaType.ToLower().Contains("multipart/"))
+				if (type.Contains( "multipart/" ))
 					return _defaultMIMEFileName;
 
-				if(headers.ContentType.MediaType.ToLower().Contains("message/rfc822"))
+				if (type.Contains( "message/rfc822" ))
 					return _defaultMIMEFileName;
 			}
 
@@ -145,7 +162,7 @@ namespace OpenPOP.MIME
 		/// <returns>Decoded attachment text</returns>
 		public string DecodeAsText()
 		{
-			if (!string.IsNullOrEmpty(Headers.ContentType.MediaType) && Headers.ContentType.MediaType.ToLower().Equals("message/rfc822"))
+			if (!string.IsNullOrEmpty(Headers.ContentType.MediaType) && Headers.ContentType.MediaType.Equals("message/rfc822", StringComparison.InvariantCultureIgnoreCase))
 				return EncodedWord.Decode(RawAttachment);
 
 			return Utility.DoDecode(RawAttachment, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
@@ -163,7 +180,7 @@ namespace OpenPOP.MIME
 
 			if (blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
 				strContent = strContent.Substring(2, strContent.Length - 2);
-			return new Message(false, strContent, false);
+			return new Message(false, strContent, false, Log);
 		}
 
 		/// <summary>
@@ -185,6 +202,14 @@ namespace OpenPOP.MIME
 			return Utility.SaveByteContentToFile(strFileName, DecodedAsBytes());
 		}
 
+		/// <summary>
+		/// Compares this insance with the specified <see cref="Attachment"/> and indicates whether this
+		/// instance precedes, follows, or appears in the same position
+		/// </summary>
+		/// <param name="attachment">The attachment to compare against</param>
+		/// <returns>
+		/// A 32-bit signed integer indicating the lexical relationship between the two comparands.
+		/// </returns>
 		public int CompareTo(Attachment attachment)
 		{
 			return RawAttachment.CompareTo(attachment.RawAttachment);
@@ -198,7 +223,7 @@ namespace OpenPOP.MIME
 		{
 			return (Headers.ContentType.MediaType != null &&
 					Headers.ContentType.MediaType.ToLower().Contains("message/rfc822")) ||
-				   ContentFileName.ToLower().EndsWith(".eml");
+				   ContentFileName.EndsWith(".eml", true, CultureInfo.InvariantCulture);
 		}
 
 		///<summary>

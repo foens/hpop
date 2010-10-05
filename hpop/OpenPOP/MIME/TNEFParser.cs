@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using OpenPOP.POP3;
+using OpenPOP.Shared;
 
 namespace OpenPOP.MIME
 {
@@ -11,8 +13,11 @@ namespace OpenPOP.MIME
 	///
 	/// Based on tnef.c from Thomas Boll.
 	/// </summary>
-	/// <see cref="http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format">For more details</see>
-	public class TNEFParser
+	/// <remarks>
+	/// See <a href="http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format">http://en.wikipedia.org/wiki/Transport_Neutral_Encapsulation_Format</a> 
+	/// for more details
+	/// </remarks>
+	public class TNEFParser : Disposable
 	{
 		#region Member Variables
 		private const int TNEF_SIGNATURE  = 0x223e9f78;
@@ -31,29 +36,44 @@ namespace OpenPOP.MIME
 
 		private Stream fsTNEF;
 		private readonly List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
-		private TNEFAttachment _attachment=null;
+		private TNEFAttachment _attachment;
 
 		//private string _logFile="OpenPOP.TNEF.log";
-		private long _fileLength=0;
+		private long _fileLength;
 		private string strSubject;
 		#endregion
 
 		#region Properties
-		//		public string LogFilePath
-		//		{
-		//			get{return _logFile;}
-		//			set{_logFile=value;}
-		//		}
 
+		/// <summary>
+		/// The file the parser is associated with
+		/// </summary>
 		public string TNEFFile { get; set; }
 
+		/// <summary>
+		/// Specifies whether to turn of verbose logging output
+		/// </summary>
 		public bool Verbose { get; set; }
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public int SkipSignature { get; set; }
 
+		/// <summary>
+		/// The search signature
+		/// </summary>
 		public bool SearchSignature { get; set; }
 
+		/// <summary>
+		/// The offset
+		/// </summary>
 		public long Offset { get; set; }
+
+		/// <summary>
+		/// The logging interface for the object
+		/// </summary>
+		protected ILog Log { get; private set; }
 
 		#endregion
 
@@ -61,18 +81,23 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Used the set up default values
 		/// </summary>
-		private TNEFParser()
+		/// <param name="logger">The logging interface to use</param>
+		private TNEFParser(ILog logger)
 		{
+			if ( logger == null)
+				throw new ArgumentNullException("logger");
+			Log = logger;
 			Verbose = false;
-			TNEFFile = "";
+			TNEFFile = string.Empty;
 		}
 
 		/// <summary>
 		/// Create a TNEFParser which loads its content from a file
 		/// </summary>
 		/// <param name="strFile">MS-TNEF file</param>
-		public TNEFParser(string strFile)
-			: this()
+		/// <param name="logger">The logging interface to use</param>
+		public TNEFParser( string strFile, ILog logger )
+			: this( logger )
 		{
 			if (!OpenTNEFStream(strFile))
 				throw new ArgumentException();
@@ -82,16 +107,12 @@ namespace OpenPOP.MIME
 		/// Create a TNEFParser which loads its content from a byte array
 		/// </summary>
 		/// <param name="bytContents">MS-TNEF bytes</param>
-		public TNEFParser(byte[] bytContents)
-			: this()
+		/// <param name="logger">The logging interface to use</param>
+		public TNEFParser( byte[] bytContents, ILog logger )
+			: this( logger )
 		{
 			if (!OpenTNEFStream(bytContents))
 				throw new ArgumentException();
-		}
-
-		~TNEFParser()
-		{
-			CloseTNEFStream();
 		}
 		#endregion
 
@@ -112,7 +133,7 @@ namespace OpenPOP.MIME
 
 			if(StreamReadBytes(buf,4)!=1)
 			{
-				Utility.LogError("geti32():unexpected end of input\n");
+				Log.LogError("geti32():unexpected end of input\n");
 				return 1;
 			}
 			return GETINT32(buf);
@@ -124,7 +145,7 @@ namespace OpenPOP.MIME
 
 			if(StreamReadBytes(buf,2)!=1)
 			{
-				Utility.LogError("geti16():unexpected end of input\n");
+				Log.LogError( "geti16():unexpected end of input\n" );
 				return 1;
 			}
 			return GETINT16(buf);
@@ -136,7 +157,7 @@ namespace OpenPOP.MIME
 
 			if(StreamReadBytes(buf,1)!=1)
 			{
-				Utility.LogError("geti8():unexpected end of input\n");
+				Log.LogError( "geti8():unexpected end of input\n" );
 				return 1;
 			}
 			return buf[0];
@@ -155,21 +176,25 @@ namespace OpenPOP.MIME
 				return 0;
 			}
 			catch(Exception e)				
-			{				
-				Utility.LogError("StreamReadBytes():"+e.Message);
+			{
+				Log.LogError( "StreamReadBytes():" + e.Message );
 				return 0;
 			}
 		}
 
 		private void CloseTNEFStream()
 		{
+			if (fsTNEF == null)
+				return;
 			try
 			{
-				fsTNEF.Close();
+				var stream = fsTNEF;
+				fsTNEF = null;
+				stream.Close();
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("CloseTNEFStream():"+e.Message);
+				Log.LogError( "CloseTNEFStream():" + e.Message );
 			}
 		}
 
@@ -190,7 +215,8 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("OpenTNEFStream(File):"+e.Message);
+				fsTNEF = null;
+				Log.LogError( "OpenTNEFStream(File):" + e.Message );
 				return false;
 			}
 		}
@@ -210,7 +236,8 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("OpenTNEFStream(Bytes):"+e.Message);
+				fsTNEF = null;
+				Log.LogError( "OpenTNEFStream(Bytes):" + e.Message );
 				return false;
 			}
 		}
@@ -246,7 +273,7 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("FindSignature():"+e.Message);
+				Log.LogError( "FindSignature():" + e.Message );
 				ret=false;
 			}
 
@@ -442,7 +469,7 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				Utility.LogError("SaveAttachment():"+e.Message);
+				System.Diagnostics.Trace.WriteLine( "SaveAttachment():" + e.Message );
 				return false;
 			}
 		}
@@ -503,9 +530,24 @@ namespace OpenPOP.MIME
 
 		private void PrintResult(string strResult, params object[] strContent)
 		{
-			string strRet=string.Format(strResult,strContent);
-			if (Verbose) 
-				Utility.LogError(strRet);
+			if (Verbose)
+			{
+				Log.LogDebug( string.Format(strResult,strContent) );
+			}
+		}
+
+		/// <summary>
+		/// Disposes of the managed resources within the object
+		/// </summary>
+		/// <param name="disposing">Specifies if managed resources are being disposed of</param>
+		protected override void Dispose( bool disposing )
+		{
+			if ( disposing && !IsDisposed)
+			{
+				CloseTNEFStream();
+				Log = null;
+			}
+			base.Dispose( disposing );
 		}
 	}
 }
