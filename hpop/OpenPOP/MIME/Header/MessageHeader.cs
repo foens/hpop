@@ -121,11 +121,20 @@ namespace OpenPOP.MIME.Header
 		public ContentDisposition ContentDisposition { get; private set; }
 
 		/// <summary>
-		/// The Date headers raw value.
+		/// The Date when the email was sent.
+		/// This is the raw value. <see cref="DateSent"/> for a parsed up DateTime value of this field
 		/// </summary>
-		/// <remarks>If you can parse this into a DateTime, please get in touch with developers</remarks>
 		/// <see cref="http://tools.ietf.org/html/rfc5322#section-3.6.1">For more details</see>
 		public string Date { get; private set; }
+
+		/// <summary>
+		/// The Date when the email was sent.
+		/// This is the parsed equavalent of <see cref="Date"/>.
+		/// Notice that the TimeZone of the DateTime object is in UTC and has NOT been converted
+		/// to local TimeZone.
+		/// </summary>
+		/// <see cref="http://tools.ietf.org/html/rfc5322#section-3.6.1">For more details</see>
+		public DateTime DateSent { get; private set; }
 
 		/// <summary>
 		/// An ID of the message that is SUPPOSED to be in every message according to the RFC.
@@ -345,6 +354,7 @@ namespace OpenPOP.MIME.Header
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.1
 				case "DATE":
 					Date = headerValue.Trim();
+					DateSent = RFC2822DateTime.StringToDate(headerValue);
 					break;
 
 				// See ContentTransferEncoding class for more details

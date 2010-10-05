@@ -585,6 +585,7 @@ namespace OpenPOP.NET_Sample_App
 				ds.Tables[0].Rows.Add(new object[] {"ReturnPath", m.Headers.ReturnPath});
 				ds.Tables[0].Rows.Add(new object[] {"Subject", m.Headers.Subject});
 				ds.Tables[0].Rows.Add(new object[] {"Date", m.Headers.Date});
+				ds.Tables[0].Rows.Add(new object[] {"DateSent", m.Headers.DateSent});
 				foreach(string received in m.Headers.Received)
 					ds.Tables[0].Rows.Add(new object[] {"Received", received});
 				ds.Tables[0].Rows.Add(new object[] {"Importance", m.Headers.Importance});

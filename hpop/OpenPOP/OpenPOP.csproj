@@ -112,6 +112,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MIME\Attachment.cs" />
+    <Compile Include="MIME\Header\RFC2822DateTime.cs" />
     <Compile Include="MIME\Header\ContentTransferEncoding.cs" />
     <Compile Include="MIME\Decode\Base64.cs" />
     <Compile Include="MIME\Decode\EncodedWord.cs" />
