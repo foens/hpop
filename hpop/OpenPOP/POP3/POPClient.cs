@@ -260,6 +260,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerNotFoundException">If it was not possible to connect to the server</exception>
 		public void Connect(string hostname, int port, bool useSsl)
 		{
+			AssertDisposed();
 			CommunicationBegan(this);
 
 			TcpClient clientSocket = new TcpClient();
@@ -325,6 +326,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		public void Disconnect()
 		{
+			AssertDisposed();
 			try
 			{
 				SendCommand("QUIT");
@@ -355,6 +357,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password)
 		{
+			AssertDisposed();
 			Authenticate(username, password, AuthenticationMethod.TRYBOTH);
 		}
 
@@ -369,6 +372,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
+			AssertDisposed();
 			if(authenticationMethod == AuthenticationMethod.USERPASS)
 			{
 				AuthenticateUsingUSER(username, password);				
@@ -471,6 +475,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the STAT command</exception>
 		public int GetMessageCount()
 		{
+			AssertDisposed();
 			return SendCommandIntResponse("STAT", 1);
 		}
 
@@ -483,6 +488,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the delete command</exception>
 		public void DeleteMessage(int messageNumber) 
 		{
+			AssertDisposed();
 			SendCommand("DELE " + messageNumber);
 		}
 
@@ -495,6 +501,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept one of the delete commands. All prior marked messages will still be marked.</exception>
 		public void DeleteAllMessages() 
 		{
+			AssertDisposed();
 			int messageCount = GetMessageCount();
 
 			for (int messageItem = messageCount; messageItem > 0; messageItem--)
@@ -516,6 +523,7 @@ namespace OpenPOP.POP3
 		[Obsolete("You should use the disconnect method instead. It also sends the QUIT command and closes the streams correctly.")]
 		public void QUIT()
 		{
+			AssertDisposed();
 			SendCommand("QUIT");
 		}
 
@@ -528,6 +536,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the NOOP command</exception>
 		public void NOOP()
 		{
+			AssertDisposed();
 			SendCommand("NOOP");
 		}
 
@@ -542,6 +551,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the RSET command</exception>
 		public void RSET()
 		{
+			AssertDisposed();
 			SendCommand("RSET");
 		}
 
@@ -553,6 +563,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the messageNumber does not exist</exception>
 		public string GetMessageUID(int messageNumber)
 		{
+			AssertDisposed();
 			// Example from RFC:
 			//C: UIDL 2
 			//S: +OK 2 QhdPYR:00WBw1Ph7x7
@@ -573,6 +584,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
 		public List<string> GetMessageUIDs()
 		{
+			AssertDisposed();
 			// RFC Example:
 			// C: UIDL
 			// S: +OK
@@ -602,6 +614,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
 		public int GetMessageSize(int messageNumber)
 		{
+			AssertDisposed();
 			// RFC Example:
 			// C: LIST 2
 			// S: +OK 2 200
@@ -616,6 +629,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
 		public List<int> GetMessageSizes()
 		{
+			AssertDisposed();
 			// RFC Example:
 			// C: LIST
 			// S: +OK 2 messages (320 octets)
@@ -680,6 +694,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the RETR command</exception>
 		public Message GetMessage(int messageNumber)
 		{
+			AssertDisposed();
 			return FetchMessage("RETR " + messageNumber, false);
 		}
 
@@ -691,6 +706,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the TOP command</exception>
 		public MessageHeader GetMessageHeaders(int messageNumber)
 		{
+			AssertDisposed();
 			// 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
 			Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
 
