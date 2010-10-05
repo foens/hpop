@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace OpenPOP.MIME.Header
 {
 	/// <summary>
-	/// Copyright (c)  vendredi13@007.freesurf.fr
+	/// Portions Copyright (c)  vendredi13@007.freesurf.fr
 	/// All rights reserved.
 	/// 
 	/// Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,10 @@ namespace OpenPOP.MIME.Header
 	/// 
 	/// Bugs supplied by Ross Presser on codeproject.com has been incorporated.
 	/// </summary>
-	/// <see cref="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">for original version</see>
-	/// <see cref="http://www.codeproject.com/info/cpol10.aspx">for license</see>
+	/// <remarks> 
+	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx</a> for original version.
+	/// See <a href="http://www.codeproject.com/info/cpol10.aspx">http://www.codeproject.com/info/cpol10.aspx</a> for license.
+	/// </remarks>
 	public static class RFC2822DateTime
 	{
 		/// <summary>
@@ -24,15 +27,13 @@ namespace OpenPOP.MIME.Header
 		public static DateTime StringToDate(string adate)
 		{
 			string dayName;
-			DateTime dt;
 
-			// FIXME : how to handle nested comments ?
-			string tmp = Regex.Replace(adate, "(\\([^(].*\\))", "");
+			// Strip out comments, handles nested comments as well
+			string tmp = Regex.Replace( adate, @"(\((?>\((?<C>)|\)(?<-C>)|.?)*(?(C)(?!))\))", "" );
 
 			// strip extra white spaces
-			tmp = Regex.Replace(tmp, "\\s+", " ");
-			tmp = Regex.Replace(tmp, "^\\s+", "");
-			tmp = Regex.Replace(tmp, "\\s+$", "");
+			tmp = Regex.Replace(tmp, @"\s+", " ");
+			tmp = Regex.Replace( tmp, @"^\s*(.*?)\s*$", "$1" );
 
 			// extract week name part
 			string[] resp = tmp.Split(new[] { ',' }, 2);
@@ -42,16 +43,21 @@ namespace OpenPOP.MIME.Header
 				dayName = resp[0];
 				tmp = resp[1];
 			}
-			else dayName = "";
+			else
+				dayName = "";
 
 			try
 			{
 				// extract date and time
 				int pos = tmp.LastIndexOf(" ");
-				if (pos < 1) throw new FormatException("probably not a date");
+				if (pos < 1)
+					throw new FormatException("probably not a date");
+
 				string dpart = tmp.Substring(0, pos);
 				string timeZone = tmp.Substring(pos + 1);
-				dt = Convert.ToDateTime(dpart);
+
+				// Date parts should always be parsed as english, and represented as UTC
+				DateTime dt = new DateTime( Convert.ToDateTime( dpart, CultureInfo.InvariantCulture ).Ticks, DateTimeKind.Utc );
 
 				// check weekDay name
 				// this must be done before convert to GMT 
@@ -69,15 +75,18 @@ namespace OpenPOP.MIME.Header
 				}
 
 				// adjust to localtime
-				if (Regex.IsMatch(timeZone, "[+\\-][0-9][0-9][0-9][0-9]"))
+				if (Regex.IsMatch(timeZone, @"[+\-][0-9][0-9][0-9][0-9]"))
 				{
 					// it's a modern ANSI style timezone
 					int factor;
+					if (timeZone.Substring(0, 1) == "+")
+						factor = -1;
+					else if (timeZone.Substring(0, 1) == "-")
+						factor = 1;
+					else
+						throw new FormatException("incorrect time zone");
 					string hour = timeZone.Substring(1, 2);
 					string minute = timeZone.Substring(3, 2);
-					if (timeZone.Substring(0, 1) == "+") factor = -1;
-					else if (timeZone.Substring(0, 1) == "-") factor = 1;
-					else throw new FormatException("incorrect time zone");
 					dt = dt.AddHours(factor * Convert.ToInt32(hour));
 					dt = dt.AddMinutes(factor * Convert.ToInt32(minute));
 				}
@@ -121,15 +130,16 @@ namespace OpenPOP.MIME.Header
 						case "MDT": dt = dt.AddHours(6); break;
 						case "PST": dt = dt.AddHours(8); break;
 						case "PDT": dt = dt.AddHours(7); break;
-						default: throw new FormatException("invalid time zone");
+						default:
+							throw new FormatException("invalid time zone");
 					}
 				}
+				return dt;
 			}
 			catch (Exception e)
 			{
-				throw new FormatException(string.Format("Invalid date:{0}:{1}", e.Message, adate));
+				throw new FormatException(string.Format("Invalid date:{0}:{1}", e.Message, adate), e);
 			}
-			return dt;
 		}
 	}
 }
