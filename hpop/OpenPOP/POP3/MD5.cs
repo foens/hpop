@@ -4,6 +4,9 @@ using System.Text;
 
 namespace OpenPOP.POP3
 {
+	/// <summary>
+	/// This is a simple class which encapsulates MD5 algorithms
+	/// </summary>
 	public static class MD5
 	{
 		/// <summary>

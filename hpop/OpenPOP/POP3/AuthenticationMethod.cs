@@ -15,16 +15,16 @@ namespace OpenPOP.POP3
 		/// Recomended AuthenticationMethod is APOP, but it does not matter
 		/// if SSL is used.
 		/// </summary>
-		USERPASS = 0,
+		USERPASS,
 		/// <summary>
 		/// Authenticate using the APOP method, which is more secure.
 		/// </summary>
-		APOP = 1,
+		APOP,
 		/// <summary>
 		/// Authenticate using APOP first, which is more secure.
 		/// If APOP is not supported on the server, authenticate
 		/// using USER/PASS.
 		/// </summary>
-		TRYBOTH = 2
+		TRYBOTH
 	}
 }

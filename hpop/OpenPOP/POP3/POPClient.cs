@@ -117,7 +117,7 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Constructs a new POPClient with default settings.
 		/// </summary>
-		/// <param name="log">Set this parameter to use your own logger</param>
+		/// <param name="log">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
 		public POPClient(ILog log = null)
 		{
 			// We have not seen the APOPTimestamp yet
@@ -145,7 +145,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading. Set to 0 or -1 to specify infinite timeout.</param>
 		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending. Set to 0 or -1 to specify infinite timeout.</param>
-		/// <param name="log">Set this parameter to use your own logger</param>
+		/// <param name="log">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
 		/// <exception cref="ArgumentOutOfRangeException">If any of the timeouts is less than -1.</exception>
 		public POPClient(int receiveTimeout, int sendTimeout, ILog log = null)
 			: this(log)
