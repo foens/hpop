@@ -20,7 +20,7 @@ namespace OpenPOP.MIME
 		{
 			if (string.IsNullOrEmpty( strContentType ))
 				return false;
-			return (strContentType.Equals( MIMEType_MSTNEF, StringComparison.InvariantCulture ));
+			return (strContentType.Equals( MIMEType_MSTNEF, StringComparison.InvariantCultureIgnoreCase ));
 		}
 
 		private static string ContentType(string strExtension)
