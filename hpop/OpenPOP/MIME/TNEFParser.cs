@@ -73,7 +73,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// The logging interface for the object
 		/// </summary>
-		protected ILog Log { get; private set; }
+		private ILog Log { get; set; }
 
 		#endregion
 
@@ -86,6 +86,7 @@ namespace OpenPOP.MIME
 		{
 			if ( logger == null)
 				throw new ArgumentNullException("logger");
+
 			Log = logger;
 			Verbose = false;
 			TNEFFile = string.Empty;
@@ -96,8 +97,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strFile">MS-TNEF file</param>
 		/// <param name="logger">The logging interface to use</param>
-		public TNEFParser( string strFile, ILog logger )
-			: this( logger )
+		public TNEFParser(string strFile, ILog logger)
+			: this(logger)
 		{
 			if (!OpenTNEFStream(strFile))
 				throw new ArgumentException();
@@ -108,8 +109,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="bytContents">MS-TNEF bytes</param>
 		/// <param name="logger">The logging interface to use</param>
-		public TNEFParser( byte[] bytContents, ILog logger )
-			: this( logger )
+		public TNEFParser(byte[] bytContents, ILog logger)
+			: this(logger)
 		{
 			if (!OpenTNEFStream(bytContents))
 				throw new ArgumentException();

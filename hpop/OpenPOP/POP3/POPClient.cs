@@ -76,7 +76,6 @@ namespace OpenPOP.POP3
 		private StreamReader reader;
 		private StreamWriter writer;
 		private string _lastCommandResponse;
-		private readonly ILog logger;
 
 		/// <summary>
 		/// The APOP timestamp sent by the server in it's welcome
@@ -112,13 +111,18 @@ namespace OpenPOP.POP3
 		/// Send timeout for the connection to the SMTP server in milliseconds.
 		/// </summary>
 		public int SendTimeOut { get; private set; }
+
+		/// <summary>
+		/// The logging interface used by the object
+		/// </summary>
+		private ILog Log { get; set; }
 		#endregion
 
 		/// <summary>
 		/// Constructs a new POPClient with default settings.
 		/// </summary>
-		/// <param name="log">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
-		public POPClient(ILog log = null)
+		/// <param name="logger">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
+		public POPClient(ILog logger)
 		{
 			// We have not seen the APOPTimestamp yet
 			APOPTimestamp = null;
@@ -137,7 +141,16 @@ namespace OpenPOP.POP3
 			APOPSupported = false;
 
 			// Was a logger specified, if so, use it. Otherwise create a deafult logger
-			logger = log ?? new DefaultLogger();
+			Log = logger ?? new DefaultLogger();
+		}
+
+		/// <summary>
+		/// Constructs a new POPClient with default settings.
+		/// </summary>
+		public POPClient()
+			: this(null)
+		{
+			
 		}
 
 		/// <summary>
@@ -145,16 +158,28 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading. Set to 0 or -1 to specify infinite timeout.</param>
 		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending. Set to 0 or -1 to specify infinite timeout.</param>
-		/// <param name="log">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
+		/// <param name="logger">Set this parameter to use your own logger. If <see langword="null"/> a <see cref="DefaultLogger"/> will be created</param>
 		/// <exception cref="ArgumentOutOfRangeException">If any of the timeouts is less than -1.</exception>
-		public POPClient(int receiveTimeout, int sendTimeout, ILog log = null)
-			: this(log)
+		public POPClient(int receiveTimeout, int sendTimeout, ILog logger)
+			: this(logger)
 		{
 			if(receiveTimeout < -1 || sendTimeout < -1)
 				throw new ArgumentOutOfRangeException();
 
 			ReceiveTimeOut = receiveTimeout;
 			SendTimeOut = sendTimeout;
+		}
+
+		/// <summary>
+		/// Creates a new POPClient with special settings for socket timeouts.
+		/// </summary>
+		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading. Set to 0 or -1 to specify infinite timeout.</param>
+		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending. Set to 0 or -1 to specify infinite timeout.</param>
+		/// <exception cref="ArgumentOutOfRangeException">If any of the timeouts is less than -1.</exception>
+		public POPClient(int receiveTimeout, int sendTimeout)
+			: this(receiveTimeout, sendTimeout, null)
+		{
+			
 		}
 
 		/// <summary>
@@ -274,7 +299,7 @@ namespace OpenPOP.POP3
 			catch (SocketException e) 
 			{
 				Disconnect();
-				logger.LogError("Connect():" + e.Message);
+				Log.LogError("Connect():" + e.Message);
 				throw new PopServerNotFoundException();
 			}
 
@@ -314,8 +339,8 @@ namespace OpenPOP.POP3
 			{
 				// If not close down the connection and abort
 				Disconnect();
-				logger.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
-				logger.LogDebug("Last response from server was: " + _lastCommandResponse);
+				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+				Log.LogDebug("Last response from server was: " + _lastCommandResponse);
 				throw new PopServerNotAvailableException();   
 			}
 		}
@@ -407,7 +432,7 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				logger.LogError("AuthenticateUsingUSER():wrong user: " + username);
+				Log.LogError("AuthenticateUsingUSER():wrong user: " + username);
 				throw new InvalidLoginException();
 			}
 
@@ -419,14 +444,14 @@ namespace OpenPOP.POP3
 			{
 				if(_lastCommandResponse.ToLower().Contains("lock"))
 				{
-					logger.LogError("AuthenticateUsingUSER(): maildrop is locked");
+					Log.LogError("AuthenticateUsingUSER(): maildrop is locked");
 					throw new PopServerLockException();			
 				}
 
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
-				logger.LogError("AuthenticateUsingUSER(): wrong password.");
-				logger.LogDebug("Server response was: " + _lastCommandResponse);
+				Log.LogError("AuthenticateUsingUSER(): wrong password.");
+				Log.LogDebug("Server response was: " + _lastCommandResponse);
 				throw new InvalidPasswordException();
 			}
 			
@@ -456,12 +481,12 @@ namespace OpenPOP.POP3
 			{
 				if (_lastCommandResponse.ToLower().Contains("lock"))
 				{
-					logger.LogError("AuthenticateUsingAPOP(): maildrop is locked");
+					Log.LogError("AuthenticateUsingAPOP(): maildrop is locked");
 					throw new PopServerLockException();
 				}
 
-				logger.LogError("AuthenticateUsingAPOP(): wrong user or password");
-				logger.LogDebug("Server response was: " + _lastCommandResponse);
+				Log.LogError("AuthenticateUsingAPOP(): wrong user or password");
+				Log.LogDebug("Server response was: " + _lastCommandResponse);
 				throw new InvalidLoginOrPasswordException();
 			}
 
@@ -730,7 +755,7 @@ namespace OpenPOP.POP3
 			string receivedContent = ReceiveRETRMessage();
 
 			// Parse the message from the received contet
-			Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, logger);
+			Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
 
 			MessageTransferFinished(this);
 			return msg;

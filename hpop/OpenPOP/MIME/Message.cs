@@ -58,7 +58,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// The logging interface used by the object
 		/// </summary>
-		protected ILog Log { get; private set; }
+		private ILog Log { get; set; }
 
 		#endregion
 
@@ -66,13 +66,10 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Sets up a default new message
 		/// </summary>
-		/// <param name="logger">The logging interface to use</param>
-		private Message( ILog logger )
+		/// <param name="log">The logging interface to use</param>
+		private Message(ILog log)
 		{
-			if (logger == null)
-				throw new ArgumentNullException( "logger" );
-
-			Log = logger;
+			Log = log ?? new DefaultLogger();
 			RawMessage = null;
 			RawHeader = null;
 			RawMessageBody = null;
@@ -84,37 +81,62 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Initializes a message from a .eml file
 		/// </summary>
-		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
-		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
-		/// <param name="strEMLFile">File with email content to load from</param>
+		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="onlyParseHeader">whether only decode the header without body</param>
+		/// <param name="EmlFile">File with email content to load from</param>
 		/// <param name="logger">The logging interface to use</param>
-		public Message(bool blnAutoDecodeMSTNEF, bool blnOnlyHeader, string strEMLFile, ILog logger)
+		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, string EmlFile, ILog logger)
 			: this(logger)
 		{
 			string strMessage = null;
-			if (Utility.ReadPlainTextFromFile(strEMLFile, ref strMessage))
+			if (Utility.ReadPlainTextFromFile(EmlFile, ref strMessage))
 			{
-				AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
-				InitializeMessage(strMessage, blnOnlyHeader);
+				AutoDecodeMSTNEF = autoDecodeMSTNEF;
+				InitializeMessage(strMessage, onlyParseHeader);
 			}
 			else
 			{
-				throw new FileNotFoundException("Could not find file " + strEMLFile);
+				throw new FileNotFoundException("Could not find file " + EmlFile);
 			}
+		}
+
+		/// <summary>
+		/// Initializes a message from a .eml file
+		/// </summary>
+		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="onlyParseHeader">whether only decode the header without body</param>
+		/// <param name="emlFile">File with email content to load from</param>
+		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, string emlFile)
+			: this(autoDecodeMSTNEF, onlyParseHeader, emlFile, null)
+		{
+
 		}
 
 		/// <summary>
 		/// Creates a new message from a string
 		/// </summary>
-		/// <param name="blnAutoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
-		/// <param name="strMessage">raw message content</param>
-		/// <param name="blnOnlyHeader">whether only decode the header without body</param>
+		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="rawMessageContent">raw message content</param>
+		/// <param name="onlyParseHeader">whether only decode the header without body</param>
 		/// <param name="logger">The logging interface to use</param>
-		public Message(bool blnAutoDecodeMSTNEF, string strMessage, bool blnOnlyHeader, ILog logger)
+		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader, ILog logger)
 			: this(logger)
 		{
-			AutoDecodeMSTNEF = blnAutoDecodeMSTNEF;
-			InitializeMessage(strMessage,blnOnlyHeader);
+			AutoDecodeMSTNEF = autoDecodeMSTNEF;
+			InitializeMessage(rawMessageContent, onlyParseHeader);
+		}
+
+		/// <summary>
+		/// Creates a new message from a string
+		/// </summary>
+		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
+		/// <param name="rawMessageContent">raw message content</param>
+		/// <param name="onlyParseHeader">whether only decode the header without body</param>
+		/// <param name="logger">The logging interface to use</param>
+		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader)
+			: this(autoDecodeMSTNEF, rawMessageContent, onlyParseHeader, null)
+		{
+
 		}
 		#endregion
 

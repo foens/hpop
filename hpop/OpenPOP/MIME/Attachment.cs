@@ -45,7 +45,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// The logging interface used by the object
 		/// </summary>
-		protected ILog Log { get; private set; }
+		private ILog Log { get; set; }
 
 		#endregion
 
@@ -54,66 +54,87 @@ namespace OpenPOP.MIME
 		/// Used to create a new attachment internally to avoid any
 		/// duplicate code for setting up an attachment
 		/// </summary>
-		/// <param name="strFileName">file name</param>
+		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
 		/// <param name="logger">The logging interface to be used by the object</param>
-		private Attachment(string strFileName, ILog logger)
+		private Attachment(string fileName, ILog logger)
 		{
-			if ( logger == null )
-				throw new ArgumentNullException( "logger" );
-
-			Log = logger;
+			Log = logger ?? new DefaultLogger();
 
 			// Setup defaults
 			RawAttachment = null;
 			RawContent = null;
 
 			// Setup parameters
-			ContentFileName = strFileName;
+			ContentFileName = fileName;
 		}
 
 		/// <summary>
 		/// Create an Attachment from byte contents. These are NOT parsed in any way, but assumed to be correct.
 		/// This is used for MS-TNEF attachments
 		/// </summary>
-		/// <param name="bytAttachment">attachment bytes content</param>
-		/// <param name="strFileName">file name</param>
-		/// <param name="strContentType">content type</param>
+		/// <param name="attachmentContent">The contents of the Attachment</param>
+		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
+		/// <param name="contentType">The content type of the Attachment</param>
 		/// <param name="logger">The logging interface to be used by the object</param>
-		public Attachment( byte[] bytAttachment, string strFileName, string strContentType, ILog logger )
-			: this(strFileName, logger)
+		public Attachment(byte[] attachmentContent, string fileName, string contentType, ILog logger)
+			: this(fileName, logger)
 		{
-			string bytesInAString = Encoding.Default.GetString(bytAttachment);
+			string bytesInAString = Encoding.Default.GetString(attachmentContent);
 			RawContent = bytesInAString;
 			RawAttachment = bytesInAString;
-			Headers = new MessageHeader(HeaderFieldParser.ParseContentType(strContentType));
+			Headers = new MessageHeader(HeaderFieldParser.ParseContentType(contentType));
+		}
+
+		/// <summary>
+		/// Create an Attachment from byte contents. These are NOT parsed in any way, but assumed to be correct.
+		/// This is used for MS-TNEF attachments
+		/// </summary>
+		/// <param name="attachmentContent">attachment bytes content</param>
+		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
+		/// <param name="contentType">The content type of the Attachment</param>
+		public Attachment(byte[] attachmentContent, string fileName, string contentType)
+			: this(attachmentContent, fileName, contentType, null)
+		{
+
 		}
 
 		/// <summary>
 		/// Create an attachment from a string, with some headers use from the message it is inside
 		/// </summary>
-		/// <param name="strAttachment">attachment content</param>
+		/// <param name="attachmentContent">The content of the Attachment</param>
 		/// <param name="headersFromMessage">The attachments headers defaults to some of the message headers, this is the headers from the message</param>
 		/// <param name="logger">The logging interface to be used by the object</param>
-		public Attachment( string strAttachment, MessageHeader headersFromMessage, ILog logger )
+		public Attachment(string attachmentContent, MessageHeader headersFromMessage, ILog logger)
 			: this(string.Empty, logger)
 		{
-			if (strAttachment == null)
-				throw new ArgumentNullException("strAttachment");
+			if (attachmentContent == null)
+				throw new ArgumentNullException("attachmentContent");
 
-			RawContent = strAttachment;
+			RawContent = attachmentContent;
 
 			string rawHeaders;
 			NameValueCollection headers;
-			HeaderExtractor.ExtractHeaders(strAttachment, out rawHeaders, out headers);
+			HeaderExtractor.ExtractHeaders(attachmentContent, out rawHeaders, out headers);
 
 			Headers = new MessageHeader(headers, headersFromMessage.ContentType, headersFromMessage.ContentTransferEncoding);
 
 			// If we parsed headers, as we just did, the RawAttachment is found by removing the headers
 			// We also want to remove the line just after the headers, that tells the headers ended
-			RawAttachment = Utility.ReplaceFirstOccurrence(strAttachment, rawHeaders + "\r\n\r\n", "");
+			RawAttachment = Utility.ReplaceFirstOccurrence(attachmentContent, rawHeaders + "\r\n\r\n", "");
 
 			// Set the filename
 			ContentFileName = FigureOutFilename(Headers);
+		}
+
+		/// <summary>
+		/// Create an attachment from a string, with some headers use from the message it is inside
+		/// </summary>
+		/// <param name="attachmentContent">The content of the Attachment</param>
+		/// <param name="headersFromMessage">The attachments headers defaults to some of the message headers, this is the headers from the message</param>
+		public Attachment(string attachmentContent, MessageHeader headersFromMessage)
+			: this(attachmentContent, headersFromMessage, null)
+		{
+			
 		}
 		#endregion
 
@@ -195,15 +216,15 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Save this Attachment to a file
 		/// </summary>
-		/// <param name="strFileName">File to write Attachment to</param>
+		/// <param name="fileName">File to write Attachment to</param>
 		/// <returns><see langword="true"/> if save was successful, <see langword="false"/> if save failed</returns>
-		public bool SaveToFile(string strFileName)
+		public bool SaveToFile(string fileName)
 		{
-			return Utility.SaveByteContentToFile(strFileName, DecodedAsBytes());
+			return Utility.SaveByteContentToFile(fileName, DecodedAsBytes());
 		}
 
 		/// <summary>
-		/// Compares this insance with the specified <see cref="Attachment"/> and indicates whether this
+		/// Compares this instance with the specified <see cref="Attachment"/> and indicates whether this
 		/// instance precedes, follows, or appears in the same position
 		/// </summary>
 		/// <param name="attachment">The attachment to compare against</param>
