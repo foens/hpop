@@ -312,7 +312,7 @@ namespace MailMonitor
 			{
 				if(File.Exists(_file)||FindLocalMessage(ref _file))
 				{
-					_msg=new OpenPOP.MIME.Message(true,false,_file);
+					_msg=new OpenPOP.MIME.Message(true,false, new FileInfo(_file));
 				}
 				else
 				{
@@ -330,7 +330,7 @@ namespace MailMonitor
 						Directory.CreateDirectory(strPath);
 					if(!Settings.MessageIDs.ContainsKey(mi.ID))
 						Settings.MessageIDs.Add(mi.ID,mi);
-					_msg.SaveToMIMEEmailFile(Settings.GetMessageFile(_msg.Headers.MessageID), true);
+					_msg.SaveToMIMEEmailFile(new FileInfo(Settings.GetMessageFile(_msg.Headers.MessageID)), true);
 				}
 
 				txtSubject.Text = _msg.Headers.Subject;
@@ -343,7 +343,7 @@ namespace MailMonitor
 
 				strBodyFile = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + Path.DirectorySeparatorChar + "mail.htm";
 				string strBodyText=Utilities.ToFormattedHTML(_msg.MessageBody[_msg.MessageBody.Count-1].Body);
-				Utility.SavePlainTextToFile(strBodyFile,strBodyText,true);
+				Utility.SavePlainTextToFile(new FileInfo(strBodyFile), strBodyText,true);
 				object o=null;
 				wbBody.Navigate(strBodyFile,ref o,ref o,ref o,ref o);
 				
@@ -378,11 +378,15 @@ namespace MailMonitor
 									Attachment att2=m2.Attachments[i];
 									attachmentNames+=att2.ContentFileName+"("+att2.RawAttachment.Length+" bytes)\r\n";
 								}
-							bool blnRet = _msg.SaveAttachments(Path.GetDirectoryName(dlgSave.FileName));
-							MessageBox.Show(this,"Parsing "+(blnRet?"succeeded":"failed")+"\r\n\r\nsubject:"+m2.Headers.Subject+"\r\n\r\nAttachment:\r\n"+attachmentNames);
+							bool saveSuccesful = false;
+							string path = Path.GetDirectoryName(dlgSave.FileName);
+							if(path != null)
+								saveSuccesful = _msg.SaveAttachments(new DirectoryInfo(path));
+
+							MessageBox.Show(this, "Parsing " + (saveSuccesful ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 						}
 					}
-					MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(dlgSave.FileName))?"succeeded":"failed"));
+					MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(new FileInfo(dlgSave.FileName)))?"succeeded":"failed"));
 				}
 			}
 			else
@@ -401,7 +405,7 @@ namespace MailMonitor
 			dlgSave.FileName=Utilities.ToNormalFileName(_msg.Headers.Subject);
 			DialogResult result=dlgSave.ShowDialog();
 			if(result==DialogResult.OK)			
-				_msg.SaveToMIMEEmailFile(dlgSave.FileName,true);
+				_msg.SaveToMIMEEmailFile(new FileInfo(dlgSave.FileName), true);
 		}
 
 		private void mnuOpen_Click(object sender, EventArgs e)

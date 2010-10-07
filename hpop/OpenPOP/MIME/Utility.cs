@@ -42,24 +42,25 @@ namespace OpenPOP.MIME
 		/// Save byte content to a file.
 		/// If file exists it is deleted!
 		/// </summary>
-		/// <param name="strFile">File to be saved to</param>
-		/// <param name="bytContent">Byte array content</param>
+		/// <param name="file">File to be saved to</param>
+		/// <param name="contents">Byte array content</param>
 		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
-		public static bool SaveByteContentToFile( string strFile, byte[] bytContent )
+		public static bool SaveByteContentToFile(FileInfo file, byte[] contents)
 		{
 			try
 			{
-				if (File.Exists( strFile ))
-					File.Delete( strFile );
-				FileStream fs = File.Create( strFile );
-				fs.Write( bytContent, 0, bytContent.Length );
-				fs.Flush();
-				fs.Close();
+				if (file.Exists)
+					file.Delete();
+				using (FileStream fs = file.Create())
+				{
+					fs.Write(contents, 0, contents.Length);
+				}
+
 				return true;
 			}
 			catch (Exception e)
 			{
-				System.Diagnostics.Trace.WriteLine( "SaveByteContentToFile():" + e.Message );
+				System.Diagnostics.Trace.WriteLine("SaveByteContentToFile():" + e.Message);
 				return false;
 			}
 		}
@@ -67,32 +68,32 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Save text content to a file
 		/// </summary>
-		/// <param name="strFile">File to be saved to</param>
+		/// <param name="file">File to be saved to</param>
 		/// <param name="strText">Text content</param>
 		/// <param name="blnReplaceExists">Replace file if exists</param>
 		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
-		public static bool SavePlainTextToFile( string strFile, string strText, bool blnReplaceExists )
+		public static bool SavePlainTextToFile(FileInfo file, string strText, bool blnReplaceExists)
 		{
 			try
 			{
-				if (File.Exists( strFile ))
+				if (file.Exists)
 				{
 					if (blnReplaceExists)
-						File.Delete( strFile );
+						file.Delete();
 					else
 						return false; // Failure. File exist but we may not delete it
 				}
 
-				StreamWriter sw = File.CreateText( strFile );
-				sw.Write( strText );
-				sw.Flush();
-				sw.Close();
+				using (StreamWriter sw = new StreamWriter(file.Create()))
+				{
+					sw.Write(strText);
+				}
 
 				return true; // Success
 			}
 			catch (Exception e)
 			{
-				System.Diagnostics.Trace.WriteLine( "SavePlainTextToFile():" + e.Message );
+				System.Diagnostics.Trace.WriteLine("SavePlainTextToFile():" + e.Message);
 				return false;
 			}
 		}
@@ -100,16 +101,17 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Read text content from a file
 		/// </summary>
-		/// <param name="strFile">File to be read from</param>
+		/// <param name="file">File to be read from</param>
 		/// <param name="strText">This is where the content of the file is placed</param>
 		/// <returns><see langword="true"/> if reading succeeded, <see langword="false"/> if failed</returns>
-		public static bool ReadPlainTextFromFile( string strFile, ref string strText )
+		public static bool ReadPlainTextFromFile(FileInfo file, ref string strText)
 		{
-			if (File.Exists( strFile ))
+			if(file.Exists)
 			{
-				StreamReader fs = new StreamReader( strFile );
-				strText = fs.ReadToEnd();
-				fs.Close();
+				using (StreamReader fs = new StreamReader(file.OpenRead()))
+				{
+					strText = fs.ReadToEnd();
+				}
 				return true;
 			}
 
@@ -141,18 +143,18 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Remove quotes
 		/// </summary>
-		/// <param name="strText">Text with quotes</param>
+		/// <param name="text">Text with quotes</param>
 		/// <returns>Text without quotes</returns>
-		public static string RemoveQuotes(string strText)
+		public static string RemoveQuotes(string text)
 		{
-			string strRet = strText;
+			string returner = text;
 
-			if(strRet.StartsWith("\""))
-				strRet = strRet.Substring(1);
-			if(strRet.EndsWith("\""))
-				strRet = strRet.Substring(0, strRet.Length - 1);
+			if(returner.StartsWith("\""))
+				returner = returner.Substring(1);
+			if(returner.EndsWith("\""))
+				returner = returner.Substring(0, returner.Length - 1);
 
-			return strRet;
+			return returner;
 		}
 
 		/// <summary>

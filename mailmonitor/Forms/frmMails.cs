@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Threading;
 using OpenPOP.MIME.Header;
@@ -486,7 +487,7 @@ namespace MailMonitor
 				dlgSave.FileName = msg.Headers.Subject;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)			
-					msg.SaveToMIMEEmailFile(dlgSave.FileName,true);
+					msg.SaveToMIMEEmailFile(new FileInfo(dlgSave.FileName), true);
 			}
 		}
 		#endregion

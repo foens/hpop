@@ -625,15 +625,21 @@ namespace OpenPOP.NET_Sample_App
 						MIME.Message m2 = att.DecodeAsMessage(true, false);
 						string attachmentNames = "";
 						if (m2.Attachments.Count > 0)
+						{
 							foreach (MIME.Attachment att2 in m2.Attachments)
 							{
 								attachmentNames += att2.ContentFileName + "(" + att2.RawAttachment.Length + " bytes)\r\n";
 							}
-							bool blnRet = m.SaveAttachments(Path.GetDirectoryName(saveFile.FileName));
-							MessageBox.Show(this, "Parsing " + (blnRet ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
+						}
+
+						bool saveSuccesfull = false;
+						string directoryPath = Path.GetDirectoryName(saveFile.FileName);
+						if(directoryPath != null)
+							saveSuccesfull = m.SaveAttachments(new DirectoryInfo(directoryPath));
+						MessageBox.Show(this, "Parsing " + (saveSuccesfull ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
-				MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(saveFile.FileName))?"succeeded":"failed"));
+				MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(new FileInfo(saveFile.FileName)))?"succeeded":"failed"));
 			}
 			else
 				MessageBox.Show(this,"attachment object is null!");

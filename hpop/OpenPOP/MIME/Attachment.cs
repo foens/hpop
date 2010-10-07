@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
@@ -216,11 +217,11 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Save this Attachment to a file
 		/// </summary>
-		/// <param name="fileName">File to write Attachment to</param>
+		/// <param name="file">File to write Attachment to</param>
 		/// <returns><see langword="true"/> if save was successful, <see langword="false"/> if save failed</returns>
-		public bool SaveToFile(string fileName)
+		public bool SaveToFile(FileInfo file)
 		{
-			return Utility.SaveByteContentToFile(fileName, DecodedAsBytes());
+			return Utility.SaveByteContentToFile(file, DecodedAsBytes());
 		}
 
 		/// <summary>

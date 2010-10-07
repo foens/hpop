@@ -82,24 +82,24 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Create a TNEFParser which loads its content from a file
 		/// </summary>
-		/// <param name="strFile">MS-TNEF file</param>
+		/// <param name="file">MS-TNEF file</param>
 		/// <param name="logger">The logging interface to use</param>
-		public TNEFParser(string strFile, ILog logger)
+		public TNEFParser(FileInfo file, ILog logger)
 			: this(logger)
 		{
-			if (!OpenTNEFStream(strFile))
+			if (!OpenTNEFStream(file))
 				throw new ArgumentException();
 		}
 
 		/// <summary>
 		/// Create a TNEFParser which loads its content from a byte array
 		/// </summary>
-		/// <param name="bytContents">MS-TNEF bytes</param>
+		/// <param name="contents">MS-TNEF bytes</param>
 		/// <param name="logger">The logging interface to use</param>
-		public TNEFParser(byte[] bytContents, ILog logger)
+		public TNEFParser(byte[] contents, ILog logger)
 			: this(logger)
 		{
-			if (!OpenTNEFStream(bytContents))
+			if (!OpenTNEFStream(contents))
 				throw new ArgumentException();
 		}
 		#endregion
@@ -191,14 +191,13 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="file">MS-TNEF file</param>
 		/// <returns></returns>
-		private bool OpenTNEFStream(string file)
+		private bool OpenTNEFStream(FileInfo file)
 		{
-			TNEFFile = file;
+			TNEFFile = file.FullName;
 			try
 			{
-				fsTNEF = new FileStream(file, FileMode.Open, FileAccess.Read);
-				FileInfo fi = new FileInfo(file);
-				_fileLength = fi.Length;
+				fsTNEF = file.OpenRead();
+				_fileLength = file.Length;
 				return true;
 			}
 			catch(Exception e)
@@ -420,7 +419,7 @@ namespace OpenPOP.MIME
 		/// save all decoded attachments to files
 		/// </summary>
 		/// <returns>true is succeded, vice versa</returns>
-		public bool SaveAttachments(string pathToSaveTo)
+		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
 			bool blnRet=false;
 
@@ -438,19 +437,19 @@ namespace OpenPOP.MIME
 		/// <param name="attachment">decoded attachment</param>
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
 		/// <returns>true is succeded, vice versa</returns>
-		public static bool SaveAttachment(TNEFAttachment attachment, string pathToSaveTo)
+		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo)
 		{
 			try
 			{
-				string outFile = pathToSaveTo + attachment.FileName;
+				FileInfo outFile = new FileInfo(Path.Combine(pathToSaveTo.FullName, attachment.FileName));
 
-				if(File.Exists(outFile))
-					File.Delete(outFile);
-				FileStream fsData=new FileStream(outFile,FileMode.CreateNew,FileAccess.Write);
-
-				fsData.Write(attachment.Content, 0, (int)attachment.Length);
-
-				fsData.Close();
+				if (outFile.Exists)
+					outFile.Delete();
+				
+				using (FileStream fsData = outFile.Create())
+				{
+					fsData.Write(attachment.Content, 0, (int) attachment.Length);
+				}
 
 				return true;
 			}

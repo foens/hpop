@@ -321,13 +321,13 @@ namespace OpenPOP.MIME
 		{			
 			try
 			{
-				string strFileExtension=new FileInfo(fileName).Extension;
+				string strFileExtension = new FileInfo(fileName).Extension;
 				string strContentType;
 				bool mono = Environment.OSVersion.Platform == PlatformID.Unix; // Are we running of Mono?
 
 				if(mono)
 				{
-					strContentType=ContentType(strFileExtension);
+					strContentType = ContentType(strFileExtension);
 				}
 				else
 				{
