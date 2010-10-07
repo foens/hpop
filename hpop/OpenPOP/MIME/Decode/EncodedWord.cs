@@ -85,7 +85,7 @@ namespace OpenPOP.MIME.Decode
 						case "Q":
 							try
 							{
-								decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset), 0);
+								decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
 							}
 							catch (ArgumentException)
 							{

@@ -181,9 +181,8 @@ namespace OpenPOP.MIME
 			{
 				case ContentTransferEncoding.QuotedPrintable:
 					if(!string.IsNullOrEmpty((charSet)))
-						return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet), 0);
-
-					return QuotedPrintable.Decode(input);
+						return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet));
+					return QuotedPrintable.Decode(input, Encoding.Default);
 
 				case ContentTransferEncoding.Base64:
 					try
