@@ -10,7 +10,3 @@ using System.Reflection;
 [assembly: AssemblyCulture("")]
 
 [assembly: AssemblyVersion("2010.07.01.1600")]
-
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile("")]
-[assembly: AssemblyKeyName("")]

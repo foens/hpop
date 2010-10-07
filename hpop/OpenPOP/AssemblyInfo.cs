@@ -1,4 +1,8 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+// Make sure that the unit tests can access internal classes
+[assembly: InternalsVisibleTo("OpenPOPUnitTests")]
 
 [assembly: AssemblyTitle("OpenPOP")]
 [assembly: AssemblyDescription("POP3 Mail Library")]
@@ -10,7 +14,3 @@ using System.Reflection;
 [assembly: AssemblyCulture("")]		
 
 [assembly: AssemblyVersion("2010.07.01.1600")]
-
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile("")]
-[assembly: AssemblyKeyName("")]
