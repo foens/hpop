@@ -14,9 +14,9 @@ namespace OpenPOP.MIME
 	public class Attachment : IComparable<Attachment>
 	{
 		#region Member Variables
-		private const string _defaultMIMEFileName = "body.eml";
-		private const string _defaultReportFileName = "report.htm";
-		private const string _defaultFileName = "body.htm";
+		private const string DefaultMIMEFileName = "body.eml";
+		private const string DefaultReportFileName = "report.htm";
+		private const string DefaultFileName = "body.htm";
 		#endregion
 
 		#region Properties
@@ -160,13 +160,13 @@ namespace OpenPOP.MIME
 			{
 				string type = headers.ContentType.MediaType.ToLower( );
 				if (type.Contains( "report" ))
-					return _defaultReportFileName;
+					return DefaultReportFileName;
 
 				if (type.Contains( "multipart/" ))
-					return _defaultMIMEFileName;
+					return DefaultMIMEFileName;
 
 				if (type.Contains( "message/rfc822" ))
-					return _defaultMIMEFileName;
+					return DefaultMIMEFileName;
 			}
 
 			// If it was not possible with the MediaType, use the ContentID as a name
@@ -174,7 +174,7 @@ namespace OpenPOP.MIME
 				return headers.ContentID;
 
 			// If everything else fails, just use the default name
-			return _defaultFileName;
+			return DefaultFileName;
 		}
 
 		/// <summary>
@@ -192,16 +192,16 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Decode attachment to be a message object
 		/// </summary>
-		/// <param name="blnRemoveHeaderBlankLine"></param>
-		/// <param name="blnUseRawContent"></param>
+		/// <param name="removeHeaderBlankLine"></param>
+		/// <param name="useRawContent"></param>
 		/// <returns>new message object</returns>
-		public Message DecodeAsMessage(bool blnRemoveHeaderBlankLine, bool blnUseRawContent)
+		public Message DecodeAsMessage(bool removeHeaderBlankLine, bool useRawContent)
 		{
-			string strContent = blnUseRawContent ? RawContent : RawAttachment;
+			string contentToDecode = useRawContent ? RawContent : RawAttachment;
 
-			if (blnRemoveHeaderBlankLine && strContent.StartsWith("\r\n"))
-				strContent = strContent.Substring(2, strContent.Length - 2);
-			return new Message(false, strContent, false, Log);
+			if (removeHeaderBlankLine && contentToDecode.StartsWith("\r\n"))
+				contentToDecode = contentToDecode.Substring(2, contentToDecode.Length - 2);
+			return new Message(false, contentToDecode, false, Log);
 		}
 
 		/// <summary>

@@ -10,6 +10,8 @@ namespace OpenPOP.MIME
 	/// foens: This class should be reworked.
 	/// Right now it is just like "The blob" - which
 	/// is lots of code that is totally unrelated to each other
+	/// 
+	/// The class should, in time, be made internal
 	/// </summary>
 	public static class Utility
 	{
@@ -19,9 +21,9 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="filename">Filename to be checked</param>
 		/// <returns><see langword="true"/> if filename is of picture type, <see langword="false"/> if not</returns>
-		public static bool IsPictureFile( string filename )
+		public static bool IsPictureFile(string filename)
 		{
-			if (!string.IsNullOrEmpty( filename ))
+			if (!string.IsNullOrEmpty(filename))
 			{
 				filename = filename.ToLower();
 				if (filename.EndsWith( ".jpg" ) ||
@@ -118,19 +120,19 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Separate header name and header value
 		/// </summary>
-		public static string[] GetHeadersValue( string strRawHeader )
+		public static string[] GetHeadersValue(string rawHeader)
 		{
-			if (strRawHeader == null)
-				throw new ArgumentNullException( "strRawHeader", "Argument was null" );
+			if(rawHeader == null)
+				throw new ArgumentNullException("rawHeader", "Argument was null");
 
 			string[] array = new[] { "", "" };
-			int indexOfColon = strRawHeader.IndexOf( ":" );
+			int indexOfColon = rawHeader.IndexOf( ":" );
 
 			// Check if it is allowed to make substring calls
-			if (indexOfColon >= 0 && strRawHeader.Length > indexOfColon + 1)
+			if(indexOfColon >= 0 && rawHeader.Length > indexOfColon + 1)
 			{
-				array[0] = strRawHeader.Substring( 0, indexOfColon ).Trim();
-				array[1] = strRawHeader.Substring( indexOfColon + 1 ).Trim();
+				array[0] = rawHeader.Substring(0, indexOfColon).Trim();
+				array[1] = rawHeader.Substring(indexOfColon + 1).Trim();
 			}
 
 			return array;
@@ -141,14 +143,14 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="strText">Text with quotes</param>
 		/// <returns>Text without quotes</returns>
-		public static string RemoveQuotes( string strText )
+		public static string RemoveQuotes(string strText)
 		{
 			string strRet = strText;
 
-			if (strRet.StartsWith( "\"" ))
-				strRet = strRet.Substring( 1 );
-			if (strRet.EndsWith( "\"" ))
-				strRet = strRet.Substring( 0, strRet.Length - 1 );
+			if(strRet.StartsWith("\""))
+				strRet = strRet.Substring(1);
+			if(strRet.EndsWith("\""))
+				strRet = strRet.Substring(0, strRet.Length - 1);
 
 			return strRet;
 		}
@@ -156,11 +158,11 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Checks to see if a string is null, empty, only whitespace
 		/// </summary>
-		/// <param name="strText">The string to check</param>
-		/// <returns>Returns True if <paramref name="strText"/> is <see langword="null"/>, empty, or contains only whitespace.</returns>
-		public static bool IsOrNullTextEx( string strText )
+		/// <param name="text">The string to check</param>
+		/// <returns>Returns True if <paramref name="text"/> is <see langword="null"/>, empty, or contains only whitespace.</returns>
+		public static bool IsOrNullTextEx(string text)
 		{
-			return strText == null || strText.Trim().Equals( "" );
+			return text == null || text.Trim().Equals("");
 		}
 
 		/// <summary>
@@ -171,20 +173,20 @@ namespace OpenPOP.MIME
 		/// <param name="charSet">The name of the character set encoding</param>
 		/// <returns>The decoded string</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="contentTransferEncoding"/> is unsupported</exception>
-		public static string DoDecode( string input, ContentTransferEncoding contentTransferEncoding, string charSet )
+		public static string DoDecode(string input, ContentTransferEncoding contentTransferEncoding, string charSet)
 		{
 			switch (contentTransferEncoding)
 			{
 				case ContentTransferEncoding.QuotedPrintable:
-					if (!string.IsNullOrEmpty( (charSet) ))
-						return QuotedPrintable.Decode( input, Encoding.GetEncoding( charSet ), 0 );
+					if(!string.IsNullOrEmpty((charSet)))
+						return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet), 0);
 
-					return QuotedPrintable.Decode( input );
+					return QuotedPrintable.Decode(input);
 
 				case ContentTransferEncoding.Base64:
 					try
 					{
-						return Base64.Decode( input, charSet );
+						return Base64.Decode(input, charSet);
 					}
 					catch (Exception)
 					{
@@ -195,8 +197,8 @@ namespace OpenPOP.MIME
 				case ContentTransferEncoding.SevenBit:
 				case ContentTransferEncoding.Binary:
 				case ContentTransferEncoding.EightBit:
-					if (!string.IsNullOrEmpty( charSet ))
-						return ChangeEncoding( input, charSet );
+					if(!string.IsNullOrEmpty(charSet))
+						return ChangeEncoding(input, charSet);
 
 					// Nothing needed to be done
 					return input;
@@ -209,16 +211,16 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Change text encoding
 		/// </summary>
-		/// <param name="strText">Source encoded text</param>
-		/// <param name="strCharset">New charset</param>
+		/// <param name="text">Source encoded text</param>
+		/// <param name="newEncoding">New charset</param>
 		/// <returns>Encoded text with new charset</returns>
-		private static string ChangeEncoding( string strText, string strCharset )
+		private static string ChangeEncoding(string text, string newEncoding)
 		{
-			if (string.IsNullOrEmpty( strCharset ))
-				return strText;
+			if (string.IsNullOrEmpty(newEncoding))
+				return text;
 
-			byte[] b = Encoding.Default.GetBytes( strText );
-			return Encoding.GetEncoding( strCharset ).GetString( b );
+			byte[] bytes = Encoding.Default.GetBytes(text);
+			return Encoding.GetEncoding(newEncoding).GetString(bytes);
 		}
 
 		/// <summary>
@@ -232,19 +234,21 @@ namespace OpenPOP.MIME
 		/// The original is returned if <paramref name="toReplace"/> was not found.
 		/// </returns>
 		/// <remarks><a href="http://fortycal.blogspot.com/2007/07/replace-first-occurrence-of-string-in-c.html">See For author</a></remarks>
-		public static string ReplaceFirstOccurrence( string original, string toReplace, string toReplaceWith )
+		public static string ReplaceFirstOccurrence(string original, string toReplace, string toReplaceWith)
 		{
-			if (String.IsNullOrEmpty( original ))
+			if (String.IsNullOrEmpty(original))
 				return String.Empty;
-			if (String.IsNullOrEmpty( toReplace ))
+			if (String.IsNullOrEmpty(toReplace))
 				return original;
-			if (String.IsNullOrEmpty( toReplaceWith ))
+			if (String.IsNullOrEmpty(toReplaceWith))
 				toReplaceWith = String.Empty;
-			int loc = original.IndexOf( toReplace );
+
+			int loc = original.IndexOf(toReplace);
 
 			if (loc == -1)
 				return original;
-			return original.Remove( loc, toReplace.Length ).Insert( loc, toReplaceWith );
+
+			return original.Remove(loc, toReplace.Length).Insert(loc, toReplaceWith);
 		}
 
 	}

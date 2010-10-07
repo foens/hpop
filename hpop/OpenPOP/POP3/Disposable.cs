@@ -58,12 +58,11 @@ namespace OpenPOP.POP3
 		/// disposal state of the object.</remarks>
 		protected void AssertDisposed()
 		{
-			if (IsDisposed)
+			if(IsDisposed)
 			{
 				string typeName = GetType().FullName;
-				throw new ObjectDisposedException( typeName, String.Format( System.Globalization.CultureInfo.InvariantCulture, "Cannot access a disposed {0}.", typeName ) );
+				throw new ObjectDisposedException(typeName, String.Format(System.Globalization.CultureInfo.InvariantCulture, "Cannot access a disposed {0}.", typeName));
 			}
 		}
-
 	}
 }

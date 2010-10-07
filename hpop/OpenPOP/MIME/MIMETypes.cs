@@ -14,19 +14,25 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Determines in the content type is Microsoft Transport Neutral Encapsulation Format
 		/// </summary>
-		/// <param name="strContentType">The content type string to check</param>
+		/// <param name="contentType">The content type string to check</param>
 		/// <returns>True is the format is MS-TNEF, otherwise false</returns>
-		public static bool IsMSTNEF(string strContentType)
+		public static bool IsMSTNEF(string contentType)
 		{
-			if (string.IsNullOrEmpty( strContentType ))
+			if (string.IsNullOrEmpty( contentType ))
 				return false;
-			return (strContentType.Equals( MIMEType_MSTNEF, StringComparison.InvariantCultureIgnoreCase ));
+			return (contentType.Equals( MIMEType_MSTNEF, StringComparison.InvariantCultureIgnoreCase ));
 		}
 
-		private static string ContentType(string strExtension)
+		/// <summary>
+		/// Returns the content type that fits with the 
+		/// extension <paramref name="extension"/>.
+		/// </summary>
+		/// <param name="extension">Extension of the filetype where a content type is needed. Notice that the . is needed too. Example: .gif</param>
+		/// <returns>A content type for the file, or null if it cannot be determined</returns>
+		private static string ContentType(string extension)
 		{
-			if(MIMETypeList.ContainsKey(strExtension))
-				return MIMETypeList[strExtension].ToString();
+			if(MIMETypeList.ContainsKey(extension))
+				return MIMETypeList[extension].ToString();
 			
 			return null;
 		}
@@ -311,15 +317,15 @@ namespace OpenPOP.MIME
 
 		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
 		/// <returns>string MIME type (Example: \"text/plain\")</returns>
-		public static string GetMimeType(string strFileName)
+		public static string GetMimeType(string fileName)
 		{			
 			try
 			{
-				string strFileExtension=new FileInfo(strFileName).Extension;
+				string strFileExtension=new FileInfo(fileName).Extension;
 				string strContentType;
-				bool MONO = Environment.OSVersion.Platform == PlatformID.Unix;
+				bool mono = Environment.OSVersion.Platform == PlatformID.Unix; // Are we running of Mono?
 
-				if(MONO)
+				if(mono)
 				{
 					strContentType=ContentType(strFileExtension);
 				}
@@ -334,10 +340,12 @@ namespace OpenPOP.MIME
 					return strContentType; 
 				}
 				
+				// TODO Some documentation why this is a good choice (if it is) would be nice
 				return "application/octet-stream";
 			}
 			catch(Exception)
 			{
+				// TODO Some documentation why this is a good choice (if it is) would be nice
 				return "application/octet-stream";
 			}
 		}

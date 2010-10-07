@@ -7,7 +7,7 @@ namespace OpenPOP.MIME.Decode
 	/// <summary>
 	/// Utility class for dealing with encoded word strings
 	/// </summary>
-	public static class EncodedWord
+	internal static class EncodedWord
 	{
 		/// <summary>
 		/// Decode text that is encoded. See BNF below.
@@ -35,7 +35,7 @@ namespace OpenPOP.MIME.Decode
 			if(encodedWords == null)
 				return null;
 
-			string strRet = encodedWords;
+			string decodedWords = encodedWords;
 
 			// This is the regex that should fit the BNF
 			// RFC Says that NO WHITESPACE is allowed in this encoding. See RFC for details.
@@ -92,6 +92,7 @@ namespace OpenPOP.MIME.Decode
 								// The encoding we are using is not supported.
 								// Therefore we cannot decode it. We must simply return
 								// the encoded form
+								// TODO What encodings are not supported? Can we support them?
 								decodedText = fullMatchValue;
 							}
 							break;
@@ -101,11 +102,11 @@ namespace OpenPOP.MIME.Decode
 					}
 
 					// Repalce our encoded value with our decoded value
-					strRet = strRet.Replace(fullMatchValue, decodedText);
+					decodedWords = decodedWords.Replace(fullMatchValue, decodedText);
 				}
 			}
 
-			return strRet;
+			return decodedWords;
 		}
 	}
 }

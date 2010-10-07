@@ -9,7 +9,7 @@ namespace OpenPOP.MIME.Header
 	/// <summary>
 	/// Class that can parse different fields in the header sections of a MIME message
 	/// </summary>
-	public static class HeaderFieldParser
+	internal static class HeaderFieldParser
 	{
 		/// <summary>
 		/// Parse email address from a MIME header

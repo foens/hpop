@@ -7,13 +7,13 @@ namespace OpenPOP.MIME.Decode
 	/// <summary>
 	/// Utility class for dealing with Base64 encoded strings
 	/// </summary>
-	public static class Base64
+	internal static class Base64
 	{
-		private static byte[] DecodeToBytes(string strText)
+		private static byte[] DecodeToBytes(string toDecode)
 		{
 			try
 			{
-				return Convert.FromBase64String(strText);
+				return Convert.FromBase64String(toDecode);
 			}
 			catch (FormatException e)
 			{

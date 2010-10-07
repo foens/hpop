@@ -83,20 +83,20 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="onlyParseHeader">whether only decode the header without body</param>
-		/// <param name="EmlFile">File with email content to load from</param>
+		/// <param name="emlFile">File with email content to load from</param>
 		/// <param name="logger">The logging interface to use</param>
-		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, string EmlFile, ILog logger)
+		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, string emlFile, ILog logger)
 			: this(logger)
 		{
 			string strMessage = null;
-			if (Utility.ReadPlainTextFromFile(EmlFile, ref strMessage))
+			if (Utility.ReadPlainTextFromFile(emlFile, ref strMessage))
 			{
 				AutoDecodeMSTNEF = autoDecodeMSTNEF;
 				InitializeMessage(strMessage, onlyParseHeader);
 			}
 			else
 			{
-				throw new FileNotFoundException("Could not find file " + EmlFile);
+				throw new FileNotFoundException("Could not find file " + emlFile);
 			}
 		}
 
@@ -271,6 +271,9 @@ namespace OpenPOP.MIME
 			{
 				// The message body must be the full raw message, with headers removed.
 				// Also remove any CRLF in top or bottom.
+				// TODO foens: I do not think it is valid to remove \r\n from the message. Some of these parts
+				//             could be used in later decoding (for example QuoutedPrintable cannot have a = without something behind
+				//             and that can happen if \r\n is removed
 				RawMessageBody = Utility.ReplaceFirstOccurrence(RawMessage, RawHeader, "").Trim();
 
 				// Check if the message is a multipart message (which means, has multiple message bodies)
@@ -379,7 +382,7 @@ namespace OpenPOP.MIME
 							// ms-tnef attachment might contain multiple attachments inside it
 							foreach (TNEFAttachment tatt in tnef.Attachments( ))
 							{
-								Attachment attNew = new Attachment(tatt.FileContent, tatt.FileName, MIMETypes.GetMimeType( tatt.FileName ), Log);
+								Attachment attNew = new Attachment(tatt.Content, tatt.FileName, MIMETypes.GetMimeType( tatt.FileName ), Log);
 								Attachments.Add(attNew);
 							}
 						}
@@ -416,6 +419,9 @@ namespace OpenPOP.MIME
 		/// <param name="strBuffer">Raw message body</param>
 		private void GetMessageBody(string strBuffer)
 		{
+			// TODO foens: I do not like that this function is named Get
+			//             but it actually clears the MessageBody list!
+
 			MessageBody.Clear();
 
 			try
@@ -511,6 +517,8 @@ namespace OpenPOP.MIME
 				string body;
 				try
 				{
+					// TODO foens: Why do we try to base64 decode here?
+					//             Can we just assume it is base64?!
 					body = Base64.Decode( strBuffer );
 				}
 				catch(Exception)

@@ -188,7 +188,7 @@ namespace OpenPOP.POP3
 		/// <param name="disposing"><see langword="true"/> if managed and unmanaged code should be disposed, <see langword="false"/> if only managed code should be disposed</param>
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing && !IsDisposed)
+			if(disposing && !IsDisposed)
 			{
 				if(Connected)
 				{
@@ -223,26 +223,26 @@ namespace OpenPOP.POP3
 		/// 
 		/// The method does only check if it starts with an "+OK"
 		/// </summary>
-		/// <param name="strResponse">The string to examine</param>
+		/// <param name="response">The string to examine</param>
 		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
-		private static void IsOkResponse(string strResponse)
+		private static void IsOkResponse(string response)
 		{
-			if (strResponse.StartsWith("+OK"))
+			if (response.StartsWith("+OK"))
 				return;
 
-			throw new PopServerException(strResponse);
+			throw new PopServerException(response);
 		}
 
 		/// <summary>
 		/// Sends a command to the POP server.
 		/// If this fails, an exception is thrown
 		/// </summary>
-		/// <param name="strCommand">command to send to server</param>
+		/// <param name="command">command to send to server</param>
 		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
-		private void SendCommand(string strCommand)
+		private void SendCommand(string command)
 		{
 			// Write a command with CRLF afterwards as per RFC.
-			writer.Write(strCommand + "\r\n");
+			writer.Write(command + "\r\n");
 			writer.Flush(); // Flush the content as we now wait for a response
 
 			_lastCommandResponse = reader.ReadLine();
@@ -258,21 +258,21 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Sends a command to the POP server, expects an integer reply in the response
 		/// </summary>
-		/// <param name="strCommand">command to send to server</param>
-		/// <param name="intLocation">
+		/// <param name="command">command to send to server</param>
+		/// <param name="location">
 		/// The location of the int to return.
 		/// Example:
 		/// S: +OK 2 200
-		/// Set <paramref name="intLocation"/>=1 to get 2
-		/// Set <paramref name="intLocation"/>=2 to get 200
+		/// Set <paramref name="location"/>=1 to get 2
+		/// Set <paramref name="location"/>=2 to get 200
 		/// </param>
 		/// <returns>integer value in the reply</returns>
 		/// <exception cref="PopServerException">If the server did not accept the command</exception>
-		private int SendCommandIntResponse(string strCommand, int intLocation)
+		private int SendCommandIntResponse(string command, int location)
 		{
-			SendCommand(strCommand);
+			SendCommand(command);
 			
-			return int.Parse(_lastCommandResponse.Split(' ')[intLocation]);
+			return int.Parse(_lastCommandResponse.Split(' ')[location]);
 		}
 
 		/// <summary>
@@ -325,13 +325,13 @@ namespace OpenPOP.POP3
 			}
 
 			// Fetch the server one-line welcome greeting
-			string strResponse = reader.ReadLine();
+			string response = reader.ReadLine();
 
 			// Check if the response was an OK response
 			try
 			{
-				IsOkResponse(strResponse);
-				ExtractApopTimestamp(strResponse);
+				IsOkResponse(response);
+				ExtractApopTimestamp(response);
 				Connected = true;
 				CommunicationOccurred(this);
 			}
@@ -373,7 +373,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.TRYBOTH"/>
+		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.TryBoth"/>
 		/// which is the most secure method to use.
 		/// </summary>
 		/// <param name="username">The username</param>
@@ -383,7 +383,7 @@ namespace OpenPOP.POP3
 		public void Authenticate(string username, string password)
 		{
 			AssertDisposed();
-			Authenticate(username, password, AuthenticationMethod.TRYBOTH);
+			Authenticate(username, password, AuthenticationMethod.TryBoth);
 		}
 
 		/// <summary>
@@ -398,7 +398,7 @@ namespace OpenPOP.POP3
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
-			if(authenticationMethod == AuthenticationMethod.USERPASS)
+			if(authenticationMethod == AuthenticationMethod.UsernameAndPassword)
 			{
 				AuthenticateUsingUSER(username, password);				
 			}
@@ -406,7 +406,7 @@ namespace OpenPOP.POP3
 			{
 				AuthenticateUsingAPOP(username, password);
 			}
-			else if(authenticationMethod == AuthenticationMethod.TRYBOTH)
+			else if(authenticationMethod == AuthenticationMethod.TryBoth)
 			{
 				// Check if APOP is supported
 				if(APOPSupported)
@@ -621,13 +621,14 @@ namespace OpenPOP.POP3
 			
 			List<string> uids = new List<string>();
 
-			string strResponse;
+			string response;
 			// Keep reading until multi-line ends with a "."
-			while (!".".Equals(strResponse = reader.ReadLine()))
+			while (!".".Equals(response = reader.ReadLine()))
 			{
 				// Add the unique ID to the list
-				uids.Add(strResponse.Split(' ')[1]);
+				uids.Add(response.Split(' ')[1]);
 			}
+
 			return uids;
 		}
 
@@ -666,11 +667,11 @@ namespace OpenPOP.POP3
 			
 			List<int> sizes = new List<int>();
 
-			string strResponse;
+			string response;
 			// Read until end of multi-line
-			while (!".".Equals(strResponse = reader.ReadLine()))
+			while (!".".Equals(response = reader.ReadLine()))
 			{
-				sizes.Add(int.Parse(strResponse.Split(' ')[1]));
+				sizes.Add(int.Parse(response.Split(' ')[1]));
 			}
 
 			return sizes;
@@ -733,9 +734,9 @@ namespace OpenPOP.POP3
 		{
 			AssertDisposed();
 			// 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
-			Message msg = FetchMessage("TOP " + messageNumber + " 0", true);
+			Message message = FetchMessage("TOP " + messageNumber + " 0", true);
 
-			return msg.Headers;
+			return message.Headers;
 		}
 
 		/// <summary>
@@ -755,10 +756,10 @@ namespace OpenPOP.POP3
 			string receivedContent = ReceiveRETRMessage();
 
 			// Parse the message from the received contet
-			Message msg = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
+			Message message = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
 
 			MessageTransferFinished(this);
-			return msg;
+			return message;
 		}
 	}
 }

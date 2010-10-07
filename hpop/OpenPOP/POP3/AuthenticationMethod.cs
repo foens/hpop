@@ -4,18 +4,18 @@ namespace OpenPOP.POP3
 	/// Authentication method to use
 	/// </summary>
 	/// <remarks>
-	/// TRYBOTH means code will first attempt by using APOP method as its more secure.
-	/// In case of failure the code will fall back to USERPASS method.
+	/// TryBoth means code will first attempt by using APOP method as its more secure.
+	/// In case of failure the code will fall back to UsernameAndPassword method.
 	/// </remarks>
 	public enum AuthenticationMethod
 	{
 		/// <summary>
-		/// Authenticate using the USER/PASS method.
+		/// Authenticate using the UsernameAndPassword method.
 		/// APOP is more secure but might not be supported on a server.
 		/// Recomended AuthenticationMethod is APOP, but it does not matter
 		/// if SSL is used.
 		/// </summary>
-		USERPASS,
+		UsernameAndPassword,
 		/// <summary>
 		/// Authenticate using the APOP method, which is more secure.
 		/// </summary>
@@ -25,6 +25,6 @@ namespace OpenPOP.POP3
 		/// If APOP is not supported on the server, authenticate
 		/// using USER/PASS.
 		/// </summary>
-		TRYBOTH
+		TryBoth
 	}
 }

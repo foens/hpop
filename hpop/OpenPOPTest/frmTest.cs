@@ -69,7 +69,7 @@ namespace OpenPOP.NET_Sample_App
 
 			// This is only for faster debugging purposes
 			string myDocs = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-			string file = Path.Combine( myDocs, "OpenPOPLogin.txt" );
+			string file = Path.Combine(myDocs, "OpenPOPLogin.txt");
 			if (File.Exists(file))
 			{
 				using(StreamReader reader = new StreamReader(File.OpenRead(file)))

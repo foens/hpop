@@ -5,10 +5,9 @@ namespace OpenPOP.MIME
 	/// 
 	/// Based on tnef.c from Thomas Boll 
 	/// </summary>
-	public class TNEFAttachment
+	internal class TNEFAttachment
 	{
 		#region Properties
-
 		/// <summary>
 		/// attachment subject
 		/// </summary>
@@ -17,7 +16,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// attachment file length
 		/// </summary>
-		public long FileLength { get; set; }
+		public long Length { get; set; }
 
 		/// <summary>
 		/// attachment file name
@@ -27,21 +26,20 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// attachment file content
 		/// </summary>
-		public byte[] FileContent { get; set; }
-
+		public byte[] Content { get; set; }
 		#endregion
-
 
 		public TNEFAttachment()
 		{
-			FileContent = null;
+			Content = null;
 			FileName = "";
 			Subject = "";
 		}
 
 		~TNEFAttachment()
 		{
-			FileContent=null;
+			// TODO foens: Is this needed? Is it not deconstructed automatically?
+			Content = null;
 		}
 	}
 }

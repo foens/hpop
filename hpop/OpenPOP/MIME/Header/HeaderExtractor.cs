@@ -7,7 +7,7 @@ namespace OpenPOP.MIME.Header
 	///<summary>
 	/// Includes methods that pulls out the headers of an email message.
 	///</summary>
-	public static class HeaderExtractor
+	internal static class HeaderExtractor
 	{
 		/// <summary>
 		/// Method that takes a full message and extract the headers from it.
