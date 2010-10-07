@@ -72,10 +72,23 @@ namespace OpenPOP.POP3
 		public event POPClientEvent MessageTransferFinished = delegate { };
 		#endregion
 
-		#region Private member variables
-		private StreamReader reader;
-		private StreamWriter writer;
-		private string _lastCommandResponse;
+		#region Private member properties
+		/// <summary>
+		/// This is the stread used to read off the server response
+		/// to a command
+		/// </summary>
+		private StreamReader StreamReader { get; set; }
+
+		/// <summary>
+		/// This is the stream used to write commands to the server
+		/// </summary>
+		private StreamWriter StreamWriter { get; set; }
+
+		/// <summary>
+		/// This is the last response the server sent back when a
+		/// command was issued to it
+		/// </summary>
+		private string LastServerResponse { get; set; }
 
 		/// <summary>
 		/// The APOP timestamp sent by the server in it's welcome
@@ -84,7 +97,7 @@ namespace OpenPOP.POP3
 		private string APOPTimestamp { get; set; }
 		#endregion
 
-		#region Public member variables
+		#region Public member properties
 		/// <summary>
 		/// Tells whether the <see cref="POPClient"/> is connected to a POP server or not
 		/// </summary>
@@ -118,6 +131,7 @@ namespace OpenPOP.POP3
 		private ILog Log { get; set; }
 		#endregion
 
+		#region Constructors
 		/// <summary>
 		/// Constructs a new POPClient with default settings.
 		/// </summary>
@@ -181,6 +195,7 @@ namespace OpenPOP.POP3
 		{
 			
 		}
+		#endregion
 
 		/// <summary>
 		/// Disposes the <see cref="POPClient"/>. This is the implementation of the <see cref="IDisposable"/> interface.
@@ -204,7 +219,7 @@ namespace OpenPOP.POP3
 		/// If it does, sets the <see cref="APOPTimestamp"/> property to this value
 		/// </summary>
 		/// <param name="response">The string to examine</param>
-		private void ExtractApopTimestamp(string response)
+		private void ExtractAPOPTimestamp(string response)
 		{
 			// RFC Example:
 			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
@@ -242,17 +257,17 @@ namespace OpenPOP.POP3
 		private void SendCommand(string command)
 		{
 			// Write a command with CRLF afterwards as per RFC.
-			writer.Write(command + "\r\n");
-			writer.Flush(); // Flush the content as we now wait for a response
+			StreamWriter.Write(command + "\r\n");
+			StreamWriter.Flush(); // Flush the content as we now wait for a response
 
-			_lastCommandResponse = reader.ReadLine();
+			LastServerResponse = StreamReader.ReadLine();
 
 			// Just a sanity check, catching the error before the response might
 			// be used somewhere else
-			if (_lastCommandResponse == null)
+			if (LastServerResponse == null)
 				throw new NullReferenceException("The server must have closed the connection");
 
-			IsOkResponse(_lastCommandResponse);
+			IsOkResponse(LastServerResponse);
 		}
 
 		/// <summary>
@@ -272,7 +287,7 @@ namespace OpenPOP.POP3
 		{
 			SendCommand(command);
 			
-			return int.Parse(_lastCommandResponse.Split(' ')[location]);
+			return int.Parse(LastServerResponse.Split(' ')[location]);
 		}
 
 		/// <summary>
@@ -314,24 +329,24 @@ namespace OpenPOP.POP3
 				// Authenticate the server
 				stream.AuthenticateAsClient(hostname);
 
-				reader = new StreamReader(stream);
-				writer = new StreamWriter(stream);
+				StreamReader = new StreamReader(stream);
+				StreamWriter = new StreamWriter(stream);
 			}
 			else
 			{
 				// If we do not want to use SSL, use plain TCP
-				reader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
-				writer = new StreamWriter(clientSocket.GetStream());
+				StreamReader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
+				StreamWriter = new StreamWriter(clientSocket.GetStream());
 			}
 
 			// Fetch the server one-line welcome greeting
-			string response = reader.ReadLine();
+			string response = StreamReader.ReadLine();
 
 			// Check if the response was an OK response
 			try
 			{
 				IsOkResponse(response);
-				ExtractApopTimestamp(response);
+				ExtractAPOPTimestamp(response);
 				Connected = true;
 				CommunicationOccurred(this);
 			}
@@ -340,7 +355,7 @@ namespace OpenPOP.POP3
 				// If not close down the connection and abort
 				Disconnect();
 				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
-				Log.LogDebug("Last response from server was: " + _lastCommandResponse);
+				Log.LogDebug("Last response from server was: " + LastServerResponse);
 				throw new PopServerNotAvailableException();   
 			}
 		}
@@ -355,12 +370,14 @@ namespace OpenPOP.POP3
 			try
 			{
 				SendCommand("QUIT");
-				reader.Close();
-				writer.Close();
+				StreamReader.Close();
+				StreamWriter.Close();
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				// We don't care about errors in disconnect
+				// but log it anyways, to keep it transparent
+				Log.LogError("Exception thrown when disconnecting: " + e.Message);
 			}
 			finally
 			{
@@ -442,7 +459,7 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				if(_lastCommandResponse.ToLower().Contains("lock"))
+				if(LastServerResponse.ToLower().Contains("lock"))
 				{
 					Log.LogError("AuthenticateUsingUSER(): maildrop is locked");
 					throw new PopServerLockException();			
@@ -451,7 +468,7 @@ namespace OpenPOP.POP3
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
 				Log.LogError("AuthenticateUsingUSER(): wrong password.");
-				Log.LogDebug("Server response was: " + _lastCommandResponse);
+				Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidPasswordException();
 			}
 			
@@ -479,14 +496,14 @@ namespace OpenPOP.POP3
 			}
 			catch (PopServerException)
 			{
-				if (_lastCommandResponse.ToLower().Contains("lock"))
+				if (LastServerResponse.ToLower().Contains("lock"))
 				{
 					Log.LogError("AuthenticateUsingAPOP(): maildrop is locked");
 					throw new PopServerLockException();
 				}
 
 				Log.LogError("AuthenticateUsingAPOP(): wrong user or password");
-				Log.LogDebug("Server response was: " + _lastCommandResponse);
+				Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidLoginOrPasswordException();
 			}
 
@@ -596,7 +613,7 @@ namespace OpenPOP.POP3
 			SendCommand("UIDL " + messageNumber);
 			
 			// Parse out the unique ID
-			return _lastCommandResponse.Split(' ')[2];
+			return LastServerResponse.Split(' ')[2];
 		}
 
 		/// <summary>
@@ -623,7 +640,7 @@ namespace OpenPOP.POP3
 
 			string response;
 			// Keep reading until multi-line ends with a "."
-			while (!".".Equals(response = reader.ReadLine()))
+			while (!".".Equals(response = StreamReader.ReadLine()))
 			{
 				// Add the unique ID to the list
 				uids.Add(response.Split(' ')[1]);
@@ -669,7 +686,7 @@ namespace OpenPOP.POP3
 
 			string response;
 			// Read until end of multi-line
-			while (!".".Equals(response = reader.ReadLine()))
+			while (!".".Equals(response = StreamReader.ReadLine()))
 			{
 				sizes.Add(int.Parse(response.Split(' ')[1]));
 			}
@@ -696,7 +713,7 @@ namespace OpenPOP.POP3
 
 			// Read input line for line until end
 			string line;
-			while (!".".Equals(line = reader.ReadLine()))
+			while (!".".Equals(line = StreamReader.ReadLine()))
 			{
 				// This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
 				// http://tools.ietf.org/html/rfc1939#section-3
