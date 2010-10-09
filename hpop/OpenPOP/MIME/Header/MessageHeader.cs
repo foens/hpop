@@ -10,7 +10,7 @@ namespace OpenPOP.MIME.Header
 	/// <summary>
 	/// Class that holds all headers for a message
 	/// </summary>
-	/// <see cref="http://www.rfc-editor.org/rfc/rfc4021.txt">For a large list of headers</see>
+	/// <remarks>See <a href="http://www.rfc-editor.org/rfc/rfc4021.txt">http://www.rfc-editor.org/rfc/rfc4021.txt</a> for a large list of headers</remarks>
 	public sealed class MessageHeader
 	{
 		#region Properties
@@ -49,7 +49,7 @@ namespace OpenPOP.MIME.Header
 		/// These notifications can be deletion, printing, ...
 		/// Empty list of not set
 		/// </summary>
-		/// <see cref="http://tools.ietf.org/html/rfc3798">For details</see>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc3798">http://tools.ietf.org/html/rfc3798</a> for details</remarks>
 		public List<MailAddress> DispositionNotificationTo { get; private set; }
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace OpenPOP.MIME.Header
 		/// If the header was not found when this object was created, it is set
 		/// to the default of 7BIT
 		/// </summary>
-		/// <see cref="http://www.ietf.org/rfc/rfc2045.txt">Part 6 for details</see>
+		/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">http://www.ietf.org/rfc/rfc2045.txt</a> Part 6 for details</remarks>
 		public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace OpenPOP.MIME.Header
 		/// <summary>
 		/// The ContentType header field.
 		/// If not set, the ContentType is created by the default string
-		/// defined in http://www.ietf.org/rfc/rfc2045.txt Section 5.2
+		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">http://www.ietf.org/rfc/rfc2045.txt</a> Section 5.2
 		/// which is "text/plain; charset=us-ascii"
 		/// </summary>
 		public ContentType ContentType { get; private set; }
@@ -124,7 +124,7 @@ namespace OpenPOP.MIME.Header
 		/// The Date when the email was sent.
 		/// This is the raw value. <see cref="DateSent"/> for a parsed up <see cref="DateTime"/> value of this field
 		/// </summary>
-		/// <see cref="http://tools.ietf.org/html/rfc5322#section-3.6.1">For more details</see>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">http://tools.ietf.org/html/rfc5322#section-3.6.1</a> for more details</remarks>
 		public string Date { get; private set; }
 
 		/// <summary>
@@ -133,7 +133,7 @@ namespace OpenPOP.MIME.Header
 		/// Notice that the TimeZone of the DateTime object is in UTC and has NOT been converted
 		/// to local TimeZone.
 		/// </summary>
-		/// <see cref="http://tools.ietf.org/html/rfc5322#section-3.6.1">For more details</see>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">http://tools.ietf.org/html/rfc5322#section-3.6.1</a> for more details</remarks>
 		public DateTime DateSent { get; private set; }
 
 		/// <summary>

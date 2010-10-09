@@ -9,9 +9,11 @@ namespace OpenPOP.MIME.Decode
 	/// This is a robust implementation of a Quoted-Printable decoder defined in RFC 2047.
 	/// Every measurement has been taken to conform to the RFC.
 	/// </summary>
-	/// <see cref="http://tools.ietf.org/html/rfc2047">This is the RFC which the decoder conforms to.</see>
-	/// The RFC above overrides <see cref="http://tools.ietf.org/html/rfc2045#section-6.7"/> which originally
+	/// <remarks>
+	/// <a href="http://tools.ietf.org/html/rfc2047">http://tools.ietf.org/html/rfc2047</a> This is the RFC which the decoder conforms to.
+	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">http://tools.ietf.org/html/rfc2045#section-6.7</a> which originally
 	/// defined what a Quoted-Printable string was.
+	/// </remarks>
 	internal static class QuotedPrintable
 	{
 		/// <summary>
@@ -30,7 +32,7 @@ namespace OpenPOP.MIME.Decode
 			return decodedRightEncoded;
 		}
 
-		/// <see cref="http://tools.ietf.org/html/rfc2047">For RFC details</see>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047">http://tools.ietf.org/html/rfc2047</a> for RFC details</remarks>
 		/// <summary>
 		/// This is the actual decoder
 		/// </summary>
