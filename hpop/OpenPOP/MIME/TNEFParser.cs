@@ -88,7 +88,7 @@ namespace OpenPOP.MIME
 			: this(logger)
 		{
 			if (!OpenTNEFStream(file))
-				throw new ArgumentException();
+				throw new ArgumentException("Error opening the file", "file");
 		}
 
 		/// <summary>
@@ -100,7 +100,7 @@ namespace OpenPOP.MIME
 			: this(logger)
 		{
 			if (!OpenTNEFStream(contents))
-				throw new ArgumentException();
+				throw new ArgumentException("The content is invalid", "contents");
 		}
 		#endregion
 
@@ -425,7 +425,7 @@ namespace OpenPOP.MIME
 
 			foreach (TNEFAttachment tnefAttachment in _attachments)
 			{
-				blnRet = SaveAttachment(tnefAttachment, pathToSaveTo);
+				blnRet = SaveAttachment(tnefAttachment, pathToSaveTo, Log);
 			}
 
 			return blnRet;
@@ -438,6 +438,18 @@ namespace OpenPOP.MIME
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
 		/// <returns>true is succeded, vice versa</returns>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo)
+		{
+			return SaveAttachment(attachment, pathToSaveTo, DefaultLogger.CreateLogger( ));
+		}
+
+		/// <summary>
+		/// save a decoded attachment to file
+		/// </summary>
+		/// <param name="attachment">decoded attachment</param>
+		/// <param name="pathToSaveTo">Where to save the attachment to</param>
+		/// <param name="logger">The object to use for logging output</param>
+		/// <returns>true is succeded, vice versa</returns>
+		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo, ILog logger)
 		{
 			try
 			{
@@ -455,7 +467,7 @@ namespace OpenPOP.MIME
 			}
 			catch(Exception e)
 			{
-				System.Diagnostics.Trace.WriteLine("SaveAttachment():" + e.Message);
+				logger.LogError("SaveAttachment(): " + e.Message);
 				return false;
 			}
 		}

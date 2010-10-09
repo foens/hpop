@@ -35,12 +35,6 @@ namespace OpenPOP.MIME
 			FileName = "";
 			Subject = "";
 		}
-
-		~TNEFAttachment()
-		{
-			// TODO foens: Is this needed? Is it not deconstructed automatically?
-			Content = null;
-		}
 	}
 }
 
