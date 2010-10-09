@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Data;
 using OpenPOP.MIME;
 using OpenPOP.POP3;
-using OpenPOP.Shared;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.NET_Sample_App
 {

@@ -10,7 +10,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
 using OpenPOP.POP3;
-using OpenPOP.Shared;
 
 namespace MailMonitor
 {
@@ -1004,8 +1003,6 @@ namespace MailMonitor
 
 			try
 			{
-				Logger.Log=true;
-				
 				if(_popClient.Connected)
 					_popClient.Disconnect();
 

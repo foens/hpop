@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME;
 using OpenPOP.MIME.Header;
-using OpenPOP.Shared;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.POP3
 {

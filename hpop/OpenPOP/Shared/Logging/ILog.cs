@@ -1,4 +1,4 @@
-﻿namespace OpenPOP.Shared
+﻿namespace OpenPOP.Shared.Logging
 {
 	/// <summary>
 	/// Defines a logger for managing system logging output  

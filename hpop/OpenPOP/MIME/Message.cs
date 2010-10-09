@@ -5,7 +5,7 @@ using System.Collections;
 using System.IO;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
-using OpenPOP.Shared;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME
 {

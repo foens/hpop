@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using OpenPOP.POP3;
-using OpenPOP.Shared;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME
 {
@@ -439,7 +439,7 @@ namespace OpenPOP.MIME
 		/// <returns>true is succeded, vice versa</returns>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo)
 		{
-			return SaveAttachment(attachment, pathToSaveTo, DefaultLogger.CreateLogger( ));
+			return SaveAttachment(attachment, pathToSaveTo, DefaultLogger.CreateLogger());
 		}
 
 		/// <summary>

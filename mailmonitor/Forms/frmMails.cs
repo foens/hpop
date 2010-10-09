@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Threading;
 using OpenPOP.MIME.Header;
 using OpenPOP.POP3;
-using OpenPOP.Shared;
 
 namespace MailMonitor
 {
@@ -238,7 +237,6 @@ namespace MailMonitor
 		{
 			try
 			{
-				Logger.Log=true;
 				if(_popClient.Connected)
 					_popClient.Disconnect();
 

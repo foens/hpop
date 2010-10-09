@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME.Decode
 {
@@ -17,7 +18,7 @@ namespace OpenPOP.MIME.Decode
 			}
 			catch (FormatException e)
 			{
-				Trace.WriteLine( "Base64:DecodeToBytes: (FormatException) " + e.Message );
+				DefaultLogger.CreateLogger().LogError("Base64:DecodeToBytes: (FormatException) " + e.Message);
 				throw;
 			}
 		}
@@ -54,7 +55,7 @@ namespace OpenPOP.MIME.Decode
 			}
 			catch (DecoderFallbackException e)
 			{
-				Trace.WriteLine( "Base64:Decode: (DecoderFallbackException) " + e.Message );
+				DefaultLogger.CreateLogger().LogError("Base64:Decode: (DecoderFallbackException) " + e.Message);
 			}
 			return Decode( base64Encoded, Encoding.ASCII );
 		}
