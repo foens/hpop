@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace OpenPOP.NET_Sample_App
 {
-	public partial class ShowSourceForm : Form
+	public class ShowSourceForm : Form
 	{
-		private string Source;
+		private readonly string Source;
+
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private readonly IContainer components;
+
+		private Panel panel1;
+		private RichTextBox sourceText;
 
 		public ShowSourceForm(string source)
 		{
@@ -18,11 +21,6 @@ namespace OpenPOP.NET_Sample_App
 			InitializeComponent();
 			SetupText();
 		}
-
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -35,6 +33,11 @@ namespace OpenPOP.NET_Sample_App
 				components.Dispose();
 			}
 			base.Dispose(disposing);
+		}
+
+		private void SetupText()
+		{
+			sourceText.Text = Source;
 		}
 
 		#region Windows Form Designer generated code
@@ -52,8 +55,8 @@ namespace OpenPOP.NET_Sample_App
 			// sourceText
 			// 
 			this.sourceText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                                | System.Windows.Forms.AnchorStyles.Left)
+			                                                               | System.Windows.Forms.AnchorStyles.Right)));
 			this.sourceText.Location = new System.Drawing.Point(3, 3);
 			this.sourceText.Name = "sourceText";
 			this.sourceText.ReadOnly = true;
@@ -81,16 +84,7 @@ namespace OpenPOP.NET_Sample_App
 			this.Text = "ShowSourceForm";
 			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
-
 		}
 		#endregion
-
-		private System.Windows.Forms.RichTextBox sourceText;
-		private System.Windows.Forms.Panel panel1;
-
-		private void SetupText()
-		{
-			sourceText.Text = Source;
-		}
 	}
 }

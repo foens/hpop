@@ -47,7 +47,7 @@ namespace OpenPOP.MIME.Decode
 			StringBuilder builder = new StringBuilder();
 
 			// Run through the whole string that needs to be decoded
-			for(int i = 0; i<toDecode.Length; i++)
+			for (int i = 0; i < toDecode.Length; i++)
 			{
 				char currentChar = toDecode[i];
 				if (currentChar == '=')
@@ -60,7 +60,7 @@ namespace OpenPOP.MIME.Decode
 
 						// Since it was the last part, we should stop parsing anymore
 						break;
-					} 
+					}
 
 					// Decode the Quoted-Printable part
 					string QuotedPrintablePart = toDecode.Substring(i, 3);
@@ -68,8 +68,7 @@ namespace OpenPOP.MIME.Decode
 
 					// We now consumed two extra characters. Go forward two extra characters
 					i += 2;
-				}
-				else
+				} else
 				{
 					// This character is not quoted printable hex encoded.
 
@@ -121,24 +120,23 @@ namespace OpenPOP.MIME.Decode
 			// of altering the input string each time a illegal token is found
 			StringBuilder newString = new StringBuilder(input.Length);
 
-			for(int i = 0; i<input.Length; i++)
+			for (int i = 0; i < input.Length; i++)
 			{
 				// There is a character after it
 				// Check for lonely \r
 				// There is a lonely \r if it is the last character in the input or if there
 				// is no \n following it
-				if(input[i] == '\r' && (i+1 >= input.Length || input[i+1] != '\n'))
+				if (input[i] == '\r' && (i + 1 >= input.Length || input[i + 1] != '\n'))
 				{
 					// Illegal token \r found. Do not add it to the new string
 
 					// Check for lonely \n
 					// There is a lonely \n if \n is the first character or if there
 					// is no \r in front of it
-				} else if(input[i] == '\n' && (i-1 < 0 || input[i-1] != '\r'))
+				} else if (input[i] == '\n' && (i - 1 < 0 || input[i - 1] != '\r'))
 				{
 					// Illegal token \n found. Do not add it to the new string
-				}
-				else
+				} else
 				{
 					// No illegal tokens found. Simply insert the character we are at
 					// in our new string
@@ -171,11 +169,11 @@ namespace OpenPOP.MIME.Decode
 		private static string DecodeEqualSignNotLongEnough(string decode)
 		{
 			// We can only decode wrong length equal signs
-			if(decode.Length >= 3)
+			if (decode.Length >= 3)
 				throw new ArgumentException();
 
 			// First char must be =
-			if(decode[0] != '=')
+			if (decode[0] != '=')
 				throw new ArgumentException();
 
 			// If the length is only one, the only thing there is an equal sign
@@ -213,12 +211,12 @@ namespace OpenPOP.MIME.Decode
 			//   - it might be the last character on the line before a CRLF
 			//     pair, denoting a soft linebreak, which simply
 			//     splits the text up, because of the 76 chars per line restriction
-			if(decode.Contains("\r\n"))
+			if (decode.Contains("\r\n"))
 			{
 				// Soft break detected
 				return "";
 			}
-			
+
 			// Hex string detected. Convertion needed.
 			// It might be that the string located after the equal sign is not hex characters
 			// An example: =JU
@@ -238,7 +236,7 @@ namespace OpenPOP.MIME.Decode
 
 				// Simple conversion to string
 				return decodedChar.ToString();
-			} catch(FormatException)
+			} catch (FormatException)
 			{
 				// RFC 2045 says about robust implementation:
 				// An "=" followed by a character that is neither a

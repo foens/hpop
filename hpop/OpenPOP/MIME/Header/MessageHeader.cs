@@ -227,7 +227,7 @@ namespace OpenPOP.MIME.Header
 		public MessageHeader(ContentType contentType)
 			: this()
 		{
-			if(contentType == null)
+			if (contentType == null)
 				throw new ArgumentNullException();
 
 			ContentType = contentType;
@@ -320,7 +320,7 @@ namespace OpenPOP.MIME.Header
 				case "IMPORTANCE":
 					Importance = HeaderFieldParser.ParseImportance(headerValue.Trim());
 					break;
-					
+
 
 				// See http://tools.ietf.org/html/rfc3798#section-2.1
 				case "DISPOSITION-NOTIFICATION-TO":

@@ -1,57 +1,54 @@
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net.Mail;
 using System.Text;
 using System.Windows.Forms;
-using System.Data;
 using OpenPOP.MIME;
 using OpenPOP.POP3;
 using OpenPOP.Shared.Logging;
+using Attachment = OpenPOP.MIME.Attachment;
+using Message = OpenPOP.MIME.Message;
 
 namespace OpenPOP.NET_Sample_App
 {
 	public class frmTest : Form
 	{
-		private Panel panel1;
-		private TextBox txtPOPServer;
+		private readonly Hashtable msgs = new Hashtable();
+		private readonly POPClient popClient;
+		private Button ConnectAndRetrieveButton;
+		private Button UIDLButton;
+		private Panel attachmentPanel;
+		private ContextMenu ctmMessages;
+		private DataGrid gridHeaders;
 		private Label label1;
 		private Label label2;
-		private TextBox txtPort;
-		private Button ConnectAndRetrieveButton;
+		private Label label3;
+		private Label label4;
+		private Label label5;
+		private Label label6;
+		private Label label7;
+		private Label label8;
+		private TreeView listAttachments;
+		private TreeView listMessages;
+		private ListBox lstEvents;
+		private MenuItem mnuDeleteMessage;
+		private MenuItem mnuViewSource;
+		private Panel panel1;
 		private Panel panel2;
 		private Panel panel3;
 		private Panel panel4;
 		private Panel panel5;
-		private Panel attachmentPanel;
-		private Label label5;
-		private Label label7;
-		private TextBox txtPassword;
-		private Label label8;
-		private TextBox txtLogin;
-		private DataGrid gridHeaders;
-		private TextBox txtMessage;
-		private Label label4;
-		private Label label3;
-		private Label label6;
-		private TextBox txtTotalMessages;
-		private TreeView listAttachments;
-		private TreeView listMessages;
 		private SaveFileDialog saveFile;
-		private ContextMenu ctmMessages;
-		private MenuItem mnuDeleteMessage;
-		private Button UIDLButton;
-		private readonly POPClient popClient;
-		private ListBox lstEvents;
+		private TextBox txtLogin;
+		private TextBox txtMessage;
+		private TextBox txtPOPServer;
+		private TextBox txtPassword;
+		private TextBox txtPort;
+		private TextBox txtTotalMessages;
 		private CheckBox useSsl;
-		private MenuItem mnuViewSource;
-		private readonly Hashtable msgs = new Hashtable();
-
-		private static ILog AppLoggerFactory()
-		{
-			return new FileLogger( );
-		}
 
 		private frmTest()
 		{
@@ -82,11 +79,11 @@ namespace OpenPOP.NET_Sample_App
 			string file = Path.Combine(myDocs, "OpenPOPLogin.txt");
 			if (File.Exists(file))
 			{
-				using(StreamReader reader = new StreamReader(File.OpenRead(file)))
+				using (StreamReader reader = new StreamReader(File.OpenRead(file)))
 				{
 					txtPOPServer.Text = reader.ReadLine();
 					txtPort.Text = reader.ReadLine();
-					useSsl.Checked = bool.Parse(reader.ReadLine());
+					useSsl.Checked = bool.Parse(reader.ReadLine() ?? "true");
 					txtLogin.Text = reader.ReadLine();
 					txtPassword.Text = reader.ReadLine();
 				}
@@ -98,8 +95,8 @@ namespace OpenPOP.NET_Sample_App
 
 		#region Windows Form Designer generated code
 		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
+		///   Required method for Designer support - do not modify
+		///   the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent()
 		{
@@ -284,8 +281,8 @@ namespace OpenPOP.NET_Sample_App
 			// gridHeaders
 			// 
 			this.gridHeaders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                                 | System.Windows.Forms.AnchorStyles.Left)
+			                                                                | System.Windows.Forms.AnchorStyles.Right)));
 			this.gridHeaders.DataMember = "";
 			this.gridHeaders.HeaderForeColor = System.Drawing.SystemColors.ControlText;
 			this.gridHeaders.Location = new System.Drawing.Point(0, 0);
@@ -320,7 +317,7 @@ namespace OpenPOP.NET_Sample_App
 			// lstEvents
 			// 
 			this.lstEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                              | System.Windows.Forms.AnchorStyles.Right)));
 			this.lstEvents.Location = new System.Drawing.Point(7, 171);
 			this.lstEvents.Name = "lstEvents";
 			this.lstEvents.Size = new System.Drawing.Size(475, 17);
@@ -329,8 +326,8 @@ namespace OpenPOP.NET_Sample_App
 			// txtMessage
 			// 
 			this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                                | System.Windows.Forms.AnchorStyles.Left)
+			                                                               | System.Windows.Forms.AnchorStyles.Right)));
 			this.txtMessage.Location = new System.Drawing.Point(7, 22);
 			this.txtMessage.MaxLength = 999999999;
 			this.txtMessage.Multiline = true;
@@ -360,8 +357,8 @@ namespace OpenPOP.NET_Sample_App
 			// listMessages
 			// 
 			this.listMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                                  | System.Windows.Forms.AnchorStyles.Left)
+			                                                                 | System.Windows.Forms.AnchorStyles.Right)));
 			this.listMessages.ContextMenu = this.ctmMessages;
 			this.listMessages.Location = new System.Drawing.Point(8, 24);
 			this.listMessages.Name = "listMessages";
@@ -373,9 +370,11 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// ctmMessages
 			// 
-			this.ctmMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-			this.mnuDeleteMessage,
-			this.mnuViewSource});
+			this.ctmMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[]
+			                                    	{
+			                                    		this.mnuDeleteMessage,
+			                                    		this.mnuViewSource
+			                                    	});
 			// 
 			// mnuDeleteMessage
 			// 
@@ -405,8 +404,8 @@ namespace OpenPOP.NET_Sample_App
 			// listAttachments
 			// 
 			this.listAttachments.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			                                                                     | System.Windows.Forms.AnchorStyles.Left)
+			                                                                    | System.Windows.Forms.AnchorStyles.Right)));
 			this.listAttachments.Location = new System.Drawing.Point(8, 24);
 			this.listAttachments.Name = "listAttachments";
 			this.listAttachments.ShowLines = false;
@@ -454,15 +453,19 @@ namespace OpenPOP.NET_Sample_App
 			this.panel5.ResumeLayout(false);
 			this.attachmentPanel.ResumeLayout(false);
 			this.ResumeLayout(false);
-
 		}
 		#endregion
 
+		private static ILog AppLoggerFactory()
+		{
+			return new FileLogger();
+		}
+
 		/// <summary>
-		/// The main entry point for the application.
+		///   The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static void Main() 
+		private static void Main()
 		{
 			Application.Run(new frmTest());
 		}
@@ -477,8 +480,8 @@ namespace OpenPOP.NET_Sample_App
 			{
 				if (popClient.Connected)
 					popClient.Disconnect();
-				popClient.Connect( txtPOPServer.Text, int.Parse( txtPort.Text ), useSsl.Checked );
-				popClient.Authenticate( txtLogin.Text, txtPassword.Text );
+				popClient.Connect(txtPOPServer.Text, int.Parse(txtPort.Text), useSsl.Checked);
+				popClient.Authenticate(txtLogin.Text, txtPassword.Text);
 				int Count = popClient.GetMessageCount();
 				txtTotalMessages.Text = Count.ToString();
 				txtMessage.Text = "";
@@ -500,37 +503,31 @@ namespace OpenPOP.NET_Sample_App
 
 					try
 					{
-						MIME.Message m = popClient.GetMessage( i );
+						Message m = popClient.GetMessage(i);
 
 						success++;
-						msgs.Add( "msg" + i, m );
-						TreeNode node = listMessages.Nodes.Add( "[" + i + "] " + m.Headers.Subject );
+						msgs.Add("msg" + i, m);
+						TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
 						node.Tag = i.ToString();
-					}
-					catch (Exception)
+					} catch (Exception)
 					{
 						fail++;
 					}
 				}
 				MessageBox.Show(this, "Mail received!\nSuccess: " + success + "\nFailed: " + fail);
-			}
-			catch (InvalidLoginException)
+			} catch (InvalidLoginException)
 			{
-				MessageBox.Show( this, "Unknown username!", "POP3 Server Authentication" );
-			}
-			catch (InvalidPasswordException)
+				MessageBox.Show(this, "Unknown username!", "POP3 Server Authentication");
+			} catch (InvalidPasswordException)
 			{
-				MessageBox.Show( this, "Invalid password!", "POP3 Server Authentication" );
-			}
-			catch(PopServerNotFoundException)
+				MessageBox.Show(this, "Invalid password!", "POP3 Server Authentication");
+			} catch (PopServerNotFoundException)
 			{
-				MessageBox.Show( this, "The server could not be found", "POP3 Retrieval" );
-			}
-			catch(Exception e)
+				MessageBox.Show(this, "The server could not be found", "POP3 Retrieval");
+			} catch (Exception e)
 			{
-				MessageBox.Show( this, "Error occurred retrieving mail. " + e.Message, "POP3 Retrieval" );
-			}
-			finally
+				MessageBox.Show(this, "Error occurred retrieving mail. " + e.Message, "POP3 Retrieval");
+			} finally
 			{
 				// Enable the buttons again
 				ConnectAndRetrieveButton.Enabled = true;
@@ -541,11 +538,11 @@ namespace OpenPOP.NET_Sample_App
 		private void ConnectAndRetrieveButtonClick(object sender, EventArgs e)
 		{
 			ReceiveMails();
-		}		
+		}
 
 		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
+			Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
 			if (m != null)
 			{
 				if (m.MessageBody.Count > 0)
@@ -568,7 +565,7 @@ namespace OpenPOP.NET_Sample_App
 				listAttachments.Nodes.Clear();
 
 				bool hadAttachments = false;
-				foreach(MIME.Attachment att in m.Attachments)
+				foreach (Attachment att in m.Attachments)
 				{
 					hadAttachments = true;
 					listAttachments.Nodes.Add(att.ContentFileName).Tag = att;
@@ -597,7 +594,7 @@ namespace OpenPOP.NET_Sample_App
 				ds.Tables[0].Rows.Add(new object[] {"Subject", m.Headers.Subject});
 				ds.Tables[0].Rows.Add(new object[] {"Date", m.Headers.Date});
 				ds.Tables[0].Rows.Add(new object[] {"DateSent", m.Headers.DateSent});
-				foreach(string received in m.Headers.Received)
+				foreach (string received in m.Headers.Received)
 					ds.Tables[0].Rows.Add(new object[] {"Received", received});
 				ds.Tables[0].Rows.Add(new object[] {"Importance", m.Headers.Importance});
 				ds.Tables[0].Rows.Add(new object[] {"ReplyTo", m.Headers.ReplyTo});
@@ -619,25 +616,25 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			MIME.Attachment att = (MIME.Attachment) listAttachments.SelectedNode.Tag;
-			MIME.Message m = (MIME.Message) msgs["msg" + listMessages.SelectedNode.Tag];
-			if(att!=null && m!=null)
+			Attachment att = (Attachment)listAttachments.SelectedNode.Tag;
+			Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
+			if (att != null && m != null)
 			{
 				saveFile.FileName = att.ContentFileName;
 				DialogResult result = saveFile.ShowDialog();
-				if(result != DialogResult.OK)
+				if (result != DialogResult.OK)
 					return;
 
-				if(att.IsMIMEMailFile())
+				if (att.IsMIMEMailFile())
 				{
 					result = MessageBox.Show(this, "OpenPOP.POP3 found the attachment is a MIME mail, do you want to extract it?", "MIME mail", MessageBoxButtons.YesNo);
-					if(result == DialogResult.Yes)
+					if (result == DialogResult.Yes)
 					{
-						MIME.Message m2 = att.DecodeAsMessage(true, false);
+						Message m2 = att.DecodeAsMessage(true, false);
 						string attachmentNames = "";
 						if (m2.Attachments.Count > 0)
 						{
-							foreach (MIME.Attachment att2 in m2.Attachments)
+							foreach (Attachment att2 in m2.Attachments)
 							{
 								attachmentNames += att2.ContentFileName + "(" + att2.RawAttachment.Length + " bytes)\r\n";
 							}
@@ -645,15 +642,14 @@ namespace OpenPOP.NET_Sample_App
 
 						bool saveSuccesfull = false;
 						string directoryPath = Path.GetDirectoryName(saveFile.FileName);
-						if(directoryPath != null)
+						if (directoryPath != null)
 							saveSuccesfull = m.SaveAttachments(new DirectoryInfo(directoryPath));
 						MessageBox.Show(this, "Parsing " + (saveSuccesfull ? "succeeded" : "failed") + "\r\n\r\nsubject:" + m2.Headers.Subject + "\r\n\r\nAttachment:\r\n" + attachmentNames);
 					}
 				}
-				MessageBox.Show(this,"Attachment saving "+((att.SaveToFile(new FileInfo(saveFile.FileName)))?"succeeded":"failed"));
-			}
-			else
-				MessageBox.Show(this,"attachment object is null!");
+				MessageBox.Show(this, "Attachment saving " + ((att.SaveToFile(new FileInfo(saveFile.FileName))) ? "succeeded" : "failed"));
+			} else
+				MessageBox.Show(this, "attachment object is null!");
 		}
 
 		private void mnuDeleteMessage_Click(object sender, EventArgs e)
@@ -733,7 +729,7 @@ namespace OpenPOP.NET_Sample_App
 		{
 			if (listMessages.SelectedNode != null)
 			{
-				MIME.Message m = (MIME.Message)msgs["msg" + listMessages.SelectedNode.Tag];
+				Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
 
 				ShowSourceForm sourceForm = new ShowSourceForm(m.RawMessage);
 				sourceForm.ShowDialog();

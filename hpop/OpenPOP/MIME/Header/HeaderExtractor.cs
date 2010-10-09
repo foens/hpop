@@ -50,8 +50,7 @@ namespace OpenPOP.MIME.Header
 
 					// Now we have the name and full value. Add it
 					headers.Add(headerName, headerValue);
-				}
-				else
+				} else
 				{
 					// This is a single line header. Simply insert it
 					headers.Add(headerName, headerValue);
@@ -59,7 +58,7 @@ namespace OpenPOP.MIME.Header
 			}
 
 			// Set the out parameter to our raw header. Remember to remove the last line ending.
-			rawHeaders = rawHeadersBuilder.ToString().TrimEnd(new[] { '\r', '\n' });
+			rawHeaders = rawHeadersBuilder.ToString().TrimEnd(new[] {'\r', '\n'});
 		}
 
 		/// <summary>

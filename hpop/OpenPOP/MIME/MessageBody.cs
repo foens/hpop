@@ -26,7 +26,7 @@ namespace OpenPOP.MIME
 		/// <exception cref="ArgumentNullException">If body or type is <see langword="null"/></exception>
 		public MessageBody(string body, string type)
 		{
-			if(body == null)
+			if (body == null)
 				throw new ArgumentNullException();
 
 			if (type == null)

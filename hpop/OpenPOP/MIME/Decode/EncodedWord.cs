@@ -32,7 +32,7 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>Decoded text</returns>
 		public static string Decode(string encodedWords)
 		{
-			if(encodedWords == null)
+			if (encodedWords == null)
 				return null;
 
 			string decodedWords = encodedWords;
@@ -48,7 +48,7 @@ namespace OpenPOP.MIME.Decode
 			MatchCollection matches = Regex.Matches(encodedWords, strRegEx);
 			foreach (Match match in matches)
 			{
-				if(match.Success)
+				if (match.Success)
 				{
 					string fullMatchValue = match.Value;
 
@@ -68,9 +68,8 @@ namespace OpenPOP.MIME.Decode
 						case "B":
 							try
 							{
-								decodedText = Base64.Decode( encodedText, charset );
-							}
-							catch (Exception)
+								decodedText = Base64.Decode(encodedText, charset);
+							} catch (Exception)
 							{
 								// We cannot decode it.Simply return the encoded form.
 								decodedText = fullMatchValue;
@@ -86,8 +85,7 @@ namespace OpenPOP.MIME.Decode
 							try
 							{
 								decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
-							}
-							catch (ArgumentException)
+							} catch (ArgumentException)
 							{
 								// The encoding we are using is not supported.
 								// Therefore we cannot decode it. We must simply return

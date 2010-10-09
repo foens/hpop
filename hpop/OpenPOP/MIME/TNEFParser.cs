@@ -71,7 +71,7 @@ namespace OpenPOP.MIME
 		/// <param name="logger">The logging interface to use</param>
 		private TNEFParser(ILog logger)
 		{
-			if ( logger == null)
+			if (logger == null)
 				throw new ArgumentNullException("logger");
 
 			Log = logger;
@@ -104,22 +104,21 @@ namespace OpenPOP.MIME
 		}
 		#endregion
 
-
 		private static int GETINT32(byte[] p)
 		{
-			return (p[0]+(p[1]<<8)+(p[2]<<16)+(p[3]<<24));
+			return (p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24));
 		}
 
 		private static short GETINT16(byte[] p)
 		{
-			return (short)(p[0]+(p[1]<<8));
+			return (short) (p[0] + (p[1] << 8));
 		}
 
-		private int geti32() 
+		private int geti32()
 		{
 			byte[] buffer = new byte[4];
 
-			if(StreamReadBytes(buffer, 4) != 1)
+			if (StreamReadBytes(buffer, 4) != 1)
 			{
 				Log.LogError("geti32():unexpected end of input\n");
 				return 1;
@@ -127,11 +126,11 @@ namespace OpenPOP.MIME
 			return GETINT32(buffer);
 		}
 
-		private int geti16() 
+		private int geti16()
 		{
 			byte[] buffer = new byte[2];
 
-			if(StreamReadBytes(buffer, 2) != 1)
+			if (StreamReadBytes(buffer, 2) != 1)
 			{
 				Log.LogError("geti16():unexpected end of input\n");
 				return 1;
@@ -139,11 +138,11 @@ namespace OpenPOP.MIME
 			return GETINT16(buffer);
 		}
 
-		private int geti8() 
+		private int geti8()
 		{
 			byte[] buffer = new byte[1];
 
-			if(StreamReadBytes(buffer, 1) != 1)
+			if (StreamReadBytes(buffer, 1) != 1)
 			{
 				Log.LogError("geti8():unexpected end of input\n");
 				return 1;
@@ -155,15 +154,14 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-				if(fsTNEF.Position+size <= _fileLength)					
+				if (fsTNEF.Position + size <= _fileLength)
 				{
 					fsTNEF.Read(buffer, 0, size);
 					return 1;
 				}
 
 				return 0;
-			}
-			catch(Exception e)				
+			} catch (Exception e)
 			{
 				Log.LogError("StreamReadBytes():" + e.Message);
 				return 0;
@@ -179,8 +177,7 @@ namespace OpenPOP.MIME
 				Stream stream = fsTNEF;
 				fsTNEF = null;
 				stream.Close();
-			}
-			catch(Exception e)
+			} catch (Exception e)
 			{
 				Log.LogError("CloseTNEFStream():" + e.Message);
 			}
@@ -199,8 +196,7 @@ namespace OpenPOP.MIME
 				fsTNEF = file.OpenRead();
 				_fileLength = file.Length;
 				return true;
-			}
-			catch(Exception e)
+			} catch (Exception e)
 			{
 				fsTNEF = null;
 				Log.LogError("OpenTNEFStream(File):" + e.Message);
@@ -220,8 +216,7 @@ namespace OpenPOP.MIME
 				fsTNEF = new MemoryStream(content);
 				_fileLength = content.Length;
 				return true;
-			}
-			catch(Exception e)
+			} catch (Exception e)
 			{
 				fsTNEF = null;
 				Log.LogError("OpenTNEFStream(Bytes):" + e.Message);
@@ -240,9 +235,8 @@ namespace OpenPOP.MIME
 
 			try
 			{
-				for (leftPosition=0; ; leftPosition++) 
+				for (leftPosition = 0; ; leftPosition++)
 				{
-
 					if (fsTNEF.Seek(leftPosition, SeekOrigin.Begin) == -1)
 					{
 						PrintResult("No signature found\n");
@@ -250,15 +244,14 @@ namespace OpenPOP.MIME
 					}
 
 					int d = geti32();
-					if (d == TNEF_SIGNATURE) 
+					if (d == TNEF_SIGNATURE)
 					{
 						PrintResult("Signature found at {0}\n", leftPosition);
 						break;
 					}
 				}
 				returner = true;
-			}
-			catch(Exception e)
+			} catch (Exception e)
 			{
 				Log.LogError("FindSignature():" + e.Message);
 				returner = false;
@@ -269,17 +262,17 @@ namespace OpenPOP.MIME
 			return returner;
 		}
 
-		private void decode_attribute (int d) 
+		private void decode_attribute(int d)
 		{
 			byte[] buffer = new byte[4000];
 			int i;
 
 			int length = geti32();
 
-			switch(d&0xffff0000)
+			switch (d & 0xffff0000)
 			{
 				case _BYTE:
-					PrintResult("Attribute {0} =", d&0xffff);
+					PrintResult("Attribute {0} =", d & 0xffff);
 					for (i = 0; i < length; i++)
 					{
 						int v = geti8();
@@ -290,7 +283,7 @@ namespace OpenPOP.MIME
 					PrintResult("\n");
 					break;
 				case _WORD:
-					PrintResult("Attribute {0} =", d&0xffff);
+					PrintResult("Attribute {0} =", d & 0xffff);
 					for (i = 0; i < length; i += 2)
 					{
 						int v = geti16();
@@ -301,7 +294,7 @@ namespace OpenPOP.MIME
 					PrintResult("\n");
 					break;
 				case _DWORD:
-					PrintResult("Attribute {0} =", d&0xffff);
+					PrintResult("Attribute {0} =", d & 0xffff);
 					for (i = 0; i < length; i += 4)
 					{
 						int v = geti32();
@@ -314,7 +307,7 @@ namespace OpenPOP.MIME
 				case _string:
 					StreamReadBytes(buffer, length);
 
-					PrintResult("Attribute {0} = {1}\n", d&0xffff, Encoding.Default.GetString(buffer));
+					PrintResult("Attribute {0} = {1}\n", d & 0xffff, Encoding.Default.GetString(buffer));
 					break;
 				default:
 					StreamReadBytes(buffer, length);
@@ -322,7 +315,7 @@ namespace OpenPOP.MIME
 					break;
 			}
 
-			geti16();     /* checksum */
+			geti16(); /* checksum */
 		}
 
 		private void decode_message()
@@ -332,29 +325,29 @@ namespace OpenPOP.MIME
 			decode_attribute(d);
 		}
 
-		private void decode_attachment() 
-		{  
+		private void decode_attachment()
+		{
 			byte[] buffer = new byte[4096];
 			int length;
 
 			int d = geti32();
 
-			switch (d) 
+			switch (d)
 			{
 				case ASUBJECT:
 					length = geti32();
 
 					StreamReadBytes(buffer, length);
 
-					byte[] _subjectBuffer = new byte[length-1];
+					byte[] _subjectBuffer = new byte[length - 1];
 
-					Array.Copy(buffer, _subjectBuffer, (long)length-1);
+					Array.Copy(buffer, _subjectBuffer, (long) length - 1);
 
 					strSubject = Encoding.Default.GetString(_subjectBuffer);
 
 					PrintResult("Found subject: {0}", strSubject);
 
-					geti16();     /* checksum */ 
+					geti16(); /* checksum */
 
 					break;
 
@@ -362,8 +355,8 @@ namespace OpenPOP.MIME
 					length = geti32();
 					StreamReadBytes(buffer, length);
 					//PrintResult("File-Name: {0}\n", buf);
-					byte[] _fileNameBuffer = new byte[length-1];
-					Array.Copy(buffer, _fileNameBuffer, (long)length-1);
+					byte[] _fileNameBuffer = new byte[length - 1];
+					Array.Copy(buffer, _fileNameBuffer, (long) length - 1);
 
 					string strFileName = Encoding.Default.GetString(_fileNameBuffer);
 
@@ -372,7 +365,7 @@ namespace OpenPOP.MIME
 					_attachment.Subject = strSubject;
 					_attachments.Add(_attachment);
 
-					geti16();     /* checksum */ 
+					geti16(); /* checksum */
 
 					break;
 
@@ -384,22 +377,22 @@ namespace OpenPOP.MIME
 					_attachment.Content = new byte[length];
 					_attachment.Length = length;
 
-					for (int i = 0; i < length; ) 
+					for (int i = 0; i < length;)
 					{
-						int chunk = length-i;
+						int chunk = length - i;
 						if (chunk > buffer.Length) chunk = buffer.Length;
 
-						StreamReadBytes(buffer,chunk);
+						StreamReadBytes(buffer, chunk);
 
-						Array.Copy(buffer,0,_attachment.Content,i,chunk);
+						Array.Copy(buffer, 0, _attachment.Content, i, chunk);
 
 						i += chunk;
 					}
 
-					geti16();     /* checksum */ 
-		
+					geti16(); /* checksum */
+
 					break;
-		  
+
 				default:
 					decode_attribute(d);
 					break;
@@ -421,14 +414,14 @@ namespace OpenPOP.MIME
 		/// <returns>true is succeded, vice versa</returns>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
-			bool blnRet=false;
+			bool result = false;
 
 			foreach (TNEFAttachment tnefAttachment in _attachments)
 			{
-				blnRet = SaveAttachment(tnefAttachment, pathToSaveTo, Log);
+				result = SaveAttachment(tnefAttachment, pathToSaveTo, Log);
 			}
 
-			return blnRet;
+			return result;
 		}
 
 		/// <summary>
@@ -457,15 +450,14 @@ namespace OpenPOP.MIME
 
 				if (outFile.Exists)
 					outFile.Delete();
-				
+
 				using (FileStream fsData = outFile.Create())
 				{
 					fsData.Write(attachment.Content, 0, (int) attachment.Length);
 				}
 
 				return true;
-			}
-			catch(Exception e)
+			} catch (Exception e)
 			{
 				logger.LogError("SaveAttachment(): " + e.Message);
 				return false;
@@ -480,15 +472,15 @@ namespace OpenPOP.MIME
 		{
 			byte[] buffer = new byte[4];
 
-			if(FindSignature())
+			if (FindSignature())
 			{
 				int d;
-				if (SkipSignature < 2) 
+				if (SkipSignature < 2)
 				{
 					d = geti32();
-					if (SkipSignature < 1) 
+					if (SkipSignature < 1)
 					{
-						if (d != TNEF_SIGNATURE) 
+						if (d != TNEF_SIGNATURE)
 						{
 							PrintResult("Seems not to be a TNEF file\n");
 							return false;
@@ -498,14 +490,14 @@ namespace OpenPOP.MIME
 
 				d = geti16();
 				PrintResult("TNEF Key is: {0}\n", d);
-				for (;;) 
+				for (;;)
 				{
-					if(StreamReadBytes(buffer, 1) == 0) 
+					if (StreamReadBytes(buffer, 1) == 0)
 						break;
 
 					d = buffer[0];
 
-					switch (d) 
+					switch (d)
 					{
 						case LVL_MESSAGE:
 							PrintResult("{0}: Decoding Message Attributes\n", fsTNEF.Position);
@@ -522,7 +514,7 @@ namespace OpenPOP.MIME
 				}
 				return true;
 			}
-			
+
 			return false;
 		}
 
@@ -540,13 +532,13 @@ namespace OpenPOP.MIME
 		/// <param name="disposing">Specifies if managed resources are being disposed of</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && !IsDisposed)
+			if (disposing && !IsDisposed)
 			{
 				CloseTNEFStream();
 				Log = null;
 			}
 
-			base.Dispose( disposing );
+			base.Dispose(disposing);
 		}
 	}
 }

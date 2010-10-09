@@ -65,7 +65,7 @@ namespace OpenPOP.POP3
 		/// Event that fires when message transfer has begun.
 		/// </summary>		
 		public event POPClientEvent MessageTransferBegan = delegate { };
-		
+
 		/// <summary>
 		/// Event that fires when message transfer has finished.
 		/// </summary>
@@ -74,7 +74,7 @@ namespace OpenPOP.POP3
 
 		#region Private member properties
 		/// <summary>
-		/// This is the stread used to read off the server response
+		/// This is the stream used to read off the server response
 		/// to a command
 		/// </summary>
 		private StreamReader StreamReader { get; set; }
@@ -109,7 +109,7 @@ namespace OpenPOP.POP3
 		/// as the server tells in its welcome message if APOP is supported.
 		/// </summary>
 		public bool APOPSupported { get; private set; }
-		
+
 		/// <summary>
 		/// whether auto decoding MS-TNEF attachment files
 		/// </summary>
@@ -164,7 +164,6 @@ namespace OpenPOP.POP3
 		public POPClient()
 			: this(null)
 		{
-			
 		}
 
 		/// <summary>
@@ -177,7 +176,7 @@ namespace OpenPOP.POP3
 		public POPClient(int receiveTimeout, int sendTimeout, ILog logger)
 			: this(logger)
 		{
-			if(receiveTimeout < -1 || sendTimeout < -1)
+			if (receiveTimeout < -1 || sendTimeout < -1)
 				throw new ArgumentOutOfRangeException();
 
 			ReceiveTimeOut = receiveTimeout;
@@ -193,7 +192,6 @@ namespace OpenPOP.POP3
 		public POPClient(int receiveTimeout, int sendTimeout)
 			: this(receiveTimeout, sendTimeout, null)
 		{
-			
 		}
 		#endregion
 
@@ -203,9 +201,9 @@ namespace OpenPOP.POP3
 		/// <param name="disposing"><see langword="true"/> if managed and unmanaged code should be disposed, <see langword="false"/> if only managed code should be disposed</param>
 		protected override void Dispose(bool disposing)
 		{
-			if(disposing && !IsDisposed)
+			if (disposing && !IsDisposed)
 			{
-				if(Connected)
+				if (Connected)
 				{
 					Disconnect();
 				}
@@ -286,7 +284,7 @@ namespace OpenPOP.POP3
 		private int SendCommandIntResponse(string command, int location)
 		{
 			SendCommand(command);
-			
+
 			return int.Parse(LastServerResponse.Split(' ')[location]);
 		}
 
@@ -310,8 +308,7 @@ namespace OpenPOP.POP3
 			try
 			{
 				clientSocket.Connect(hostname, port);
-			}
-			catch (SocketException e) 
+			} catch (SocketException e)
 			{
 				Disconnect();
 				Log.LogError("Connect():" + e.Message);
@@ -331,8 +328,7 @@ namespace OpenPOP.POP3
 
 				StreamReader = new StreamReader(stream);
 				StreamWriter = new StreamWriter(stream);
-			}
-			else
+			} else
 			{
 				// If we do not want to use SSL, use plain TCP
 				StreamReader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
@@ -349,14 +345,13 @@ namespace OpenPOP.POP3
 				ExtractAPOPTimestamp(response);
 				Connected = true;
 				CommunicationOccurred(this);
-			}
-			catch (PopServerException)
+			} catch (PopServerException)
 			{
 				// If not close down the connection and abort
 				Disconnect();
 				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
 				Log.LogDebug("Last response from server was: " + LastServerResponse);
-				throw new PopServerNotAvailableException();   
+				throw new PopServerNotAvailableException();
 			}
 		}
 
@@ -372,14 +367,12 @@ namespace OpenPOP.POP3
 				SendCommand("QUIT");
 				StreamReader.Close();
 				StreamWriter.Close();
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				// We don't care about errors in disconnect
 				// but log it anyways, to keep it transparent
 				Log.LogError("Exception thrown when disconnecting: " + e.Message);
-			}
-			finally
+			} finally
 			{
 				// Reset values
 				Connected = false;
@@ -415,18 +408,16 @@ namespace OpenPOP.POP3
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
-			if(authenticationMethod == AuthenticationMethod.UsernameAndPassword)
+			if (authenticationMethod == AuthenticationMethod.UsernameAndPassword)
 			{
-				AuthenticateUsingUSER(username, password);				
-			}
-			else if(authenticationMethod == AuthenticationMethod.APOP)
+				AuthenticateUsingUSER(username, password);
+			} else if (authenticationMethod == AuthenticationMethod.APOP)
 			{
 				AuthenticateUsingAPOP(username, password);
-			}
-			else if(authenticationMethod == AuthenticationMethod.TryBoth)
+			} else if (authenticationMethod == AuthenticationMethod.TryBoth)
 			{
 				// Check if APOP is supported
-				if(APOPSupported)
+				if (APOPSupported)
 					AuthenticateUsingAPOP(username, password);
 				else
 					AuthenticateUsingUSER(username, password);
@@ -441,13 +432,12 @@ namespace OpenPOP.POP3
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingUSER(string username, string password)
-		{				
+		{
 			AuthenticationBegan(this);
 			try
 			{
 				SendCommand("USER " + username);
-			}
-			catch (PopServerException)
+			} catch (PopServerException)
 			{
 				Log.LogError("AuthenticateUsingUSER():wrong user: " + username);
 				throw new InvalidLoginException();
@@ -456,13 +446,12 @@ namespace OpenPOP.POP3
 			try
 			{
 				SendCommand("PASS " + password);
-			}
-			catch (PopServerException)
+			} catch (PopServerException)
 			{
-				if(LastServerResponse.ToLower().Contains("lock"))
+				if (LastServerResponse.ToLower().Contains("lock"))
 				{
 					Log.LogError("AuthenticateUsingUSER(): maildrop is locked");
-					throw new PopServerLockException();			
+					throw new PopServerLockException();
 				}
 
 				// Lastcommand might contain an error description like:
@@ -471,7 +460,7 @@ namespace OpenPOP.POP3
 				Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidPasswordException();
 			}
-			
+
 			AuthenticationFinished(this);
 		}
 
@@ -485,7 +474,7 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingAPOP(string username, string password)
 		{
-			if(!APOPSupported)
+			if (!APOPSupported)
 				throw new NotSupportedException("APOP is not supported on this server");
 
 			AuthenticationBegan(this);
@@ -493,8 +482,7 @@ namespace OpenPOP.POP3
 			try
 			{
 				SendCommand("APOP " + username + " " + MD5.ComputeHashHex(APOPTimestamp + password));
-			}
-			catch (PopServerException)
+			} catch (PopServerException)
 			{
 				if (LastServerResponse.ToLower().Contains("lock"))
 				{
@@ -528,7 +516,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="messageNumber">The number of the message to be deleted. This message may not already have been deleted</param>
 		/// <exception cref="PopServerException">If the server did not accept the delete command</exception>
-		public void DeleteMessage(int messageNumber) 
+		public void DeleteMessage(int messageNumber)
 		{
 			AssertDisposed();
 			SendCommand("DELE " + messageNumber);
@@ -541,7 +529,7 @@ namespace OpenPOP.POP3
 		/// Assumes that no prior message has been marked as deleted.
 		/// </summary>
 		/// <exception cref="PopServerException">If the server did not accept one of the delete commands. All prior marked messages will still be marked.</exception>
-		public void DeleteAllMessages() 
+		public void DeleteAllMessages()
 		{
 			AssertDisposed();
 			int messageCount = GetMessageCount();
@@ -611,7 +599,7 @@ namespace OpenPOP.POP3
 			//S: +OK 2 QhdPYR:00WBw1Ph7x7
 
 			SendCommand("UIDL " + messageNumber);
-			
+
 			// Parse out the unique ID
 			return LastServerResponse.Split(' ')[2];
 		}
@@ -635,7 +623,7 @@ namespace OpenPOP.POP3
 			// S: .      // this is the end
 
 			SendCommand("UIDL");
-			
+
 			List<string> uids = new List<string>();
 
 			string response;
@@ -681,7 +669,7 @@ namespace OpenPOP.POP3
 			// S: .       // End of multi-line
 
 			SendCommand("LIST");
-			
+
 			List<int> sizes = new List<int>();
 
 			string response;

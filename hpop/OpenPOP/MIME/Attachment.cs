@@ -47,7 +47,6 @@ namespace OpenPOP.MIME
 		/// The logging interface used by the object
 		/// </summary>
 		private ILog Log { get; set; }
-
 		#endregion
 
 		#region Constructors
@@ -96,7 +95,6 @@ namespace OpenPOP.MIME
 		public Attachment(byte[] attachmentContent, string fileName, string contentType)
 			: this(attachmentContent, fileName, contentType, null)
 		{
-
 		}
 
 		/// <summary>
@@ -135,7 +133,6 @@ namespace OpenPOP.MIME
 		public Attachment(string attachmentContent, MessageHeader headersFromMessage)
 			: this(attachmentContent, headersFromMessage, null)
 		{
-			
 		}
 		#endregion
 
@@ -150,28 +147,28 @@ namespace OpenPOP.MIME
 			// There is a name field in the ContentType
 			if (!string.IsNullOrEmpty(headers.ContentType.Name))
 				return headers.ContentType.Name;
-			
+
 			// There is a FileName in the ContentDisposition
-			if(headers.ContentDisposition != null)
+			if (headers.ContentDisposition != null)
 				return headers.ContentDisposition.FileName;
 
 			// We could not find any given name. Instead we will try
 			// to give a name based on the MediaType
-			if(headers.ContentType.MediaType != null)
+			if (headers.ContentType.MediaType != null)
 			{
-				string type = headers.ContentType.MediaType.ToLower( );
-				if (type.Contains( "report" ))
+				string type = headers.ContentType.MediaType.ToLower();
+				if (type.Contains("report"))
 					return DefaultReportFileName;
 
-				if (type.Contains( "multipart/" ))
+				if (type.Contains("multipart/"))
 					return DefaultMIMEFileName;
 
-				if (type.Contains( "message/rfc822" ))
+				if (type.Contains("message/rfc822"))
 					return DefaultMIMEFileName;
 			}
 
 			// If it was not possible with the MediaType, use the ContentID as a name
-			if(headers.ContentID != null)
+			if (headers.ContentID != null)
 				return headers.ContentID;
 
 			// If everything else fails, just use the default name
@@ -244,8 +241,8 @@ namespace OpenPOP.MIME
 		public bool IsMIMEMailFile()
 		{
 			return (Headers.ContentType.MediaType != null &&
-					Headers.ContentType.MediaType.ToLower().Contains("message/rfc822")) ||
-				   ContentFileName.EndsWith(".eml", true, CultureInfo.InvariantCulture);
+			        Headers.ContentType.MediaType.ToLower().Contains("message/rfc822")) ||
+			       ContentFileName.EndsWith(".eml", true, CultureInfo.InvariantCulture);
 		}
 
 		///<summary>

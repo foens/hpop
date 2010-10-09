@@ -15,8 +15,7 @@ namespace OpenPOP.MIME.Decode
 			try
 			{
 				return Convert.FromBase64String(toDecode);
-			}
-			catch (FormatException e)
+			} catch (FormatException e)
 			{
 				DefaultLogger.CreateLogger().LogError("Base64:DecodeToBytes: (FormatException) " + e.Message);
 				throw;
@@ -31,9 +30,9 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string</returns>
 		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException"> Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
-		public static string Decode( string base64Encoded, Encoding encoding )
+		public static string Decode(string base64Encoded, Encoding encoding)
 		{
-			return encoding.GetString( DecodeToBytes( base64Encoded ) );
+			return encoding.GetString(DecodeToBytes(base64Encoded));
 		}
 
 		/// <summary>
@@ -47,17 +46,16 @@ namespace OpenPOP.MIME.Decode
 		/// </remarks>
 		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException"> Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
-		public static string Decode( string base64Encoded )
+		public static string Decode(string base64Encoded)
 		{
 			try
 			{
-				return Decode( base64Encoded, Encoding.Default );
-			}
-			catch (DecoderFallbackException e)
+				return Decode(base64Encoded, Encoding.Default);
+			} catch (DecoderFallbackException e)
 			{
 				DefaultLogger.CreateLogger().LogError("Base64:Decode: (DecoderFallbackException) " + e.Message);
 			}
-			return Decode( base64Encoded, Encoding.ASCII );
+			return Decode(base64Encoded, Encoding.ASCII);
 		}
 
 		/// <summary>
@@ -68,19 +66,17 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string</returns>
 		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException"> Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
-		public static string Decode( string base64Encoded, string nameOfEncoding )
+		public static string Decode(string base64Encoded, string nameOfEncoding)
 		{
 			try
 			{
-				return Decode( base64Encoded, Encoding.GetEncoding( nameOfEncoding ) );
-			}
-			catch (DecoderFallbackException e)
+				return Decode(base64Encoded, Encoding.GetEncoding(nameOfEncoding));
+			} catch (DecoderFallbackException e)
 			{
-				Trace.WriteLine( "Base64:Decode: (DecoderFallbackException) " + e.Message );
-			}
-			catch (ArgumentException e)
+				DefaultLogger.CreateLogger().LogError("Base64:Decode: (DecoderFallbackException) " + e.Message);
+			} catch (ArgumentException e)
 			{
-				Trace.WriteLine( "Base64:Decode: Invalid encoding specified! " + e.Message );
+				DefaultLogger.CreateLogger().LogError("Base64:Decode: Invalid encoding specified! " + e.Message);
 			}
 			return Decode(base64Encoded);
 		}

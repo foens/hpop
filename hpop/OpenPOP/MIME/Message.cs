@@ -59,7 +59,6 @@ namespace OpenPOP.MIME
 		/// The logging interface used by the object
 		/// </summary>
 		private ILog Log { get; set; }
-
 		#endregion
 
 		#region Constructors
@@ -93,8 +92,7 @@ namespace OpenPOP.MIME
 			{
 				AutoDecodeMSTNEF = autoDecodeMSTNEF;
 				InitializeMessage(strMessage, onlyParseHeader);
-			}
-			else
+			} else
 			{
 				throw new FileNotFoundException("Could not find file " + emlFile);
 			}
@@ -109,7 +107,6 @@ namespace OpenPOP.MIME
 		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, FileInfo emlFile)
 			: this(autoDecodeMSTNEF, onlyParseHeader, emlFile, null)
 		{
-
 		}
 
 		/// <summary>
@@ -135,7 +132,6 @@ namespace OpenPOP.MIME
 		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader)
 			: this(autoDecodeMSTNEF, rawMessageContent, onlyParseHeader, null)
 		{
-
 		}
 		#endregion
 
@@ -146,7 +142,7 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> if message is a report message, <see langword="false"/> otherwise</returns>
 		public bool IsReport()
 		{
-			if (string.IsNullOrEmpty( Headers.ContentType.MediaType ))
+			if (string.IsNullOrEmpty(Headers.ContentType.MediaType))
 				return false;
 			return (Headers.ContentType.MediaType.IndexOf("report", StringComparison.InvariantCultureIgnoreCase) != -1);
 		}
@@ -159,9 +155,9 @@ namespace OpenPOP.MIME
 		/// <returns>translated message body</returns>
 		public string TranslateHTMLPictureFiles(string body, Hashtable hsbFiles)
 		{
-			foreach(Attachment attachment in Attachments)
+			foreach (Attachment attachment in Attachments)
 			{
-				if(Utility.IsPictureFile(attachment.ContentFileName))
+				if (Utility.IsPictureFile(attachment.ContentFileName))
 				{
 					if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
 						body = body.Replace("cid:" + attachment.Headers.ContentID, hsbFiles[attachment.ContentFileName].ToString());
@@ -169,7 +165,7 @@ namespace OpenPOP.MIME
 						body = body.Replace(attachment.ContentFileName, hsbFiles[attachment.ContentFileName].ToString());
 				}
 			}
-			
+
 			return body;
 		}
 
@@ -182,15 +178,15 @@ namespace OpenPOP.MIME
 		/// <returns>A Translated message body</returns>
 		public string TranslateHTMLPictureFiles(string body, DirectoryInfo path)
 		{
-			if(path == null)
+			if (path == null)
 				throw new ArgumentNullException("path");
 
-			if(!path.Exists)
+			if (!path.Exists)
 				throw new ArgumentException("The path" + path.FullName + " does not exist", "path");
-			
-			foreach(Attachment attachment in Attachments)
+
+			foreach (Attachment attachment in Attachments)
 			{
-				if(Utility.IsPictureFile(attachment.ContentFileName))
+				if (Utility.IsPictureFile(attachment.ContentFileName))
 				{
 					if (!string.IsNullOrEmpty(attachment.Headers.ContentID))
 						body = body.Replace("cid:" + attachment.Headers.ContentID, Path.Combine(path.FullName, attachment.ContentFileName));
@@ -210,25 +206,24 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> if all attachments was saved successfully, <see langword="false"/> if just one failed</returns>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
-			if(pathToSaveTo == null)
+			if (pathToSaveTo == null)
 				throw new ArgumentNullException("pathToSaveTo");
-			
-			if(!pathToSaveTo.Exists)
+
+			if (!pathToSaveTo.Exists)
 				throw new ArgumentException("The path" + pathToSaveTo.FullName + " does not exist", "pathToSaveTo");
-			
+
 			try
 			{
-				bool blnRet = true;
-				
+				bool result = true;
+
 				foreach (Attachment attachment in Attachments)
 				{
-					blnRet = attachment.SaveToFile(new FileInfo(Path.Combine(pathToSaveTo.FullName, attachment.ContentFileName)));
-					if (blnRet == false)
+					result = attachment.SaveToFile(new FileInfo(Path.Combine(pathToSaveTo.FullName, attachment.ContentFileName)));
+					if (result == false)
 						break;
 				}
-				return blnRet;
-			}
-			catch(Exception e)
+				return result;
+			} catch (Exception e)
 			{
 				Log.LogError(e.Message);
 				return false;
@@ -293,18 +288,18 @@ namespace OpenPOP.MIME
 						foreach (Attachment attachment in Attachments)
 						{
 							if (attachment.Headers.ContentType != null &&
-								// The content type must be plain or html
-								 (
-									attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
-									attachment.Headers.ContentType.MediaType.Contains("text/html")
-								 ) 
-								 &&
-								// But if the attachment is a message, it cannot have a filename/name
-								!(
-									(attachment.Headers.ContentType.Parameters != null && attachment.Headers.ContentType.Parameters.ContainsKey("name")) ||
-									(attachment.Headers.ContentDisposition != null && attachment.Headers.ContentDisposition.Parameters.ContainsKey("filename"))
-								 )
-							   )
+							    // The content type must be plain or html
+							    (
+							    	attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
+							    	attachment.Headers.ContentType.MediaType.Contains("text/html")
+							    )
+							    &&
+							    // But if the attachment is a message, it cannot have a filename/name
+							    !(
+							     	(attachment.Headers.ContentType.Parameters != null && attachment.Headers.ContentType.Parameters.ContainsKey("name")) ||
+							     	(attachment.Headers.ContentDisposition != null && attachment.Headers.ContentDisposition.Parameters.ContainsKey("filename"))
+							     )
+								)
 							{
 								MessageBody.Add(new MessageBody(attachment.DecodeAsText(), attachment.Headers.ContentType.MediaType));
 								toRemoveFromAttachments.Add(attachment);
@@ -316,8 +311,7 @@ namespace OpenPOP.MIME
 							Attachments.Remove(removeFromAttachment);
 						}
 					}
-				}
-				else
+				} else
 				{
 					// This is not a multipart message.
 					// This means that the whole message body is the actual message
@@ -344,12 +338,12 @@ namespace OpenPOP.MIME
 			bool moreParts = true;
 
 			// Keep working until we have parsed every message part in this message
-			while(moreParts)
+			while (moreParts)
 			{
 				// Find the start of the message parts multipartBoundary
 				indexOfAttachmentStart = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart);
 
-				if(indexOfAttachmentStart == -1)
+				if (indexOfAttachmentStart == -1)
 					throw new ArgumentException("The start of the attachment could not be found");
 
 				// Find the start of this message part - which does not include the multipartBoundary or the trailing CRLF
@@ -358,11 +352,11 @@ namespace OpenPOP.MIME
 				// Find the end of the attachment, were we do not want the last line
 				int indexOfAttachmentEnd = RawMessageBody.IndexOf(multipartBoundary, indexOfAttachmentStart);
 
-				if(indexOfAttachmentEnd == -1)
+				if (indexOfAttachmentEnd == -1)
 					throw new ArgumentException("The end of the attachment could not be found");
 
 				// Check if this is the last part, which ends with the multipartBoundary followed by "--"
-				if(RawMessageBody.Substring(indexOfAttachmentEnd).StartsWith(multipartBoundary + "--"))
+				if (RawMessageBody.Substring(indexOfAttachmentEnd).StartsWith(multipartBoundary + "--"))
 					moreParts = false;
 
 				// Calculate the length. We do not want to include the last "\r\n" in the attachment
@@ -374,31 +368,29 @@ namespace OpenPOP.MIME
 				// Check if this is the MS-TNEF attachment type
 				// which has ContentType application/ms-tnef
 				// and also if we should decode it
-				if(MIMETypes.IsMSTNEF(att.Headers.ContentType.MediaType) && AutoDecodeMSTNEF) 
+				if (MIMETypes.IsMSTNEF(att.Headers.ContentType.MediaType) && AutoDecodeMSTNEF)
 				{
 					// It was a MS-TNEF attachment. Now we should parse it.
 					using (TNEFParser tnef = new TNEFParser(att.DecodedAsBytes(), Log))
 					{
-						if (tnef.Parse( ))
+						if (tnef.Parse())
 						{
 							// ms-tnef attachment might contain multiple attachments inside it
-							foreach (TNEFAttachment tatt in tnef.Attachments( ))
+							foreach (TNEFAttachment tatt in tnef.Attachments())
 							{
-								Attachment attNew = new Attachment(tatt.Content, tatt.FileName, MIMETypes.GetMimeType( tatt.FileName ), Log);
+								Attachment attNew = new Attachment(tatt.Content, tatt.FileName, MIMETypes.GetMimeType(tatt.FileName), Log);
 								Attachments.Add(attNew);
 							}
-						}
-						else
+						} else
 							throw new ArgumentException("Could not parse TNEF attachment");
 					}
-				}
-				else if(att.isMultipartAttachment())
+				} else if (att.isMultipartAttachment())
 				{
 					// The attachment itself is a multipart message
 					// Parse it as such, and take the attachments from it
 					// and add it to our message
 					// This will in reality flatten the structure
-					Message m = att.DecodeAsMessage(true,true);
+					Message m = att.DecodeAsMessage(true, true);
 					foreach (MessageBody body in m.MessageBody)
 					{
 						MessageBody.Add(body);
@@ -406,8 +398,7 @@ namespace OpenPOP.MIME
 
 					foreach (Attachment attachment in m.Attachments)
 						Attachments.Add(attachment);
-				}
-				else
+				} else
 				{
 					// This must be an attachment
 					Attachments.Add(att);
@@ -450,7 +441,7 @@ namespace OpenPOP.MIME
 					// This is not a multipart message.
 					// It only contains some text
 					// Now we only need to decode the text according to encoding
-					body = Utility.DoDecode( buffer, Headers.ContentTransferEncoding, Headers.ContentType.CharSet );
+					body = Utility.DoDecode(buffer, Headers.ContentTransferEncoding, Headers.ContentType.CharSet);
 
 					MessageBody.Add(new MessageBody(body, Headers.ContentType.MediaType));
 					return;
@@ -499,8 +490,7 @@ namespace OpenPOP.MIME
 						body = Utility.DoDecode(body, multipartHeaders.ContentTransferEncoding, charSet);
 
 						MessageBody.Add(new MessageBody(body, multipartHeaders.ContentType.MediaType));
-					}
-					else
+					} else
 					{
 						// If we did not find any parts in the multipart message
 						// We just add everything as a message
@@ -512,8 +502,7 @@ namespace OpenPOP.MIME
 						break;
 					}
 				}
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				Log.LogError("GetMessageBody():" + e.Message);
 				string body;
@@ -522,8 +511,7 @@ namespace OpenPOP.MIME
 					// TODO foens: Why do we try to base64 decode here?
 					//             Can we just assume it is base64?!
 					body = Base64.Decode(buffer);
-				}
-				catch(Exception)
+				} catch (Exception)
 				{
 					body = buffer;
 				}

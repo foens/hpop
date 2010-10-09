@@ -26,11 +26,11 @@ namespace OpenPOP.MIME
 			if (!string.IsNullOrEmpty(filename))
 			{
 				filename = filename.ToLower();
-				if (filename.EndsWith( ".jpg" ) ||
-					filename.EndsWith( ".bmp" ) ||
-					filename.EndsWith( ".ico" ) ||
-					filename.EndsWith( ".gif" ) ||
-					filename.EndsWith( ".png" ))
+				if (filename.EndsWith(".jpg") ||
+				    filename.EndsWith(".bmp") ||
+				    filename.EndsWith(".ico") ||
+				    filename.EndsWith(".gif") ||
+				    filename.EndsWith(".png"))
 					return true;
 				return false;
 			}
@@ -57,8 +57,7 @@ namespace OpenPOP.MIME
 				}
 
 				return true;
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				System.Diagnostics.Trace.WriteLine("SaveByteContentToFile():" + e.Message);
 				return false;
@@ -69,16 +68,16 @@ namespace OpenPOP.MIME
 		/// Save text content to a file
 		/// </summary>
 		/// <param name="file">File to be saved to</param>
-		/// <param name="strText">Text content</param>
-		/// <param name="blnReplaceExists">Replace file if exists</param>
+		/// <param name="content">Text content</param>
+		/// <param name="replaceFileIfExists">Replace file if exists</param>
 		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
-		public static bool SavePlainTextToFile(FileInfo file, string strText, bool blnReplaceExists)
+		public static bool SavePlainTextToFile(FileInfo file, string content, bool replaceFileIfExists)
 		{
 			try
 			{
 				if (file.Exists)
 				{
-					if (blnReplaceExists)
+					if (replaceFileIfExists)
 						file.Delete();
 					else
 						return false; // Failure. File exist but we may not delete it
@@ -86,12 +85,11 @@ namespace OpenPOP.MIME
 
 				using (StreamWriter sw = new StreamWriter(file.Create()))
 				{
-					sw.Write(strText);
+					sw.Write(content);
 				}
 
 				return true; // Success
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				System.Diagnostics.Trace.WriteLine("SavePlainTextToFile():" + e.Message);
 				return false;
@@ -102,15 +100,15 @@ namespace OpenPOP.MIME
 		/// Read text content from a file
 		/// </summary>
 		/// <param name="file">File to be read from</param>
-		/// <param name="strText">This is where the content of the file is placed</param>
+		/// <param name="content">This is where the content of the file is placed</param>
 		/// <returns><see langword="true"/> if reading succeeded, <see langword="false"/> if failed</returns>
-		public static bool ReadPlainTextFromFile(FileInfo file, ref string strText)
+		public static bool ReadPlainTextFromFile(FileInfo file, ref string content)
 		{
-			if(file.Exists)
+			if (file.Exists)
 			{
 				using (StreamReader fs = new StreamReader(file.OpenRead()))
 				{
-					strText = fs.ReadToEnd();
+					content = fs.ReadToEnd();
 				}
 				return true;
 			}
@@ -124,14 +122,14 @@ namespace OpenPOP.MIME
 		/// </summary>
 		public static string[] GetHeadersValue(string rawHeader)
 		{
-			if(rawHeader == null)
+			if (rawHeader == null)
 				throw new ArgumentNullException("rawHeader", "Argument was null");
 
-			string[] array = new[] { "", "" };
-			int indexOfColon = rawHeader.IndexOf( ":" );
+			string[] array = new[] {"", ""};
+			int indexOfColon = rawHeader.IndexOf(":");
 
 			// Check if it is allowed to make substring calls
-			if(indexOfColon >= 0 && rawHeader.Length > indexOfColon + 1)
+			if (indexOfColon >= 0 && rawHeader.Length > indexOfColon + 1)
 			{
 				array[0] = rawHeader.Substring(0, indexOfColon).Trim();
 				array[1] = rawHeader.Substring(indexOfColon + 1).Trim();
@@ -149,9 +147,9 @@ namespace OpenPOP.MIME
 		{
 			string returner = text;
 
-			if(returner.StartsWith("\""))
+			if (returner.StartsWith("\""))
 				returner = returner.Substring(1);
-			if(returner.EndsWith("\""))
+			if (returner.EndsWith("\""))
 				returner = returner.Substring(0, returner.Length - 1);
 
 			return returner;
@@ -180,7 +178,7 @@ namespace OpenPOP.MIME
 			switch (contentTransferEncoding)
 			{
 				case ContentTransferEncoding.QuotedPrintable:
-					if(!string.IsNullOrEmpty((charSet)))
+					if (!string.IsNullOrEmpty((charSet)))
 						return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet));
 					return QuotedPrintable.Decode(input, Encoding.Default);
 
@@ -188,8 +186,7 @@ namespace OpenPOP.MIME
 					try
 					{
 						return Base64.Decode(input, charSet);
-					}
-					catch (Exception)
+					} catch (Exception)
 					{
 						// We cannot decode it.Simply return the encoded form.
 						return input;
@@ -198,7 +195,7 @@ namespace OpenPOP.MIME
 				case ContentTransferEncoding.SevenBit:
 				case ContentTransferEncoding.Binary:
 				case ContentTransferEncoding.EightBit:
-					if(!string.IsNullOrEmpty(charSet))
+					if (!string.IsNullOrEmpty(charSet))
 						return ChangeEncoding(input, charSet);
 
 					// Nothing needed to be done
@@ -251,6 +248,5 @@ namespace OpenPOP.MIME
 
 			return original.Remove(loc, toReplace.Length).Insert(loc, toReplaceWith);
 		}
-
 	}
 }

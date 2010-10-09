@@ -25,7 +25,7 @@ namespace OpenPOP.POP3
 
 			// Convert the hashed value back into a string
 			foreach (byte aByte in result)
-				returnThis.Append(Uri.HexEscape((char) aByte));
+				returnThis.Append(Uri.HexEscape((char)aByte));
 
 			return returnThis.ToString().Replace("%", "").ToLower();
 		}
