@@ -267,11 +267,10 @@ namespace OpenPOP.MIME
 			if (onlyParseHeaders == false)
 			{
 				// The message body must be the full raw message, with headers removed.
-				// Also remove any CRLF in top or bottom.
-				// TODO foens: I do not think it is valid to remove \r\n from the message. Some of these parts
-				//             could be used in later decoding (for example QuoutedPrintable cannot have a = without something behind
-				//             and that can happen if \r\n is removed
-				RawMessageBody = Utility.ReplaceFirstOccurrence(RawMessage, RawHeader, "").Trim();
+				// The headers does not contain the last \r\n of the last line
+				// The headers does not contain the delimiter \r\n to denote the end of the header section
+				// Therefore we add the \r\n\r\n to the RawHeader
+				RawMessageBody = Utility.ReplaceFirstOccurrence(RawMessage, RawHeader + "\r\n\r\n", "");
 
 				// Check if the message is a multipart message (which means, has multiple message bodies)
 				if (Headers.ContentType.MediaType.ToLower().Contains("multipart"))

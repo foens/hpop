@@ -176,16 +176,7 @@ namespace OpenPOP.MIME.Decode
 			if (decode[0] != '=')
 				throw new ArgumentException();
 
-			// If the length is only one, the only thing there is an equal sign
-			// Simply return the equal sign then
-			if (decode.Length == 1)
-				return decode;	// foens: TODO It could be that the last \r\n was trimmed away - Would we like
-								//        to go away from the RFC and return an emptry string here?
-								//        I think we should stick to the RFC and try to find the places where
-								//        \r\n is trimmed away
-
-			// If there are more characters behind the equal sign, we simply return it as
-			// an un-endoded string
+			// We will now believe that the string sent to us, was actually not encoded
 			return decode;
 		}
 

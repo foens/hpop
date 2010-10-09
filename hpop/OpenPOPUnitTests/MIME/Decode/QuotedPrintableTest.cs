@@ -169,9 +169,6 @@ namespace OpenPOPUnitTests.MIME.Decode
 			Assert.AreEqual(expectedOutput, output);
 		}
 
-		// TODO Need help understanding bullet 4 of <see cref="http://tools.ietf.org/html/rfc2045#section-6.7"/>
-		// and to implement a test case of it
-
 		/// <see cref="http://en.wikipedia.org/wiki/Quoted-printable#Example"/>
 		/// This also tests
 		/// <see cref="http://tools.ietf.org/html/rfc2045#section-6.7"/>
@@ -311,11 +308,13 @@ namespace OpenPOPUnitTests.MIME.Decode
 
 			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.Default); }); // Maybe exception thrown?
 
-			// foens: TODO Would we like to assure that the equal sign is deleted, or if it is kept?
-			// foens: I have a message where the last part is an equal sign, and that sign should not be there (it should be deleted in my case)
-			//        I have researched a bit, and found that OpenPOP trims the lines, and therefore the message I have is actually in correct
-			//        format, but the last \r\n is trimmed away.
-			//        RFC states that it should be kept
+			// The RFC says that the input should be though of as not encoded at all
+			const string expectedOutput = "=";
+
+			string output = QuotedPrintable.Decode(input, Encoding.Default);
+
+			// And output should be correct
+			Assert.AreEqual(expectedOutput, output);
 		}
 
 		/// <summary>
