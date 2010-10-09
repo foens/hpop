@@ -16,12 +16,12 @@ namespace OpenPOP.NET_Sample_App
 {
 	public class frmTest : Form
 	{
-		private readonly Hashtable msgs = new Hashtable();
+		private readonly Hashtable messages = new Hashtable();
 		private readonly POPClient popClient;
 		private Button ConnectAndRetrieveButton;
 		private Button UIDLButton;
 		private Panel attachmentPanel;
-		private ContextMenu ctmMessages;
+		private ContextMenu contextMenuMessages;
 		private DataGrid gridHeaders;
 		private Label label1;
 		private Label label2;
@@ -33,22 +33,22 @@ namespace OpenPOP.NET_Sample_App
 		private Label label8;
 		private TreeView listAttachments;
 		private TreeView listMessages;
-		private ListBox lstEvents;
-		private MenuItem mnuDeleteMessage;
-		private MenuItem mnuViewSource;
+		private ListBox listOfEvents;
+		private MenuItem menuDeleteMessage;
+		private MenuItem menuViewSource;
 		private Panel panel1;
 		private Panel panel2;
 		private Panel panel3;
 		private Panel panel4;
 		private Panel panel5;
 		private SaveFileDialog saveFile;
-		private TextBox txtLogin;
-		private TextBox txtMessage;
-		private TextBox txtPOPServer;
-		private TextBox txtPassword;
-		private TextBox txtPort;
-		private TextBox txtTotalMessages;
-		private CheckBox useSsl;
+		private TextBox loginTextBox;
+		private TextBox messageTextBox;
+		private TextBox popServerTextBox;
+		private TextBox passwordTextBox;
+		private TextBox portTextBox;
+		private TextBox totalMessagesTextBox;
+		private CheckBox useSslCheckBox;
 
 		private frmTest()
 		{
@@ -62,7 +62,7 @@ namespace OpenPOP.NET_Sample_App
 			//
 
 			// This is how you would override the default logger type,
-			// typically the app would just pass in the ILog interface object using the constructor
+			// typically the application would just pass in the ILog interface object using the constructor
 			DefaultLogger.LoggerFactory = AppLoggerFactory;
 
 			popClient = new POPClient( /* new DiagnosticsLogger() */ );
@@ -81,11 +81,11 @@ namespace OpenPOP.NET_Sample_App
 			{
 				using (StreamReader reader = new StreamReader(File.OpenRead(file)))
 				{
-					txtPOPServer.Text = reader.ReadLine();
-					txtPort.Text = reader.ReadLine();
-					useSsl.Checked = bool.Parse(reader.ReadLine() ?? "true");
-					txtLogin.Text = reader.ReadLine();
-					txtPassword.Text = reader.ReadLine();
+					popServerTextBox.Text = reader.ReadLine();
+					portTextBox.Text = reader.ReadLine();
+					useSslCheckBox.Checked = bool.Parse(reader.ReadLine() ?? "true");
+					loginTextBox.Text = reader.ReadLine();
+					passwordTextBox.Text = reader.ReadLine();
 				}
 			}
 
@@ -101,36 +101,36 @@ namespace OpenPOP.NET_Sample_App
 		private void InitializeComponent()
 		{
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.useSsl = new System.Windows.Forms.CheckBox();
+			this.useSslCheckBox = new System.Windows.Forms.CheckBox();
 			this.UIDLButton = new System.Windows.Forms.Button();
-			this.txtTotalMessages = new System.Windows.Forms.TextBox();
+			this.totalMessagesTextBox = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
-			this.txtPassword = new System.Windows.Forms.TextBox();
+			this.passwordTextBox = new System.Windows.Forms.TextBox();
 			this.label8 = new System.Windows.Forms.Label();
-			this.txtLogin = new System.Windows.Forms.TextBox();
+			this.loginTextBox = new System.Windows.Forms.TextBox();
 			this.ConnectAndRetrieveButton = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
-			this.txtPort = new System.Windows.Forms.TextBox();
+			this.portTextBox = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
-			this.txtPOPServer = new System.Windows.Forms.TextBox();
+			this.popServerTextBox = new System.Windows.Forms.TextBox();
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.gridHeaders = new System.Windows.Forms.DataGrid();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.panel4 = new System.Windows.Forms.Panel();
-			this.lstEvents = new System.Windows.Forms.ListBox();
-			this.txtMessage = new System.Windows.Forms.TextBox();
+			this.listOfEvents = new System.Windows.Forms.ListBox();
+			this.messageTextBox = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.panel5 = new System.Windows.Forms.Panel();
 			this.listMessages = new System.Windows.Forms.TreeView();
-			this.ctmMessages = new System.Windows.Forms.ContextMenu();
-			this.mnuDeleteMessage = new System.Windows.Forms.MenuItem();
+			this.contextMenuMessages = new System.Windows.Forms.ContextMenu();
+			this.menuDeleteMessage = new System.Windows.Forms.MenuItem();
 			this.label5 = new System.Windows.Forms.Label();
 			this.attachmentPanel = new System.Windows.Forms.Panel();
 			this.listAttachments = new System.Windows.Forms.TreeView();
 			this.label3 = new System.Windows.Forms.Label();
 			this.saveFile = new System.Windows.Forms.SaveFileDialog();
-			this.mnuViewSource = new System.Windows.Forms.MenuItem();
+			this.menuViewSource = new System.Windows.Forms.MenuItem();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -142,36 +142,36 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// panel1
 			// 
-			this.panel1.Controls.Add(this.useSsl);
+			this.panel1.Controls.Add(this.useSslCheckBox);
 			this.panel1.Controls.Add(this.UIDLButton);
-			this.panel1.Controls.Add(this.txtTotalMessages);
+			this.panel1.Controls.Add(this.totalMessagesTextBox);
 			this.panel1.Controls.Add(this.label6);
 			this.panel1.Controls.Add(this.label7);
-			this.panel1.Controls.Add(this.txtPassword);
+			this.panel1.Controls.Add(this.passwordTextBox);
 			this.panel1.Controls.Add(this.label8);
-			this.panel1.Controls.Add(this.txtLogin);
+			this.panel1.Controls.Add(this.loginTextBox);
 			this.panel1.Controls.Add(this.ConnectAndRetrieveButton);
 			this.panel1.Controls.Add(this.label2);
-			this.panel1.Controls.Add(this.txtPort);
+			this.panel1.Controls.Add(this.portTextBox);
 			this.panel1.Controls.Add(this.label1);
-			this.panel1.Controls.Add(this.txtPOPServer);
+			this.panel1.Controls.Add(this.popServerTextBox);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(804, 64);
 			this.panel1.TabIndex = 0;
 			// 
-			// useSsl
+			// useSslCheckBox
 			// 
-			this.useSsl.AutoSize = true;
-			this.useSsl.Checked = true;
-			this.useSsl.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.useSsl.Location = new System.Drawing.Point(19, 38);
-			this.useSsl.Name = "useSsl";
-			this.useSsl.Size = new System.Drawing.Size(68, 17);
-			this.useSsl.TabIndex = 4;
-			this.useSsl.Text = "Use SSL";
-			this.useSsl.UseVisualStyleBackColor = true;
+			this.useSslCheckBox.AutoSize = true;
+			this.useSslCheckBox.Checked = true;
+			this.useSslCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.useSslCheckBox.Location = new System.Drawing.Point(19, 38);
+			this.useSslCheckBox.Name = "useSslCheckBox";
+			this.useSslCheckBox.Size = new System.Drawing.Size(68, 17);
+			this.useSslCheckBox.TabIndex = 4;
+			this.useSslCheckBox.Text = "Use SSL";
+			this.useSslCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// UIDLButton
 			// 
@@ -182,12 +182,12 @@ namespace OpenPOP.NET_Sample_App
 			this.UIDLButton.Text = "UIDL";
 			this.UIDLButton.Click += new System.EventHandler(this.UIDLButtonClick);
 			// 
-			// txtTotalMessages
+			// totalMessagesTextBox
 			// 
-			this.txtTotalMessages.Location = new System.Drawing.Point(553, 30);
-			this.txtTotalMessages.Name = "txtTotalMessages";
-			this.txtTotalMessages.Size = new System.Drawing.Size(100, 20);
-			this.txtTotalMessages.TabIndex = 7;
+			this.totalMessagesTextBox.Location = new System.Drawing.Point(553, 30);
+			this.totalMessagesTextBox.Name = "totalMessagesTextBox";
+			this.totalMessagesTextBox.Size = new System.Drawing.Size(100, 20);
+			this.totalMessagesTextBox.TabIndex = 7;
 			// 
 			// label6
 			// 
@@ -205,13 +205,13 @@ namespace OpenPOP.NET_Sample_App
 			this.label7.TabIndex = 8;
 			this.label7.Text = "Password";
 			// 
-			// txtPassword
+			// passwordTextBox
 			// 
-			this.txtPassword.Location = new System.Drawing.Point(328, 36);
-			this.txtPassword.Name = "txtPassword";
-			this.txtPassword.PasswordChar = '*';
-			this.txtPassword.Size = new System.Drawing.Size(128, 20);
-			this.txtPassword.TabIndex = 2;
+			this.passwordTextBox.Location = new System.Drawing.Point(328, 36);
+			this.passwordTextBox.Name = "passwordTextBox";
+			this.passwordTextBox.PasswordChar = '*';
+			this.passwordTextBox.Size = new System.Drawing.Size(128, 20);
+			this.passwordTextBox.TabIndex = 2;
 			// 
 			// label8
 			// 
@@ -221,12 +221,12 @@ namespace OpenPOP.NET_Sample_App
 			this.label8.TabIndex = 6;
 			this.label8.Text = "Login";
 			// 
-			// txtLogin
+			// loginTextBox
 			// 
-			this.txtLogin.Location = new System.Drawing.Point(328, 5);
-			this.txtLogin.Name = "txtLogin";
-			this.txtLogin.Size = new System.Drawing.Size(128, 20);
-			this.txtLogin.TabIndex = 1;
+			this.loginTextBox.Location = new System.Drawing.Point(328, 5);
+			this.loginTextBox.Name = "loginTextBox";
+			this.loginTextBox.Size = new System.Drawing.Size(128, 20);
+			this.loginTextBox.TabIndex = 1;
 			// 
 			// ConnectAndRetrieveButton
 			// 
@@ -245,13 +245,13 @@ namespace OpenPOP.NET_Sample_App
 			this.label2.TabIndex = 3;
 			this.label2.Text = "Port";
 			// 
-			// txtPort
+			// portTextBox
 			// 
-			this.txtPort.Location = new System.Drawing.Point(128, 39);
-			this.txtPort.Name = "txtPort";
-			this.txtPort.Size = new System.Drawing.Size(128, 20);
-			this.txtPort.TabIndex = 3;
-			this.txtPort.Text = "110";
+			this.portTextBox.Location = new System.Drawing.Point(128, 39);
+			this.portTextBox.Name = "portTextBox";
+			this.portTextBox.Size = new System.Drawing.Size(128, 20);
+			this.portTextBox.TabIndex = 3;
+			this.portTextBox.Text = "110";
 			// 
 			// label1
 			// 
@@ -261,13 +261,13 @@ namespace OpenPOP.NET_Sample_App
 			this.label1.TabIndex = 1;
 			this.label1.Text = "POP Server Address";
 			// 
-			// txtPOPServer
+			// popServerTextBox
 			// 
-			this.txtPOPServer.Location = new System.Drawing.Point(128, 8);
-			this.txtPOPServer.Name = "txtPOPServer";
-			this.txtPOPServer.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-			this.txtPOPServer.Size = new System.Drawing.Size(128, 20);
-			this.txtPOPServer.TabIndex = 0;
+			this.popServerTextBox.Location = new System.Drawing.Point(128, 8);
+			this.popServerTextBox.Name = "popServerTextBox";
+			this.popServerTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
+			this.popServerTextBox.Size = new System.Drawing.Size(128, 20);
+			this.popServerTextBox.TabIndex = 0;
 			// 
 			// panel2
 			// 
@@ -305,8 +305,8 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			// panel4
 			// 
-			this.panel4.Controls.Add(this.lstEvents);
-			this.panel4.Controls.Add(this.txtMessage);
+			this.panel4.Controls.Add(this.listOfEvents);
+			this.panel4.Controls.Add(this.messageTextBox);
 			this.panel4.Controls.Add(this.label4);
 			this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panel4.Location = new System.Drawing.Point(175, 0);
@@ -314,27 +314,27 @@ namespace OpenPOP.NET_Sample_App
 			this.panel4.Size = new System.Drawing.Size(492, 196);
 			this.panel4.TabIndex = 6;
 			// 
-			// lstEvents
+			// listOfEvents
 			// 
-			this.lstEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+			this.listOfEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
 			                                                              | System.Windows.Forms.AnchorStyles.Right)));
-			this.lstEvents.Location = new System.Drawing.Point(7, 171);
-			this.lstEvents.Name = "lstEvents";
-			this.lstEvents.Size = new System.Drawing.Size(475, 17);
-			this.lstEvents.TabIndex = 8;
+			this.listOfEvents.Location = new System.Drawing.Point(7, 171);
+			this.listOfEvents.Name = "lstEvents";
+			this.listOfEvents.Size = new System.Drawing.Size(475, 17);
+			this.listOfEvents.TabIndex = 8;
 			// 
-			// txtMessage
+			// messageTextBox
 			// 
-			this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this.messageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 			                                                                | System.Windows.Forms.AnchorStyles.Left)
 			                                                               | System.Windows.Forms.AnchorStyles.Right)));
-			this.txtMessage.Location = new System.Drawing.Point(7, 22);
-			this.txtMessage.MaxLength = 999999999;
-			this.txtMessage.Multiline = true;
-			this.txtMessage.Name = "txtMessage";
-			this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.txtMessage.Size = new System.Drawing.Size(476, 143);
-			this.txtMessage.TabIndex = 9;
+			this.messageTextBox.Location = new System.Drawing.Point(7, 22);
+			this.messageTextBox.MaxLength = 999999999;
+			this.messageTextBox.Multiline = true;
+			this.messageTextBox.Name = "messageTextBox";
+			this.messageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+			this.messageTextBox.Size = new System.Drawing.Size(476, 143);
+			this.messageTextBox.TabIndex = 9;
 			// 
 			// label4
 			// 
@@ -359,7 +359,7 @@ namespace OpenPOP.NET_Sample_App
 			this.listMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 			                                                                  | System.Windows.Forms.AnchorStyles.Left)
 			                                                                 | System.Windows.Forms.AnchorStyles.Right)));
-			this.listMessages.ContextMenu = this.ctmMessages;
+			this.listMessages.ContextMenu = this.contextMenuMessages;
 			this.listMessages.Location = new System.Drawing.Point(8, 24);
 			this.listMessages.Name = "listMessages";
 			this.listMessages.ShowLines = false;
@@ -368,19 +368,19 @@ namespace OpenPOP.NET_Sample_App
 			this.listMessages.TabIndex = 8;
 			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.listMessages_AfterSelect);
 			// 
-			// ctmMessages
+			// contextMenuMessages
 			// 
-			this.ctmMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[]
+			this.contextMenuMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[]
 			                                    	{
-			                                    		this.mnuDeleteMessage,
-			                                    		this.mnuViewSource
+			                                    		this.menuDeleteMessage,
+			                                    		this.menuViewSource
 			                                    	});
 			// 
-			// mnuDeleteMessage
+			// menuDeleteMessage
 			// 
-			this.mnuDeleteMessage.Index = 0;
-			this.mnuDeleteMessage.Text = "Delete Mail";
-			this.mnuDeleteMessage.Click += new System.EventHandler(this.mnuDeleteMessage_Click);
+			this.menuDeleteMessage.Index = 0;
+			this.menuDeleteMessage.Text = "Delete Mail";
+			this.menuDeleteMessage.Click += new System.EventHandler(this.mnuDeleteMessage_Click);
 			// 
 			// label5
 			// 
@@ -426,11 +426,11 @@ namespace OpenPOP.NET_Sample_App
 			// 
 			this.saveFile.Title = "Save Attachment";
 			// 
-			// mnuViewSource
+			// menuViewSource
 			// 
-			this.mnuViewSource.Index = 1;
-			this.mnuViewSource.Text = "View source";
-			this.mnuViewSource.Click += new System.EventHandler(this.mnuDeleteMessageClick);
+			this.menuViewSource.Index = 1;
+			this.menuViewSource.Text = "View source";
+			this.menuViewSource.Click += new System.EventHandler(this.mnuDeleteMessageClick);
 			// 
 			// frmTest
 			// 
@@ -480,12 +480,12 @@ namespace OpenPOP.NET_Sample_App
 			{
 				if (popClient.Connected)
 					popClient.Disconnect();
-				popClient.Connect(txtPOPServer.Text, int.Parse(txtPort.Text), useSsl.Checked);
-				popClient.Authenticate(txtLogin.Text, txtPassword.Text);
+				popClient.Connect(popServerTextBox.Text, int.Parse(portTextBox.Text), useSslCheckBox.Checked);
+				popClient.Authenticate(loginTextBox.Text, passwordTextBox.Text);
 				int Count = popClient.GetMessageCount();
-				txtTotalMessages.Text = Count.ToString();
-				txtMessage.Text = "";
-				msgs.Clear();
+				totalMessagesTextBox.Text = Count.ToString();
+				messageTextBox.Text = "";
+				messages.Clear();
 				listMessages.Nodes.Clear();
 				listAttachments.Nodes.Clear();
 
@@ -506,7 +506,7 @@ namespace OpenPOP.NET_Sample_App
 						Message m = popClient.GetMessage(i);
 
 						success++;
-						msgs.Add("msg" + i, m);
+						messages.Add("msg" + i, m);
 						TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
 						node.Tag = i.ToString();
 					} catch (Exception)
@@ -542,7 +542,7 @@ namespace OpenPOP.NET_Sample_App
 
 		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
+			Message m = (Message)messages["msg" + listMessages.SelectedNode.Tag];
 			if (m != null)
 			{
 				if (m.MessageBody.Count > 0)
@@ -553,14 +553,14 @@ namespace OpenPOP.NET_Sample_App
 					{
 						if (messageBody.Type.ToLower().Equals("text/plain"))
 						{
-							txtMessage.Text = messageBody.Body;
+							messageTextBox.Text = messageBody.Body;
 							messageSet = true;
 							break;
 						}
 					}
 
 					if (!messageSet)
-						txtMessage.Text = m.MessageBody[0].Body;
+						messageTextBox.Text = m.MessageBody[0].Body;
 				}
 				listAttachments.Nodes.Clear();
 
@@ -617,7 +617,7 @@ namespace OpenPOP.NET_Sample_App
 		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 			Attachment att = (Attachment)listAttachments.SelectedNode.Tag;
-			Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
+			Message m = (Message)messages["msg" + listMessages.SelectedNode.Tag];
 			if (att != null && m != null)
 			{
 				saveFile.FileName = att.ContentFileName;
@@ -681,13 +681,13 @@ namespace OpenPOP.NET_Sample_App
 				stringBuilder.Append(uid + "\r\n");
 			}
 
-			txtMessage.Text = stringBuilder.ToString();
+			messageTextBox.Text = stringBuilder.ToString();
 		}
 
 		private void AddEvent(string strEvent)
 		{
-			lstEvents.Items.Add(strEvent);
-			lstEvents.SelectedIndex = lstEvents.Items.Count - 1;
+			listOfEvents.Items.Add(strEvent);
+			listOfEvents.SelectedIndex = listOfEvents.Items.Count - 1;
 		}
 
 		private void popClient_CommunicationBegan(POPClient sender)
@@ -729,7 +729,7 @@ namespace OpenPOP.NET_Sample_App
 		{
 			if (listMessages.SelectedNode != null)
 			{
-				Message m = (Message)msgs["msg" + listMessages.SelectedNode.Tag];
+				Message m = (Message)messages["msg" + listMessages.SelectedNode.Tag];
 
 				ShowSourceForm sourceForm = new ShowSourceForm(m.RawMessage);
 				sourceForm.ShowDialog();

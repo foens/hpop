@@ -38,8 +38,8 @@ namespace OpenPOP.MIME
 		private readonly List<TNEFAttachment> _attachments = new List<TNEFAttachment>();
 		private TNEFAttachment _attachment;
 
-		private long _fileLength;
-		private string strSubject;
+		private long fileLength;
+		private string subject;
 		#endregion
 
 		#region Properties
@@ -154,7 +154,7 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-				if (fsTNEF.Position + size <= _fileLength)
+				if (fsTNEF.Position + size <= fileLength)
 				{
 					fsTNEF.Read(buffer, 0, size);
 					return 1;
@@ -194,7 +194,7 @@ namespace OpenPOP.MIME
 			try
 			{
 				fsTNEF = file.OpenRead();
-				_fileLength = file.Length;
+				fileLength = file.Length;
 				return true;
 			} catch (Exception e)
 			{
@@ -214,7 +214,7 @@ namespace OpenPOP.MIME
 			try
 			{
 				fsTNEF = new MemoryStream(content);
-				_fileLength = content.Length;
+				fileLength = content.Length;
 				return true;
 			} catch (Exception e)
 			{
@@ -230,6 +230,7 @@ namespace OpenPOP.MIME
 		/// <returns>true if found, vice versa</returns>
 		public bool FindSignature()
 		{
+			AssertDisposed();
 			bool returner;
 			long leftPosition = 0;
 
@@ -343,9 +344,9 @@ namespace OpenPOP.MIME
 
 					Array.Copy(buffer, _subjectBuffer, (long) length - 1);
 
-					strSubject = Encoding.Default.GetString(_subjectBuffer);
+					subject = Encoding.Default.GetString(_subjectBuffer);
 
-					PrintResult("Found subject: {0}", strSubject);
+					PrintResult("Found subject: {0}", subject);
 
 					geti16(); /* checksum */
 
@@ -362,7 +363,7 @@ namespace OpenPOP.MIME
 
 					//new attachment found because attachment data goes before attachment name
 					_attachment.FileName = strFileName;
-					_attachment.Subject = strSubject;
+					_attachment.Subject = subject;
 					_attachments.Add(_attachment);
 
 					geti16(); /* checksum */
@@ -405,6 +406,7 @@ namespace OpenPOP.MIME
 		/// <returns>attachment array</returns>
 		public List<TNEFAttachment> Attachments()
 		{
+			AssertDisposed();
 			return _attachments;
 		}
 
@@ -414,6 +416,7 @@ namespace OpenPOP.MIME
 		/// <returns>true is succeded, vice versa</returns>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
+			AssertDisposed();
 			bool result = false;
 
 			foreach (TNEFAttachment tnefAttachment in _attachments)
@@ -470,6 +473,7 @@ namespace OpenPOP.MIME
 		/// <returns>true is succeded, vice versa</returns>
 		public bool Parse()
 		{
+			AssertDisposed();
 			byte[] buffer = new byte[4];
 
 			if (FindSignature())

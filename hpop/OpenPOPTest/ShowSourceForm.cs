@@ -1,16 +1,10 @@
-﻿using System.ComponentModel;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace OpenPOP.NET_Sample_App
 {
 	public class ShowSourceForm : Form
 	{
 		private readonly string Source;
-
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private readonly IContainer components;
 
 		private Panel panel1;
 		private RichTextBox sourceText;
@@ -20,19 +14,6 @@ namespace OpenPOP.NET_Sample_App
 			Source = source;
 			InitializeComponent();
 			SetupText();
-		}
-
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && (components != null))
-			{
-				components.Dispose();
-			}
-			base.Dispose(disposing);
 		}
 
 		private void SetupText()

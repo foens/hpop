@@ -321,22 +321,23 @@ namespace OpenPOP.MIME
 		{
 			try
 			{
-				string strFileExtension = new FileInfo(fileName).Extension;
-				string strContentType;
+				string fileExtension = new FileInfo(fileName).Extension;
+				string contentType = null;
 				bool mono = Environment.OSVersion.Platform == PlatformID.Unix; // Are we running of Mono?
 
 				if (mono)
 				{
-					strContentType = ContentType(strFileExtension);
+					contentType = ContentType(fileExtension);
 				} else
 				{
-					Microsoft.Win32.RegistryKey extKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(strFileExtension);
-					strContentType = (string) extKey.GetValue("Content Type");
+					Microsoft.Win32.RegistryKey extKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(fileExtension);
+					if(extKey != null)
+						contentType = (string) extKey.GetValue("Content Type");
 				}
 
-				if (strContentType != null)
+				if (contentType != null)
 				{
-					return strContentType;
+					return contentType;
 				}
 
 				// TODO Some documentation why this is a good choice (if it is) would be nice

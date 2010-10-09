@@ -3,6 +3,7 @@ using System.Text;
 using System.IO;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME
 {
@@ -59,7 +60,7 @@ namespace OpenPOP.MIME
 				return true;
 			} catch (Exception e)
 			{
-				System.Diagnostics.Trace.WriteLine("SaveByteContentToFile():" + e.Message);
+				DefaultLogger.CreateLogger().LogError("SaveByteContentToFile():" + e.Message);
 				return false;
 			}
 		}
@@ -91,7 +92,7 @@ namespace OpenPOP.MIME
 				return true; // Success
 			} catch (Exception e)
 			{
-				System.Diagnostics.Trace.WriteLine("SavePlainTextToFile():" + e.Message);
+				DefaultLogger.CreateLogger().LogError("SavePlainTextToFile():" + e.Message);
 				return false;
 			}
 		}

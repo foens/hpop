@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 
@@ -33,28 +34,29 @@ namespace OpenPOP.MIME.Header
 				string headerName = splittedValue[0];
 				string headerValue = splittedValue[1];
 
-				// Read a single header. It might be a multi line header
-				if (IsMoreLinesInHeaderValue(messageReader))
+				// Keep reading until we would hit next header
+				// This if for handling multi line headers
+				while (IsMoreLinesInHeaderValue(messageReader))
 				{
-					// Keep reading until we would hit next header
-					while (IsMoreLinesInHeaderValue(messageReader))
-					{
-						// Unfolding is accomplished by simply removing any CRLF
-						// that is immediately followed by WSP
-						// This was done using ReadLine
-						string moreHeaderValue = messageReader.ReadLine();
-						headerValue += moreHeaderValue.Substring(1); // Remove the first whitespace
+					// Unfolding is accomplished by simply removing any CRLF
+					// that is immediately followed by WSP
+					// This was done using ReadLine
+					string moreHeaderValue = messageReader.ReadLine();
 
-						rawHeadersBuilder.Append(moreHeaderValue + "\r\n");
-					}
+					// if this exception is ever raised, there is an algorithm failure
+					// IsMoreLinesInHeaderValue should not return true if the next line
+					// does not exist
+					if (moreHeaderValue == null)
+						throw new NullReferenceException("This should never happen, since IsMoreLinesInHeaderValue method call was true");
 
-					// Now we have the name and full value. Add it
-					headers.Add(headerName, headerValue);
-				} else
-				{
-					// This is a single line header. Simply insert it
-					headers.Add(headerName, headerValue);
+					headerValue += moreHeaderValue.Substring(1); // Remove the first whitespace
+
+					rawHeadersBuilder.Append(moreHeaderValue + "\r\n");
 				}
+
+				// Now we have the name and full value. Add it
+				headers.Add(headerName, headerValue);
+				
 			}
 
 			// Set the out parameter to our raw header. Remember to remove the last line ending.

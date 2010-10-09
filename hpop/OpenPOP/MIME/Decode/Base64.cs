@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text;
 using OpenPOP.Shared.Logging;
 
@@ -30,7 +29,7 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string</returns>
 		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException"> Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
-		public static string Decode(string base64Encoded, Encoding encoding)
+		private static string Decode(string base64Encoded, Encoding encoding)
 		{
 			return encoding.GetString(DecodeToBytes(base64Encoded));
 		}

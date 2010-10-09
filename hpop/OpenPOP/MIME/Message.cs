@@ -87,11 +87,11 @@ namespace OpenPOP.MIME
 		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, FileInfo emlFile, ILog logger)
 			: this(logger)
 		{
-			string strMessage = null;
-			if (Utility.ReadPlainTextFromFile(emlFile, ref strMessage))
+			string messageContent = null;
+			if (Utility.ReadPlainTextFromFile(emlFile, ref messageContent))
 			{
 				AutoDecodeMSTNEF = autoDecodeMSTNEF;
-				InitializeMessage(strMessage, onlyParseHeader);
+				InitializeMessage(messageContent, onlyParseHeader);
 			} else
 			{
 				throw new FileNotFoundException("Could not find file " + emlFile);
