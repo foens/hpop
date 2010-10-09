@@ -27,13 +27,11 @@ namespace OpenPOP.MIME
 			if (!string.IsNullOrEmpty(filename))
 			{
 				filename = filename.ToLower();
-				if (filename.EndsWith(".jpg") ||
-				    filename.EndsWith(".bmp") ||
-				    filename.EndsWith(".ico") ||
-				    filename.EndsWith(".gif") ||
-				    filename.EndsWith(".png"))
-					return true;
-				return false;
+				return filename.EndsWith(".jpg") ||
+				       filename.EndsWith(".bmp") ||
+				       filename.EndsWith(".ico") ||
+				       filename.EndsWith(".gif") ||
+				       filename.EndsWith(".png");
 			}
 			return false;
 		}

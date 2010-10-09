@@ -408,19 +408,22 @@ namespace OpenPOP.POP3
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
-			if (authenticationMethod == AuthenticationMethod.UsernameAndPassword)
+			switch (authenticationMethod)
 			{
-				AuthenticateUsingUSER(username, password);
-			} else if (authenticationMethod == AuthenticationMethod.APOP)
-			{
-				AuthenticateUsingAPOP(username, password);
-			} else if (authenticationMethod == AuthenticationMethod.TryBoth)
-			{
-				// Check if APOP is supported
-				if (APOPSupported)
-					AuthenticateUsingAPOP(username, password);
-				else
+				case AuthenticationMethod.UsernameAndPassword:
 					AuthenticateUsingUSER(username, password);
+					break;
+
+				case AuthenticationMethod.APOP:
+					AuthenticateUsingAPOP(username, password);
+					break;
+
+				case AuthenticationMethod.TryBoth:
+					if (APOPSupported)
+						AuthenticateUsingAPOP(username, password);
+					else
+						AuthenticateUsingUSER(username, password);
+					break;
 			}
 		}
 

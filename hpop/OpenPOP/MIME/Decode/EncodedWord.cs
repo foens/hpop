@@ -48,60 +48,60 @@ namespace OpenPOP.MIME.Decode
 			MatchCollection matches = Regex.Matches(encodedWords, strRegEx);
 			foreach (Match match in matches)
 			{
-				if (match.Success)
+				// If this match was not a success, we should not use it
+				if (!match.Success) continue;
+
+				string fullMatchValue = match.Value;
+
+				string encodedText = match.Groups["Content"].Value;
+				string encoding = match.Groups["Encoding"].Value;
+				string charset = match.Groups["Charset"].Value;
+
+				// Store decoded text here when done
+				string decodedText;
+
+				// Encoding may also be written in lowercase
+				switch (encoding.ToUpper())
 				{
-					string fullMatchValue = match.Value;
-
-					string encodedText = match.Groups["Content"].Value;
-					string encoding = match.Groups["Encoding"].Value;
-					string charset = match.Groups["Charset"].Value;
-
-					// Store decoded text here when done
-					string decodedText;
-
-					// Encoding may also be written in lowercase
-					switch (encoding.ToUpper())
-					{
 						// RFC:
 						// The "B" encoding is identical to the "BASE64" 
 						// encoding defined by RFC 2045.
-						case "B":
-							try
-							{
-								decodedText = Base64.Decode(encodedText, charset);
-							} catch (Exception)
-							{
-								// We cannot decode it.Simply return the encoded form.
-								decodedText = fullMatchValue;
-							}
-							break;
+					case "B":
+						try
+						{
+							decodedText = Base64.Decode(encodedText, charset);
+						} catch (Exception)
+						{
+							// We cannot decode it.Simply return the encoded form.
+							decodedText = fullMatchValue;
+						}
+						break;
 
 						// RFC:
 						// The "Q" encoding is similar to the "Quoted-Printable" content-
 						// transfer-encoding defined in RFC 2045.
 						// There are mo details to this. Please check section 4.2 in
 						// http://tools.ietf.org/html/rfc2047
-						case "Q":
-							try
-							{
-								decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
-							} catch (ArgumentException)
-							{
-								// The encoding we are using is not supported.
-								// Therefore we cannot decode it. We must simply return
-								// the encoded form
-								// TODO What encodings are not supported? Can we support them?
-								decodedText = fullMatchValue;
-							}
-							break;
+					case "Q":
+						try
+						{
+							decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
+						} catch (ArgumentException)
+						{
+							// The encoding we are using is not supported.
+							// Therefore we cannot decode it. We must simply return
+							// the encoded form
+							// TODO What encodings are not supported? Can we support them?
+							decodedText = fullMatchValue;
+						}
+						break;
 
-						default:
-							throw new ArgumentException("The encoding " + encoding + " was not recognized");
-					}
-
-					// Repalce our encoded value with our decoded value
-					decodedWords = decodedWords.Replace(fullMatchValue, decodedText);
+					default:
+						throw new ArgumentException("The encoding " + encoding + " was not recognized");
 				}
+
+				// Repalce our encoded value with our decoded value
+				decodedWords = decodedWords.Replace(fullMatchValue, decodedText);
 			}
 
 			return decodedWords;
