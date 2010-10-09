@@ -225,7 +225,7 @@ namespace OpenPOP.MIME
 				return result;
 			} catch (Exception e)
 			{
-				Log.LogError(e.Message);
+				Log.LogError("SaveAttachments()" + e.Message);
 				return false;
 			}
 		}
@@ -512,6 +512,7 @@ namespace OpenPOP.MIME
 					body = Base64.Decode(buffer);
 				} catch (Exception)
 				{
+					Log.LogError("GetMessageBody():" + e.Message);
 					body = buffer;
 				}
 				MessageBody.Add(new MessageBody(body, "text/plain")); // Assume text/plain

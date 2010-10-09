@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using System.Net.Mime;
 using OpenPOP.MIME.Decode;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME.Header
 {
@@ -75,8 +76,10 @@ namespace OpenPOP.MIME.Header
 				if (input.Contains("@"))
 					return new MailAddress(input);
 			}
-			catch (FormatException)
-			{ }
+			catch (FormatException e)
+			{
+				DefaultLogger.CreateLogger().LogError("ParseMailAddress(): " + e.Message);
+			}
 
 			// This is not a MailAddress
 			// It could be that the format used was simply a name
@@ -236,10 +239,10 @@ namespace OpenPOP.MIME.Header
 					return new ContentDisposition(headerValue.Replace("GMT", "+0001"));
 				}
 				catch (FormatException)
-				{ }
-
-				// Then lets try to full 00 replacement
-				return new ContentDisposition(headerValue.Replace("00", "01").Replace("GMT", "+0001"));
+				{
+					// Then lets try to full 00 replacement
+					return new ContentDisposition(headerValue.Replace("00", "01").Replace("GMT", "+0001"));	
+				}
 			}
 		}
 	}

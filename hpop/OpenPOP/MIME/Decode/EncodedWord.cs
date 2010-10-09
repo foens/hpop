@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME.Decode
 {
@@ -86,12 +87,16 @@ namespace OpenPOP.MIME.Decode
 						try
 						{
 							decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
-						} catch (ArgumentException)
+						} catch (ArgumentException e)
 						{
+							// TODO What encodings are not supported? Can we support them?
+							// One of the charsets we cant handle is Cp1254 which could be translated
+							// to windows-1254 and all would be good
+
+							DefaultLogger.CreateLogger().LogError("EncodedWord(): " + e.Message);
 							// The encoding we are using is not supported.
 							// Therefore we cannot decode it. We must simply return
 							// the encoded form
-							// TODO What encodings are not supported? Can we support them?
 							decodedText = fullMatchValue;
 						}
 						break;

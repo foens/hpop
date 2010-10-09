@@ -185,8 +185,9 @@ namespace OpenPOP.MIME
 					try
 					{
 						return Base64.Decode(input, charSet);
-					} catch (Exception)
+					} catch (Exception e)
 					{
+						DefaultLogger.CreateLogger().LogError("DoDecode():" + e.Message);
 						// We cannot decode it.Simply return the encoded form.
 						return input;
 					}
