@@ -155,7 +155,7 @@ namespace OpenPOP.POP3
 			APOPSupported = false;
 
 			// Was a logger specified, if so, use it. Otherwise create a deafult logger
-			Log = logger ?? new DefaultLogger();
+			Log = logger ?? DefaultLogger.CreateLogger();
 		}
 
 		/// <summary>

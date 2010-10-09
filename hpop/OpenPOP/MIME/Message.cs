@@ -69,7 +69,7 @@ namespace OpenPOP.MIME
 		/// <param name="log">The logging interface to use</param>
 		private Message(ILog log)
 		{
-			Log = log ?? new DefaultLogger();
+			Log = log ?? DefaultLogger.CreateLogger();
 			RawMessage = null;
 			RawHeader = null;
 			RawMessageBody = null;

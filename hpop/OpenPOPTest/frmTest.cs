@@ -42,12 +42,16 @@ namespace OpenPOP.NET_Sample_App
 		private ContextMenu ctmMessages;
 		private MenuItem mnuDeleteMessage;
 		private Button UIDLButton;
-		private readonly POPClient popClient = new POPClient();
+		private readonly POPClient popClient;
 		private ListBox lstEvents;
 		private CheckBox useSsl;
 		private MenuItem mnuViewSource;
 		private readonly Hashtable msgs = new Hashtable();
 
+		private static ILog AppLoggerFactory()
+		{
+			return new FileLogger( );
+		}
 
 		private frmTest()
 		{
@@ -59,6 +63,12 @@ namespace OpenPOP.NET_Sample_App
 			//
 			// User defined stuff here 
 			//
+
+			// This is how you would override the default logger type,
+			// typically the app would just pass in the ILog interface object using the constructor
+			DefaultLogger.LoggerFactory = AppLoggerFactory;
+
+			popClient = new POPClient( /* new DiagnosticsLogger() */ );
 			popClient.AuthenticationBegan     += popClient_AuthenticationBegan;
 			popClient.AuthenticationFinished  += popClient_AuthenticationFinished;
 			popClient.CommunicationBegan      += popClient_CommunicationBegan;
@@ -82,7 +92,8 @@ namespace OpenPOP.NET_Sample_App
 				}
 			}
 
-			Logger.Log = true;
+			FileLogger.Enabled = true;
+			FileLogger.Verbose = true;
 		}
 
 		#region Windows Form Designer generated code

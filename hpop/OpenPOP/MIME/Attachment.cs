@@ -59,7 +59,7 @@ namespace OpenPOP.MIME
 		/// <param name="logger">The logging interface to be used by the object</param>
 		private Attachment(string fileName, ILog logger)
 		{
-			Log = logger ?? new DefaultLogger();
+			Log = logger ?? DefaultLogger.CreateLogger();
 
 			// Setup defaults
 			RawAttachment = null;
