@@ -174,19 +174,22 @@ namespace OpenPOP.MIME
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="contentTransferEncoding"/> is unsupported</exception>
 		public static string DoDecode(string input, ContentTransferEncoding contentTransferEncoding, string charSet)
 		{
+			Encoding encoding = Encoding.Default;
+			if (!string.IsNullOrEmpty(charSet))
+				encoding = HeaderFieldParser.ParseCharsetToEncoding(charSet);
+			
 			switch (contentTransferEncoding)
 			{
 				case ContentTransferEncoding.QuotedPrintable:
-					if (!string.IsNullOrEmpty((charSet)))
-						return QuotedPrintable.Decode(input, Encoding.GetEncoding(charSet));
-					return QuotedPrintable.Decode(input, Encoding.Default);
+					return QuotedPrintable.Decode(input, encoding);
 
 				case ContentTransferEncoding.Base64:
 					try
 					{
-						return Base64.Decode(input, charSet);
+						return Base64.Decode(input, encoding);
 					} catch (Exception e)
 					{
+						// TODO Should we remove this try catch?
 						DefaultLogger.CreateLogger().LogError("DoDecode():" + e.Message);
 						// We cannot decode it.Simply return the encoded form.
 						return input;
@@ -196,7 +199,7 @@ namespace OpenPOP.MIME
 				case ContentTransferEncoding.Binary:
 				case ContentTransferEncoding.EightBit:
 					if (!string.IsNullOrEmpty(charSet))
-						return ChangeEncoding(input, charSet);
+						return ChangeEncoding(input, encoding);
 
 					// Nothing needed to be done
 					return input;
@@ -212,13 +215,10 @@ namespace OpenPOP.MIME
 		/// <param name="text">Source encoded text</param>
 		/// <param name="newEncoding">New charset</param>
 		/// <returns>Encoded text with new charset</returns>
-		private static string ChangeEncoding(string text, string newEncoding)
+		private static string ChangeEncoding(string text, Encoding newEncoding)
 		{
-			if (string.IsNullOrEmpty(newEncoding))
-				return text;
-
 			byte[] bytes = Encoding.Default.GetBytes(text);
-			return Encoding.GetEncoding(newEncoding).GetString(bytes);
+			return newEncoding.GetString(bytes);
 		}
 
 		/// <summary>

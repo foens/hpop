@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using OpenPOP.Shared.Logging;
+using OpenPOP.MIME.Header;
 
 namespace OpenPOP.MIME.Decode
 {
@@ -58,6 +58,9 @@ namespace OpenPOP.MIME.Decode
 				string encoding = match.Groups["Encoding"].Value;
 				string charset = match.Groups["Charset"].Value;
 
+				// Get the encoding which corrosponds to the character set
+				Encoding charsetEncoding = HeaderFieldParser.ParseCharsetToEncoding(charset);
+
 				// Store decoded text here when done
 				string decodedText;
 
@@ -68,14 +71,7 @@ namespace OpenPOP.MIME.Decode
 						// The "B" encoding is identical to the "BASE64" 
 						// encoding defined by RFC 2045.
 					case "B":
-						try
-						{
-							decodedText = Base64.Decode(encodedText, charset);
-						} catch (Exception)
-						{
-							// We cannot decode it.Simply return the encoded form.
-							decodedText = fullMatchValue;
-						}
+						decodedText = Base64.Decode(encodedText, charsetEncoding);
 						break;
 
 						// RFC:
@@ -84,21 +80,7 @@ namespace OpenPOP.MIME.Decode
 						// There are mo details to this. Please check section 4.2 in
 						// http://tools.ietf.org/html/rfc2047
 					case "Q":
-						try
-						{
-							decodedText = QuotedPrintable.Decode(encodedText, Encoding.GetEncoding(charset));
-						} catch (ArgumentException e)
-						{
-							// TODO What encodings are not supported? Can we support them?
-							// One of the charsets we cant handle is Cp1254 which could be translated
-							// to windows-1254 and all would be good
-
-							DefaultLogger.CreateLogger().LogError("EncodedWord(): " + e.Message);
-							// The encoding we are using is not supported.
-							// Therefore we cannot decode it. We must simply return
-							// the encoded form
-							decodedText = fullMatchValue;
-						}
+						decodedText = QuotedPrintable.Decode(encodedText, charsetEncoding);
 						break;
 
 					default:

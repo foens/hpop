@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Text;
 using OpenPOP.MIME.Decode;
 using OpenPOP.Shared.Logging;
 
@@ -244,6 +245,31 @@ namespace OpenPOP.MIME.Header
 					return new ContentDisposition(headerValue.Replace("00", "01").Replace("GMT", "+0001"));	
 				}
 			}
+		}
+
+		/// <summary>
+		/// Parse a character set into an encoding
+		/// </summary>
+		/// <param name="charset">The character set to parse</param>
+		/// <returns>An encoding which corrosponds to the character set</returns>
+		public static Encoding ParseCharsetToEncoding(string charset)
+		{
+			string charSetLower = charset.ToLower();
+			if (charSetLower.Contains("windows") || charSetLower.Contains("cp"))
+			{
+				// It seems the character set contains an codepage value, which we should use to parse the encoding
+				charSetLower = charSetLower.Replace("cp", ""); // Remove cp
+				charSetLower = charSetLower.Replace("windows", ""); // Remove windows
+				charSetLower = charSetLower.Replace("-", ""); // Remove - which could be used as cp-1554
+
+				// Now we hope the only thing left in the charset is numbers.
+				int codepageNumber = int.Parse(charSetLower);
+
+				return Encoding.GetEncoding(codepageNumber);
+			}
+
+			// It seems there is no codepage value in the charset. It must be a named encoding
+			return Encoding.GetEncoding(charset);
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Text;
+using NUnit.Framework;
 using OpenPOP.MIME;
 
 namespace OpenPOPUnitTests.MIME
@@ -20,7 +21,6 @@ namespace OpenPOPUnitTests.MIME
 			const string expectedOutput = "Hello";
 
 			string output = new Message(false, input, false).MessageBody[0].Body;
-
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -35,7 +35,6 @@ namespace OpenPOPUnitTests.MIME
 			const string expectedOutput = "\r\nHello";
 
 			string output = new Message(false, input, false).MessageBody[0].Body;
-
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -47,10 +46,10 @@ namespace OpenPOPUnitTests.MIME
 			"\r\n" + // Headers end
 			"\x00D0\x00DD\x00DE\x00F0\x00FD\x00FE";
 
-			const string expectedOutput = "ĞİŞğış"; // not þ which is 8859-1. See http://en.wikipedia.org/wiki/ISO/IEC_8859-9
+			// not þ which is 8859-1. See http://en.wikipedia.org/wiki/ISO/IEC_8859-9
+			const string expectedOutput = "ĞİŞğış";
 
 			string output = new Message(false, input, false).MessageBody[0].Body;
-
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -66,9 +65,7 @@ namespace OpenPOPUnitTests.MIME
 			// http://en.wikipedia.org/wiki/Windows-1254
 			const string expectedOutput = "ĞİŞğış"; // not þ which is 8859-1. See http://en.wikipedia.org/wiki/ISO/IEC_8859-9
 
-
 			string output = new Message(false, input, false).MessageBody[0].Body;
-
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -84,9 +81,37 @@ namespace OpenPOPUnitTests.MIME
 			// http://en.wikipedia.org/wiki/Windows-1254
 			const string expectedOutput = "þæ"; // http://da.wikipedia.org/wiki/ISO_8859-1
 
+			string output = new Message(false, input, false).MessageBody[0].Body;
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestWindows1252CharacterSet()
+		{
+			const string input = "Content-Type: text/plain; charset=windows-1252\r\n" +
+			"Content-Transfer-Encoding: 7bit\r\n" +
+			"\r\n" + // Headers end
+			"\x00C5\x00F7\x0192";
+
+			// http://en.wikipedia.org/wiki/Windows-1254
+			const string expectedOutput = "Å÷ƒ";
 
 			string output = new Message(false, input, false).MessageBody[0].Body;
+			Assert.AreEqual(expectedOutput, output);
+		}
 
+		[Test]
+		public void TestCP1252CharacterSet()
+		{
+			const string input = "Content-Type: text/plain; charset=Cp1252\r\n" +
+			"Content-Transfer-Encoding: 7bit\r\n" +
+			"\r\n" + // Headers end
+			"\x00C5\x00F7\x0192";
+
+			// CP1252 is equivalent to http://en.wikipedia.org/wiki/Windows-1254
+			const string expectedOutput = "Å÷ƒ";
+
+			string output = new Message(false, input, false).MessageBody[0].Body;
 			Assert.AreEqual(expectedOutput, output);
 		}
 	}
