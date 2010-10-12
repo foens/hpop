@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
 using System.IO;
+using System.Net.Mail;
+using System.Text;
 using OpenPOP.MIME.Decode;
 using OpenPOP.MIME.Header;
 using OpenPOP.Shared.Logging;
@@ -170,6 +172,75 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
+		/// WARNING: This is work in progress / experimental. This might not work at all.
+		/// If you find any bugs using this method, please report to the developers
+		/// 
+		/// Converts this message to a System.Net.Mail.MailMessage
+		/// making the message easy to send using the inbuilt SMTP client of .NET
+		/// </summary>
+		/// <returns>A MailMessage object which corrosponds to this message</returns>
+		public MailMessage ToMailMessage()
+		{
+			MailMessage mailMessage = new MailMessage();
+
+			// It is not always that the From header is
+			// in a message
+			if(Headers.From != null)
+				mailMessage.From = Headers.From;
+			
+			// TODO: This might not work!
+			Encoding encodingUsed = Encoding.Default;
+				if (Headers.ContentType.CharSet != null)
+					encodingUsed = HeaderFieldParser.ParseCharsetToEncoding(Headers.ContentType.CharSet);
+
+			// Add to
+			foreach (MailAddress to in Headers.To)
+				mailMessage.To.Add(to);
+
+			mailMessage.Subject = Headers.Subject;
+			mailMessage.SubjectEncoding = encodingUsed;
+
+			// Take the most faithfull message
+			mailMessage.Body = MessageBody[MessageBody.Count - 1].Body;
+			mailMessage.BodyEncoding = encodingUsed;
+
+			// If there are more than one body, add them as alternatives
+			foreach (MessageBody body in MessageBody)
+			{
+				// Skip the one we added as the body of the mailMessage
+				if (body.Body.Equals(mailMessage.Body))
+					continue;
+				
+				// We need to give a stream to the AlternateView, so converting to stream
+				byte[] byteArray = encodingUsed.GetBytes(body.Body);
+				MemoryStream stream = new MemoryStream(byteArray);
+
+				// Create the alternative view and add it to the mailMessage
+				mailMessage.AlternateViews.Add(new AlternateView(stream, body.Type));
+			}
+
+			foreach (Attachment attachment in Attachments)
+			{
+				// We need to give a stream to the Attachment, so converting to stream
+				MemoryStream stream = new MemoryStream(attachment.DecodedAsBytes());
+
+				// Create the attachment and add it the to mailMessage
+				mailMessage.Attachments.Add(new System.Net.Mail.Attachment(stream, attachment.Headers.ContentType));
+			}
+
+			mailMessage.ReplyTo = Headers.ReplyTo;
+
+			foreach (MailAddress cc in Headers.CC)
+				mailMessage.CC.Add(cc);
+
+			mailMessage.Priority = Headers.Importance;
+
+			// TODO What about sender property?
+
+			return mailMessage;
+		}
+
+		/// <summary>
 		/// Translate inline pictures within the body to a path where the images are saved
 		/// under their ContentFileName.
 		/// </summary>
@@ -286,7 +357,7 @@ namespace OpenPOP.MIME
 						// Check if the first attachment is the message
 						foreach (Attachment attachment in Attachments)
 						{
-							if (attachment.Headers.ContentType != null &&
+							if (
 							    // The content type must be plain or html
 							    (
 							    	attachment.Headers.ContentType.MediaType.Contains("text/plain") ||
