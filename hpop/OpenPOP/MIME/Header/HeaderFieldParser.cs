@@ -154,24 +154,24 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="MessageImportance"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
-		public static MessageImportance ParseImportance(string headerValue)
+		public static MailPriority ParseImportance(string headerValue)
 		{
 			switch (headerValue.ToUpper())
 			{
 				case "5":
 				case "HIGH":
-					return MessageImportance.High;
+					return MailPriority.High;
 
 				case "3":
 				case "NORMAL":
-					return MessageImportance.Normal;
+					return MailPriority.Normal;
 
 				case "1":
 				case "LOW":
-					return MessageImportance.Low;
+					return MailPriority.Low;
 
 				default:
-					return MessageImportance.Normal;
+					return MailPriority.Normal;
 			}
 		}
 
