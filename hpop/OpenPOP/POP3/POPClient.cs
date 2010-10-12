@@ -11,10 +11,6 @@ using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.POP3
 {
-	// TODO Better error messages.
-	// For example, when trying to connect, then fetch emails, we get invalid command
-	// because user has not logged in yet.
-
 	/// <summary>
 	/// POP3 compliant POPClient
 	/// 
@@ -81,12 +77,12 @@ namespace OpenPOP.POP3
 		/// This is the stream used to read off the server response
 		/// to a command
 		/// </summary>
-		private StreamReader StreamReader { get; set; }
+		private TextReader StreamReader { get; set; }
 
 		/// <summary>
 		/// This is the stream used to write commands to the server
 		/// </summary>
-		private StreamWriter StreamWriter { get; set; }
+		private TextWriter StreamWriter { get; set; }
 
 		/// <summary>
 		/// This is the last response the server sent back when a
@@ -133,6 +129,11 @@ namespace OpenPOP.POP3
 		/// The logging interface used by the object
 		/// </summary>
 		private ILog Log { get; set; }
+
+		/// <summary>
+		/// Describes what state the <see cref="POPClient"/> is in
+		/// </summary>
+		private ConnectionState State { get; set; }
 		#endregion
 
 		#region Constructors
@@ -157,6 +158,9 @@ namespace OpenPOP.POP3
 
 			// APOP is not supported before we check on login
 			APOPSupported = false;
+
+			// We are not connected yet
+			State = ConnectionState.Disconnected;
 
 			// Was a logger specified, if so, use it. Otherwise create a deafult logger
 			Log = logger ?? DefaultLogger.CreateLogger();
@@ -244,6 +248,9 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
 		private static void IsOkResponse(string response)
 		{
+			if(response == null)
+				throw new PopServerException("The stream used to retrieve responses from was closed");
+
 			if (response.StartsWith("+OK"))
 				return;
 
@@ -263,11 +270,6 @@ namespace OpenPOP.POP3
 			StreamWriter.Flush(); // Flush the content as we now wait for a response
 
 			LastServerResponse = StreamReader.ReadLine();
-
-			// Just a sanity check, catching the error before the response might
-			// be used somewhere else
-			if (LastServerResponse == null)
-				throw new NullReferenceException("The server must have closed the connection");
 
 			IsOkResponse(LastServerResponse);
 		}
@@ -292,6 +294,49 @@ namespace OpenPOP.POP3
 			return int.Parse(LastServerResponse.Split(' ')[location]);
 		}
 
+		public void Connect(TextReader inputStream, TextWriter outputStream)
+		{
+			AssertDisposed();
+
+			if (State != ConnectionState.Disconnected)
+				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
+
+			if(inputStream == null)
+				throw new ArgumentNullException("inputStream", "inputStream cannot be null");
+
+			if(outputStream == null)
+				throw new ArgumentNullException("outputStream", "outputStream cannot be null");
+
+			StreamReader = inputStream;
+			StreamWriter = outputStream;
+
+			// Fetch the server one-line welcome greeting
+			string response = StreamReader.ReadLine();
+
+			// Check if the response was an OK response
+			try
+			{
+				// Assume we now need the user to supply credentials
+				// If we do not connect correctly, Disconnect will set the
+				// state to Disconnected
+				// If this is not set, Disconnect will throw an exception
+				State = ConnectionState.Authorization;
+
+				IsOkResponse(response);
+				ExtractAPOPTimestamp(response);
+				Connected = true;
+				CommunicationOccurred(this);
+			}
+			catch (PopServerException)
+			{
+				// If not close down the connection and abort
+				Disconnect();
+				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+				Log.LogDebug("Last response from server was: " + LastServerResponse);
+				throw new PopServerNotAvailableException();
+			}
+		}
+
 		/// <summary>
 		/// Connects to a remote POP3 server
 		/// </summary>
@@ -303,6 +348,10 @@ namespace OpenPOP.POP3
 		public void Connect(string hostname, int port, bool useSsl)
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Disconnected)
+				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
+
 			CommunicationBegan(this);
 
 			TcpClient clientSocket = new TcpClient();
@@ -319,6 +368,8 @@ namespace OpenPOP.POP3
 				throw new PopServerNotFoundException();
 			}
 
+			StreamReader reader;
+			StreamWriter writer;
 			if (useSsl)
 			{
 				// If we want to use SSL, open a new SSLStream on top of the open TCP stream.
@@ -330,33 +381,19 @@ namespace OpenPOP.POP3
 				// Authenticate the server
 				stream.AuthenticateAsClient(hostname);
 
-				StreamReader = new StreamReader(stream);
-				StreamWriter = new StreamWriter(stream);
+				// TODO Is Encoding.Default the right choice? Might this not be wrong on some setups
+				reader = new StreamReader(stream, Encoding.Default);
+				writer = new StreamWriter(stream);
 			} else
 			{
 				// If we do not want to use SSL, use plain TCP
-				StreamReader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
-				StreamWriter = new StreamWriter(clientSocket.GetStream());
+				// TODO Is Encoding.Default the right choice? Might this not be wrong on some setups
+				reader = new StreamReader(clientSocket.GetStream(), Encoding.Default, true);
+				writer = new StreamWriter(clientSocket.GetStream());
 			}
 
-			// Fetch the server one-line welcome greeting
-			string response = StreamReader.ReadLine();
-
-			// Check if the response was an OK response
-			try
-			{
-				IsOkResponse(response);
-				ExtractAPOPTimestamp(response);
-				Connected = true;
-				CommunicationOccurred(this);
-			} catch (PopServerException)
-			{
-				// If not close down the connection and abort
-				Disconnect();
-				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
-				Log.LogDebug("Last response from server was: " + LastServerResponse);
-				throw new PopServerNotAvailableException();
-			}
+			// Now do the connect with these two streams
+			Connect(reader, writer);
 		}
 
 		/// <summary>
@@ -366,6 +403,10 @@ namespace OpenPOP.POP3
 		public void Disconnect()
 		{
 			AssertDisposed();
+
+			if (State == ConnectionState.Disconnected)
+				throw new InvalidUseException("You cannot disconnect a connection which is already disconnected");
+
 			try
 			{
 				SendCommand("QUIT");
@@ -382,6 +423,7 @@ namespace OpenPOP.POP3
 				Connected = false;
 				APOPSupported = false;
 				APOPTimestamp = null;
+				State = ConnectionState.Disconnected;
 			}
 			CommunicationLost(this);
 		}
@@ -412,10 +454,14 @@ namespace OpenPOP.POP3
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
+
+			if(State != ConnectionState.Authorization)
+				throw new InvalidUseException("You have to be connected and not authorized when trying to authorize yourself");
+
 			switch (authenticationMethod)
 			{
 				case AuthenticationMethod.UsernameAndPassword:
-					AuthenticateUsingUSER(username, password);
+					AuthenticateUsingUserAndPassword(username, password);
 					break;
 
 				case AuthenticationMethod.APOP:
@@ -426,9 +472,12 @@ namespace OpenPOP.POP3
 					if (APOPSupported)
 						AuthenticateUsingAPOP(username, password);
 					else
-						AuthenticateUsingUSER(username, password);
+						AuthenticateUsingUserAndPassword(username, password);
 					break;
 			}
+
+			// We are now authenticated and therefore we enter the transaction state
+			State = ConnectionState.Transaction;
 		}
 
 		/// <summary>
@@ -438,7 +487,7 @@ namespace OpenPOP.POP3
 		/// <param name="password">The user password</param>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
-		private void AuthenticateUsingUSER(string username, string password)
+		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
 			AuthenticationBegan(this);
 			try
@@ -446,7 +495,7 @@ namespace OpenPOP.POP3
 				SendCommand("USER " + username);
 			} catch (PopServerException)
 			{
-				Log.LogError("AuthenticateUsingUSER():wrong user: " + username);
+				Log.LogError("AuthenticateUsingUserAndPassword():wrong user: " + username);
 				throw new InvalidLoginException();
 			}
 
@@ -457,13 +506,13 @@ namespace OpenPOP.POP3
 			{
 				if (LastServerResponse.ToLower().Contains("lock"))
 				{
-					Log.LogError("AuthenticateUsingUSER(): maildrop is locked");
+					Log.LogError("AuthenticateUsingUserAndPassword(): maildrop is locked");
 					throw new PopServerLockException();
 				}
 
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
-				Log.LogError("AuthenticateUsingUSER(): wrong password.");
+				Log.LogError("AuthenticateUsingUserAndPassword(): wrong password.");
 				Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidPasswordException();
 			}
@@ -513,6 +562,10 @@ namespace OpenPOP.POP3
 		public int GetMessageCount()
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("You cannot get the message count without authenticating yourself towards the server first");
+
 			return SendCommandIntResponse("STAT", 1);
 		}
 
@@ -526,6 +579,10 @@ namespace OpenPOP.POP3
 		public void DeleteMessage(int messageNumber)
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("You cannot delete any messages without authenticating yourself towards the server first");
+
 			SendCommand("DELE " + messageNumber);
 		}
 
@@ -539,6 +596,7 @@ namespace OpenPOP.POP3
 		public void DeleteAllMessages()
 		{
 			AssertDisposed();
+
 			int messageCount = GetMessageCount();
 
 			for (int messageItem = messageCount; messageItem > 0; messageItem--)
@@ -561,7 +619,14 @@ namespace OpenPOP.POP3
 		public void QUIT()
 		{
 			AssertDisposed();
+
+			if (State == ConnectionState.Disconnected)
+				throw new InvalidUseException("You cannot use the QUIT command unless you are connected to the server");
+
 			SendCommand("QUIT");
+
+			// The server will now close the connection, and we are therefore not connected anymore
+			State = ConnectionState.Disconnected;
 		}
 
 		/// <summary>
@@ -574,6 +639,10 @@ namespace OpenPOP.POP3
 		public void NOOP()
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("You cannot use the NOOP command unless you are authenticated to the server");
+
 			SendCommand("NOOP");
 		}
 
@@ -589,6 +658,10 @@ namespace OpenPOP.POP3
 		public void RSET()
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("You cannot use the RSET command unless you are authenticated to the server");
+
 			SendCommand("RSET");
 		}
 
@@ -601,6 +674,10 @@ namespace OpenPOP.POP3
 		public string GetMessageUID(int messageNumber)
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot get message ID, when the user has not been authenticated yet");
+
 			// Example from RFC:
 			//C: UIDL 2
 			//S: +OK 2 QhdPYR:00WBw1Ph7x7
@@ -622,6 +699,10 @@ namespace OpenPOP.POP3
 		public List<string> GetMessageUIDs()
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot get message IDs, when the user has not been authenticated yet");
+
 			// RFC Example:
 			// C: UIDL
 			// S: +OK
@@ -653,6 +734,10 @@ namespace OpenPOP.POP3
 		public int GetMessageSize(int messageNumber)
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot get message size, when the user has not been authenticated yet");
+
 			// RFC Example:
 			// C: LIST 2
 			// S: +OK 2 200
@@ -668,6 +753,10 @@ namespace OpenPOP.POP3
 		public List<int> GetMessageSizes()
 		{
 			AssertDisposed();
+
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot get message sizes, when the user has not been authenticated yet");
+
 			// RFC Example:
 			// C: LIST
 			// S: +OK 2 messages (320 octets)
@@ -760,6 +849,9 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerException">If the server did not accept the fetch message command</exception>
 		private Message FetchMessage(string command, bool headersOnly)
 		{
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+
 			MessageTransferBegan(this);
 
 			SendCommand(command);

@@ -43,6 +43,20 @@ namespace OpenPOP.POP3
 	{ }
 
 	/// <summary>
+	/// Thrown when the <see cref="POPClient"/> is being used in an invalid way
+	/// </summary>
+	public class InvalidUseException : Exception
+	{
+		///<summary>
+		/// Creates a InvalidUseException with the given message
+		///</summary>
+		///<param name="message">The message to include in the exception</param>
+		public InvalidUseException(string message)
+			: base(message)
+		{ }
+	}
+
+	/// <summary>
 	/// Thrown when the server does not return +OK to a command.
 	/// The server response is then placed inside.
 	/// </summary>

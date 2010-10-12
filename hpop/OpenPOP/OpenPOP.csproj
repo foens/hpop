@@ -131,6 +131,7 @@
     <Compile Include="POP3\Exceptions.cs" />
     <Compile Include="POP3\MD5.cs" />
     <Compile Include="POP3\POPClient.cs" />
+    <Compile Include="POP3\ConnectionState.cs" />
     <Compile Include="Shared\Logging\DiagnosticsLogger.cs" />
     <Compile Include="Shared\Logging\FileLogger.cs" />
     <Compile Include="Shared\Logging\DefaultLogger.cs" />
