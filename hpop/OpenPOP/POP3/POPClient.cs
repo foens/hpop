@@ -203,6 +203,7 @@ namespace OpenPOP.POP3
 		}
 		#endregion
 
+		#region IDisposable implementation
 		/// <summary>
 		/// Disposes the <see cref="POPClient"/>. This is the implementation of the <see cref="IDisposable"/> interface.
 		/// </summary>
@@ -219,81 +220,9 @@ namespace OpenPOP.POP3
 
 			base.Dispose(disposing);
 		}
+		#endregion
 
-		/// <summary>
-		/// Examines string to see if it contains a timestamp to use with the APOP command
-		/// If it does, sets the <see cref="APOPTimestamp"/> property to this value
-		/// </summary>
-		/// <param name="response">The string to examine</param>
-		private void ExtractAPOPTimestamp(string response)
-		{
-			// RFC Example:
-			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
-			Match match = Regex.Match(response, "<.+>");
-			if (match.Success)
-			{
-				APOPTimestamp = match.Value;
-				APOPSupported = true;
-			}
-		}
-
-		/// <summary>
-		/// Tests a string to see if it is a "+OK" string.
-		/// An "+OK" string should be returned by a compliant POP3
-		/// server if the request could be served.
-		/// 
-		/// The method does only check if it starts with an "+OK"
-		/// </summary>
-		/// <param name="response">The string to examine</param>
-		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
-		private static void IsOkResponse(string response)
-		{
-			if(response == null)
-				throw new PopServerException("The stream used to retrieve responses from was closed");
-
-			if (response.StartsWith("+OK"))
-				return;
-
-			throw new PopServerException(response);
-		}
-
-		/// <summary>
-		/// Sends a command to the POP server.
-		/// If this fails, an exception is thrown
-		/// </summary>
-		/// <param name="command">command to send to server</param>
-		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
-		private void SendCommand(string command)
-		{
-			// Write a command with CRLF afterwards as per RFC.
-			StreamWriter.Write(command + "\r\n");
-			StreamWriter.Flush(); // Flush the content as we now wait for a response
-
-			LastServerResponse = StreamReader.ReadLine();
-
-			IsOkResponse(LastServerResponse);
-		}
-
-		/// <summary>
-		/// Sends a command to the POP server, expects an integer reply in the response
-		/// </summary>
-		/// <param name="command">command to send to server</param>
-		/// <param name="location">
-		/// The location of the int to return.
-		/// Example:
-		/// S: +OK 2 200
-		/// Set <paramref name="location"/>=1 to get 2
-		/// Set <paramref name="location"/>=2 to get 200
-		/// </param>
-		/// <returns>integer value in the reply</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command</exception>
-		private int SendCommandIntResponse(string command, int location)
-		{
-			SendCommand(command);
-
-			return int.Parse(LastServerResponse.Split(' ')[location]);
-		}
-
+		#region Connection managing methods
 		public void Connect(TextReader inputStream, TextWriter outputStream)
 		{
 			AssertDisposed();
@@ -427,7 +356,9 @@ namespace OpenPOP.POP3
 			}
 			CommunicationLost(this);
 		}
+		#endregion
 
+		#region Authentication methods
 		/// <summary>
 		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.TryBoth"/>
 		/// which is the most secure method to use.
@@ -553,7 +484,9 @@ namespace OpenPOP.POP3
 
 			AuthenticationFinished(this);
 		}
+		#endregion
 
+		#region Public POP3 commands
 		/// <summary>
 		/// Get the number of messages on the server using a STAT command
 		/// </summary>
@@ -779,6 +712,135 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
+		/// Fetches a message from the server and parses it
+		/// </summary>
+		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
+		/// <returns>The message, containing the email message</returns>
+		/// <exception cref="PopServerException">If the server did not accept the RETR command</exception>
+		public Message GetMessage(int messageNumber)
+		{
+			AssertDisposed();
+			return FetchMessage("RETR " + messageNumber, false);
+		}
+
+		/// <summary>
+		/// Get all the headers for a message
+		/// </summary>
+		/// <param name="messageNumber">Message number, which may not be marked as deleted</param>
+		/// <returns>MessageHeaders object</returns>
+		/// <exception cref="PopServerException">If the server did not accept the TOP command</exception>
+		public MessageHeader GetMessageHeaders(int messageNumber)
+		{
+			AssertDisposed();
+			// 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
+			Message message = FetchMessage("TOP " + messageNumber + " 0", true);
+
+			return message.Headers;
+		}
+		#endregion
+
+		#region Private helper methods
+		/// <summary>
+		/// Examines string to see if it contains a timestamp to use with the APOP command
+		/// If it does, sets the <see cref="APOPTimestamp"/> property to this value
+		/// </summary>
+		/// <param name="response">The string to examine</param>
+		private void ExtractAPOPTimestamp(string response)
+		{
+			// RFC Example:
+			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
+			Match match = Regex.Match(response, "<.+>");
+			if (match.Success)
+			{
+				APOPTimestamp = match.Value;
+				APOPSupported = true;
+			}
+		}
+
+		/// <summary>
+		/// Tests a string to see if it is a "+OK" string.
+		/// An "+OK" string should be returned by a compliant POP3
+		/// server if the request could be served.
+		/// 
+		/// The method does only check if it starts with an "+OK"
+		/// </summary>
+		/// <param name="response">The string to examine</param>
+		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
+		private static void IsOkResponse(string response)
+		{
+			if (response == null)
+				throw new PopServerException("The stream used to retrieve responses from was closed");
+
+			if (response.StartsWith("+OK"))
+				return;
+
+			throw new PopServerException(response);
+		}
+
+		/// <summary>
+		/// Sends a command to the POP server.
+		/// If this fails, an exception is thrown
+		/// </summary>
+		/// <param name="command">command to send to server</param>
+		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
+		private void SendCommand(string command)
+		{
+			// Write a command with CRLF afterwards as per RFC.
+			StreamWriter.Write(command + "\r\n");
+			StreamWriter.Flush(); // Flush the content as we now wait for a response
+
+			LastServerResponse = StreamReader.ReadLine();
+
+			IsOkResponse(LastServerResponse);
+		}
+
+		/// <summary>
+		/// Sends a command to the POP server, expects an integer reply in the response
+		/// </summary>
+		/// <param name="command">command to send to server</param>
+		/// <param name="location">
+		/// The location of the int to return.
+		/// Example:
+		/// S: +OK 2 200
+		/// Set <paramref name="location"/>=1 to get 2
+		/// Set <paramref name="location"/>=2 to get 200
+		/// </param>
+		/// <returns>integer value in the reply</returns>
+		/// <exception cref="PopServerException">If the server did not accept the command</exception>
+		private int SendCommandIntResponse(string command, int location)
+		{
+			SendCommand(command);
+
+			return int.Parse(LastServerResponse.Split(' ')[location]);
+		}
+
+		/// <summary>
+		/// Fetches a message or a message header
+		/// </summary>
+		/// <param name="command">Command to send to POP server</param>
+		/// <param name="headersOnly">Only return message header?</param>
+		/// <returns>The message, containing the email message</returns>
+		/// <exception cref="PopServerException">If the server did not accept the fetch message command</exception>
+		private Message FetchMessage(string command, bool headersOnly)
+		{
+			if (State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+
+			MessageTransferBegan(this);
+
+			SendCommand(command);
+
+			// Receive the message from the server
+			string receivedContent = ReceiveRETRMessage();
+
+			// Parse the message from the received contet
+			Message message = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
+
+			MessageTransferFinished(this);
+			return message;
+		}
+
+		/// <summary>
 		/// Reads a mail message that is sent from the server, when the server
 		/// was handed a RETR [num] command which it accepted.
 		/// </summary>
@@ -812,58 +874,6 @@ namespace OpenPOP.POP3
 
 			return builder.ToString();
 		}
-
-		/// <summary>
-		/// Fetches a message from the server and parses it
-		/// </summary>
-		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
-		/// <returns>The message, containing the email message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the RETR command</exception>
-		public Message GetMessage(int messageNumber)
-		{
-			AssertDisposed();
-			return FetchMessage("RETR " + messageNumber, false);
-		}
-
-		/// <summary>
-		/// Get all the headers for a message
-		/// </summary>
-		/// <param name="messageNumber">Message number, which may not be marked as deleted</param>
-		/// <returns>MessageHeaders object</returns>
-		/// <exception cref="PopServerException">If the server did not accept the TOP command</exception>
-		public MessageHeader GetMessageHeaders(int messageNumber)
-		{
-			AssertDisposed();
-			// 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
-			Message message = FetchMessage("TOP " + messageNumber + " 0", true);
-
-			return message.Headers;
-		}
-
-		/// <summary>
-		/// Fetches a message or a message header
-		/// </summary>
-		/// <param name="command">Command to send to POP server</param>
-		/// <param name="headersOnly">Only return message header?</param>
-		/// <returns>The message, containing the email message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the fetch message command</exception>
-		private Message FetchMessage(string command, bool headersOnly)
-		{
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
-
-			MessageTransferBegan(this);
-
-			SendCommand(command);
-
-			// Receive the message from the server
-			string receivedContent = ReceiveRETRMessage();
-
-			// Parse the message from the received contet
-			Message message = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
-
-			MessageTransferFinished(this);
-			return message;
-		}
+		#endregion
 	}
 }
