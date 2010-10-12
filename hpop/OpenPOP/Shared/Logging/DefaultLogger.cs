@@ -11,7 +11,7 @@
 		/// <summary>
 		/// Delegate used to create a logger
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>A new Logger to use for logging</returns>
 		public delegate ILog DefaultLoggerFactory();
 
 		/// <summary>
