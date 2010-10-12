@@ -10,8 +10,8 @@ namespace OpenPOP.MIME.Decode
 	/// Every measurement has been taken to conform to the RFC.
 	/// </summary>
 	/// <remarks>
-	/// <a href="http://tools.ietf.org/html/rfc2047">http://tools.ietf.org/html/rfc2047</a> This is the RFC which the decoder conforms to.
-	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">http://tools.ietf.org/html/rfc2045#section-6.7</a> which originally
+	/// <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> This is the RFC which the decoder conforms to.
+	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">RFC 2045</a> which originally
 	/// defined what a Quoted-Printable string was.
 	/// </remarks>
 	internal static class QuotedPrintable
@@ -24,12 +24,8 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string in the correct encoding</returns>
 		public static string Decode(string toDecode, Encoding encoding)
 		{
-			// Decode the QuotedPrintable string
-			string decoded = RFC2047QuotedPrintableDecode(toDecode);
-
-			// Change encoding to the desired encoding
-			string decodedRightEncoded = encoding.GetString(Encoding.Default.GetBytes(decoded));
-			return decodedRightEncoded;
+			// Decode the QuotedPrintable string and return it
+			return RFC2047QuotedPrintableDecode(toDecode, encoding);
 		}
 
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047">http://tools.ietf.org/html/rfc2047</a> for RFC details</remarks>
@@ -37,8 +33,9 @@ namespace OpenPOP.MIME.Decode
 		/// This is the actual decoder
 		/// </summary>
 		/// <param name="toDecode">The string to be decoded from Quoted-Printable</param>
+		/// <param name="encoding">The encoding to use when decoding</param>
 		/// <returns>A decoded string</returns>
-		private static string RFC2047QuotedPrintableDecode(string toDecode)
+		private static string RFC2047QuotedPrintableDecode(string toDecode, Encoding encoding)
 		{
 			// Remove illegal control characters
 			toDecode = removeIllegalControlCharacters(toDecode);
@@ -64,7 +61,7 @@ namespace OpenPOP.MIME.Decode
 
 					// Decode the Quoted-Printable part
 					string QuotedPrintablePart = toDecode.Substring(i, 3);
-					builder.Append(DecodeEqualSign(QuotedPrintablePart));
+					builder.Append(DecodeEqualSign(QuotedPrintablePart, encoding));
 
 					// We now consumed two extra characters. Go forward two extra characters
 					i += 2;
@@ -185,8 +182,9 @@ namespace OpenPOP.MIME.Decode
 		/// This method will never fail, unless an argument of length not equal to three is passed
 		/// </summary>
 		/// <param name="decode">The length 3 character that needs to be decoded</param>
+		/// <param name="encoding">The encoding to use when decoding</param>
 		/// <returns>A decoded string</returns>
-		private static string DecodeEqualSign(string decode)
+		private static string DecodeEqualSign(string decode, Encoding encoding)
 		{
 			// We can only decode the string if it has length 3 - other calls to this function is invalid
 			if (decode.Length != 3)
@@ -217,16 +215,15 @@ namespace OpenPOP.MIME.Decode
 				// The number part of the string is the last two digits. Here we simply remove the equal sign
 				string numberString = decode.Substring(1);
 
-				// Now convert the number encoded in the string as a hex value to an decimal integer
+				// Now we create a byte array with the converted number encoded in the string as a hex value (base 16)
 				// This will also handle illegal encodings like =3d where the hex digits are not uppercase,
-				// whici is a robustness requirement from RFC 2045
-				int decimalNumber = Convert.ToInt16(numberString, 16);
+				// which is a robustness requirement from RFC 2045We need a byte array to store our hex number in
+				byte[] oneByte = new[] { Convert.ToByte(numberString, 16) };
 
-				// Convert the integer to a char, and we are done
-				char decodedChar = Convert.ToChar(decimalNumber);
-
-				// Simple conversion to string
-				return decodedChar.ToString();
+				// Now, using our encoding, get back the string that this byte array corrosponds to
+				// which is actually a one char string, but GetString does only take arrays, not a single byte
+				// and therefore has no method that returns a single char
+				return encoding.GetString(oneByte);
 			} catch (FormatException)
 			{
 				// RFC 2045 says about robust implementation:

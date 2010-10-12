@@ -374,5 +374,17 @@ namespace OpenPOPUnitTests.MIME.Decode
 		}
 
 		// TODO Should some testcases with a different encoding than Encoding.Default be created?
+
+		[Test]
+		public void CanHandleWindows1252Encoding()
+		{
+			const string input = "=C5=F7=96";
+
+			// http://en.wikipedia.org/wiki/Windows-1254
+			const string expectedOutput = "Å÷–";
+
+			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding(1252));
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }
