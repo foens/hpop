@@ -47,6 +47,8 @@ namespace OpenPOP.MIME.Decode
 		/// <exception cref="System.Text.DecoderFallbackException">Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
 		public static string Decode(string base64Encoded)
 		{
+			// TODO This method should not be called, as someone is trying to decode a base64, whithout specifying an encoding
+			//      That should not be allowed!
 			try
 			{
 				return Decode(base64Encoded, Encoding.Default);

@@ -33,6 +33,10 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>Decoded text</returns>
 		public static string Decode(string encodedWords)
 		{
+			// TODO This method will also take a string which is not an encodedWord string
+			//      Should we disallow such usage, as it seems a bit unclear and hard to maintain
+
+			// TODO Is it not illigal to call this method with null?
 			if (encodedWords == null)
 				return null;
 

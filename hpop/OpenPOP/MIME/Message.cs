@@ -580,6 +580,7 @@ namespace OpenPOP.MIME
 				{
 					// TODO foens: Why do we try to base64 decode here?
 					//             Can we just assume it is base64?!
+					//             What about encoding? Should it not be considered?
 					body = Base64.Decode(buffer);
 				} catch (Exception)
 				{
