@@ -11,6 +11,10 @@ using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.POP3
 {
+	// TODO Better error messages.
+	// For example, when trying to connect, then fetch emails, we get invalid command
+	// because user has not logged in yet.
+
 	/// <summary>
 	/// POP3 compliant POPClient
 	/// 
