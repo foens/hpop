@@ -77,12 +77,12 @@ namespace OpenPOP.POP3
 		/// This is the stream used to read off the server response
 		/// to a command
 		/// </summary>
-		private TextReader StreamReader { get; set; }
+		private TextReader Reader { get; set; }
 
 		/// <summary>
 		/// This is the stream used to write commands to the server
 		/// </summary>
-		private TextWriter StreamWriter { get; set; }
+		private TextWriter Writer { get; set; }
 
 		/// <summary>
 		/// This is the last response the server sent back when a
@@ -223,24 +223,29 @@ namespace OpenPOP.POP3
 		#endregion
 
 		#region Connection managing methods
-		public void Connect(TextReader inputStream, TextWriter outputStream)
+		/// <summary>
+		/// Connect to the server using user supplied and connected reader and writer.
+		/// </summary>
+		/// <param name="reader">The <see cref="TextReader"/> to read server responses from</param>
+		/// <param name="writer">The <see cref="TextWriter"/> to send commands to the server</param>
+		public void Connect(TextReader reader, TextWriter writer)
 		{
 			AssertDisposed();
 
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
 
-			if(inputStream == null)
-				throw new ArgumentNullException("inputStream", "inputStream cannot be null");
+			if(reader == null)
+				throw new ArgumentNullException("reader", "reader cannot be null");
 
-			if(outputStream == null)
-				throw new ArgumentNullException("outputStream", "outputStream cannot be null");
+			if(writer == null)
+				throw new ArgumentNullException("writer", "writer cannot be null");
 
-			StreamReader = inputStream;
-			StreamWriter = outputStream;
+			Reader = reader;
+			Writer = writer;
 
 			// Fetch the server one-line welcome greeting
-			string response = StreamReader.ReadLine();
+			string response = Reader.ReadLine();
 
 			// Check if the response was an OK response
 			try
@@ -339,8 +344,8 @@ namespace OpenPOP.POP3
 			try
 			{
 				SendCommand("QUIT");
-				StreamReader.Close();
-				StreamWriter.Close();
+				Reader.Close();
+				Writer.Close();
 			} catch (Exception e)
 			{
 				// We don't care about errors in disconnect
@@ -649,7 +654,7 @@ namespace OpenPOP.POP3
 
 			string response;
 			// Keep reading until multi-line ends with a "."
-			while (!".".Equals(response = StreamReader.ReadLine()))
+			while (!".".Equals(response = Reader.ReadLine()))
 			{
 				// Add the unique ID to the list
 				uids.Add(response.Split(' ')[1]);
@@ -703,7 +708,7 @@ namespace OpenPOP.POP3
 
 			string response;
 			// Read until end of multi-line
-			while (!".".Equals(response = StreamReader.ReadLine()))
+			while (!".".Equals(response = Reader.ReadLine()))
 			{
 				sizes.Add(int.Parse(response.Split(' ')[1]));
 			}
@@ -786,10 +791,10 @@ namespace OpenPOP.POP3
 		private void SendCommand(string command)
 		{
 			// Write a command with CRLF afterwards as per RFC.
-			StreamWriter.Write(command + "\r\n");
-			StreamWriter.Flush(); // Flush the content as we now wait for a response
+			Writer.Write(command + "\r\n");
+			Writer.Flush(); // Flush the content as we now wait for a response
 
-			LastServerResponse = StreamReader.ReadLine();
+			LastServerResponse = Reader.ReadLine();
 
 			IsOkResponse(LastServerResponse);
 		}
@@ -859,7 +864,7 @@ namespace OpenPOP.POP3
 
 			// Read input line for line until end
 			string line;
-			while (!".".Equals(line = StreamReader.ReadLine()))
+			while (!".".Equals(line = Reader.ReadLine()))
 			{
 				// This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
 				// http://tools.ietf.org/html/rfc1939#section-3
