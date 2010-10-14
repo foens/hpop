@@ -175,10 +175,16 @@ namespace OpenPOP.MIME
 		/// WARNING: This is work in progress / experimental. This might not work at all.
 		/// If you find any bugs using this method, please report to the developers
 		/// 
-		/// Converts this message to a System.Net.Mail.MailMessage
+		/// Converts this message to a <see cref="MailMessage"/>
 		/// making the message easy to send using the inbuilt SMTP client of .NET
+		/// 
+		/// When forwarding the returned <see cref="MailMessage"/> object, be sure
+		/// to specify which recipients you want in the to, CC and BCC properties.
+		/// Same goes for the from and reply-to properties.
+		/// 
+		/// Custom headers will not be preserved.
 		/// </summary>
-		/// <returns>A MailMessage object which corrosponds to this message</returns>
+		/// <returns>A <see cref="MailMessage"/> object which corresponds to this message</returns>
 		public MailMessage ToMailMessage()
 		{
 			MailMessage mailMessage = new MailMessage();
@@ -193,7 +199,6 @@ namespace OpenPOP.MIME
 				if (Headers.ContentType.CharSet != null)
 					encodingUsed = HeaderFieldParser.ParseCharsetToEncoding(Headers.ContentType.CharSet);
 
-			// Add to
 			foreach (MailAddress to in Headers.To)
 				mailMessage.To.Add(to);
 
@@ -201,7 +206,10 @@ namespace OpenPOP.MIME
 			mailMessage.SubjectEncoding = encodingUsed;
 
 			// Take the most faithfull message
-			mailMessage.Body = MessageBody[MessageBody.Count - 1].Body;
+			// MSDN says that the body property should be the text version of an email
+			// http://msdn.microsoft.com/en-us/library/system.net.mail.mailmessage.alternateviews.aspx
+			// The text only version is the first message body
+			mailMessage.Body = MessageBody[0].Body;
 			mailMessage.BodyEncoding = encodingUsed;
 
 			// If there are more than one body, add them as alternatives
