@@ -232,8 +232,14 @@ namespace OpenPOP.MIME
 				// We need to give a stream to the Attachment, so converting to stream
 				MemoryStream stream = new MemoryStream(attachment.DecodedAsBytes());
 
-				// Create the attachment and add it the to mailMessage
-				mailMessage.Attachments.Add(new System.Net.Mail.Attachment(stream, attachment.Headers.ContentType));
+				// Create the attachment
+				System.Net.Mail.Attachment attachmentToAdd = new System.Net.Mail.Attachment(stream, attachment.Headers.ContentType);
+				
+				// Make sure the content ID is the same as the original to keep cid: links correct
+				attachmentToAdd.ContentId = attachment.Headers.ContentID;
+				
+				// Add the attachment the to mailMessage
+				mailMessage.Attachments.Add(attachmentToAdd);
 			}
 
 			mailMessage.ReplyTo = Headers.ReplyTo;
