@@ -68,6 +68,13 @@ namespace OpenPOPUnitTests.POP3
 		}
 
 		[Test]
+		public void TestDeleteMessageDoesThrowWhenWrongMessageNumberPassed()
+		{
+			Authenticate("+OK"); // Message deleted succesfully
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.DeleteMessage(0); });
+		}
+
+		[Test]
 		public void TestDisconnectDoesNotThrow()
 		{
 			Authenticate();
@@ -75,10 +82,10 @@ namespace OpenPOPUnitTests.POP3
 		}
 
 		[Test]
-		public void TestGetMessageDoesNotThrow()
+		public void TestGetMessageDoesThrowWhenWrongMessageNumberPassed()
 		{
 			Authenticate("+OK\r\n" + RandomMessage + "\r\n."); // We will send message // Message // . ends message
-			Assert.DoesNotThrow(delegate { Client.GetMessage(RandomMessageNumber); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessage(-1); });
 		}
 
 		[Test]
@@ -96,10 +103,24 @@ namespace OpenPOPUnitTests.POP3
 		}
 
 		[Test]
+		public void TestGetMessageHeadersDoesThrowWhenWrongMessageNumberPassed()
+		{
+			Authenticate("+OK\r\n" + RandomMessage + "\r\n."); // We will send message // Message // . ends message
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageHeaders(0); });
+		}
+
+		[Test]
 		public void TestGetMessageSizeDoesNotThrow()
 		{
 			Authenticate("+OK 5 0"); // Message 5 has size is 0
 			Assert.DoesNotThrow(delegate { Client.GetMessageSize(RandomMessageNumber); });
+		}
+
+		[Test]
+		public void TestGetMessageSizeDoesThrowWhenWrongMessageNumberPassed()
+		{
+			Authenticate("+OK 5 0"); // Message 5 has size is 0
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageSize(0); });
 		}
 
 		[Test]
@@ -114,6 +135,13 @@ namespace OpenPOPUnitTests.POP3
 		{
 			Authenticate("+OK 2 test"); // Message 2 has UID test
 			Assert.DoesNotThrow(delegate { Client.GetMessageUID(RandomMessageNumber); });
+		}
+
+		[Test]
+		public void TestGetMessageUIDDoesThrowWhenWrongMessageNumberPassed()
+		{
+			Authenticate("+OK 2 test"); // Message 2 has UID test
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUID(0); });
 		}
 
 		[Test]

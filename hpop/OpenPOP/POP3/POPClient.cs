@@ -512,11 +512,16 @@ namespace OpenPOP.POP3
 		/// The message will not be deleted until a QUIT command is sent to the server.
 		/// This is done on disconnect.
 		/// </summary>
-		/// <param name="messageNumber">The number of the message to be deleted. This message may not already have been deleted</param>
+		/// <param name="messageNumber">
+		/// The number of the message to be deleted. This message may not already have been deleted.
+		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+		/// </param>
 		/// <exception cref="PopServerException">If the server did not accept the delete command</exception>
 		public void DeleteMessage(int messageNumber)
 		{
 			AssertDisposed();
+
+			ValidateMessageNumber(messageNumber);
 
 			if (State != ConnectionState.Transaction)
 				throw new InvalidUseException("You cannot delete any messages without authenticating yourself towards the server first");
@@ -606,12 +611,17 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Get a unique ID for a single message
 		/// </summary>
-		/// <param name="messageNumber">Message number, which may not be marked as deleted</param>
+		/// <param name="messageNumber">
+		/// Message number, which may not be marked as deleted.
+		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+		/// </param>
 		/// <returns>The unique ID for the message</returns>
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the <paramref name="messageNumber"/> does not exist</exception>
 		public string GetMessageUID(int messageNumber)
 		{
 			AssertDisposed();
+
+			ValidateMessageNumber(messageNumber);
 
 			if (State != ConnectionState.Transaction)
 				throw new InvalidUseException("Cannot get message ID, when the user has not been authenticated yet");
@@ -666,12 +676,17 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Gets the size of a single message
 		/// </summary>
-		/// <param name="messageNumber">The number of a message which may not be a message marked as deleted</param>
+		/// <param name="messageNumber">
+		/// The number of a message which may not be a message marked as deleted.
+		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+		/// </param>
 		/// <returns>Size of the message</returns>
 		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
 		public int GetMessageSize(int messageNumber)
 		{
 			AssertDisposed();
+
+			ValidateMessageNumber(messageNumber);
 
 			if (State != ConnectionState.Transaction)
 				throw new InvalidUseException("Cannot get message size, when the user has not been authenticated yet");
@@ -719,24 +734,36 @@ namespace OpenPOP.POP3
 		/// <summary>
 		/// Fetches a message from the server and parses it
 		/// </summary>
-		/// <param name="messageNumber">Message number on server, which may not be marked as deleted</param>
+		/// <param name="messageNumber">
+		/// Message number on server, which may not be marked as deleted.
+		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+		/// </param>
 		/// <returns>The message, containing the email message</returns>
 		/// <exception cref="PopServerException">If the server did not accept the RETR command</exception>
 		public Message GetMessage(int messageNumber)
 		{
 			AssertDisposed();
+
+			ValidateMessageNumber(messageNumber);
+
 			return FetchMessage("RETR " + messageNumber, false);
 		}
 
 		/// <summary>
 		/// Get all the headers for a message
 		/// </summary>
-		/// <param name="messageNumber">Message number, which may not be marked as deleted</param>
+		/// <param name="messageNumber">
+		/// Message number, which may not be marked as deleted.
+		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+		/// </param>
 		/// <returns>MessageHeaders object</returns>
 		/// <exception cref="PopServerException">If the server did not accept the TOP command</exception>
 		public MessageHeader GetMessageHeaders(int messageNumber)
 		{
 			AssertDisposed();
+
+			ValidateMessageNumber(messageNumber);
+
 			// 0 is the number of lines of the message body to fetch, therefore zero to only fetch headers
 			Message message = FetchMessage("TOP " + messageNumber + " 0", true);
 
@@ -878,6 +905,17 @@ namespace OpenPOP.POP3
 			}
 
 			return builder.ToString();
+		}
+
+		/// <summary>
+		/// Method for checking that a <paramref name="messageNumber"/> argument given to some method
+		/// is indeed valid. If not, <see cref="InvalidUseException"/> will be thrown.
+		/// </summary>
+		/// <param name="messageNumber">The message number to validate</param>
+		private static void ValidateMessageNumber(int messageNumber)
+		{
+			if(messageNumber <= 0)
+				throw new InvalidUseException("The messageNumber argument cannot have a value of zero or less. Valid messageNumber is in the range [1, messageCount]");
 		}
 		#endregion
 	}
