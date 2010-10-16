@@ -12,18 +12,22 @@ namespace OpenPOP.MIME.Header
 		/// 7 bit Encoding
 		/// </summary>
 		SevenBit,
+
 		/// <summary>
 		/// 8 bit Encoding
 		/// </summary>
 		EightBit,
+
 		/// <summary>
 		/// Quoted Printable Encoding
 		/// </summary>
 		QuotedPrintable,
+
 		/// <summary>
 		/// Base64 Encoding
 		/// </summary>
 		Base64,
+
 		/// <summary>
 		/// Binary Encoding
 		/// </summary>

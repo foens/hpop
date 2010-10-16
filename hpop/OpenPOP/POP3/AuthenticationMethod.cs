@@ -16,10 +16,12 @@ namespace OpenPOP.POP3
 		/// if SSL is used.
 		/// </summary>
 		UsernameAndPassword,
+
 		/// <summary>
 		/// Authenticate using the APOP method, which is more secure.
 		/// </summary>
 		APOP,
+
 		/// <summary>
 		/// Authenticate using APOP first, which is more secure.
 		/// If APOP is not supported on the server, authenticate
