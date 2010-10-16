@@ -208,6 +208,7 @@ namespace OpenPOP.MIME
 		/// <returns>Decoded attachment bytes</returns>
 		public byte[] DecodedAsBytes()
 		{
+			// TODO Is Encoding.Default good enough?
 			return Encoding.Default.GetBytes(DecodeAsText());
 		}
 

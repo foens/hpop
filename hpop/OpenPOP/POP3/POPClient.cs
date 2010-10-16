@@ -39,6 +39,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		// Using delegate { } there is no need for null checking
 		// which produces much cleaner code
+		// TODO Is delegates supported in .NET 2? : http://msdn.microsoft.com/en-us/library/orm-9780596516109-03-09.aspx
 		public event POPClientEvent CommunicationBegan = delegate { };
 
 		/// <summary>
@@ -297,6 +298,9 @@ namespace OpenPOP.POP3
 				clientSocket.Connect(hostname, port);
 			} catch (SocketException e)
 			{
+				// TODO Disconnect will throw an InvalidUseException here, because we are in state Disconnected
+				//      Also since the Reader and Writer are not set, a NullPointerException will be thrown too
+				//      Therefore we should simply disconnect from the just created socket.
 				Disconnect();
 				Log.LogError("Connect():" + e.Message);
 				throw new PopServerNotFoundException();

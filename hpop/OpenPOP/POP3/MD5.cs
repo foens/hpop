@@ -19,6 +19,7 @@ namespace OpenPOP.POP3
 			System.Security.Cryptography.MD5 md5 = new MD5CryptoServiceProvider();
 
 			// Give the md5 function the bytes of the string, and get an hashed byte[] as output
+			// TODO Is Encoding.Default a good choice?
 			byte[] result = md5.ComputeHash(Encoding.Default.GetBytes(input), 0, input.Length);
 
 			StringBuilder returnThis = new StringBuilder();

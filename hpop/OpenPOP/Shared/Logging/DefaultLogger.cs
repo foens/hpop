@@ -21,6 +21,7 @@
 
 		// This would be much nicer under C# 3.0 using an anonymous delegate
 		// instead of a defined delegate method
+		// TODO Is delegates not supported in C# 2.0? : http://msdn.microsoft.com/en-us/library/orm-9780596516109-03-09.aspx
 		private static ILog CreateDiagnosticsLogger()
 		{
 			return new DiagnosticsLogger();

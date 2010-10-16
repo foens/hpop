@@ -14,3 +14,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]		
 
 [assembly: AssemblyVersion("2010.07.01.1600")]
+
+// TODO When releasing, a strong-named assembly and a non-strong-named assembly should be created

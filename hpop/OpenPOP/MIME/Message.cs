@@ -150,6 +150,7 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
+		/// TODO: Make better documentation on this method
 		/// translate pictures url within the body
 		/// </summary>
 		/// <param name="body">message body</param>
@@ -172,6 +173,7 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
+		/// TODO: Discuss if we should have a bool parameter telling us whether or not to insert to,from,cc and so on
 		/// WARNING: This is work in progress / experimental. This might not work at all.
 		/// If you find any bugs using this method, please report to the developers
 		/// 
@@ -225,6 +227,8 @@ namespace OpenPOP.MIME
 
 				// Create the alternative view and add it to the mailMessage
 				mailMessage.AlternateViews.Add(new AlternateView(stream, body.Type));
+
+				// TODO What about TransferEncoding and ContentID
 			}
 
 			foreach (Attachment attachment in Attachments)
@@ -255,6 +259,7 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
+		/// TODO Make this documentation better
 		/// Translate inline pictures within the body to a path where the images are saved
 		/// under their ContentFileName.
 		/// </summary>

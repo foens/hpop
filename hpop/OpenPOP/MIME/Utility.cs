@@ -8,11 +8,11 @@ using OpenPOP.Shared.Logging;
 namespace OpenPOP.MIME
 {
 	/// <summary>
-	/// foens: This class should be reworked.
+	/// TODO This class should be reworked.
 	/// Right now it is just like "The blob" - which
 	/// is lots of code that is totally unrelated to each other
 	/// 
-	/// The class should, in time, be made internal
+	/// TODO The class should, in time, be made internal
 	/// </summary>
 	public static class Utility
 	{
@@ -217,6 +217,7 @@ namespace OpenPOP.MIME
 		/// <returns>Encoded text with new charset</returns>
 		private static string ChangeEncoding(string text, Encoding newEncoding)
 		{
+			// TODO Is Encoding.Default good enough?
 			byte[] bytes = Encoding.Default.GetBytes(text);
 			return newEncoding.GetString(bytes);
 		}
@@ -236,8 +237,10 @@ namespace OpenPOP.MIME
 		{
 			if (String.IsNullOrEmpty(original))
 				return String.Empty;
+
 			if (String.IsNullOrEmpty(toReplace))
 				return original;
+
 			if (String.IsNullOrEmpty(toReplaceWith))
 				toReplaceWith = String.Empty;
 
