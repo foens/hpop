@@ -41,9 +41,10 @@
   <ItemGroup>
     <Compile Include="MIME\Decode\QuotedPrintableTest.cs" />
     <Compile Include="MIME\MessageTest.cs" />
-    <Compile Include="POP3\POPClient\InvalidUse\POPClientAuthenticatedTests.cs" />
-    <Compile Include="POP3\POPClient\InvalidUse\POPClientConnectedTests.cs" />
-    <Compile Include="POP3\POPClient\InvalidUse\POPClientUnconnectedTests.cs" />
+    <Compile Include="POP3\POPClientAuthenticatedTests.cs" />
+    <Compile Include="POP3\POPClientConnectedTests.cs" />
+    <Compile Include="POP3\POPClientPositiveTests.cs" />
+    <Compile Include="POP3\POPClientUnconnectedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@ using OpenPOP.POP3;
 namespace OpenPOPUnitTests.POP3
 {
 	/// <summary>
-	/// Tests that when the <see cref="POPClient"/> is in an connected state, commands which may not
+	/// This TestFixture is testing that when the <see cref="POPClient"/> is in an connected state, commands which may not
 	/// be used in that state, throws <see cref="InvalidUseException"/>.
 	/// 
 	/// Also tests that commands which is can be used in this state, does not throw any exceptions
