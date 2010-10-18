@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using OpenPOP.MIME;
 using OpenPOP.POP3;
+using OpenPOP.POP3.Exceptions;
 using OpenPOP.Shared.Logging;
 using Attachment = OpenPOP.MIME.Attachment;
 using Message = OpenPOP.MIME.Message;

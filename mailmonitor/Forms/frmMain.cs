@@ -10,6 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
 using OpenPOP.POP3;
+using OpenPOP.POP3.Exceptions;
 
 namespace MailMonitor
 {
@@ -1081,7 +1082,7 @@ namespace MailMonitor
 					strRet="POP server error";
 				else if(e is PopServerNotFoundException)
 					strRet="POP server not found";
-				else if(e is PopServerLockException)
+				else if(e is PopServerLockedException)
 					strRet="POP server is locked";
 				else
 					strRet=e.Message;

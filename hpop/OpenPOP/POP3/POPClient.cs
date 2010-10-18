@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OpenPOP.MIME;
 using OpenPOP.MIME.Header;
+using OpenPOP.POP3.Exceptions;
 using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.POP3
@@ -262,13 +263,13 @@ namespace OpenPOP.POP3
 				Connected = true;
 				CommunicationOccurred(this);
 			}
-			catch (PopServerException)
+			catch (PopServerException e)
 			{
 				// If not close down the connection and abort
 				Disconnect();
 				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
 				Log.LogDebug("Last response from server was: " + LastServerResponse);
-				throw new PopServerNotAvailableException();
+				throw new PopServerNotAvailableException("Server is not available", e);
 			}
 		}
 
@@ -303,7 +304,7 @@ namespace OpenPOP.POP3
 				//      Therefore we should simply disconnect from the just created socket.
 				Disconnect();
 				Log.LogError("Connect():" + e.Message);
-				throw new PopServerNotFoundException();
+				throw new PopServerNotFoundException("Server not found", e);
 			}
 
 			StreamReader reader;
@@ -375,7 +376,7 @@ namespace OpenPOP.POP3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
-		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password)
 		{
 			AssertDisposed();
@@ -390,7 +391,7 @@ namespace OpenPOP.POP3
 		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
 		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.APOP"/> is used, but not supported by the server</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
-		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
@@ -426,35 +427,35 @@ namespace OpenPOP.POP3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
-		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
 			AuthenticationBegan(this);
 			try
 			{
 				SendCommand("USER " + username);
-			} catch (PopServerException)
+			} catch (PopServerException e)
 			{
 				Log.LogError("AuthenticateUsingUserAndPassword():wrong user: " + username);
-				throw new InvalidLoginException();
+				throw new InvalidLoginException("Invalid user", e);
 			}
 
 			try
 			{
 				SendCommand("PASS " + password);
-			} catch (PopServerException)
+			} catch (PopServerException e)
 			{
 				if (LastServerResponse.ToLower().Contains("lock"))
 				{
 					Log.LogError("AuthenticateUsingUserAndPassword(): maildrop is locked");
-					throw new PopServerLockException();
+					throw new PopServerLockedException("The account is locked", e);
 				}
 
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
 				Log.LogError("AuthenticateUsingUserAndPassword(): wrong password.");
 				Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidPasswordException();
+				throw new InvalidPasswordException("Invalid password", e);
 			}
 
 			AuthenticationFinished(this);
@@ -467,7 +468,7 @@ namespace OpenPOP.POP3
 		/// <param name="password">The user password</param>
 		/// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
-		/// <exception cref="PopServerLockException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingAPOP(string username, string password)
 		{
 			if (!APOPSupported)
@@ -478,17 +479,17 @@ namespace OpenPOP.POP3
 			try
 			{
 				SendCommand("APOP " + username + " " + MD5.ComputeHashHex(APOPTimestamp + password));
-			} catch (PopServerException)
+			} catch (PopServerException e)
 			{
 				if (LastServerResponse.ToLower().Contains("lock"))
 				{
 					Log.LogError("AuthenticateUsingAPOP(): maildrop is locked");
-					throw new PopServerLockException();
+					throw new PopServerLockedException("The account is locked", e);
 				}
 
 				Log.LogError("AuthenticateUsingAPOP(): wrong user or password");
 				Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginOrPasswordException();
+				throw new InvalidLoginOrPasswordException("The supplied username or password is wrong", e);
 			}
 
 			AuthenticationFinished(this);
@@ -810,7 +811,7 @@ namespace OpenPOP.POP3
 			if (response.StartsWith("+OK"))
 				return;
 
-			throw new PopServerException(response);
+			throw new PopServerException("The server did not respond with a +OK response. The response was: " + response);
 		}
 
 		/// <summary>

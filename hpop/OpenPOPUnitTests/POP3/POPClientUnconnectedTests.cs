@@ -2,6 +2,7 @@
 using System.Text;
 using NUnit.Framework;
 using OpenPOP.POP3;
+using OpenPOP.POP3.Exceptions;
 
 namespace OpenPOPUnitTests.POP3
 {
