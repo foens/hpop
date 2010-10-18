@@ -1,14 +1,21 @@
 ﻿using System.Windows.Forms;
 
-namespace OpenPOP.NET_Sample_App
+namespace OpenPOP.TestApplication
 {
+	/// <summary>
+	/// A form which can simply show a text string - the source of an email
+	/// </summary>
 	public class ShowSourceForm : Form
 	{
 		private readonly string Source;
 
-		private Panel panel1;
+		private Panel mainPanel;
 		private RichTextBox sourceText;
 
+		/// <summary>
+		/// Constructs a ShowSourceForm with the <paramref name="source"/> text to use.
+		/// </summary>
+		/// <param name="source">The text to show to the user</param>
 		public ShowSourceForm(string source)
 		{
 			Source = source;
@@ -29,15 +36,15 @@ namespace OpenPOP.NET_Sample_App
 		private void InitializeComponent()
 		{
 			this.sourceText = new System.Windows.Forms.RichTextBox();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.panel1.SuspendLayout();
+			this.mainPanel = new System.Windows.Forms.Panel();
+			this.mainPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// sourceText
 			// 
 			this.sourceText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-			                                                                | System.Windows.Forms.AnchorStyles.Left)
-			                                                               | System.Windows.Forms.AnchorStyles.Right)));
+						| System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
 			this.sourceText.Location = new System.Drawing.Point(3, 3);
 			this.sourceText.Name = "sourceText";
 			this.sourceText.ReadOnly = true;
@@ -46,24 +53,24 @@ namespace OpenPOP.NET_Sample_App
 			this.sourceText.Text = "";
 			this.sourceText.WordWrap = false;
 			// 
-			// panel1
+			// mainPanel
 			// 
-			this.panel1.Controls.Add(this.sourceText);
-			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel1.Location = new System.Drawing.Point(0, 0);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(284, 262);
-			this.panel1.TabIndex = 2;
+			this.mainPanel.Controls.Add(this.sourceText);
+			this.mainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mainPanel.Location = new System.Drawing.Point(0, 0);
+			this.mainPanel.Name = "mainPanel";
+			this.mainPanel.Size = new System.Drawing.Size(284, 262);
+			this.mainPanel.TabIndex = 2;
 			// 
 			// ShowSourceForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(284, 262);
-			this.Controls.Add(this.panel1);
+			this.Controls.Add(this.mainPanel);
 			this.Name = "ShowSourceForm";
 			this.Text = "ShowSourceForm";
-			this.panel1.ResumeLayout(false);
+			this.mainPanel.ResumeLayout(false);
 			this.ResumeLayout(false);
 		}
 		#endregion

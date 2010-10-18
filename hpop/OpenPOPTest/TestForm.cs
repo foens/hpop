@@ -12,7 +12,7 @@ using OpenPOP.Shared.Logging;
 using Attachment = OpenPOP.MIME.Attachment;
 using Message = OpenPOP.MIME.Message;
 
-namespace OpenPOP.NET_Sample_App
+namespace OpenPOP.TestApplication
 {
 	/// <summary>
 	/// This class is a form which makes it possible to download all messages
@@ -70,13 +70,13 @@ namespace OpenPOP.NET_Sample_App
 			DefaultLogger.LoggerFactory = AppLoggerFactory;
 
 			popClient = new POPClient( /* new DiagnosticsLogger() */ );
-			popClient.AuthenticationBegan     += popClient_AuthenticationBegan;
-			popClient.AuthenticationFinished  += popClient_AuthenticationFinished;
-			popClient.CommunicationBegan      += popClient_CommunicationBegan;
-			popClient.CommunicationOccurred   += popClient_CommunicationOccurred;
-			popClient.CommunicationLost       += popClient_CommunicationLost;
-			popClient.MessageTransferBegan    += popClient_MessageTransferBegan;
-			popClient.MessageTransferFinished += popClient_MessageTransferFinished;
+			popClient.AuthenticationBegan     += PopClient_AuthenticationBegan;
+			popClient.AuthenticationFinished  += PopClient_AuthenticationFinished;
+			popClient.CommunicationBegan      += PopClient_CommunicationBegan;
+			popClient.CommunicationOccurred   += PopClient_CommunicationOccurred;
+			popClient.CommunicationLost       += PopClient_CommunicationLost;
+			popClient.MessageTransferBegan    += PopClient_MessageTransferBegan;
+			popClient.MessageTransferFinished += PopClient_MessageTransferFinished;
 
 			// This is only for faster debugging purposes
 			// We will try to load in default values for the hostname, port, ssl, username and password
@@ -106,37 +106,37 @@ namespace OpenPOP.NET_Sample_App
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.panelTop =					new System.Windows.Forms.Panel();
-			this.useSslCheckBox =			new System.Windows.Forms.CheckBox();
-			this.uidlButton =				new System.Windows.Forms.Button();
-			this.totalMessagesTextBox =		new System.Windows.Forms.TextBox();
-			this.labelTotalMessages =		new System.Windows.Forms.Label();
-			this.labelPassword =			new System.Windows.Forms.Label();
-			this.passwordTextBox =			new System.Windows.Forms.TextBox();
-			this.labelUsername =			new System.Windows.Forms.Label();
-			this.loginTextBox =				new System.Windows.Forms.TextBox();
+			this.panelTop = new System.Windows.Forms.Panel();
+			this.useSslCheckBox = new System.Windows.Forms.CheckBox();
+			this.uidlButton = new System.Windows.Forms.Button();
+			this.totalMessagesTextBox = new System.Windows.Forms.TextBox();
+			this.labelTotalMessages = new System.Windows.Forms.Label();
+			this.labelPassword = new System.Windows.Forms.Label();
+			this.passwordTextBox = new System.Windows.Forms.TextBox();
+			this.labelUsername = new System.Windows.Forms.Label();
+			this.loginTextBox = new System.Windows.Forms.TextBox();
 			this.connectAndRetrieveButton = new System.Windows.Forms.Button();
-			this.labelServerPort =			new System.Windows.Forms.Label();
-			this.portTextBox =				new System.Windows.Forms.TextBox();
-			this.labelServerAddress =		new System.Windows.Forms.Label();
-			this.popServerTextBox =			new System.Windows.Forms.TextBox();
-			this.panelProperties =			new System.Windows.Forms.Panel();
-			this.gridHeaders =				new System.Windows.Forms.DataGrid();
-			this.panelMiddle =				new System.Windows.Forms.Panel();
-			this.panelMessageBody =			new System.Windows.Forms.Panel();
-			this.listOfEvents =				new System.Windows.Forms.ListBox();
-			this.messageTextBox =			new System.Windows.Forms.TextBox();
-			this.labelMessageBody =			new System.Windows.Forms.Label();
-			this.panelMessagesView =		new System.Windows.Forms.Panel();
-			this.listMessages =				new System.Windows.Forms.TreeView();
-			this.contextMenuMessages =		new System.Windows.Forms.ContextMenu();
-			this.menuDeleteMessage =		new System.Windows.Forms.MenuItem();
-			this.menuViewSource =			new System.Windows.Forms.MenuItem();
-			this.labelMessageNumber =		new System.Windows.Forms.Label();
-			this.attachmentPanel =			new System.Windows.Forms.Panel();
-			this.listAttachments =			new System.Windows.Forms.TreeView();
-			this.labelAttachments =			new System.Windows.Forms.Label();
-			this.saveFile =					new System.Windows.Forms.SaveFileDialog();
+			this.labelServerPort = new System.Windows.Forms.Label();
+			this.portTextBox = new System.Windows.Forms.TextBox();
+			this.labelServerAddress = new System.Windows.Forms.Label();
+			this.popServerTextBox = new System.Windows.Forms.TextBox();
+			this.panelProperties = new System.Windows.Forms.Panel();
+			this.gridHeaders = new System.Windows.Forms.DataGrid();
+			this.panelMiddle = new System.Windows.Forms.Panel();
+			this.panelMessageBody = new System.Windows.Forms.Panel();
+			this.listOfEvents = new System.Windows.Forms.ListBox();
+			this.messageTextBox = new System.Windows.Forms.TextBox();
+			this.labelMessageBody = new System.Windows.Forms.Label();
+			this.panelMessagesView = new System.Windows.Forms.Panel();
+			this.listMessages = new System.Windows.Forms.TreeView();
+			this.contextMenuMessages = new System.Windows.Forms.ContextMenu();
+			this.menuDeleteMessage = new System.Windows.Forms.MenuItem();
+			this.menuViewSource = new System.Windows.Forms.MenuItem();
+			this.labelMessageNumber = new System.Windows.Forms.Label();
+			this.attachmentPanel = new System.Windows.Forms.Panel();
+			this.listAttachments = new System.Windows.Forms.TreeView();
+			this.labelAttachments = new System.Windows.Forms.Label();
+			this.saveFile = new System.Windows.Forms.SaveFileDialog();
 			this.panelTop.SuspendLayout();
 			this.panelProperties.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -182,7 +182,7 @@ namespace OpenPOP.NET_Sample_App
 			// uidlButton
 			// 
 			this.uidlButton.Location = new System.Drawing.Point(460, 42);
-			this.uidlButton.Name = "UIDLButton";
+			this.uidlButton.Name = "uidlButton";
 			this.uidlButton.Size = new System.Drawing.Size(82, 21);
 			this.uidlButton.TabIndex = 6;
 			this.uidlButton.Text = "UIDL";
@@ -234,14 +234,14 @@ namespace OpenPOP.NET_Sample_App
 			this.loginTextBox.Size = new System.Drawing.Size(128, 20);
 			this.loginTextBox.TabIndex = 1;
 			// 
-			// ConnectAndRetrieveButton
+			// connectAndRetrieveButton
 			// 
 			this.connectAndRetrieveButton.Location = new System.Drawing.Point(460, 0);
-			this.connectAndRetrieveButton.Name = "ConnectAndRetrieveButton";
+			this.connectAndRetrieveButton.Name = "connectAndRetrieveButton";
 			this.connectAndRetrieveButton.Size = new System.Drawing.Size(82, 39);
 			this.connectAndRetrieveButton.TabIndex = 5;
 			this.connectAndRetrieveButton.Text = "Connect and Retreive";
-			this.connectAndRetrieveButton.Click += new System.EventHandler(this.connectAndRetrieveButtonClick);
+			this.connectAndRetrieveButton.Click += new System.EventHandler(this.ConnectAndRetrieveButtonClick);
 			// 
 			// labelServerPort
 			// 
@@ -372,25 +372,25 @@ namespace OpenPOP.NET_Sample_App
 			this.listMessages.ShowRootLines = false;
 			this.listMessages.Size = new System.Drawing.Size(160, 160);
 			this.listMessages.TabIndex = 8;
-			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.listMessages_AfterSelect);
+			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListMessages_AfterSelect);
 			// 
 			// contextMenuMessages
 			// 
 			this.contextMenuMessages.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-			this.menuDeleteMessage,
-			this.menuViewSource});
+            this.menuDeleteMessage,
+            this.menuViewSource});
 			// 
 			// menuDeleteMessage
 			// 
 			this.menuDeleteMessage.Index = 0;
 			this.menuDeleteMessage.Text = "Delete Mail";
-			this.menuDeleteMessage.Click += new System.EventHandler(this.mnuDeleteMessage_Click);
+			this.menuDeleteMessage.Click += new System.EventHandler(this.MenuDeleteMessage_Click);
 			// 
 			// menuViewSource
 			// 
 			this.menuViewSource.Index = 1;
 			this.menuViewSource.Text = "View source";
-			this.menuViewSource.Click += new System.EventHandler(this.mnuDeleteMessageClick);
+			this.menuViewSource.Click += new System.EventHandler(this.MenuViewSource_Click);
 			// 
 			// labelMessageNumber
 			// 
@@ -422,7 +422,7 @@ namespace OpenPOP.NET_Sample_App
 			this.listAttachments.ShowRootLines = false;
 			this.listAttachments.Size = new System.Drawing.Size(121, 160);
 			this.listAttachments.TabIndex = 10;
-			this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.listAttachments_AfterSelect);
+			this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListAttachments_AfterSelect);
 			// 
 			// labelAttachments
 			// 
@@ -445,7 +445,7 @@ namespace OpenPOP.NET_Sample_App
 			this.Controls.Add(this.panelTop);
 			this.Name = "TestForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "OpenPOP.NET Sample Application";
+			this.Text = "OpenPOP.NET Test Application";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.panelTop.ResumeLayout(false);
 			this.panelTop.PerformLayout();
@@ -513,7 +513,7 @@ namespace OpenPOP.NET_Sample_App
 						success++;
 						messages.Add(i, m);
 						TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
-						node.Tag = i.ToString();
+						node.Tag = i;
 					} catch (Exception)
 					{
 						fail++;
@@ -529,6 +529,9 @@ namespace OpenPOP.NET_Sample_App
 			} catch (PopServerNotFoundException)
 			{
 				MessageBox.Show(this, "The server could not be found", "POP3 Retrieval");
+			} catch(PopServerLockedException)
+			{
+				MessageBox.Show(this, "The mailbox is locked. It might be in use or under maintenance. Are you connected elsewhere?", "POP3 Account Locked");
 			} catch (Exception e)
 			{
 				MessageBox.Show(this, "Error occurred retrieving mail. " + e.Message, "POP3 Retrieval");
@@ -540,14 +543,14 @@ namespace OpenPOP.NET_Sample_App
 			}
 		}
 
-		private void connectAndRetrieveButtonClick(object sender, EventArgs e)
+		private void ConnectAndRetrieveButtonClick(object sender, EventArgs e)
 		{
 			ReceiveMails();
 		}
 
-		private void listMessages_AfterSelect(object sender, TreeViewEventArgs e)
+		private void ListMessages_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			Message m = messages[int.Parse(listMessages.SelectedNode.Tag.ToString())];
+			Message m = messages[(int)listMessages.SelectedNode.Tag];
 			if (m != null)
 			{
 				if (m.MessageBody.Count > 0)
@@ -619,10 +622,10 @@ namespace OpenPOP.NET_Sample_App
 			}
 		}
 
-		private void listAttachments_AfterSelect(object sender, TreeViewEventArgs e)
+		private void ListAttachments_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 			Attachment att = (Attachment)listAttachments.SelectedNode.Tag;
-			Message m = messages[int.Parse(listMessages.SelectedNode.Tag.ToString())];
+			Message m = messages[(int)listMessages.SelectedNode.Tag];
 			if (att != null && m != null)
 			{
 				saveFile.FileName = att.ContentFileName;
@@ -657,14 +660,14 @@ namespace OpenPOP.NET_Sample_App
 				MessageBox.Show(this, "attachment object is null!");
 		}
 
-		private void mnuDeleteMessage_Click(object sender, EventArgs e)
+		private void MenuDeleteMessage_Click(object sender, EventArgs e)
 		{
 			if (listMessages.SelectedNode != null)
 			{
 				DialogResult drRet = MessageBox.Show(this, "Are you sure to delete the email?", "Delete email", MessageBoxButtons.YesNo);
 				if (drRet == DialogResult.Yes)
 				{
-					popClient.DeleteMessage(Convert.ToInt32(listMessages.SelectedNode.Tag));
+					popClient.DeleteMessage((int)listMessages.SelectedNode.Tag);
 
 					listMessages.SelectedNode.Remove();
 
@@ -695,46 +698,46 @@ namespace OpenPOP.NET_Sample_App
 			listOfEvents.SelectedIndex = listOfEvents.Items.Count - 1;
 		}
 
-		private void popClient_CommunicationBegan(POPClient sender)
+		private void PopClient_CommunicationBegan(POPClient sender)
 		{
 			AddEvent("CommunicationBegan");
 		}
 
-		private void popClient_CommunicationOccurred(POPClient sender)
+		private void PopClient_CommunicationOccurred(POPClient sender)
 		{
 			AddEvent("CommunicationOccurred");
 		}
 
-		private void popClient_AuthenticationBegan(POPClient sender)
+		private void PopClient_AuthenticationBegan(POPClient sender)
 		{
 			AddEvent("AuthenticationBegan");
 		}
 
-		private void popClient_AuthenticationFinished(POPClient sender)
+		private void PopClient_AuthenticationFinished(POPClient sender)
 		{
 			AddEvent("AuthenticationFinished");
 		}
 
-		private void popClient_MessageTransferBegan(POPClient sender)
+		private void PopClient_MessageTransferBegan(POPClient sender)
 		{
 			AddEvent("MessageTransferBegan");
 		}
 
-		private void popClient_MessageTransferFinished(POPClient sender)
+		private void PopClient_MessageTransferFinished(POPClient sender)
 		{
 			AddEvent("MessageTransferFinished");
 		}
 
-		private void popClient_CommunicationLost(POPClient sender)
+		private void PopClient_CommunicationLost(POPClient sender)
 		{
 			AddEvent("CommunicationLost");
 		}
 
-		private void mnuDeleteMessageClick(object sender, EventArgs e)
+		private void MenuViewSource_Click(object sender, EventArgs e)
 		{
 			if (listMessages.SelectedNode != null)
 			{
-				Message m = messages[int.Parse(listMessages.SelectedNode.Tag.ToString())];
+				Message m = messages[(int)listMessages.SelectedNode.Tag];
 
 				ShowSourceForm sourceForm = new ShowSourceForm(m.RawMessage);
 				sourceForm.ShowDialog();

@@ -1,7 +1,7 @@
 using System.Reflection;
 
-[assembly: AssemblyTitle("OpenPOP Test Program")]
-[assembly: AssemblyDescription("OpenPOP POP3 Test Program")]
+[assembly: AssemblyTitle("OpenPOP Test Application")]
+[assembly: AssemblyDescription("OpenPOP POP3 Test Application")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenPOP")]
 [assembly: AssemblyProduct("OpenPOP")]
