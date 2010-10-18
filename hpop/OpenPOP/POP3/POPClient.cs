@@ -267,7 +267,7 @@ namespace OpenPOP.POP3
 			{
 				// If not close down the connection and abort
 				Disconnect();
-				Log.LogError("Connect():" + "Error with connection, maybe POP3 server not exist");
+				Log.LogError("Connect(): " + "Error with connection, maybe POP3 server not exist");
 				Log.LogDebug("Last response from server was: " + LastServerResponse);
 				throw new PopServerNotAvailableException("Server is not available", e);
 			}
@@ -299,11 +299,10 @@ namespace OpenPOP.POP3
 				clientSocket.Connect(hostname, port);
 			} catch (SocketException e)
 			{
-				// TODO Disconnect will throw an InvalidUseException here, because we are in state Disconnected
-				//      Also since the Reader and Writer are not set, a NullPointerException will be thrown too
-				//      Therefore we should simply disconnect from the just created socket.
-				Disconnect();
-				Log.LogError("Connect():" + e.Message);
+				// Close the socket - we are not connected, so no need to close stream underneath
+				clientSocket.Close();
+
+				Log.LogError("Connect(): " + e.Message);
 				throw new PopServerNotFoundException("Server not found", e);
 			}
 
