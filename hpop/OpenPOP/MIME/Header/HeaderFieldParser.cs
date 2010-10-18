@@ -30,6 +30,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="input">The value to parse out and email and/or a username</param>
 		/// <returns>A valid <see cref="MailAddress"/> where the input has been parsed into or <see langword="null"/> if the input is not valid</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="input"/> parameter.</exception>
 		public static MailAddress ParseMailAddress(string input)
 		{
 			if(input == null)
@@ -45,44 +46,44 @@ namespace OpenPOP.MIME.Header
 			int indexStartEmail = input.LastIndexOf("<");
 			int indexEndEmail = input.LastIndexOf(">");
 
-			if (indexStartEmail >= 0 && indexEndEmail >= 0)
-			{
-				string username;
-				// Check if there is a username in front of the email address
-				if (indexStartEmail > 0)
-				{
-					// Parse out the user
-					username = input.Substring(0, indexStartEmail).Trim();
-				}
-				else
-				{
-					// There was no user
-					username = "";
-				}
-
-				// Parse out the email address without the "<"  and ">"
-				indexStartEmail = indexStartEmail + 1;
-				int emailLength = indexEndEmail - indexStartEmail;
-				string emailAddress = input.Substring(indexStartEmail, emailLength);
-
-				// There has been cases where there was no emailaddress between the < and >
-				if (emailAddress.Equals(""))
-					return null;
-
-				// If the username is quoted, MailAddress' constructor will remove them for us
-				return new MailAddress(emailAddress, username);
-			}
-
-			// This might be on the form noreply@mail.eksperten.dk
-			// Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
 			try
 			{
+				if (indexStartEmail >= 0 && indexEndEmail >= 0)
+				{
+					string username;
+					// Check if there is a username in front of the email address
+					if (indexStartEmail > 0)
+					{
+						// Parse out the user
+						username = input.Substring(0, indexStartEmail).Trim();
+					}
+					else
+					{
+						// There was no user
+						username = "";
+					}
+
+					// Parse out the email address without the "<"  and ">"
+					indexStartEmail = indexStartEmail + 1;
+					int emailLength = indexEndEmail - indexStartEmail;
+					string emailAddress = input.Substring(indexStartEmail, emailLength);
+
+					// There has been cases where there was no emailaddress between the < and >
+					if (emailAddress.Equals(""))
+						return null;
+
+					// If the username is quoted, MailAddress' constructor will remove them for us
+					return new MailAddress(emailAddress, username);
+				}
+
+				// This might be on the form noreply@mail.eksperten.dk
+				// Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
 				if (input.Contains("@"))
 					return new MailAddress(input);
 			}
-			catch (FormatException e)
+			catch (FormatException)
 			{
-				DefaultLogger.CreateLogger().LogError("ParseMailAddress(): " + e.Message);
+				DefaultLogger.CreateLogger().LogError("ParseMailAddress(): Invalid mail address: " + input);
 			}
 
 			// This is not a MailAddress
