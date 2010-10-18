@@ -678,7 +678,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Gets the size of a single message
+		/// Gets the size in bytes of a single message
 		/// </summary>
 		/// <param name="messageNumber">
 		/// The number of a message which may not be a message marked as deleted.
@@ -702,7 +702,7 @@ namespace OpenPOP.POP3
 		}
 
 		/// <summary>
-		/// Get the sizes of all the messages.
+		/// Get the sizes in bytes of all the messages.
 		/// Messages marked as deleted are not listed
 		/// </summary>
 		/// <returns>Size of each message excluding deleted ones</returns>
