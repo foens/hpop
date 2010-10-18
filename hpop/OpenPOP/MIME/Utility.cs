@@ -46,6 +46,12 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
 		public static bool SaveByteContentToFile(FileInfo file, byte[] contents)
 		{
+			if(file == null)
+				throw new ArgumentNullException("file");
+
+			if(contents == null)
+				throw new ArgumentNullException("contents");
+
 			try
 			{
 				if (file.Exists)
@@ -67,11 +73,17 @@ namespace OpenPOP.MIME
 		/// Save text content to a file
 		/// </summary>
 		/// <param name="file">File to be saved to</param>
-		/// <param name="content">Text content</param>
+		/// <param name="contents">Text content</param>
 		/// <param name="replaceFileIfExists">Replace file if exists</param>
 		/// <returns><see langword="true"/> if saving succeeded, <see langword="false"/> if failed</returns>
-		public static bool SavePlainTextToFile(FileInfo file, string content, bool replaceFileIfExists)
+		public static bool SavePlainTextToFile(FileInfo file, string contents, bool replaceFileIfExists)
 		{
+			if (file == null)
+				throw new ArgumentNullException("file");
+
+			if (contents == null)
+				throw new ArgumentNullException("contents");
+
 			try
 			{
 				if (file.Exists)
@@ -84,7 +96,7 @@ namespace OpenPOP.MIME
 
 				using (StreamWriter sw = new StreamWriter(file.Create()))
 				{
-					sw.Write(content);
+					sw.Write(contents);
 				}
 
 				return true; // Success
@@ -99,15 +111,21 @@ namespace OpenPOP.MIME
 		/// Read text content from a file
 		/// </summary>
 		/// <param name="file">File to be read from</param>
-		/// <param name="content">This is where the content of the file is placed</param>
+		/// <param name="contents">This is where the content of the file is placed</param>
 		/// <returns><see langword="true"/> if reading succeeded, <see langword="false"/> if failed</returns>
-		public static bool ReadPlainTextFromFile(FileInfo file, ref string content)
+		public static bool ReadPlainTextFromFile(FileInfo file, ref string contents)
 		{
+			if (file == null)
+				throw new ArgumentNullException("file");
+
+			if (contents == null)
+				throw new ArgumentNullException("contents");
+
 			if (file.Exists)
 			{
 				using (StreamReader fs = new StreamReader(file.OpenRead()))
 				{
-					content = fs.ReadToEnd();
+					contents = fs.ReadToEnd();
 				}
 				return true;
 			}
@@ -144,6 +162,9 @@ namespace OpenPOP.MIME
 		/// <returns>Text without quotes</returns>
 		public static string RemoveQuotes(string text)
 		{
+			if(text == null)
+				throw new ArgumentNullException("text");
+
 			string returner = text;
 
 			if (returner.StartsWith("\""))
@@ -174,6 +195,9 @@ namespace OpenPOP.MIME
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="contentTransferEncoding"/> is unsupported</exception>
 		public static string DoDecode(string input, ContentTransferEncoding contentTransferEncoding, string charSet)
 		{
+			if(input == null)
+				throw new ArgumentNullException("input");
+
 			Encoding encoding = Encoding.Default;
 			if (!string.IsNullOrEmpty(charSet))
 				encoding = HeaderFieldParser.ParseCharsetToEncoding(charSet);
@@ -217,6 +241,12 @@ namespace OpenPOP.MIME
 		/// <returns>Encoded text with new charset</returns>
 		private static string ChangeEncoding(string text, Encoding newEncoding)
 		{
+			if(text == null)
+				throw new ArgumentNullException("text");
+
+			if(newEncoding == null)
+				throw new ArgumentNullException("newEncoding");
+
 			// TODO Is Encoding.Default good enough?
 			byte[] bytes = Encoding.Default.GetBytes(text);
 			return newEncoding.GetString(bytes);

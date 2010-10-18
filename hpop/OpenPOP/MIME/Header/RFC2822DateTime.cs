@@ -26,6 +26,9 @@ namespace OpenPOP.MIME.Header
 		/// <returns>A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted</returns>
 		public static DateTime StringToDate(string aDate)
 		{
+			if(aDate == null)
+				throw new ArgumentNullException("aDate");
+
 			string dayName;
 
 			// Strip out comments, handles nested comments as well

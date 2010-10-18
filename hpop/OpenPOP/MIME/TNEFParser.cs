@@ -80,27 +80,33 @@ namespace OpenPOP.MIME
 		}
 
 		/// <summary>
-		/// Create a TNEFParser which loads its content from a file
+		/// Create a TNEFParser which loads its contents from a file
 		/// </summary>
 		/// <param name="file">MS-TNEF file</param>
 		/// <param name="logger">The logging interface to use</param>
 		public TNEFParser(FileInfo file, ILog logger)
 			: this(logger)
 		{
+			if(file == null)
+				throw new ArgumentNullException("file");
+
 			if (!OpenTNEFStream(file))
 				throw new ArgumentException("Error opening the file", "file");
 		}
 
 		/// <summary>
-		/// Create a TNEFParser which loads its content from a byte array
+		/// Create a TNEFParser which loads its contents from a byte array
 		/// </summary>
 		/// <param name="contents">MS-TNEF bytes</param>
 		/// <param name="logger">The logging interface to use</param>
 		public TNEFParser(byte[] contents, ILog logger)
 			: this(logger)
 		{
+			if(contents == null)
+				throw new ArgumentNullException("contents");
+
 			if (!OpenTNEFStream(contents))
-				throw new ArgumentException("The content is invalid", "contents");
+				throw new ArgumentException("The contents is invalid", "contents");
 		}
 		#endregion
 
@@ -190,6 +196,9 @@ namespace OpenPOP.MIME
 		/// <returns></returns>
 		private bool OpenTNEFStream(FileInfo file)
 		{
+			if(file == null)
+				throw new ArgumentNullException("file");
+
 			TNEFFile = file.FullName;
 			try
 			{
@@ -207,14 +216,17 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Open the MS-TNEF stream from bytes
 		/// </summary>
-		/// <param name="content">MS-TNEF bytes</param>
+		/// <param name="contents">MS-TNEF bytes</param>
 		/// <returns></returns>
-		private bool OpenTNEFStream(byte[] content)
+		private bool OpenTNEFStream(byte[] contents)
 		{
+			if(contents == null)
+				throw new ArgumentNullException("contents");
+
 			try
 			{
-				fsTNEF = new MemoryStream(content);
-				fileLength = content.Length;
+				fsTNEF = new MemoryStream(contents);
+				fileLength = contents.Length;
 				return true;
 			} catch (Exception e)
 			{
@@ -407,16 +419,21 @@ namespace OpenPOP.MIME
 		public List<TNEFAttachment> Attachments()
 		{
 			AssertDisposed();
+
 			return _attachments;
 		}
 
 		/// <summary>
 		/// save all decoded attachments to files
 		/// </summary>
-		/// <returns>true is succeded, vice versa</returns>
+		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
 			AssertDisposed();
+
+			if(pathToSaveTo == null)
+				throw new ArgumentNullException("pathToSaveTo");
+
 			bool result = false;
 
 			foreach (TNEFAttachment tnefAttachment in _attachments)
@@ -432,9 +449,18 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="attachment">decoded attachment</param>
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
-		/// <returns>true is succeded, vice versa</returns>
+		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo)
 		{
+			if(attachment == null)
+				throw new ArgumentNullException("attachment");
+
+			if(pathToSaveTo == null)
+				throw new ArgumentNullException("pathToSaveTo");
+
+			if(!pathToSaveTo.Exists)
+				throw new ArgumentException("The path " + pathToSaveTo.FullName + " does not exist");
+
 			return SaveAttachment(attachment, pathToSaveTo, DefaultLogger.CreateLogger());
 		}
 
@@ -444,9 +470,21 @@ namespace OpenPOP.MIME
 		/// <param name="attachment">decoded attachment</param>
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
 		/// <param name="logger">The object to use for logging output</param>
-		/// <returns>true is succeded, vice versa</returns>
+		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo, ILog logger)
 		{
+			if (attachment == null)
+				throw new ArgumentNullException("attachment");
+
+			if (pathToSaveTo == null)
+				throw new ArgumentNullException("pathToSaveTo");
+
+			if (logger == null)
+				throw new ArgumentNullException("logger");
+
+			if (!pathToSaveTo.Exists)
+				throw new ArgumentException("The path " + pathToSaveTo.FullName + " does not exist");
+			
 			try
 			{
 				FileInfo outFile = new FileInfo(Path.Combine(pathToSaveTo.FullName, attachment.FileName));
@@ -470,7 +508,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// parse MS-TNEF stream
 		/// </summary>
-		/// <returns>true is succeded, vice versa</returns>
+		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
 		public bool Parse()
 		{
 			AssertDisposed();

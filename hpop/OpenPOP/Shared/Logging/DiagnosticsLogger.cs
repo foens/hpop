@@ -1,4 +1,6 @@
-﻿namespace OpenPOP.Shared.Logging
+﻿using System;
+
+namespace OpenPOP.Shared.Logging
 {
 	/// <summary>
 	/// This logging object writes aplication error and debug output using the
@@ -12,6 +14,9 @@
 		/// <param name="message">This is the string to log</param>
 		public void LogError(string message)
 		{
+			if(message == null)
+				throw new ArgumentNullException("message");
+
 			System.Diagnostics.Trace.WriteLine("OpenPOP: " + message);
 		}
 
@@ -21,6 +26,9 @@
 		/// <param name="message">This is the debug message to log</param>
 		public void LogDebug(string message)
 		{
+			if (message == null)
+				throw new ArgumentNullException("message");
+
 			System.Diagnostics.Trace.WriteLine("OpenPOP: (DEBUG) " + message);
 		}
 	}

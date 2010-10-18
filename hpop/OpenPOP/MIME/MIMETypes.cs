@@ -31,6 +31,9 @@ namespace OpenPOP.MIME
 		/// <returns>A content type for the file, or null if it cannot be determined</returns>
 		private static string ContentType(string extension)
 		{
+			if(extension == null)
+				throw new ArgumentNullException("extension");
+
 			if (MIMETypeList.ContainsKey(extension))
 				return MIMETypeList[extension].ToString();
 
@@ -319,6 +322,9 @@ namespace OpenPOP.MIME
 		/// <returns>string MIME type (Example: \"text/plain\")</returns>
 		public static string GetMimeType(string fileName)
 		{
+			if(fileName == null)
+				throw new ArgumentNullException("fileName");
+
 			try
 			{
 				string fileExtension = new FileInfo(fileName).Extension;

@@ -22,7 +22,7 @@ namespace OpenPOP.MIME.Header
 		/// "Eksperten mailrobot" &lt;noreply@mail.eksperten.dk&gt;
 		/// &lt;noreply@mail.eksperten.dk&gt;
 		/// noreply@mail.eksperten.dk
-		/// Some name (will return null on this)
+		/// Some name (will return <see langword="null"/> on this)
 		/// 
 		/// 
 		/// It might also contain encoded text.
@@ -32,6 +32,9 @@ namespace OpenPOP.MIME.Header
 		/// <returns>A valid <see cref="MailAddress"/> where the input has been parsed into or <see langword="null"/> if the input is not valid</returns>
 		public static MailAddress ParseMailAddress(string input)
 		{
+			if(input == null)
+				throw new ArgumentNullException("input");
+
 			// Remove exesive whitespace
 			input = input.Trim();
 
@@ -95,10 +98,13 @@ namespace OpenPOP.MIME.Header
 		/// Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;, ...
 		/// to a list of MailAddresses
 		/// </summary>
-		/// <param name="input">The input that is a comma-seperated list of EmailAddresses to parse</param>
+		/// <param name="input">The input that is a comma-separated list of EmailAddresses to parse</param>
 		/// <returns>A List of MailAddresses, or an empty list if there was no valid EmailAddresses to parse</returns>
 		public static List<MailAddress> ParseMailAddresses(string input)
 		{
+			if(input == null)
+				throw new ArgumentNullException("input");
+
 			List<MailAddress> returner = new List<MailAddress>();
 
 			// MailAddresses are split by commas
@@ -124,8 +130,8 @@ namespace OpenPOP.MIME.Header
 		/// <returns>A <see cref="ContentTransferEncoding"/></returns>
 		public static ContentTransferEncoding ParseContentTransferEncoding(string headerValue)
 		{
-			if (headerValue == null)
-				return ContentTransferEncoding.SevenBit; // This is the default value
+			if(headerValue == null)
+				throw new ArgumentNullException("headerValue");
 
 			switch (headerValue.Trim().ToUpper())
 			{
@@ -153,9 +159,12 @@ namespace OpenPOP.MIME.Header
 		/// Parses an ImportanceType from a given Importance header value
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
-		/// <returns>A <see cref="MessageImportance"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
+		/// <returns>A <see cref="MailPriority"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
 		public static MailPriority ParseImportance(string headerValue)
 		{
+			if(headerValue == null)
+				throw new ArgumentNullException("headerValue");
+
 			switch (headerValue.ToUpper())
 			{
 				case "5":
@@ -183,6 +192,9 @@ namespace OpenPOP.MIME.Header
 		/// <returns>A <see cref="ContentType"/> object</returns>
 		public static ContentType ParseContentType(string headerValue)
 		{
+			if(headerValue == null)
+				throw new ArgumentNullException("headerValue");
+
 			try
 			{
 				return new ContentType(headerValue);
@@ -206,6 +218,9 @@ namespace OpenPOP.MIME.Header
 		/// <returns>A <see cref="ContentDisposition"/> object</returns>
 		public static ContentDisposition ParseContentDisposition(string headerValue)
 		{
+			if (headerValue == null)
+				throw new ArgumentNullException("headerValue");
+
 			try
 			{
 				return new ContentDisposition(headerValue);
@@ -251,9 +266,12 @@ namespace OpenPOP.MIME.Header
 		/// Parse a character set into an encoding
 		/// </summary>
 		/// <param name="charset">The character set to parse</param>
-		/// <returns>An encoding which corrosponds to the character set</returns>
+		/// <returns>An encoding which corresponds to the character set</returns>
 		public static Encoding ParseCharsetToEncoding(string charset)
 		{
+			if (charset == null)
+				throw new ArgumentNullException("charset");
+
 			string charSetLower = charset.ToLower();
 			if (charSetLower.Contains("windows") || charSetLower.Contains("cp"))
 			{

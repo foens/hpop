@@ -198,6 +198,9 @@ namespace OpenPOP.MIME.Header
 		public MessageHeader(NameValueCollection headers)
 			: this()
 		{
+			if(headers == null)
+				throw new ArgumentNullException("headers");
+
 			ParseHeaders(headers);
 		}
 
@@ -212,6 +215,12 @@ namespace OpenPOP.MIME.Header
 		public MessageHeader(NameValueCollection headers, ContentType contentType, ContentTransferEncoding contentTransferEncoding)
 			: this()
 		{
+			if (headers == null)
+				throw new ArgumentNullException("headers");
+
+			if (contentType == null)
+				throw new ArgumentNullException("contentType");
+
 			ContentType = contentType;
 			ContentTransferEncoding = contentTransferEncoding;
 
@@ -228,7 +237,7 @@ namespace OpenPOP.MIME.Header
 			: this()
 		{
 			if (contentType == null)
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("contentType");
 
 			ContentType = contentType;
 		}
@@ -242,7 +251,7 @@ namespace OpenPOP.MIME.Header
 		private void ParseHeaders(NameValueCollection headers)
 		{
 			if (headers == null)
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("headers");
 
 			// Now begin to parse the header values
 			foreach (string headerName in headers.Keys)
@@ -266,6 +275,12 @@ namespace OpenPOP.MIME.Header
 		/// <param name="headerValue">The value of the header in unfolded state (only one line)</param>
 		private void ParseHeader(string headerName, string headerValue)
 		{
+			if(headerName == null)
+				throw new ArgumentNullException("headerName");
+
+			if (headerValue == null)
+				throw new ArgumentNullException("headerValue");
+
 			switch (headerName.ToUpper())
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3

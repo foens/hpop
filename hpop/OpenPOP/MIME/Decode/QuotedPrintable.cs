@@ -37,6 +37,12 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string</returns>
 		private static string RFC2047QuotedPrintableDecode(string toDecode, Encoding encoding)
 		{
+			if(toDecode == null)
+				throw new ArgumentNullException("toDecode");
+
+			if(encoding == null)
+				throw new ArgumentNullException("encoding");
+
 			// Remove illegal control characters
 			toDecode = removeIllegalControlCharacters(toDecode);
 
@@ -95,6 +101,9 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A string with no illegal control characters</returns>
 		private static string removeIllegalControlCharacters(string input)
 		{
+			if(input == null)
+				throw new ArgumentNullException("input");
+
 			// First we remove any \r or \n which is not part of a \r\n pair
 			input = RemoveCarriageReturnAndNewLinewIfNotInPair(input);
 
@@ -113,6 +122,9 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A string without lonely \r and \n's</returns>
 		private static string RemoveCarriageReturnAndNewLinewIfNotInPair(string input)
 		{
+			if (input == null)
+				throw new ArgumentNullException("input");
+
 			// Use this for building up the new string. This is used for performance instead
 			// of altering the input string each time a illegal token is found
 			StringBuilder newString = new StringBuilder(input.Length);
@@ -165,6 +177,9 @@ namespace OpenPOP.MIME.Decode
 		/// <returns></returns>
 		private static string DecodeEqualSignNotLongEnough(string decode)
 		{
+			if (decode == null)
+				throw new ArgumentNullException("decode");
+
 			// We can only decode wrong length equal signs
 			if (decode.Length >= 3)
 				throw new ArgumentException();
@@ -186,6 +201,12 @@ namespace OpenPOP.MIME.Decode
 		/// <returns>A decoded string</returns>
 		private static string DecodeEqualSign(string decode, Encoding encoding)
 		{
+			if (decode == null)
+				throw new ArgumentNullException("decode");
+
+			if (encoding == null)
+				throw new ArgumentNullException("encoding");
+
 			// We can only decode the string if it has length 3 - other calls to this function is invalid
 			if (decode.Length != 3)
 				throw new ArgumentException();

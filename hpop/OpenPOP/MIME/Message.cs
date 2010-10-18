@@ -67,7 +67,7 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Sets up a default new message
 		/// </summary>
-		/// <param name="log">The logging interface to use</param>
+		/// <param name="log">The logging interface to use. If <see langword="null"/> a default logger is created</param>
 		private Message(ILog log)
 		{
 			Log = log ?? DefaultLogger.CreateLogger();
@@ -89,6 +89,9 @@ namespace OpenPOP.MIME
 		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, FileInfo emlFile, ILog logger)
 			: this(logger)
 		{
+			if(emlFile == null)
+				throw new ArgumentNullException("emlFile");
+
 			string messageContent = null;
 			if (Utility.ReadPlainTextFromFile(emlFile, ref messageContent))
 			{
@@ -121,6 +124,9 @@ namespace OpenPOP.MIME
 		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader, ILog logger)
 			: this(logger)
 		{
+			if(rawMessageContent == null)
+				throw new ArgumentNullException("rawMessageContent");
+
 			AutoDecodeMSTNEF = autoDecodeMSTNEF;
 			InitializeMessage(rawMessageContent, onlyParseHeader);
 		}
@@ -158,6 +164,12 @@ namespace OpenPOP.MIME
 		/// <returns>translated message body</returns>
 		public string TranslateHTMLPictureFiles(string body, Hashtable hsbFiles)
 		{
+			if(body == null)
+				throw new ArgumentNullException("body");
+
+			if(hsbFiles == null)
+				throw new ArgumentNullException("hsbFiles");
+
 			foreach (Attachment attachment in Attachments)
 			{
 				if (Utility.IsPictureFile(attachment.ContentFileName))
@@ -268,6 +280,9 @@ namespace OpenPOP.MIME
 		/// <returns>A Translated message body</returns>
 		public string TranslateHTMLPictureFiles(string body, DirectoryInfo path)
 		{
+			if(body == null)
+				throw new ArgumentNullException("body");
+
 			if (path == null)
 				throw new ArgumentNullException("path");
 
@@ -328,6 +343,9 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> on success, <see langword="false"/> otherwise</returns>
 		public bool SaveToMIMEEmailFile(FileInfo file, bool replaceFileIfExists)
 		{
+			if(file == null)
+				throw new ArgumentNullException("file");
+
 			return Utility.SavePlainTextToFile(file, RawMessage, replaceFileIfExists);
 		}
 		#endregion
@@ -501,6 +519,9 @@ namespace OpenPOP.MIME
 		/// <param name="buffer">Raw message body</param>
 		private void GetMessageBody(string buffer)
 		{
+			if(buffer == null)
+				throw new ArgumentNullException("buffer");
+
 			// TODO foens: I do not like that this function is named Get
 			//             but it actually clears the MessageBody list!
 

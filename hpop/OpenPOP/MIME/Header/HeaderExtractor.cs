@@ -18,6 +18,9 @@ namespace OpenPOP.MIME.Header
 		/// <param name="headers">A collection of Name and Value pairs of headers</param>
 		public static void ExtractHeaders(string message, out string rawHeaders, out NameValueCollection headers)
 		{
+			if(message == null)
+				throw new ArgumentNullException("message");
+
 			headers = new NameValueCollection();
 			StringBuilder rawHeadersBuilder = new StringBuilder();
 
@@ -65,11 +68,11 @@ namespace OpenPOP.MIME.Header
 
 		/// <summary>
 		/// Check if the next line is part of the current header value we are parsing by
-		/// peeking on the next character of the TextReader.
+		/// peeking on the next character of the <see cref="TextReader"/>.
 		/// This should only be called while parsing headers
 		/// </summary>
 		/// <param name="reader">The reader from which the header is read from</param>
-		/// <returns>true if multi-line header. False otherwise</returns>
+		/// <returns><see langword="true"/> if multi-line header. <see langword="false"/> otherwise</returns>
 		private static bool IsMoreLinesInHeaderValue(TextReader reader)
 		{
 			int peek = reader.Peek();

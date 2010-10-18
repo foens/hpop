@@ -55,9 +55,12 @@ namespace OpenPOP.MIME
 		/// duplicate code for setting up an attachment
 		/// </summary>
 		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
-		/// <param name="logger">The logging interface to be used by the object</param>
+		/// <param name="logger">The logging interface to be used by the object. If <see langword="null"/> a default logger will be created.</param>
 		private Attachment(string fileName, ILog logger)
 		{
+			if (fileName == null)
+				throw new ArgumentNullException("fileName");
+
 			Log = logger ?? DefaultLogger.CreateLogger();
 
 			// Setup defaults
@@ -79,6 +82,15 @@ namespace OpenPOP.MIME
 		public Attachment(byte[] attachmentContent, string fileName, string contentType, ILog logger)
 			: this(fileName, logger)
 		{
+			if(attachmentContent == null)
+				throw new ArgumentNullException("attachmentContent");
+
+			if (fileName == null)
+				throw new ArgumentNullException("fileName");
+
+			if (contentType == null)
+				throw new ArgumentNullException("contentType");
+
 			string bytesInAString = Encoding.Default.GetString(attachmentContent);
 			RawContent = bytesInAString;
 			RawAttachment = bytesInAString;
@@ -108,6 +120,9 @@ namespace OpenPOP.MIME
 		{
 			if (attachmentContent == null)
 				throw new ArgumentNullException("attachmentContent");
+
+			if(headersFromMessage == null)
+				throw new ArgumentNullException("headersFromMessage");
 
 			RawContent = attachmentContent;
 
@@ -144,6 +159,9 @@ namespace OpenPOP.MIME
 		/// <returns>A name to use for an Attachment with the headers given</returns>
 		private static string FigureOutFilename(MessageHeader headers)
 		{
+			if(headers == null)
+				throw new ArgumentNullException("headers");
+
 			// There is a name field in the ContentType
 			if (!string.IsNullOrEmpty(headers.ContentType.Name))
 				return headers.ContentType.Name;
@@ -219,6 +237,9 @@ namespace OpenPOP.MIME
 		/// <returns><see langword="true"/> if save was successful, <see langword="false"/> if save failed</returns>
 		public bool SaveToFile(FileInfo file)
 		{
+			if(file == null)
+				throw new ArgumentNullException("file");
+
 			return Utility.SaveByteContentToFile(file, DecodedAsBytes());
 		}
 
@@ -228,10 +249,14 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="attachment">The attachment to compare against</param>
 		/// <returns>
-		/// A 32-bit signed integer indicating the lexical relationship between the two comparands.
+		/// A 32-bit signed integer indicating the lexical relationship between the two objects being compared.
 		/// </returns>
 		public int CompareTo(Attachment attachment)
 		{
+			// If the attachment is null, the MSDN documentation says that any objects compara larger then null
+			if (attachment == null)
+				return 1;
+
 			return RawAttachment.CompareTo(attachment.RawAttachment);
 		}
 

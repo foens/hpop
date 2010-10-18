@@ -52,6 +52,9 @@ namespace OpenPOP.Shared.Logging
 		/// <param name="text">The error text to log</param>
 		private static void LogToFile(string text)
 		{
+			if (text == null)
+				throw new ArgumentNullException("text");
+
 			// We want to open the file and append some text to it
 			lock (LogLock)
 			{

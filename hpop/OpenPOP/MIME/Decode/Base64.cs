@@ -31,6 +31,12 @@ namespace OpenPOP.MIME.Decode
 		/// <exception cref="System.Text.DecoderFallbackException">Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
 		public static string Decode(string base64Encoded, Encoding encoding)
 		{
+			if(base64Encoded == null)
+				throw new ArgumentNullException("base64Encoded");
+
+			if(encoding == null)
+				throw new ArgumentNullException("encoding");
+
 			return encoding.GetString(DecodeToBytes(base64Encoded));
 		}
 

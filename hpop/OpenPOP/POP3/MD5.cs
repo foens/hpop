@@ -16,6 +16,9 @@ namespace OpenPOP.POP3
 		/// <returns>The MD5 hash of the input string</returns>
 		public static string ComputeHashHex(string input)
 		{
+			if (input == null)
+				throw new ArgumentNullException("input");
+
 			System.Security.Cryptography.MD5 md5 = new MD5CryptoServiceProvider();
 
 			// Give the md5 function the bytes of the string, and get an hashed byte[] as output
