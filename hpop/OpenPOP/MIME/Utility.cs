@@ -142,11 +142,11 @@ namespace OpenPOP.MIME
 			if (rawHeader == null)
 				throw new ArgumentNullException("rawHeader", "Argument was null");
 
-			string[] array = new[] {"", ""};
+			string[] array = new[] {string.Empty, string.Empty};
 			int indexOfColon = rawHeader.IndexOf(":");
 
 			// Check if it is allowed to make substring calls
-			if (indexOfColon >= 0 && rawHeader.Length > indexOfColon + 1)
+			if (indexOfColon >= 0 && rawHeader.Length >= indexOfColon + 1)
 			{
 				array[0] = rawHeader.Substring(0, indexOfColon).Trim();
 				array[1] = rawHeader.Substring(indexOfColon + 1).Trim();

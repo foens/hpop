@@ -42,6 +42,7 @@
     <Compile Include="MIME\Decode\QuotedPrintableTest.cs" />
     <Compile Include="MIME\MessageTest.cs" />
     <Compile Include="MIME\RFCMailAddressTest.cs" />
+    <Compile Include="MIME\UtilityTest.cs" />
     <Compile Include="POP3\POPClientAuthenticatedTests.cs" />
     <Compile Include="POP3\POPClientConnectedTests.cs" />
     <Compile Include="POP3\POPClientPositiveTests.cs" />
