@@ -50,7 +50,7 @@ namespace OpenPOP.MIME.Header
 		/// Empty list of not set
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc3798">http://tools.ietf.org/html/rfc3798</a> for details</remarks>
-		public List<MailAddress> DispositionNotificationTo { get; private set; }
+		public List<RFCMailAddress> DispositionNotificationTo { get; private set; }
 
 		/// <summary>
 		/// This is the Received headers. This tells the path that the email went.
@@ -79,32 +79,32 @@ namespace OpenPOP.MIME.Header
 		/// Carbon Copy. This specifies who got a copy of the message.
 		/// Empty list of not set
 		/// </summary>
-		public List<MailAddress> CC { get; private set; }
+		public List<RFCMailAddress> CC { get; private set; }
 
 		/// <summary>
 		/// Blind Carbon Copy. This specifies who got a copy of the message, but others
 		/// cannot see who these persons are.
 		/// Empty list of not set
 		/// </summary>
-		public List<MailAddress> BCC { get; private set; }
+		public List<RFCMailAddress> BCC { get; private set; }
 
 		/// <summary>
 		/// Specifies to who this mail was for.
 		/// Empty list if not used
 		/// </summary>
-		public List<MailAddress> To { get; private set; }
+		public List<RFCMailAddress> To { get; private set; }
 
 		/// <summary>
 		/// Specifies who sent the email
 		/// Null if not set
 		/// </summary>
-		public MailAddress From { get; private set; }
+		public RFCMailAddress From { get; private set; }
 
 		/// <summary>
 		/// Specifies to who a reply to the message should be sent
 		/// Null if not set
 		/// </summary>
-		public MailAddress ReplyTo { get; private set; }
+		public RFCMailAddress ReplyTo { get; private set; }
 
 		/// <summary>
 		/// The ContentType header field.
@@ -155,7 +155,7 @@ namespace OpenPOP.MIME.Header
 		/// This is a trace header field, that should be in all messages
 		/// Null if not set
 		/// </summary>
-		public MailAddress ReturnPath { get; private set; }
+		public RFCMailAddress ReturnPath { get; private set; }
 
 		/// <summary>
 		/// The subject line of the message in decoded, one line state.
@@ -171,12 +171,12 @@ namespace OpenPOP.MIME.Header
 		private MessageHeader()
 		{
 			// Create empty lists as defaults. We do not like null values
-			To = new List<MailAddress>();
-			CC = new List<MailAddress>();
-			BCC = new List<MailAddress>();
+			To = new List<RFCMailAddress>();
+			CC = new List<RFCMailAddress>();
+			BCC = new List<RFCMailAddress>();
 			Received = new List<string>();
 			Keywords = new List<string>();
-			DispositionNotificationTo = new List<MailAddress>();
+			DispositionNotificationTo = new List<RFCMailAddress>();
 			UnknownHeaders = new NameValueCollection();
 
 			// Default importancetype is Normal (assumed if not set)
@@ -285,30 +285,30 @@ namespace OpenPOP.MIME.Header
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "TO":
-					To = HeaderFieldParser.ParseMailAddresses(headerValue);
+					To = RFCMailAddress.ParseMailAddresses( headerValue );
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "CC":
-					CC = HeaderFieldParser.ParseMailAddresses(headerValue);
+					CC = RFCMailAddress.ParseMailAddresses( headerValue );
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "BCC":
-					BCC = HeaderFieldParser.ParseMailAddresses(headerValue);
+					BCC = RFCMailAddress.ParseMailAddresses( headerValue );
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.2
 				case "FROM":
 					// There is only one MailAddress in the from field
-					From = HeaderFieldParser.ParseMailAddress(headerValue);
+					From = RFCMailAddress.ParseMailAddress( headerValue );
 					break;
 
 				// http://tools.ietf.org/html/rfc5322#section-3.6.2
 				// The implementation here might be wrong
 				case "REPLY-TO":
 					// I am unsure if there is more than one email address here
-					ReplyTo = HeaderFieldParser.ParseMailAddress(headerValue);
+					ReplyTo = RFCMailAddress.ParseMailAddress( headerValue );
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.5
@@ -339,7 +339,7 @@ namespace OpenPOP.MIME.Header
 
 				// See http://tools.ietf.org/html/rfc3798#section-2.1
 				case "DISPOSITION-NOTIFICATION-TO":
-					DispositionNotificationTo = HeaderFieldParser.ParseMailAddresses(headerValue);
+					DispositionNotificationTo = RFCMailAddress.ParseMailAddresses( headerValue );
 					break;
 
 				case "MIME-VERSION":
@@ -356,7 +356,7 @@ namespace OpenPOP.MIME.Header
 				case "RETURN-PATH":
 					// Return-paths does not include a username, but we 
 					// may still use the address parser 
-					ReturnPath = HeaderFieldParser.ParseMailAddress(headerValue);
+					ReturnPath = RFCMailAddress.ParseMailAddress( headerValue );
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.4

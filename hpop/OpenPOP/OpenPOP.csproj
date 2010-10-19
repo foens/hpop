@@ -128,6 +128,7 @@
     <Compile Include="POP3\Exceptions\PopServerNotAvailableException.cs" />
     <Compile Include="POP3\Exceptions\PopServerLockedException.cs" />
     <Compile Include="POP3\Exceptions\PopServerNotFoundException.cs" />
+    <Compile Include="MIME\RFCMailAddress.cs" />
     <Compile Include="Shared\Logging\DiagnosticsLogger.cs" />
     <Compile Include="Shared\Logging\FileLogger.cs" />
     <Compile Include="Shared\Logging\DefaultLogger.cs" />

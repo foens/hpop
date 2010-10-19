@@ -589,9 +589,9 @@ namespace OpenPOP.TestApplication
 				ds.Tables[0].Rows.Add(new object[] {"ContentType", m.Headers.ContentType});
 				ds.Tables[0].Rows.Add(new object[] {"AttachmentCount", m.Attachments.Count});
 
-				foreach (MailAddress cc in m.Headers.CC)
+				foreach (var cc in m.Headers.CC)
 					ds.Tables[0].Rows.Add(new object[] {"CC", cc});
-				foreach (MailAddress to in m.Headers.To)
+				foreach (var to in m.Headers.To)
 					ds.Tables[0].Rows.Add(new object[] {"To", to});
 
 				ds.Tables[0].Rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});
