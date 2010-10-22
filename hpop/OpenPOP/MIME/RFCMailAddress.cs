@@ -19,8 +19,7 @@ namespace OpenPOP.MIME
 		#region Properties
 		///<summary>
 		/// The email address of this <see cref="RFCMailAddress"/>
-		/// It is possibly string.Empty since RFC mail addresses
-		/// does not require an email address specified.
+		/// It is possibly string.Empty since RFC mail addresses does not require an email address specified.
 		///</summary>
 		///<example>
 		/// Example header with email address:
@@ -36,8 +35,7 @@ namespace OpenPOP.MIME
 
 		///<summary>
 		/// The display name of this <see cref="RFCMailAddress"/>
-		/// It is possibly string.Empty since RFC mail addresses
-		/// does not require a display name to be specified.
+		/// It is possibly string.Empty since RFC mail addresses does not require a display name to be specified.
 		///</summary>
 		///<example>
 		/// Example header with display name:
@@ -58,6 +56,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <remarks>
 		/// The value of this property can be <see lanword="null"/> in instances where the <see cref="MailAddress"/> cannot represent the address properly.
+		/// Use <see cref="HasValidMailAddress"/> property to see if this property is valid.
 		/// </remarks>
 		public MailAddress MailAddress { get; private set; }
 
