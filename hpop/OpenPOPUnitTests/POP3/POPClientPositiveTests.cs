@@ -625,14 +625,6 @@ namespace OpenPOPUnitTests.POP3
 			Assert.AreEqual(expectedSubject, subject);
 		}
 
-		[Test]
-		public void Test()
-		{
-			Stream stream = new MemoryStream(Encoding.ASCII.GetBytes("Test"));
-
-			Assert.AreEqual("Test", POPClient.ReadLineAsAscii(stream));
-		}
-
 		/// <summary>
 		/// Helper method to get the last line from a <see cref="StringBuilder"/>
 		/// which is the last line that the client has sent.
