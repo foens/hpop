@@ -42,37 +42,37 @@ namespace OpenPOP.POP3
 		// Using delegate { } there is no need for null checking
 		// which produces much cleaner code
 		// TODO Is delegates supported in .NET 2? : http://msdn.microsoft.com/en-us/library/orm-9780596516109-03-09.aspx
-		public event POPClientEvent CommunicationBegan = delegate { };
+		public event POPClientEvent CommunicationBegan;
 
 		/// <summary>
 		/// Event that fires when connected with target POP3 server.
 		/// </summary>
-		public event POPClientEvent CommunicationOccurred = delegate { };
+		public event POPClientEvent CommunicationOccurred;
 
 		/// <summary>
 		/// Event that fires when disconnected with target POP3 server.
 		/// </summary>
-		public event POPClientEvent CommunicationLost = delegate { };
+		public event POPClientEvent CommunicationLost;
 
 		/// <summary>
 		/// Event that fires when authentication began with target POP3 server.
 		/// </summary>
-		public event POPClientEvent AuthenticationBegan = delegate { };
+		public event POPClientEvent AuthenticationBegan;
 
 		/// <summary>
 		/// Event that fires when authentication finished with target POP3 server.
 		/// </summary>
-		public event POPClientEvent AuthenticationFinished = delegate { };
+		public event POPClientEvent AuthenticationFinished;
 
 		/// <summary>
 		/// Event that fires when message transfer has begun.
 		/// </summary>		
-		public event POPClientEvent MessageTransferBegan = delegate { };
+		public event POPClientEvent MessageTransferBegan;
 
 		/// <summary>
 		/// Event that fires when message transfer has finished.
 		/// </summary>
-		public event POPClientEvent MessageTransferFinished = delegate { };
+		public event POPClientEvent MessageTransferFinished;
 		#endregion
 
 		#region Private member properties
@@ -263,7 +263,9 @@ namespace OpenPOP.POP3
 				IsOkResponse(response);
 				ExtractAPOPTimestamp(response);
 				Connected = true;
-				CommunicationOccurred(this);
+				
+				if(CommunicationOccurred != null)
+					CommunicationOccurred(this);
 			}
 			catch (PopServerException e)
 			{
@@ -298,7 +300,8 @@ namespace OpenPOP.POP3
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
 
-			CommunicationBegan(this);
+			if(CommunicationBegan != null)
+				CommunicationBegan(this);
 
 			TcpClient clientSocket = new TcpClient();
 			clientSocket.ReceiveTimeout = ReceiveTimeOut;
@@ -373,7 +376,9 @@ namespace OpenPOP.POP3
 				APOPTimestamp = null;
 				State = ConnectionState.Disconnected;
 			}
-			CommunicationLost(this);
+
+			if(CommunicationLost != null)
+				CommunicationLost(this);
 		}
 		#endregion
 
@@ -447,7 +452,8 @@ namespace OpenPOP.POP3
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
-			AuthenticationBegan(this);
+			if (AuthenticationBegan != null)
+				AuthenticationBegan(this);
 			try
 			{
 				SendCommand("USER " + username);
@@ -475,7 +481,8 @@ namespace OpenPOP.POP3
 				throw new InvalidPasswordException("Invalid password", e);
 			}
 
-			AuthenticationFinished(this);
+			if (AuthenticationFinished != null)
+				AuthenticationFinished(this);
 		}
 
 		/// <summary>
@@ -491,7 +498,8 @@ namespace OpenPOP.POP3
 			if (!APOPSupported)
 				throw new NotSupportedException("APOP is not supported on this server");
 
-			AuthenticationBegan(this);
+			if (AuthenticationBegan != null) 
+				AuthenticationBegan(this);
 
 			try
 			{
@@ -509,7 +517,8 @@ namespace OpenPOP.POP3
 				throw new InvalidLoginOrPasswordException("The supplied username or password is wrong", e);
 			}
 
-			AuthenticationFinished(this);
+			if (AuthenticationFinished != null)
+				AuthenticationFinished(this);
 		}
 		#endregion
 
@@ -880,7 +889,8 @@ namespace OpenPOP.POP3
 			if (State != ConnectionState.Transaction)
 				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
 
-			MessageTransferBegan(this);
+			if (MessageTransferBegan != null)
+				MessageTransferBegan(this);
 
 			SendCommand(command);
 
@@ -890,7 +900,9 @@ namespace OpenPOP.POP3
 			// Parse the message from the received contet
 			Message message = new Message(AutoDecodeMSTNEF, receivedContent, headersOnly, Log);
 
-			MessageTransferFinished(this);
+			if (MessageTransferFinished != null)
+				MessageTransferFinished(this);
+
 			return message;
 		}
 
