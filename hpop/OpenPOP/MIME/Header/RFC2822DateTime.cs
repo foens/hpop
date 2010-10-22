@@ -11,7 +11,7 @@ namespace OpenPOP.MIME.Header
 	/// Redistribution and use in source and binary forms, with or without
 	/// modification, are permitted.
 	/// 
-	/// Bugs supplied by Ross Presser on codeproject.com has been incorporated.
+	/// Bugs supplied by Ross Presser on codeProject.com has been incorporated.
 	/// </summary>
 	/// <remarks> 
 	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx</a> for original version.

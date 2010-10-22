@@ -935,7 +935,8 @@ namespace OpenPOP.POP3
 					line = line.Substring(1);
 
 				// Add the read line with CRLF after it
-				builder.Append(line + "\r\n");
+				builder.Append(line);
+				builder.Append("\r\n");
 			}
 
 			// The last \r\n should not be included

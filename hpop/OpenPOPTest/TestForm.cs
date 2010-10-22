@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Net.Mail;
 using System.Text;
 using System.Windows.Forms;
 using OpenPOP.MIME;
@@ -589,9 +588,9 @@ namespace OpenPOP.TestApplication
 				ds.Tables[0].Rows.Add(new object[] {"ContentType", m.Headers.ContentType});
 				ds.Tables[0].Rows.Add(new object[] {"AttachmentCount", m.Attachments.Count});
 
-				foreach (var cc in m.Headers.CC)
+				foreach (RFCMailAddress cc in m.Headers.CC)
 					ds.Tables[0].Rows.Add(new object[] {"CC", cc});
-				foreach (var to in m.Headers.To)
+				foreach (RFCMailAddress to in m.Headers.To)
 					ds.Tables[0].Rows.Add(new object[] {"To", to});
 
 				ds.Tables[0].Rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});
@@ -683,10 +682,12 @@ namespace OpenPOP.TestApplication
 			List<string> uids = popClient.GetMessageUIDs();
 
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append("UIDL:\r\n");
+			stringBuilder.Append("UIDL:");
+			stringBuilder.Append("\r\n");
 			foreach (string uid in uids)
 			{
-				stringBuilder.Append(uid + "\r\n");
+				stringBuilder.Append(uid);
+				stringBuilder.Append("\r\n");
 			}
 
 			messageTextBox.Text = stringBuilder.ToString();

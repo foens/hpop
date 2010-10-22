@@ -31,7 +31,9 @@ namespace OpenPOP.MIME.Header
 			string line;
 			while (!"".Equals(line = messageReader.ReadLine()))
 			{
-				rawHeadersBuilder.Append(line + "\r\n");
+				// Add the line read with the CRLF after it
+				rawHeadersBuilder.Append(line);
+				rawHeadersBuilder.Append("\r\n");
 
 				// Split into name and value
 				string[] splittedValue = Utility.GetHeadersValue(line);
@@ -55,7 +57,9 @@ namespace OpenPOP.MIME.Header
 
 					headerValue += moreHeaderValue.Substring(1); // Remove the first whitespace
 
-					rawHeadersBuilder.Append(moreHeaderValue + "\r\n");
+					// Add the line read with the CRLF after it
+					rawHeadersBuilder.Append(moreHeaderValue);
+					rawHeadersBuilder.Append("\r\n");
 				}
 
 				// Now we have the name and full value. Add it
