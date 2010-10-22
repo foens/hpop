@@ -16,6 +16,7 @@ namespace OpenPOP.MIME.Header
 		/// <param name="message">The message to extract headers from</param>
 		/// <param name="rawHeaders">The portion of the message that was headers</param>
 		/// <param name="headers">A collection of Name and Value pairs of headers</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="message"/> is <see langword="null"/></exception>
 		public static void ExtractHeaders(string message, out string rawHeaders, out NameValueCollection headers)
 		{
 			if(message == null)

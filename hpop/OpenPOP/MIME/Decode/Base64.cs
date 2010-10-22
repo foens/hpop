@@ -27,7 +27,8 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="base64Encoded">Source string to decode</param>
 		/// <param name="encoding">The encoding to use for the output</param>
 		/// <returns>A decoded string</returns>
-		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="base64Encoded"/> or <paramref name="encoding"/> is <see langword="null"/></exception>
+		/// <exception cref="FormatException">If <paramref name="base64Encoded"/> is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException">Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
 		public static string Decode(string base64Encoded, Encoding encoding)
 		{
@@ -49,7 +50,7 @@ namespace OpenPOP.MIME.Decode
 		/// If the string cannot be decoded, it falls back to using <see cref="Decode(string, Encoding)"/> 
 		/// with the <see cref="Encoding.ASCII"/> encoding.
 		/// </remarks>
-		/// <exception cref="FormatException">Thrown if the <para>base64Encoded</para> string is not a valid base64 encoded string</exception>
+		/// <exception cref="FormatException">If <paramref name="base64Encoded"/> is not a valid base64 encoded string</exception>
 		/// <exception cref="System.Text.DecoderFallbackException">Thrown if the encoding cannot successfully map a byte sequence to a character</exception>
 		public static string Decode(string base64Encoded)
 		{

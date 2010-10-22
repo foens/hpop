@@ -31,6 +31,7 @@ namespace OpenPOP.MIME.Decode
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-2">http://tools.ietf.org/html/rfc2047#section-2</a> RFC Part 2 "Syntax of encoded-words" for more detail</remarks>
 		/// <param name="encodedWords">Source text</param>
 		/// <returns>Decoded text</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="encodedWords"/> is <see langword="null"/></exception>
 		public static string Decode(string encodedWords)
 		{
 			if(encodedWords == null)

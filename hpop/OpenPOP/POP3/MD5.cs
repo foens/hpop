@@ -14,6 +14,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="input">The input string to be hashed</param>
 		/// <returns>The MD5 hash of the input string</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		public static string ComputeHashHex(string input)
 		{
 			if (input == null)

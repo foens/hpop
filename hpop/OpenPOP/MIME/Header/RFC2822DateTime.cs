@@ -24,6 +24,8 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="aDate">The date to convert</param>
 		/// <returns>A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted</returns>
+		/// <exception cref="ArgumentNullException"><exception cref="ArgumentNullException">If <paramref name="aDate"/> is <see langword="null"/></exception></exception>
+		/// <exception cref="FormatException">If the <paramref name="aDate"/> could not be parsed into a <see cref="DateTime"/> object</exception>
 		public static DateTime StringToDate(string aDate)
 		{
 			if(aDate == null)

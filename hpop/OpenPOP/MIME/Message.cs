@@ -86,6 +86,7 @@ namespace OpenPOP.MIME
 		/// <param name="onlyParseHeader">whether only decode the header without body</param>
 		/// <param name="emlFile">File with email content to load from</param>
 		/// <param name="logger">The logging interface to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="emlFile"/> is <see langword="null"/></exception>
 		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, FileInfo emlFile, ILog logger)
 			: this(logger)
 		{
@@ -109,6 +110,7 @@ namespace OpenPOP.MIME
 		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="onlyParseHeader">whether only decode the header without body</param>
 		/// <param name="emlFile">File with email content to load from</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="emlFile"/> is <see langword="null"/></exception>
 		public Message(bool autoDecodeMSTNEF, bool onlyParseHeader, FileInfo emlFile)
 			: this(autoDecodeMSTNEF, onlyParseHeader, emlFile, null)
 		{
@@ -121,6 +123,7 @@ namespace OpenPOP.MIME
 		/// <param name="rawMessageContent">raw message content</param>
 		/// <param name="onlyParseHeader">whether only decode the header without body</param>
 		/// <param name="logger">The logging interface to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="rawMessageContent"/> is <see langword="null"/></exception>
 		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader, ILog logger)
 			: this(logger)
 		{
@@ -137,6 +140,7 @@ namespace OpenPOP.MIME
 		/// <param name="autoDecodeMSTNEF">whether auto decoding MS-TNEF attachments</param>
 		/// <param name="rawMessageContent">raw message content</param>
 		/// <param name="onlyParseHeader">whether only decode the header without body</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="rawMessageContent"/> is <see langword="null"/></exception>
 		public Message(bool autoDecodeMSTNEF, string rawMessageContent, bool onlyParseHeader)
 			: this(autoDecodeMSTNEF, rawMessageContent, onlyParseHeader, null)
 		{
@@ -162,6 +166,7 @@ namespace OpenPOP.MIME
 		/// <param name="body">message body</param>
 		/// <param name="hsbFiles">pictures collection</param>
 		/// <returns>translated message body</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="body"/> or <paramref name="hsbFiles"/> is <see langword="null"/></exception>
 		public string TranslateHTMLPictureFiles(string body, Hashtable hsbFiles)
 		{
 			if(body == null)
@@ -278,6 +283,8 @@ namespace OpenPOP.MIME
 		/// <param name="body">The body to be changed</param>
 		/// <param name="path">Path to the location of the pictures</param>
 		/// <returns>A Translated message body</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="body"/> or <paramref name="path"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="path"/> does not exist</exception>
 		public string TranslateHTMLPictureFiles(string body, DirectoryInfo path)
 		{
 			if(body == null)
@@ -307,8 +314,10 @@ namespace OpenPOP.MIME
 		/// Save all Attachments included in this message to a defined path.
 		/// The attachments name will be appended to the path, and saved under that name.
 		/// </summary>
-		/// <param name="pathToSaveTo">Path to place the attachments. Cannot be null. Path must exist.</param>
+		/// <param name="pathToSaveTo">Path to directory where the attachments will be saved to</param>
 		/// <returns><see langword="true"/> if all attachments was saved successfully, <see langword="false"/> if just one failed</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="pathToSaveTo"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="pathToSaveTo"/> does not exist</exception>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
 			if (pathToSaveTo == null)
@@ -341,6 +350,7 @@ namespace OpenPOP.MIME
 		/// <param name="file">The File location to save the message to</param>
 		/// <param name="replaceFileIfExists">Should the file be replaced if it exists?</param>
 		/// <returns><see langword="true"/> on success, <see langword="false"/> otherwise</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
 		public bool SaveToMIMEEmailFile(FileInfo file, bool replaceFileIfExists)
 		{
 			if(file == null)

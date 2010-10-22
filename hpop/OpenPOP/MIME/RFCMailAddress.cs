@@ -7,7 +7,7 @@ using OpenPOP.MIME.Decode;
 namespace OpenPOP.MIME
 {
 	/// <summary>
-	/// This class is used for RFC compiant email addresses
+	/// This class is used for RFC compliant email addresses
 	/// </summary>
 	/// <remarks>
 	/// The <seealso cref="System.Net.Mail.MailAddress"/> does not cover all the possible formats 
@@ -45,18 +45,26 @@ namespace OpenPOP.MIME
 		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="System.Net.Mail.MailAddress"/> object
 		/// </summary>
 		/// <param name="address">The address to use</param>
+		/// /// <exception cref="ArgumentNullException">If <paramref name="address"/> is <see langword="null"/></exception>
 		private RFCMailAddress(MailAddress address)
 		{
+			if (address == null)
+				throw new ArgumentNullException("address");
+
 			MailAddress = address;
-			Address = address.ToString( );
+			Address = address.ToString();
 		}
 
 		/// <summary>
 		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="String"/>
 		/// </summary>
 		/// <param name="address">The address to use</param>
-		private RFCMailAddress( string address )
+		/// <exception cref="ArgumentNullException">If <paramref name="address"/> is <see langword="null"/></exception>
+		private RFCMailAddress(string address)
 		{
+			if(address == null)
+				throw new ArgumentNullException("address");
+
 			Address = address;
 		}
 
@@ -69,15 +77,13 @@ namespace OpenPOP.MIME
 		/// "Eksperten mailrobot" &lt;noreply@mail.eksperten.dk&gt;
 		/// &lt;noreply@mail.eksperten.dk&gt;
 		/// noreply@mail.eksperten.dk
-		/// Some name (will return <see langword="null"/> on this)
-		/// 
 		/// 
 		/// It might also contain encoded text.
 		/// <see cref="EncodedWord.Decode">For more information about encoded text</see>
 		/// </summary>
 		/// <param name="input">The value to parse out and email and/or a username</param>
-		/// <returns>A valid <see cref="MailAddress"/> where the input has been parsed into or <see langword="null"/> if the input is not valid</returns>
-		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="input"/> parameter.</exception>
+		/// <returns>A <see cref="RFCMailAddress"/></returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		public static RFCMailAddress ParseMailAddress(string input)
 		{
 			if (input == null)
@@ -116,14 +122,14 @@ namespace OpenPOP.MIME
 					if (!string.IsNullOrEmpty(emailAddress))
 					{
 						// If the username is quoted, MailAddress' constructor will remove them for us
-						return new RFCMailAddress( new MailAddress(emailAddress, username) );
+						return new RFCMailAddress(new MailAddress(emailAddress, username));
 					}
 				}
 
 				// This might be on the form noreply@mail.eksperten.dk
 				// Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
 				// if the MailAddress will take it so will we, otherwise it gets handled below
-				return new RFCMailAddress( new MailAddress( input ) );
+				return new RFCMailAddress(new MailAddress(input));
 			}
 			catch (FormatException)
 			{
@@ -144,6 +150,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="input">The input that is a comma-separated list of EmailAddresses to parse</param>
 		/// <returns>A List of <seealso cref="RFCMailAddress"/> objects extracted from the <paramref name="input"/> parameter.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		// TODO: This method does not handle display names that contain commas. "McDaniel, John" <john@mcdaniel.me>, "next" <next@next.com>
 		public static List<RFCMailAddress> ParseMailAddresses(string input)
 		{
@@ -169,7 +176,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="address">The <see cref="RFCMailAddress"/> to convert.</param>
 		/// <returns>The internal reference to the <see cref="System.Net.Mail.MailAddress"/> object from the <paramref name="address"/> object.</returns>
-		public static implicit operator MailAddress( RFCMailAddress address )
+		public static implicit operator MailAddress(RFCMailAddress address)
 		{
 			return address.MailAddress;
 		}

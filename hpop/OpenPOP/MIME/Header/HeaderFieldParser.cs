@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
-using OpenPOP.MIME.Decode;
-using OpenPOP.Shared.Logging;
 
 namespace OpenPOP.MIME.Header
 {
@@ -18,6 +15,8 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerValue">The value for the header to be parsed</param>
 		/// <returns>A <see cref="ContentTransferEncoding"/></returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If the <paramref name="headerValue"/> could not be parsed to a <see cref="ContentTransferEncoding"/></exception>
 		public static ContentTransferEncoding ParseContentTransferEncoding(string headerValue)
 		{
 			if(headerValue == null)
@@ -50,6 +49,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="MailPriority"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
 		public static MailPriority ParseImportance(string headerValue)
 		{
 			if(headerValue == null)
@@ -80,6 +80,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="ContentType"/> object</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
 		public static ContentType ParseContentType(string headerValue)
 		{
 			if(headerValue == null)
@@ -106,6 +107,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="ContentDisposition"/> object</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="headerValue"/> is <see langword="null"/></exception>
 		public static ContentDisposition ParseContentDisposition(string headerValue)
 		{
 			if (headerValue == null)
@@ -155,14 +157,15 @@ namespace OpenPOP.MIME.Header
 		/// <summary>
 		/// Parse a character set into an encoding
 		/// </summary>
-		/// <param name="charset">The character set to parse</param>
+		/// <param name="characterSet">The character set to parse</param>
 		/// <returns>An encoding which corresponds to the character set</returns>
-		public static Encoding ParseCharsetToEncoding(string charset)
+		/// <exception cref="ArgumentNullException">If <paramref name="characterSet"/> is <see langword="null"/></exception>
+		public static Encoding ParseCharsetToEncoding(string characterSet)
 		{
-			if (charset == null)
-				throw new ArgumentNullException("charset");
+			if (characterSet == null)
+				throw new ArgumentNullException("characterSet");
 
-			string charSetLower = charset.ToLower();
+			string charSetLower = characterSet.ToLower();
 			if (charSetLower.Contains("windows") || charSetLower.Contains("cp"))
 			{
 				// It seems the character set contains an codepage value, which we should use to parse the encoding
@@ -170,14 +173,14 @@ namespace OpenPOP.MIME.Header
 				charSetLower = charSetLower.Replace("windows", ""); // Remove windows
 				charSetLower = charSetLower.Replace("-", ""); // Remove - which could be used as cp-1554
 
-				// Now we hope the only thing left in the charset is numbers.
+				// Now we hope the only thing left in the characterSet is numbers.
 				int codepageNumber = int.Parse(charSetLower);
 
 				return Encoding.GetEncoding(codepageNumber);
 			}
 
-			// It seems there is no codepage value in the charset. It must be a named encoding
-			return Encoding.GetEncoding(charset);
+			// It seems there is no codepage value in the characterSet. It must be a named encoding
+			return Encoding.GetEncoding(characterSet);
 		}
 	}
 }

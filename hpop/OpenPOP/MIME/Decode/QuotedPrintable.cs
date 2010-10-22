@@ -22,6 +22,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="toDecode">Quoted-Printable encoded string</param>
 		/// <param name="encoding">Specifies which encoding the returned string will be in</param>
 		/// <returns>A decoded string in the correct encoding</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="toDecode"/> or the <paramref name="encoding"/> parameter.</exception>
 		public static string Decode(string toDecode, Encoding encoding)
 		{
 			// Decode the QuotedPrintable string and return it
@@ -35,6 +36,7 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="toDecode">The string to be decoded from Quoted-Printable</param>
 		/// <param name="encoding">The encoding to use when decoding</param>
 		/// <returns>A decoded string</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="toDecode"/> or the <paramref name="encoding"/> parameter.</exception>
 		private static string RFC2047QuotedPrintableDecode(string toDecode, Encoding encoding)
 		{
 			if(toDecode == null)
@@ -66,8 +68,8 @@ namespace OpenPOP.MIME.Decode
 					}
 
 					// Decode the Quoted-Printable part
-					string QuotedPrintablePart = toDecode.Substring(i, 3);
-					builder.Append(DecodeEqualSign(QuotedPrintablePart, encoding));
+					string quotedPrintablePart = toDecode.Substring(i, 3);
+					builder.Append(DecodeEqualSign(quotedPrintablePart, encoding));
 
 					// We now consumed two extra characters. Go forward two extra characters
 					i += 2;
@@ -99,6 +101,7 @@ namespace OpenPOP.MIME.Decode
 		/// </summary>
 		/// <param name="input">String to be stripped from illegal control characters</param>
 		/// <returns>A string with no illegal control characters</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="input"/> parameter.</exception>
 		private static string removeIllegalControlCharacters(string input)
 		{
 			if(input == null)
@@ -120,6 +123,7 @@ namespace OpenPOP.MIME.Decode
 		/// </summary>
 		/// <param name="input">String to remove lonely \r and \n's from</param>
 		/// <returns>A string without lonely \r and \n's</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="input"/> parameter.</exception>
 		private static string RemoveCarriageReturnAndNewLinewIfNotInPair(string input)
 		{
 			if (input == null)
@@ -173,8 +177,13 @@ namespace OpenPOP.MIME.Decode
 		/// possible, indicate to the user that proper decoding was not possible at
 		/// this point in the data.
 		/// </summary>
-		/// <param name="decode"></param>
-		/// <returns></returns>
+		/// <param name="decode">
+		/// The string to decode which cannot have length above or equal to 3
+		/// and must start with an equal sign
+		/// </param>
+		/// <returns>A decoded string</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="decode"/> parameter.</exception>
+		/// <exception cref="ArgumentException">Thrown if a the <paramref name="decode"/> parameter has length above 2 or does not start with an equal sign.</exception>
 		private static string DecodeEqualSignNotLongEnough(string decode)
 		{
 			if (decode == null)
@@ -199,6 +208,8 @@ namespace OpenPOP.MIME.Decode
 		/// <param name="decode">The length 3 character that needs to be decoded</param>
 		/// <param name="encoding">The encoding to use when decoding</param>
 		/// <returns>A decoded string</returns>
+		/// <exception cref="ArgumentNullException">Thrown if a <see langword="null"/> reference is passed via the <paramref name="decode"/> or the <paramref name="encoding"/> parameter.</exception>
+		/// <exception cref="ArgumentException">Thrown if a the <paramref name="decode"/> parameter does not have length 3 or does not start with an equal sign.</exception>
 		private static string DecodeEqualSign(string decode, Encoding encoding)
 		{
 			if (decode == null)

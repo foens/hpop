@@ -69,6 +69,7 @@ namespace OpenPOP.MIME
 		/// Used the set up default values
 		/// </summary>
 		/// <param name="logger">The logging interface to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="logger"/> is <see langword="null"/></exception>
 		private TNEFParser(ILog logger)
 		{
 			if (logger == null)
@@ -84,6 +85,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="file">MS-TNEF file</param>
 		/// <param name="logger">The logging interface to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> or <paramref name="logger"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="file"/> could not be opened</exception>
 		public TNEFParser(FileInfo file, ILog logger)
 			: this(logger)
 		{
@@ -99,6 +102,8 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="contents">MS-TNEF bytes</param>
 		/// <param name="logger">The logging interface to use</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="contents"/> or <paramref name="logger"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="contents"/> could not be opened as a stream</exception>
 		public TNEFParser(byte[] contents, ILog logger)
 			: this(logger)
 		{
@@ -218,6 +223,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="contents">MS-TNEF bytes</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="contents"/> is <see langword="null"/></exception>
 		private bool OpenTNEFStream(byte[] contents)
 		{
 			if(contents == null)
@@ -427,6 +433,7 @@ namespace OpenPOP.MIME
 		/// save all decoded attachments to files
 		/// </summary>
 		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="pathToSaveTo"/> is <see langword="null"/></exception>
 		public bool SaveAttachments(DirectoryInfo pathToSaveTo)
 		{
 			AssertDisposed();
@@ -450,6 +457,8 @@ namespace OpenPOP.MIME
 		/// <param name="attachment">decoded attachment</param>
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
 		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="attachment"/> or <paramref name="pathToSaveTo"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="pathToSaveTo"/> does not exist</exception>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo)
 		{
 			if(attachment == null)
@@ -471,6 +480,8 @@ namespace OpenPOP.MIME
 		/// <param name="pathToSaveTo">Where to save the attachment to</param>
 		/// <param name="logger">The object to use for logging output</param>
 		/// <returns><see langword="true"/> if succeeded, <see langword="false"/> otherwise</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="attachment"/>, <paramref name="pathToSaveTo"/> or <paramref name="logger"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentException">If <paramref name="pathToSaveTo"/> does not exist</exception>
 		public static bool SaveAttachment(TNEFAttachment attachment, DirectoryInfo pathToSaveTo, ILog logger)
 		{
 			if (attachment == null)

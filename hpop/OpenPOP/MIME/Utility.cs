@@ -137,10 +137,11 @@ namespace OpenPOP.MIME
 		/// <summary>
 		/// Separate header name and header value
 		/// </summary>
+		/// <exception cref="ArgumentNullException">If <paramref name="rawHeader"/> is <see langword="null"/></exception>
 		public static string[] GetHeadersValue(string rawHeader)
 		{
 			if (rawHeader == null)
-				throw new ArgumentNullException("rawHeader", "Argument was null");
+				throw new ArgumentNullException("rawHeader");
 
 			string[] array = new[] {string.Empty, string.Empty};
 			int indexOfColon = rawHeader.IndexOf(":");
@@ -160,6 +161,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="text">Text with quotes</param>
 		/// <returns>Text without quotes</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="text"/> is <see langword="null"/></exception>
 		public static string RemoveQuotes(string text)
 		{
 			if(text == null)
@@ -192,6 +194,7 @@ namespace OpenPOP.MIME
 		/// <param name="contentTransferEncoding">The <see cref="ContentTransferEncoding"/> of the string</param>
 		/// <param name="charSet">The name of the character set encoding</param>
 		/// <returns>The decoded string</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="contentTransferEncoding"/> is unsupported</exception>
 		public static string DoDecode(string input, ContentTransferEncoding contentTransferEncoding, string charSet)
 		{
@@ -237,8 +240,9 @@ namespace OpenPOP.MIME
 		/// Change text encoding
 		/// </summary>
 		/// <param name="text">Source encoded text</param>
-		/// <param name="newEncoding">New charset</param>
-		/// <returns>Encoded text with new charset</returns>
+		/// <param name="newEncoding">New character set</param>
+		/// <returns>Encoded text with new character set</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="text"/> or <paramref name="newEncoding"/> is <see langword="null"/></exception>
 		private static string ChangeEncoding(string text, Encoding newEncoding)
 		{
 			if(text == null)

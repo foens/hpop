@@ -15,7 +15,7 @@ namespace OpenPOP.MIME
 		/// Determines in the content type is Microsoft Transport Neutral Encapsulation Format
 		/// </summary>
 		/// <param name="contentType">The content type string to check</param>
-		/// <returns>True is the format is MS-TNEF, otherwise false</returns>
+		/// <returns><see langword="true"/> is the format is MS-TNEF, <see langword="false"/> otherwise</returns>
 		public static bool IsMSTNEF(string contentType)
 		{
 			if (string.IsNullOrEmpty(contentType))
@@ -27,8 +27,9 @@ namespace OpenPOP.MIME
 		/// Returns the content type that fits with the 
 		/// extension <paramref name="extension"/>.
 		/// </summary>
-		/// <param name="extension">Extension of the filetype where a content type is needed. Notice that the . is needed too. Example: .gif</param>
-		/// <returns>A content type for the file, or null if it cannot be determined</returns>
+		/// <param name="extension">Extension of the file type where a content type is needed. Notice that the . is needed too. Example: .gif</param>
+		/// <returns>A content type for the file, or <see langword="null"/> if it cannot be determined</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="extension"/> is <see langword="null"/></exception>
 		private static string ContentType(string extension)
 		{
 			if(extension == null)
@@ -320,6 +321,7 @@ namespace OpenPOP.MIME
 
 		/// <summary>Returns the MIME content-type for the supplied file extension</summary>
 		/// <returns>string MIME type (Example: \"text/plain\")</returns>
+		/// <exception cref="ArgumentNullException">If <param name="fileName"/> is <see langword="null"/></exception>
 		public static string GetMimeType(string fileName)
 		{
 			if(fileName == null)

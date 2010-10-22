@@ -56,6 +56,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
 		/// <param name="logger">The logging interface to be used by the object. If <see langword="null"/> a default logger will be created.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="fileName"/> is <see langword="null"/></exception>
 		private Attachment(string fileName, ILog logger)
 		{
 			if (fileName == null)
@@ -79,6 +80,7 @@ namespace OpenPOP.MIME
 		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
 		/// <param name="contentType">The content type of the Attachment</param>
 		/// <param name="logger">The logging interface to be used by the object</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="attachmentContent"/>, <paramref name="contentType"/> or <paramref name="fileName"/> is <see langword="null"/></exception>
 		public Attachment(byte[] attachmentContent, string fileName, string contentType, ILog logger)
 			: this(fileName, logger)
 		{
@@ -104,6 +106,7 @@ namespace OpenPOP.MIME
 		/// <param name="attachmentContent">attachment bytes content</param>
 		/// <param name="fileName">Sets the attachment file name to the supplied argument</param>
 		/// <param name="contentType">The content type of the Attachment</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="attachmentContent"/>, <paramref name="contentType"/> or <paramref name="fileName"/> is <see langword="null"/></exception>
 		public Attachment(byte[] attachmentContent, string fileName, string contentType)
 			: this(attachmentContent, fileName, contentType, null)
 		{
@@ -111,11 +114,13 @@ namespace OpenPOP.MIME
 
 		/// <summary>
 		/// Create an attachment from a string, with some headers use from the message it is inside
+		/// This should only be used by assembly code, and not by outside users
 		/// </summary>
 		/// <param name="attachmentContent">The content of the Attachment</param>
 		/// <param name="headersFromMessage">The attachments headers defaults to some of the message headers, this is the headers from the message</param>
 		/// <param name="logger">The logging interface to be used by the object</param>
-		public Attachment(string attachmentContent, MessageHeader headersFromMessage, ILog logger)
+		/// <exception cref="ArgumentNullException">If <paramref name="attachmentContent"/> or <paramref name="headersFromMessage"/> is <see langword="null"/></exception>
+		internal Attachment(string attachmentContent, MessageHeader headersFromMessage, ILog logger)
 			: this(string.Empty, logger)
 		{
 			if (attachmentContent == null)
@@ -139,16 +144,6 @@ namespace OpenPOP.MIME
 			// Set the filename
 			ContentFileName = FigureOutFilename(Headers);
 		}
-
-		/// <summary>
-		/// Create an attachment from a string, with some headers use from the message it is inside
-		/// </summary>
-		/// <param name="attachmentContent">The content of the Attachment</param>
-		/// <param name="headersFromMessage">The attachments headers defaults to some of the message headers, this is the headers from the message</param>
-		public Attachment(string attachmentContent, MessageHeader headersFromMessage)
-			: this(attachmentContent, headersFromMessage, null)
-		{
-		}
 		#endregion
 
 		/// <summary>
@@ -157,6 +152,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="headers">The headers that can be used to give a reasonable name</param>
 		/// <returns>A name to use for an Attachment with the headers given</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
 		private static string FigureOutFilename(MessageHeader headers)
 		{
 			if(headers == null)
@@ -235,6 +231,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="file">File to write Attachment to</param>
 		/// <returns><see langword="true"/> if save was successful, <see langword="false"/> if save failed</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
 		public bool SaveToFile(FileInfo file)
 		{
 			if(file == null)

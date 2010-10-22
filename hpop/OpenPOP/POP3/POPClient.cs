@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.IO;
@@ -230,6 +231,7 @@ namespace OpenPOP.POP3
 		/// </summary>
 		/// <param name="reader">The <see cref="TextReader"/> to read server responses from</param>
 		/// <param name="writer">The <see cref="TextWriter"/> to send commands to the server</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="reader"/> or <paramref name="writer"/> is <see langword="null"/></exception>
 		public void Connect(TextReader reader, TextWriter writer)
 		{
 			AssertDisposed();
@@ -281,9 +283,17 @@ namespace OpenPOP.POP3
 		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
 		/// <exception cref="PopServerNotAvailableException">If the server did not send an OK message when a connection was established</exception>
 		/// <exception cref="PopServerNotFoundException">If it was not possible to connect to the server</exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="hostname"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentOutOfRangeException">If port is not in the range [<see cref="IPEndPoint.MinPort"/>, <see cref="IPEndPoint.MaxPort"/></exception>
 		public void Connect(string hostname, int port, bool useSsl)
 		{
 			AssertDisposed();
+
+			if(hostname == null)
+				throw new ArgumentNullException("hostname");
+
+			if(port > IPEndPoint.MaxPort || port < IPEndPoint.MinPort)
+				throw new ArgumentOutOfRangeException("port");
 
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
@@ -376,6 +386,7 @@ namespace OpenPOP.POP3
 		/// <param name="password">The user password</param>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
 		public void Authenticate(string username, string password)
 		{
 			AssertDisposed();
@@ -391,9 +402,16 @@ namespace OpenPOP.POP3
 		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.APOP"/> is used, but not supported by the server</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
+
+			if(username == null)
+				throw new ArgumentNullException("username");
+
+			if(password == null)
+				throw new ArgumentNullException("password");
 
 			if(State != ConnectionState.Authorization)
 				throw new InvalidUseException("You have to be connected and not authorized when trying to authorize yourself");
@@ -907,6 +925,10 @@ namespace OpenPOP.POP3
 				// Add the read line with CRLF after it
 				builder.Append(line + "\r\n");
 			}
+
+			// The last \r\n should not be included
+			if (builder.Length > 0)
+				builder.Remove(builder.Length - 3, 2);
 
 			return builder.ToString();
 		}

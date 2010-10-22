@@ -194,7 +194,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headers">The collection that should be traversed and parsed</param>
 		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
 		public MessageHeader(NameValueCollection headers)
 			: this()
 		{
@@ -211,7 +211,7 @@ namespace OpenPOP.MIME.Header
 		/// <param name="contentType">A <see cref="ContentType"/> to use as default, which might get overwritten</param>
 		/// <param name="contentTransferEncoding">A <see cref="ContentTransferEncoding"/> to use as default, which might get overwritten</param>
 		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> or <paramref name="contentType"/> is <see langword="null"/></exception>
 		public MessageHeader(NameValueCollection headers, ContentType contentType, ContentTransferEncoding contentTransferEncoding)
 			: this()
 		{
@@ -232,7 +232,7 @@ namespace OpenPOP.MIME.Header
 		/// It uses all defaults but sets the <paramref name="contentType"/>
 		/// </summary>
 		/// <param name="contentType">The <see cref="ContentType"/> to use</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="contentType"/> was <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="contentType"/> is <see langword="null"/></exception>
 		public MessageHeader(ContentType contentType)
 			: this()
 		{
@@ -247,7 +247,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headers">The collection that should be traversed and parsed</param>
 		/// <returns>A valid <see cref="MessageHeader"/> object</returns>
-		/// <exception cref="ArgumentNullException">If headers is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
 		private void ParseHeaders(NameValueCollection headers)
 		{
 			if (headers == null)
@@ -273,6 +273,7 @@ namespace OpenPOP.MIME.Header
 		/// </summary>
 		/// <param name="headerName">The name of the header</param>
 		/// <param name="headerValue">The value of the header in unfolded state (only one line)</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="headerName"/> or <paramref name="headerValue"/> is <see langword="null"/></exception>
 		private void ParseHeader(string headerName, string headerValue)
 		{
 			if(headerName == null)
@@ -285,30 +286,30 @@ namespace OpenPOP.MIME.Header
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "TO":
-					To = RFCMailAddress.ParseMailAddresses( headerValue );
+					To = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "CC":
-					CC = RFCMailAddress.ParseMailAddresses( headerValue );
+					CC = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "BCC":
-					BCC = RFCMailAddress.ParseMailAddresses( headerValue );
+					BCC = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.2
 				case "FROM":
 					// There is only one MailAddress in the from field
-					From = RFCMailAddress.ParseMailAddress( headerValue );
+					From = RFCMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// http://tools.ietf.org/html/rfc5322#section-3.6.2
 				// The implementation here might be wrong
 				case "REPLY-TO":
 					// I am unsure if there is more than one email address here
-					ReplyTo = RFCMailAddress.ParseMailAddress( headerValue );
+					ReplyTo = RFCMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.5
@@ -318,8 +319,8 @@ namespace OpenPOP.MIME.Header
 				// The field are intended to have only human-readable content
 				// with information about the message
 				case "KEYWORDS":
-					string[] KeywordsTemp = headerValue.Split(',');
-					foreach (string keyword in KeywordsTemp)
+					string[] keywordsTemp = headerValue.Split(',');
+					foreach (string keyword in keywordsTemp)
 					{
 						// Remove the quotes if there is any
 						Keywords.Add(Utility.RemoveQuotes(keyword.Trim()));
@@ -339,7 +340,7 @@ namespace OpenPOP.MIME.Header
 
 				// See http://tools.ietf.org/html/rfc3798#section-2.1
 				case "DISPOSITION-NOTIFICATION-TO":
-					DispositionNotificationTo = RFCMailAddress.ParseMailAddresses( headerValue );
+					DispositionNotificationTo = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				case "MIME-VERSION":
@@ -356,7 +357,7 @@ namespace OpenPOP.MIME.Header
 				case "RETURN-PATH":
 					// Return-paths does not include a username, but we 
 					// may still use the address parser 
-					ReturnPath = RFCMailAddress.ParseMailAddress( headerValue );
+					ReturnPath = RFCMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.4

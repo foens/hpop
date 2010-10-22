@@ -23,7 +23,7 @@ namespace OpenPOP.MIME
 		/// </summary>
 		/// <param name="body">The body part of the MessageBody</param>
 		/// <param name="type">The type of the MessageBody</param>
-		/// <exception cref="ArgumentNullException">If body or type is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="body"/> or <paramref name="type"/> is <see langword="null"/></exception>
 		public MessageBody(string body, string type)
 		{
 			if (body == null)
