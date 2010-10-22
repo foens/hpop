@@ -10,64 +10,107 @@ namespace OpenPOP.MIME
 	/// This class is used for RFC compliant email addresses
 	/// </summary>
 	/// <remarks>
-	/// The <seealso cref="System.Net.Mail.MailAddress"/> does not cover all the possible formats 
+	/// The <seealso cref="MailAddress"/> does not cover all the possible formats 
 	/// for <a href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC5322</a> compliant email addresses.
 	/// This class is used as an address wrapper to account for that deficiency.
 	/// </remarks>
 	public class RFCMailAddress
 	{
 		#region Properties
-
-		/// <summary>
-		/// The textual representation of the mail address
-		/// </summary>
+		///<summary>
+		/// The email address of this <see cref="RFCMailAddress"/>
+		/// It is possibly string.Empty since RFC mail addresses
+		/// does not require an email address specified.
+		///</summary>
+		///<example>
+		/// Example header with email address:
+		/// To: Test test@mail.com
+		/// Address will be test@mail.com
+		///</example>
+		///<example>
+		/// Example header without email address:
+		/// To: Test
+		/// Address will be string.Empty
+		///</example>
 		public string Address { get; private set; }
 
+		///<summary>
+		/// The display name of this <see cref="RFCMailAddress"/>
+		/// It is possibly string.Empty since RFC mail addresses
+		/// does not require a display name to be specified.
+		///</summary>
+		///<example>
+		/// Example header with display name:
+		/// To: Test test@mail.com
+		/// DisplayName will be Test
+		///</example>
+		///<example>
+		/// Example header without display name:
+		/// To: test@test.com
+		/// DisplayName will be string.Empty
+		///</example>
+		public string DisplayName { get; private set; }
+
+		public string Raw { get; set; }
+
 		/// <summary>
-		/// The <see cref="System.Net.Mail.MailAddress"/> associated with the <see cref="RFCMailAddress"/>. 
+		/// The <see cref="MailAddress"/> associated with the <see cref="RFCMailAddress"/>. 
 		/// </summary>
 		/// <remarks>
-		/// The value of this property can be <see lanword="null"/> in instances where the <see cref="System.Net.Mail.MailAddress"/> cannot represent the address properly.
+		/// The value of this property can be <see lanword="null"/> in instances where the <see cref="MailAddress"/> cannot represent the address properly.
 		/// </remarks>
 		public MailAddress MailAddress { get; private set; }
 
 		/// <summary>
-		/// Specifies if the object contains a valid <see cref="System.Net.Mail.MailAddress"/> reference.
+		/// Specifies if the object contains a valid <see cref="MailAddress"/> reference.
 		/// </summary>
 		public bool HasValidMailAddress
 		{
 			get { return MailAddress != null; }
 		}
-
 		#endregion
 
+		# region Constructors
 		/// <summary>
-		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="System.Net.Mail.MailAddress"/> object
+		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="MailAddress"/> object.
+		/// This constructor is used when we were able to construct a <see cref="MailAddress"/> from a string.
 		/// </summary>
-		/// <param name="address">The address to use</param>
-		/// /// <exception cref="ArgumentNullException">If <paramref name="address"/> is <see langword="null"/></exception>
-		private RFCMailAddress(MailAddress address)
+		/// <param name="mailAddress">The address that <paramref name="raw"/> was parsed into</param>
+		/// <param name="raw">The raw unparsed input which was parsed into the <paramref name="mailAddress"/></param>
+		/// <exception cref="ArgumentNullException">If <paramref name="mailAddress"/> or <paramref name="raw"/> is <see langword="null"/></exception>
+		private RFCMailAddress(MailAddress mailAddress, string raw)
 		{
-			if (address == null)
-				throw new ArgumentNullException("address");
+			if (mailAddress == null)
+				throw new ArgumentNullException("mailAddress");
 
-			MailAddress = address;
-			Address = address.ToString();
+			if(raw == null)
+				throw new ArgumentNullException("raw");
+
+			MailAddress = mailAddress;
+			Address = mailAddress.Address;
+			DisplayName = mailAddress.DisplayName;
+			Raw = raw;
 		}
 
 		/// <summary>
-		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="String"/>
+		/// When we were unable to parse a string into a <see cref="MailAddress"/>, this constructor can be
+		/// used. The Raw string is then used as the <see cref="DisplayName"/>.
 		/// </summary>
-		/// <param name="address">The address to use</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="address"/> is <see langword="null"/></exception>
-		private RFCMailAddress(string address)
+		/// <param name="raw">The raw unparsed input which could not be parsed</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="raw"/> is <see langword="null"/></exception>
+		private RFCMailAddress(string raw)
 		{
-			if(address == null)
-				throw new ArgumentNullException("address");
+			if(raw == null)
+				throw new ArgumentNullException("raw");
 
-			Address = address;
+			MailAddress = null;
+			Address = string.Empty;
+			DisplayName = raw;
+			Raw = raw;
 		}
+		#endregion
 
+		#region Parsing
 		/// <summary>
 		/// Parse email address from a MIME header
 		/// http://tools.ietf.org/html/rfc5322#section-3.4
@@ -122,17 +165,18 @@ namespace OpenPOP.MIME
 					if (!string.IsNullOrEmpty(emailAddress))
 					{
 						// If the username is quoted, MailAddress' constructor will remove them for us
-						return new RFCMailAddress(new MailAddress(emailAddress, username));
+						return new RFCMailAddress(new MailAddress(emailAddress, username), input);
 					}
 				}
 
 				// This might be on the form noreply@mail.eksperten.dk
-				// Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
-				// if the MailAddress will take it so will we, otherwise it gets handled below
-				return new RFCMailAddress(new MailAddress(input));
+				// Check if there is an email, if notm there is no need to try
+				if(input.Contains("@"))
+					return new RFCMailAddress(new MailAddress(input), input);
 			}
 			catch (FormatException)
 			{
+				// Sometimes invalid emails are sent, like sqlmap-user@sourceforge.net. (last period is illigal)
 				DefaultLogger.CreateLogger().LogError("ParseMailAddress(): Improper mail address: " + input);
 			}
 
@@ -170,7 +214,10 @@ namespace OpenPOP.MIME
 
 			return returner;
 		}
+		#endregion
 
+		/*
+		 * TODO: Discuss with John if this should be kept or deleted
 		/// <summary>
 		/// Operator allows for implicit conversion from <see cref="RFCMailAddress"/> to <see cref="System.Net.Mail.MailAddress"/>
 		/// </summary>
@@ -180,14 +227,18 @@ namespace OpenPOP.MIME
 		{
 			return address.MailAddress;
 		}
-
+		 */
+		
 		/// <summary>
 		/// The <see cref="Address"/> string associated with the object
 		/// </summary>
 		/// <returns>Returns the string representation for the object</returns>
 		public override string ToString()
 		{
-			return Address;
+			if (HasValidMailAddress)
+				return MailAddress.ToString();
+
+			return Raw;
 		}
 
 	}

@@ -210,16 +210,19 @@ namespace OpenPOP.MIME
 
 			// It is not always that the From header is
 			// in a message
-			if(Headers.From != null)
-				mailMessage.From = Headers.From;
+			if(Headers.From != null && Headers.From.HasValidMailAddress)
+				mailMessage.From = Headers.From.MailAddress;
 			
 			// TODO: This might not work!
 			Encoding encodingUsed = Encoding.Default;
-				if (Headers.ContentType.CharSet != null)
-					encodingUsed = HeaderFieldParser.ParseCharsetToEncoding(Headers.ContentType.CharSet);
+			if (Headers.ContentType.CharSet != null)
+				encodingUsed = HeaderFieldParser.ParseCharsetToEncoding(Headers.ContentType.CharSet);
 
-			foreach (MailAddress to in Headers.To)
-				mailMessage.To.Add(to);
+			foreach (RFCMailAddress to in Headers.To)
+			{
+				if(to.HasValidMailAddress)
+					mailMessage.To.Add(to.MailAddress);
+			}
 
 			mailMessage.Subject = Headers.Subject;
 			mailMessage.SubjectEncoding = encodingUsed;
@@ -263,10 +266,21 @@ namespace OpenPOP.MIME
 				mailMessage.Attachments.Add(attachmentToAdd);
 			}
 
-			mailMessage.ReplyTo = Headers.ReplyTo;
+			if(Headers.ReplyTo != null && Headers.ReplyTo.HasValidMailAddress)
+				mailMessage.ReplyTo = Headers.ReplyTo.MailAddress;
 
-			foreach (MailAddress cc in Headers.CC)
-				mailMessage.CC.Add(cc);
+			foreach (RFCMailAddress cc in Headers.CC)
+			{
+				if(cc.HasValidMailAddress)
+					mailMessage.CC.Add(cc.MailAddress);
+			}
+
+			foreach (RFCMailAddress bcc in Headers.BCC)
+			{
+				if(bcc.HasValidMailAddress)
+					mailMessage.Bcc.Add(bcc.MailAddress);
+			}
+			// TODO What about BCC?
 
 			mailMessage.Priority = Headers.Importance;
 
