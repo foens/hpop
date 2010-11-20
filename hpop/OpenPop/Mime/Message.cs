@@ -1,0 +1,296 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using OpenPop.Mime.Header;
+using OpenPop.Mime.Traverse;
+using System.Net.Mail;
+
+namespace OpenPop.Mime
+{
+	/// <summary>
+	/// This is the root of the email tree structure.
+	/// <see cref="Mime.MessagePart"/> for a description about the structure.
+	/// 
+	/// A <see cref="Message"/> (this class) contains the headers of an email message such as 
+	///  - To
+	///  - From
+	///  - Subject
+	///  - Content-Type
+	///  - Message-ID
+	/// which are located in the <see cref="Headers"/> property.
+	/// 
+	/// Use the <see cref="Message.MessagePart"/> property to find the actual content of the email message.
+	/// </summary>
+	public class Message
+	{
+		#region Public properties
+		/// <summary>
+		/// Headers of the Message.
+		/// </summary>
+		public MessageHeader Headers { get; private set; }
+
+		/// <summary>
+		/// These are the message bodies that could be found in the message.
+		/// The last message should be the message most faithful to what the user sent
+		/// Commonly the second message is HTML and the first is plain text
+		/// </summary>
+		public MessagePart MessagePart { get; private set; }
+
+		/// <summary>
+		/// The raw content from which this message has been constructed
+		/// </summary>
+		public byte[] RawMessage { get; private set; }
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Convenience constructor for <see cref="Mime.Message(byte[], bool)"/>.
+		/// Creates a message from a byte array. The full message including its body is parsed.
+		/// </summary>
+		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
+		public Message(byte[] rawMessageContent)
+			: this(rawMessageContent, true)
+		{
+		}
+
+		/// <summary>
+		/// Creates a message from a byte array.
+		/// The headers are always parsed, but if <paramref name="parseBody"/> is <see langword="false"/>, the body is not parsed.
+		/// </summary>
+		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
+		/// <param name="parseBody"><see langword="true"/> if the body should be parsed, <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> array</param>
+		public Message(byte[] rawMessageContent, bool parseBody)
+		{
+			RawMessage = rawMessageContent;
+
+			// Find the headers and the body parts of the byte array
+			MessageHeader headersTemp;
+			byte[] body;
+			HeaderExtractor.ExtractHeadersAndBody(rawMessageContent, out headersTemp, out body);
+
+			// Set the Headers property
+			Headers = headersTemp;
+
+			// Should we also parse the body?
+			if (parseBody)
+			{
+				// Parse the body into a MessagePart
+				MessagePart = new MessagePart(body, Headers);
+			}
+		}
+		#endregion
+
+		/// <summary>
+		/// This method will convert this <see cref="Message"/> into a <see cref="MailMessage"/> equivalent.
+		/// The returned <see cref="MailMessage"/> can be used with <see cref="System.Net.Mail.SmtpClient"/> to forward the email.
+		/// 
+		/// You should be aware of the following about this method:
+		///  - All sender and receiver mail addresses are set.
+		///    If you send this email using a <see cref="System.Net.Mail.SmtpClient"/> then all
+		///    receivers in To, From, CC and BCC will receive the email once again.
+		/// 
+		///  - If you view the source code of this Message and looks at the source code of the forwarded
+		///    <see cref="MailMessage"/> returned by this method, you will notice that the source codes are not the same.
+		///    The content that is presented by a mail client reading the forwarded <see cref="MailMessage"/> should be the
+		///    same as the original, though.
+		/// 
+		///  - Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
+		///    It is simply not possible to set these on Attachments.
+		/// </summary>
+		/// <returns>A <see cref="MailMessage"/> object that contains the same information that this Message does</returns>
+		public MailMessage ToMailMessage()
+		{
+			// Construct an empty MailMessage to which we will gradually build up to look like the current Message object (this)
+			MailMessage message = new MailMessage();
+
+			message.Subject = Headers.Subject;
+
+			// We here set the encoding to be UTF-8
+			// We cannot determine what the encoding of the subject was at this point.
+			// But since we know that strings in .NET is stored in UTF, we can
+			// use UTF-8 to decode the subject into bytes
+			message.SubjectEncoding = Encoding.UTF8;
+
+			// Add the first plain text version as the body, if it exists
+			MessagePart firstPlainTextVersion = FindFirstPlainTextVersion();
+			if (firstPlainTextVersion != null)
+			{
+				message.Body = firstPlainTextVersion.GetBodyAsText();
+				message.BodyEncoding = firstPlainTextVersion.BodyEncoding;
+			}
+
+			// Add body and alternative views (html and such) to the message
+			IEnumerable<MessagePart> textVersions = FindAllTextVersions();
+			foreach (MessagePart textVersion in textVersions)
+			{
+				// The textVersions also contain the plainText version, therefore
+				// we should skip that one
+				if (textVersion == firstPlainTextVersion)
+					continue;
+				
+				MemoryStream stream = new MemoryStream(textVersion.Body);
+				AlternateView alternative = new AlternateView(stream);
+				alternative.ContentId = textVersion.ContentID;
+				alternative.ContentType = textVersion.ContentType;
+				message.AlternateViews.Add(alternative);
+			}
+
+			// Add attachments to the message
+			IEnumerable<MessagePart> attachments = FindAllAttachments();
+			foreach (MessagePart attachmentMessagePart in attachments)
+			{
+				MemoryStream stream = new MemoryStream(attachmentMessagePart.Body);
+				Attachment attachment = new Attachment(stream, attachmentMessagePart.ContentType);
+				attachment.ContentId = attachmentMessagePart.ContentID;
+				message.Attachments.Add(attachment);
+			}
+
+			if(Headers.From != null && Headers.From.HasValidMailAddress)
+				message.From = Headers.From.MailAddress;
+
+			if (Headers.ReplyTo != null && Headers.ReplyTo.HasValidMailAddress)
+				message.ReplyTo = Headers.ReplyTo.MailAddress;
+
+			if(Headers.Sender != null && Headers.Sender.HasValidMailAddress)
+				message.Sender = Headers.Sender.MailAddress;
+
+			foreach (RFCMailAddress to in Headers.To)
+			{
+				if(to.HasValidMailAddress)
+					message.To.Add(to.MailAddress);
+			}
+
+			foreach (RFCMailAddress cc in Headers.CC)
+			{
+				if (cc.HasValidMailAddress)
+					message.CC.Add(cc.MailAddress);
+			}
+
+			foreach (RFCMailAddress bcc in Headers.BCC)
+			{
+				if (bcc.HasValidMailAddress)
+					message.Bcc.Add(bcc.MailAddress);
+			}
+
+			return message;
+		}
+
+		/// <summary>
+		/// Finds the first text/plain <see cref="MessagePart"/> in this message.
+		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.
+		/// 
+		/// If no text/plain version is found, <see langword="null"/> is returned.
+		/// </summary>
+		/// <returns>
+		/// <see cref="MessagePart"/> which has a MediaType of text/plain or <see langword="null"/>
+		/// if such <see cref="MessagePart"/> could not be found.
+		/// </returns>
+		public MessagePart FindFirstPlainTextVersion()
+		{
+			return FindFirstMessagePartWithMediaType("text/plain");
+		}
+
+		/// <summary>
+		/// Finds the first text/html <see cref="MessagePart"/> in this message.
+		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.
+		/// 
+		/// If no text/html version is found, <see langword="null"/> is returned.
+		/// </summary>
+		/// <returns>
+		/// <see cref="MessagePart"/> which has a MediaType of text/html or <see langword="null"/>
+		/// if such <see cref="MessagePart"/> could not be found.
+		/// </returns>
+		public MessagePart FindFirstHtmlVersion()
+		{
+			return FindFirstMessagePartWithMediaType("text/html");
+		}
+
+		/// <summary>
+		/// Finds all the <see cref="MessagePart"/>'s which contains a text version.
+		/// 
+		/// <see cref="Mime.MessagePart.IsText"/> for MessageParts which are considered to be text versions.
+		/// 
+		/// Examples of MessageParts media types are:
+		/// text/plain
+		/// text/html
+		/// </summary>
+		/// <returns>A List of MessageParts where each part is a text version</returns>
+		public List<MessagePart> FindAllTextVersions()
+		{
+			return new TextVersionFinder().VisitMessage(this);
+		}
+
+		/// <summary>
+		/// Finds all the <see cref="MessagePart"/>'s which are attachments to this message.
+		/// 
+		/// <see cref="Mime.MessagePart.IsAttachment"/> for MessageParts which are considered to be attachments.
+		/// </summary>
+		/// <returns>A List of MessageParts where each is considered an attachment</returns>
+		public List<MessagePart> FindAllAttachments()
+		{
+			return new AttachmentFinder().VisitMessage(this);
+		}
+
+		///<summary>
+		/// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.
+		/// The search in the hierarchy is a depth-first traversal.
+		///</summary>
+		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
+		///<returns>A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found</returns>
+		public MessagePart FindFirstMessagePartWithMediaType(string mediaType)
+		{
+			return new FindFirstMessagePartWithMediaType().VisitMessage(this, mediaType);
+		}
+
+		///<summary>
+		/// Finds all the <see cref="MessagePart"/>s in the <see cref="Message"/> hierarchy with the given MediaType.
+		///</summary>
+		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
+		/// <returns>
+		/// A List of <see cref="MessagePart"/>s with the given MediaType.
+		/// The List might be empty if no such <see cref="MessagePart"/>s were found.
+		/// The order of the elements in the list is the order which they are found using
+		/// a depth first traversal of the <see cref="Message"/> hierarchy.
+		/// </returns>
+		public List<MessagePart> FindAllMessagePartsWithMediaType(string mediaType)
+		{
+			return new FindAllMessagePartsWithMediaType().VisitMessage(this, mediaType);
+		}
+
+		/// <summary>
+		/// Save this <see cref="Message"/> to a file.
+		/// Can be loaded at a later time using the <see cref="LoadFromFile"/> method.
+		/// </summary>
+		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
+		/// <exception>Other exceptions relevant to file saving might be thrown as well</exception>
+		public void SaveToFile(FileInfo file)
+		{
+			if (file == null)
+				throw new ArgumentNullException("file");
+
+			File.WriteAllBytes(file.FullName, RawMessage);
+		}
+
+		/// <summary>
+		/// Loads a <see cref="Message"/> from a file with an email in it.
+		/// </summary>
+		/// <param name="file">The File location to load the <see cref="Message"/> from. File must be existent.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
+		/// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
+		/// <exception>Other exceptions relevant to file loading might be thrown as well</exception>
+		/// <returns>A <see cref="Message"/> with the content located in the <paramref name="file"/></returns>
+		public static Message LoadFromFile(FileInfo file)
+		{
+			if (file == null)
+				throw new ArgumentNullException("file");
+
+			if(!file.Exists)
+				throw new FileNotFoundException("Cannot load message from non-existent file", file.FullName);
+
+			byte[] content = File.ReadAllBytes(file.FullName);
+			return new Message(content);
+		}
+	}
+}

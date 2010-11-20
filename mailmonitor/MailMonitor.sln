@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPOP", "..\hpop\OpenPOP\OpenPOP.csproj", "{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailMonitor", "MailMonitor.csproj", "{210D66B9-9A59-4B17-8270-854C1FA4FE1C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B3E0DF-61C3-4643-AB47-DBE1CFE3D303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{210D66B9-9A59-4B17-8270-854C1FA4FE1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{210D66B9-9A59-4B17-8270-854C1FA4FE1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{210D66B9-9A59-4B17-8270-854C1FA4FE1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{210D66B9-9A59-4B17-8270-854C1FA4FE1C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
