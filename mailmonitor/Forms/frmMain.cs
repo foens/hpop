@@ -1010,7 +1010,7 @@ namespace MailMonitor
 				_popClient = new Pop3Client();
 
 				int timeout = _settings.ServerTimeout*1000;
-				_popClient.Connect(mailBox.ServerAddress, mailBox.Port, mailBox.UseSsl, timeout, timeout);
+				_popClient.Connect(mailBox.ServerAddress, mailBox.Port, mailBox.UseSsl, timeout, timeout, null);
 				_popClient.Authenticate(mailBox.UserName, mailBox.Password);
 
 				int intCount = _popClient.GetMessageCount();
