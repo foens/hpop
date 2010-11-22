@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace OpenPop.Mime.Header
+namespace OpenPop.Mime.Decode
 {
 	/// <summary>
 	/// Portions Copyright (c)  vendredi13@007.freesurf.fr

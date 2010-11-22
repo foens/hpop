@@ -17,7 +17,7 @@ namespace OpenPop.Mime.Header
 		/// <summary>
 		/// All headers which were not recognized and explicitly dealt with.
 		/// This should mostly be custom headers, which are marked as X-[name].
-		/// Empty list if no unknown headers
+		/// This list will be empty if all headers were recognized and parsed.
 		/// </summary>
 		/// <remarks>
 		/// If you as a user, feels that a header in this collection should
@@ -27,82 +27,86 @@ namespace OpenPop.Mime.Header
 
 		/// <summary>
 		/// A human readable description of the body
-		/// Null if not set
+		/// <see langword="null"/> if no Content-Description header was present in the message.
 		/// </summary>
 		public string ContentDescription { get; private set; }
 
 		/// <summary>
 		/// ID of the content part (like an attached image). Used with MultiPart messages.
-		/// Null if not set
+		/// <see langword="null"/> if no Content-Type header field was present in the message.
 		/// </summary>
 		/// <see cref="MessageID">For an ID of the message</see>
 		public string ContentID { get; private set; }
 
 		/// <summary>
 		/// Message keywords
-		/// Empty list if no keywords
+		/// The list will be empty if no Keywords header was present in the message
 		/// </summary>
 		public List<string> Keywords { get; private set; }
 
 		/// <summary>
-		/// Tells to where a Disposition Notification should be sent to.
-		/// These notifications can be deletion, printing, ...
-		/// Empty list of not set
+		/// A List of emails to people who wishes to be notified when some event happens.
+		/// These events could be email
+		///  - deletion
+		///  - printing
+		///  - received
+		///  - ...
+		/// The list will be empty if no Disposition-Notification-To header was present in the message
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc3798">RFC 3798</a> for details</remarks>
 		public List<RFCMailAddress> DispositionNotificationTo { get; private set; }
 
 		/// <summary>
 		/// This is the Received headers. This tells the path that the email went.
-		/// Empty list of not used
+		/// The list will be empty if no Received header was present in the message
 		/// </summary>
 		public List<string> Received { get; private set; }
 
 		/// <summary>
 		/// Importance level type
 		/// 
-		/// The importance level is set to normal, if no such header field was mentioned or it contained
+		/// The importance level is set to normal, if no Importance header field was mentioned or it contained
 		/// unknown information. This is the expected behavior according to the RFC.
 		/// </summary>
 		public MailPriority Importance { get; private set; }
 
 		/// <summary>
-		/// The CONTENT-TRANSFER-ENCODING header field
+		/// This header describes the Content encoding during transfer.
 		/// 
-		/// If the header was not found when this object was created, it is set
-		/// to the default of 7BIT
+		/// If no Content-Transfer-Encoding header was present in the message, it is set
+		/// to the default of SevenBit in accordance to the RFC.
 		/// </summary>
 		/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Part 6 for details</remarks>
 		public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>
 		/// Carbon Copy. This specifies who got a copy of the message.
-		/// Empty list of not set
+		/// The list will be empty if no Cc header was present in the message
 		/// </summary>
 		public List<RFCMailAddress> CC { get; private set; }
 
 		/// <summary>
 		/// Blind Carbon Copy. This specifies who got a copy of the message, but others
 		/// cannot see who these persons are.
-		/// Empty list of not set
+		/// The list will be empty if no Received Bcc was present in the message
 		/// </summary>
 		public List<RFCMailAddress> BCC { get; private set; }
 
 		/// <summary>
-		/// Specifies to who this mail was for.
-		/// Empty list if not used
+		/// Specifies who this mail was for
+		/// The list will be empty if no To header was present in the message
 		/// </summary>
 		public List<RFCMailAddress> To { get; private set; }
 
 		/// <summary>
 		/// Specifies who sent the email
-		/// Null if not set
+		/// <see langword="null"/> if no From header field was present in the message
 		/// </summary>
 		public RFCMailAddress From { get; private set; }
 
 		/// <summary>
-		/// Specifies to who a reply to the message should be sent
-		/// Null if not set
+		/// Specifies who a reply to the message should be sent to
+		/// <see langword="null"/> if no Reply-To header field was present in the message
 		/// </summary>
 		public RFCMailAddress ReplyTo { get; private set; }
 
@@ -114,26 +118,29 @@ namespace OpenPop.Mime.Header
 		/// the Reply-To field would hold the address of the person she works for.
 		/// RFC states that if the Sender is the same as the From field,
 		/// sender should not be included in the message.
+		/// <see langword="null"/> if no Sender header field was present in the message
 		/// </summary>
 		public RFCMailAddress Sender { get; private set; }
 
 		/// <summary>
-		/// The ContentType header field.
 		/// If not set, the ContentType is created by the default string
 		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 5.2
 		/// which is "text/plain; charset=us-ascii"
+		/// If set, the default is overridden.
 		/// </summary>
 		public ContentType ContentType { get; private set; }
 
 		/// <summary>
-		/// The ContentDisposition header field
-		/// Null if not set
+		/// Used to describe if a <see cref="MessagePart"/> is to be displayed or to be though of as an attachment.
+		/// Also contains information about filename if such was sent.
+		/// <see langword="null"/> if no Content-Disposition header field was present in the message
 		/// </summary>
 		public ContentDisposition ContentDisposition { get; private set; }
 
 		/// <summary>
 		/// The Date when the email was sent.
 		/// This is the raw value. <see cref="DateSent"/> for a parsed up <see cref="DateTime"/> value of this field
+		/// <see langword="null"/> if no Date header field was present in the message
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section-3.6.1</a> for more details</remarks>
 		public string Date { get; private set; }
@@ -150,28 +157,28 @@ namespace OpenPop.Mime.Header
 		/// <summary>
 		/// An ID of the message that is SUPPOSED to be in every message according to the RFC.
 		/// The ID is unique
-		/// Null if not set (which should be rare)
+		/// <see langword="null"/> if no Message-ID header field was present in the message
 		/// </summary>
 		public string MessageID { get; private set; }
 
 		/// <summary>
 		/// The Mime Version.
 		/// This field will almost always show 1.0
-		/// Null if not set
+		/// <see langword="null"/> if no Mime-Version header field was present in the message
 		/// </summary>
 		public string MimeVersion { get; private set; }
 
 		/// <summary>
 		/// A single <see cref="MailAddress"/> with no username inside
 		/// This is a trace header field, that should be in all messages
-		/// Null if not set
+		/// <see langword="null"/> if no Return-Path header field was present in the message
 		/// </summary>
 		public RFCMailAddress ReturnPath { get; private set; }
 
 		/// <summary>
 		/// The subject line of the message in decoded, one line state.
 		/// This should be in all messages.
-		/// Null if not set
+		/// <see langword="null"/> if no Subject header field was present in the message
 		/// </summary>
 		public string Subject { get; private set; }
 		#endregion

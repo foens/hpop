@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using OpenPop.Mime;
+using OpenPop.Mime.Header;
 using OpenPop.Pop3;
 using OpenPop.Pop3.Exceptions;
 using OpenPop.Shared.Logging;

@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using OpenPop.Mime;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
+using OpenPop.Mime.Header;
 
-namespace OpenPopUnitTests.Mime
+namespace OpenPopUnitTests.Mime.Header
 {
 	/// <summary>
 	/// Tests for <see cref="RFCMailAddress"/>

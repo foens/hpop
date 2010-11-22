@@ -100,14 +100,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mime\Decode\RFC2231Decoder.cs" />
+    <Compile Include="Mime\Decode\RFC2822DateTime.cs" />
     <Compile Include="Mime\Decode\Utility.cs" />
+    <Compile Include="Mime\Header\RFCMailAddress.cs" />
     <Compile Include="Mime\Traverse\AttachmentFinder.cs" />
     <Compile Include="Mime\Traverse\FindAllMessagePartsWithMediaType.cs" />
     <Compile Include="Mime\Traverse\IQuestionAnswerMessageTraverser.cs" />
     <Compile Include="Mime\Traverse\FindFirstMessagePartWithMediaType.cs" />
     <Compile Include="Mime\Traverse\MultipleMessagePartFinder.cs" />
     <Compile Include="Mime\Traverse\TextVersionFinder.cs" />
-    <Compile Include="Mime\Header\RFC2822DateTime.cs" />
     <Compile Include="Mime\Header\ContentTransferEncoding.cs" />
     <Compile Include="Mime\Decode\Base64.cs" />
     <Compile Include="Mime\Decode\EncodedWord.cs" />
@@ -133,7 +134,6 @@
     <Compile Include="Pop3\Exceptions\PopServerNotAvailableException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerLockedException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerNotFoundException.cs" />
-    <Compile Include="Mime\RFCMailAddress.cs" />
     <Compile Include="Shared\Logging\DiagnosticsLogger.cs" />
     <Compile Include="Shared\Logging\FileLogger.cs" />
     <Compile Include="Shared\Logging\DefaultLogger.cs" />

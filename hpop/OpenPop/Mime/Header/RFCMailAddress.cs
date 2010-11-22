@@ -4,7 +4,7 @@ using System.Net.Mail;
 using OpenPop.Mime.Decode;
 using OpenPop.Shared.Logging;
 
-namespace OpenPop.Mime
+namespace OpenPop.Mime.Header
 {
 	/// <summary>
 	/// This class is used for RFC compliant email addresses
@@ -72,7 +72,7 @@ namespace OpenPop.Mime
 		}
 		#endregion
 
-		# region Constructors
+		#region Constructors
 		/// <summary>
 		/// Constructs an <see cref="RFCMailAddress"/> object from a <see cref="MailAddress"/> object.
 		/// This constructor is used when we were able to construct a <see cref="MailAddress"/> from a string.
