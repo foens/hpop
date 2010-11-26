@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -14,5 +15,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]		
 
 [assembly: AssemblyVersion("2010.07.01.1600")]
+
+// The assemble is compliant to CLS rules
+[assembly: CLSCompliant(true)]
 
 // TODO When releasing, a strong-named assembly and a non-strong-named assembly should be created

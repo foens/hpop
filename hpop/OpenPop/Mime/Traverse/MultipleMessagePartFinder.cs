@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OpenPop.Mime.Traverse
 {
@@ -11,6 +12,9 @@ namespace OpenPop.Mime.Traverse
 		/// <returns>A list with has all the elements in the <paramref name="leafAnswers"/> lists</returns>
 		protected override List<MessagePart> MergeLeafAnswers(List<List<MessagePart>> leafAnswers)
 		{
+			if(leafAnswers == null)
+				throw new ArgumentNullException("leafAnswers");
+
 			// We simply create a list with all the answer generated from the leaves
 			List<MessagePart> mergedResults = new List<MessagePart>();
 

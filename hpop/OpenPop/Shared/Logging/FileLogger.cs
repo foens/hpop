@@ -12,7 +12,7 @@ namespace OpenPop.Shared.Logging
 		/// <summary>
 		/// Lock object to prevent thread interactions
 		/// </summary>
-		private static readonly object LogLock = new object();
+		private static readonly object LogLock;
 
 		/// <summary>
 		/// Static constructor
@@ -23,6 +23,7 @@ namespace OpenPop.Shared.Logging
 			LogFile = new FileInfo("OpenPOP.log");
 			Enabled = true;
 			Verbose = false;
+			LogLock =  new object();
 		}
 
 		/// <summary>

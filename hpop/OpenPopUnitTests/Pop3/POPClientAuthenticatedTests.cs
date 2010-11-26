@@ -78,7 +78,7 @@ namespace OpenPopUnitTests.Pop3
 		[Test]
 		public void TestDisconnectDoesNotThrow()
 		{
-			Authenticate();
+			Authenticate("+OK"); // OK to quit command
 			Assert.DoesNotThrow(delegate { Client.Disconnect(); });
 		}
 
@@ -135,21 +135,21 @@ namespace OpenPopUnitTests.Pop3
 		public void TestGetMessageUIDDoesNotThrow()
 		{
 			Authenticate("+OK 2 test"); // Message 2 has UID test
-			Assert.DoesNotThrow(delegate { Client.GetMessageUID(RandomMessageNumber); });
+			Assert.DoesNotThrow(delegate { Client.GetMessageUid(RandomMessageNumber); });
 		}
 
 		[Test]
 		public void TestGetMessageUIDDoesThrowWhenWrongMessageNumberPassed()
 		{
 			Authenticate("+OK 2 test"); // Message 2 has UID test
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUID(0); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUid(0); });
 		}
 
 		[Test]
 		public void TestGetMessageUIDsDoesNotThrow()
 		{
 			Authenticate("+OK\r\n1 test\r\n."); // UIDL command accepted. // Message 1 has UID test // . ends answer
-			Assert.DoesNotThrow(delegate { Client.GetMessageUIDs(); });
+			Assert.DoesNotThrow(delegate { Client.GetMessageUids(); });
 		}
 
 		[Test]

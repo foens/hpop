@@ -63,49 +63,58 @@ namespace OpenPop.Mime.Decode
 			if (toDecode == null)
 				throw new ArgumentNullException("toDecode");
 
-			// Create a StringArrayBuilder which is equivalent to a StringBuilder
-			// to which we will append all the decoded input
-			MemoryStream byteArrayHolder = new MemoryStream();
-			BinaryWriter byteArrayBuilder = new BinaryWriter(byteArrayHolder);
-
-			// Remove illegal control characters
-			toDecode = removeIllegalControlCharacters(toDecode);
-
-			// Run through the whole string that needs to be decoded
-			for (int i = 0; i < toDecode.Length; i++)
+			// Create a byte array builder which is roughly equivalent to a StringBuilder
+			using (MemoryStream byteArrayBuilder = new MemoryStream())
 			{
-				char currentChar = toDecode[i];
-				if (currentChar == '=')
+				// Remove illegal control characters
+				toDecode = removeIllegalControlCharacters(toDecode);
+
+				// Run through the whole string that needs to be decoded
+				for (int i = 0; i < toDecode.Length; i++)
 				{
-					// Check that there is at least two characters behind the equal sign
-					if (toDecode.Length - i < 3)
+					char currentChar = toDecode[i];
+					if (currentChar == '=')
 					{
-						// We are at the end of the toDecode string, but something is missing. Handle it the way RFC 2045 states
-						byteArrayBuilder.Write(DecodeEqualSignNotLongEnough(toDecode.Substring(i)));
+						// Check that there is at least two characters behind the equal sign
+						if (toDecode.Length - i < 3)
+						{
+							// We are at the end of the toDecode string, but something is missing. Handle it the way RFC 2045 states
+							WriteAllBytesToStream(byteArrayBuilder, DecodeEqualSignNotLongEnough(toDecode.Substring(i)));
 
-						// Since it was the last part, we should stop parsing anymore
-						break;
+							// Since it was the last part, we should stop parsing anymore
+							break;
+						}
+
+						// Decode the Quoted-Printable part
+						string quotedPrintablePart = toDecode.Substring(i, 3);
+						WriteAllBytesToStream(byteArrayBuilder, DecodeEqualSign(quotedPrintablePart));
+
+						// We now consumed two extra characters. Go forward two extra characters
+						i += 2;
+					} else
+					{
+						// This character is not quoted printable hex encoded.
+
+						// Could it be the _ character, which represents space?
+						if (currentChar == '_')
+							byteArrayBuilder.WriteByte((byte)' ');
+						else
+							byteArrayBuilder.WriteByte((byte)currentChar); // This is not encoded at all. This is a literal which should just be included into the output.
 					}
-
-					// Decode the Quoted-Printable part
-					string quotedPrintablePart = toDecode.Substring(i, 3);
-					byteArrayBuilder.Write(DecodeEqualSign(quotedPrintablePart));
-
-					// We now consumed two extra characters. Go forward two extra characters
-					i += 2;
-				} else
-				{
-					// This character is not quoted printable hex encoded.
-
-					// Could it be the _ character, which represents space?
-					if (currentChar == '_')
-						byteArrayBuilder.Write(' ');
-					else
-						byteArrayBuilder.Write(currentChar); // This is not encoded at all. This is a literal which should just be included into the output.
 				}
-			}
 
-			return byteArrayHolder.ToArray();
+				return byteArrayBuilder.ToArray();
+			}
+		}
+
+		/// <summary>
+		/// Writes all bytes in a byte array to a stream
+		/// </summary>
+		/// <param name="stream">The stream to write to</param>
+		/// <param name="toWrite">The bytes to write to the <paramref name="stream"/></param>
+		private static void WriteAllBytesToStream(Stream stream, byte[] toWrite)
+		{
+			stream.Write(toWrite, 0, toWrite.Length);
 		}
 
 		/// <summary>
@@ -210,11 +219,11 @@ namespace OpenPop.Mime.Decode
 
 			// We can only decode wrong length equal signs
 			if (decode.Length >= 3)
-				throw new ArgumentException();
+				throw new ArgumentException("decode must have length lower than 3", "decode");
 
 			// First char must be =
 			if (decode[0] != '=')
-				throw new ArgumentException();
+				throw new ArgumentException("First part of decode must be an equal sign", "decode");
 
 			// We will now believe that the string sent to us, was actually not encoded
 			// Therefore it must be in US-ASCII and we will return the bytes it corrosponds to
@@ -236,11 +245,11 @@ namespace OpenPop.Mime.Decode
 
 			// We can only decode the string if it has length 3 - other calls to this function is invalid
 			if (decode.Length != 3)
-				throw new ArgumentException();
+				throw new ArgumentException("decode must have length 3", "decode");
 
 			// First char must be =
 			if (decode[0] != '=')
-				throw new ArgumentException();
+				throw new ArgumentException("decode must start with an equal sign", "decode");
 
 			// There are two cases where an equal sign might appear
 			// It might be a

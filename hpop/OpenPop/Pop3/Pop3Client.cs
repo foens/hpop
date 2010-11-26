@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -34,10 +35,10 @@ namespace OpenPop.Pop3
 	{
 		#region Events
 		/// <summary>
-		/// Basic delegate which is used for all events
+		/// Basic delegate which is used for all events in the Pop3Client
 		/// </summary>
-		/// <param name="client">The client from which the event happened</param>
-		public delegate void PopClientEvent(Pop3Client client);
+		/// <param name="sender">The client from which the event happened</param>
+		public delegate void PopClientEvent(Pop3Client sender);
 
 		/// <summary>
 		/// Event that fires when begin to connect with target POP3 server.
@@ -97,7 +98,7 @@ namespace OpenPop.Pop3
 		/// The APOP time stamp sent by the server in it's welcome
 		/// message if APOP is supported.
 		/// </summary>
-		private string APOPTimeStamp { get; set; }
+		private string ApopTimeStamp { get; set; }
 		#endregion
 
 		#region Public member properties
@@ -111,7 +112,7 @@ namespace OpenPop.Pop3
 		/// This value is filled when the connect method has returned,
 		/// as the server tells in its welcome message if APOP is supported.
 		/// </summary>
-		public bool APOPSupported { get; private set; }
+		public bool ApopSupported { get; private set; }
 
 		/// <summary>
 		/// Describes what state the <see cref="Pop3Client"/> is in
@@ -126,13 +127,13 @@ namespace OpenPop.Pop3
 		public Pop3Client()
 		{
 			// We have not seen the APOPTimestamp yet
-			APOPTimeStamp = null;
+			ApopTimeStamp = null;
 
 			// We are not connected
 			Connected = false;
 
 			// APOP is not supported before we check on login
-			APOPSupported = false;
+			ApopSupported = false;
 
 			// We are not connected yet
 			State = ConnectionState.Disconnected;
@@ -150,7 +151,7 @@ namespace OpenPop.Pop3
 			{
 				if (Connected)
 				{
-					Disconnect();
+					DisconnectStreams();
 				}
 			}
 
@@ -194,7 +195,7 @@ namespace OpenPop.Pop3
 				State = ConnectionState.Authorization;
 
 				IsOkResponse(response);
-				ExtractAPOPTimestamp(response);
+				ExtractApopTimestamp(response);
 				Connected = true;
 				
 				if(CommunicationOccurred != null)
@@ -203,7 +204,8 @@ namespace OpenPop.Pop3
 			catch (PopServerException e)
 			{
 				// If not close down the connection and abort
-				Disconnect();
+				DisconnectStreams();
+				
 				DefaultLogger.Log.LogError("Connect(): " + "Error with connection, maybe POP3 server not exist");
 				DefaultLogger.Log.LogDebug("Last response from server was: " + LastServerResponse);
 				throw new PopServerNotAvailableException("Server is not available", e);
@@ -245,6 +247,9 @@ namespace OpenPop.Pop3
 
 			if (hostname == null)
 				throw new ArgumentNullException("hostname");
+
+			if (hostname.Length == 0)
+				throw new ArgumentException("hostname cannot be empty", "hostname");
 
 			if (port > IPEndPoint.MaxPort || port < IPEndPoint.MinPort)
 				throw new ArgumentOutOfRangeException("port");
@@ -325,20 +330,9 @@ namespace OpenPop.Pop3
 			try
 			{
 				SendCommand("QUIT");
-				InputStream.Close();
-				OutputStream.Close();
-			} catch (Exception e)
-			{
-				// We don't care about errors in disconnect
-				// but log it anyways, to keep it transparent
-				DefaultLogger.Log.LogError("Exception thrown when disconnecting: " + e.Message);
 			} finally
 			{
-				// Reset values
-				Connected = false;
-				APOPSupported = false;
-				APOPTimeStamp = null;
-				State = ConnectionState.Disconnected;
+				DisconnectStreams();
 			}
 
 			if(CommunicationLost != null)
@@ -392,12 +386,12 @@ namespace OpenPop.Pop3
 					break;
 
 				case AuthenticationMethod.APOP:
-					AuthenticateUsingAPOP(username, password);
+					AuthenticateUsingApop(username, password);
 					break;
 
 				case AuthenticationMethod.TryBoth:
-					if (APOPSupported)
-						AuthenticateUsingAPOP(username, password);
+					if (ApopSupported)
+						AuthenticateUsingApop(username, password);
 					else
 						AuthenticateUsingUserAndPassword(username, password);
 					break;
@@ -433,7 +427,7 @@ namespace OpenPop.Pop3
 				SendCommand("PASS " + password);
 			} catch (PopServerException e)
 			{
-				if (LastServerResponse.ToLower().Contains("lock"))
+				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
 				{
 					DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword(): maildrop is locked");
 					throw new PopServerLockedException("The account is locked", e);
@@ -458,9 +452,9 @@ namespace OpenPop.Pop3
 		/// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
-		private void AuthenticateUsingAPOP(string username, string password)
+		private void AuthenticateUsingApop(string username, string password)
 		{
-			if (!APOPSupported)
+			if (!ApopSupported)
 				throw new NotSupportedException("APOP is not supported on this server");
 
 			if (AuthenticationBegan != null) 
@@ -468,17 +462,16 @@ namespace OpenPop.Pop3
 
 			try
 			{
-				// Only ASCII passwords are supported. If you are having a problem with this, please send an issue report
-				SendCommand("APOP " + username + " " + MD5.ComputeHashHex(Encoding.ASCII.GetBytes(APOPTimeStamp + password)));
+				SendCommand("APOP " + username + " " + MD5.ComputeHashHex(Encoding.ASCII.GetBytes(ApopTimeStamp + password)));
 			} catch (PopServerException e)
 			{
-				if (LastServerResponse.ToLower().Contains("lock"))
+				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
 				{
-					DefaultLogger.Log.LogError("AuthenticateUsingAPOP(): maildrop is locked");
+					DefaultLogger.Log.LogError("AuthenticateUsingApop(): maildrop is locked");
 					throw new PopServerLockedException("The account is locked", e);
 				}
 
-				DefaultLogger.Log.LogError("AuthenticateUsingAPOP(): wrong user or password");
+				DefaultLogger.Log.LogError("AuthenticateUsingApop(): wrong user or password");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidLoginOrPasswordException("The supplied username or password is wrong", e);
 			}
@@ -591,7 +584,7 @@ namespace OpenPop.Pop3
 		/// </param>
 		/// <returns>The unique ID for the message</returns>
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the <paramref name="messageNumber"/> does not exist</exception>
-		public string GetMessageUID(int messageNumber)
+		public string GetMessageUid(int messageNumber)
 		{
 			AssertDisposed();
 
@@ -618,7 +611,7 @@ namespace OpenPop.Pop3
 		/// A list containing the unique IDs in sorted order from message number 1 and upwards.
 		/// </returns>
 		/// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
-		public List<string> GetMessageUIDs()
+		public List<string> GetMessageUids()
 		{
 			AssertDisposed();
 
@@ -638,7 +631,7 @@ namespace OpenPop.Pop3
 
 			string response;
 			// Keep reading until multi-line ends with a "."
-			while (!".".Equals(response = StreamUtility.ReadLineAsAscii(InputStream)))
+			while (!IsLastLineInMultiLineResponse(response = StreamUtility.ReadLineAsAscii(InputStream)))
 			{
 				// Add the unique ID to the list
 				uids.Add(response.Split(' ')[1]);
@@ -699,7 +692,7 @@ namespace OpenPop.Pop3
 			// Read until end of multi-line
 			while (!".".Equals(response = StreamUtility.ReadLineAsAscii(InputStream)))
 			{
-				sizes.Add(int.Parse(response.Split(' ')[1]));
+				sizes.Add(int.Parse(response.Split(' ')[1], CultureInfo.InvariantCulture));
 			}
 
 			return sizes;
@@ -779,19 +772,19 @@ namespace OpenPop.Pop3
 
 		#region Private helper methods
 		/// <summary>
-		/// Examines string to see if it contains a timestamp to use with the APOP command
-		/// If it does, sets the <see cref="APOPTimestamp"/> property to this value
+		/// Examines string to see if it contains a time stamp to use with the APOP command
+		/// If it does, sets the <see cref="ApopTimeStamp"/> property to this value
 		/// </summary>
 		/// <param name="response">The string to examine</param>
-		private void ExtractAPOPTimestamp(string response)
+		private void ExtractApopTimestamp(string response)
 		{
 			// RFC Example:
 			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
 			Match match = Regex.Match(response, "<.+>");
 			if (match.Success)
 			{
-				APOPTimeStamp = match.Value;
-				APOPSupported = true;
+				ApopTimeStamp = match.Value;
+				ApopSupported = true;
 			}
 		}
 
@@ -809,7 +802,7 @@ namespace OpenPop.Pop3
 			if (response == null)
 				throw new PopServerException("The stream used to retrieve responses from was closed");
 
-			if (response.StartsWith("+OK"))
+			if (response.StartsWith("+OK", StringComparison.OrdinalIgnoreCase))
 				return;
 
 			throw new PopServerException("The server did not respond with a +OK response. The response was: \"" + response + "\"");
@@ -853,7 +846,7 @@ namespace OpenPop.Pop3
 		{
 			SendCommand(command);
 
-			return int.Parse(LastServerResponse.Split(' ')[location]);
+			return int.Parse(LastServerResponse.Split(' ')[location], CultureInfo.InvariantCulture);
 		}
 
 		/// <summary>
@@ -895,64 +888,64 @@ namespace OpenPop.Pop3
 			// S: <the POP3 server sends the entire message here>
 			// S: .
 
-			// Create a StringArrayBuilder which is equivalent to a StringBuilder
-			// to which we will append input as it comes
-			MemoryStream byteArrayHolder = new MemoryStream();
-			BinaryWriter byteArrayBuilder = new BinaryWriter(byteArrayHolder);
-
-			bool first = true;
-			byte[] lineRead;
-
-			// Keep reading until we are at the end of the multi line response
-			while (!isLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(InputStream)))
+			// Create a byte array builder which we use to write the bytes too
+			// When done, we can get the byte array out
+			using (MemoryStream byteArrayBuilder = new MemoryStream())
 			{
-				// We should not write CRLF on the very last line, therefore we do this
-				if (!first)
+				bool first = true;
+				byte[] lineRead;
+
+				// Keep reading until we are at the end of the multi line response
+				while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(InputStream)))
 				{
-					// Write CRLF which was not included in the lineRead bytes of last line
-					byteArrayBuilder.Write(Encoding.ASCII.GetBytes("\r\n"));
-				}
-				else
-				{
-					// We are now not the first anymore
-					first = false;
+					// We should not write CRLF on the very last line, therefore we do this
+					if (!first)
+					{
+						// Write CRLF which was not included in the lineRead bytes of last line
+						byte[] crlfPair = Encoding.ASCII.GetBytes("\r\n");
+						byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
+					} else
+					{
+						// We are now not the first anymore
+						first = false;
+					}
+
+					bool startingWithPeriod = false;
+					// This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
+					// http://tools.ietf.org/html/rfc1939#section-3
+					// It says that a line starting with "." and not having CRLF after it
+					// is a multi line, and the "." should be stripped
+					if (lineRead.Length > 0 && lineRead[0] == '.')
+					{
+						startingWithPeriod = true;
+					}
+
+					if (startingWithPeriod)
+					{
+						// Do not write the first period
+						byteArrayBuilder.Write(lineRead, 1, lineRead.Length - 1);
+					} else
+					{
+						// Write everything
+						byteArrayBuilder.Write(lineRead, 0, lineRead.Length);
+					}
 				}
 
-				bool startingWithPeriod = false;
-				// This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
-				// http://tools.ietf.org/html/rfc1939#section-3
-				// It says that a line starting with "." and not having CRLF after it
-				// is a multi line, and the "." should be stripped
-				if (lineRead.Length > 0 && lineRead[0] == '.')
+				// If we are fetching a header - add an extra line to denote the headers ended
+				if (askOnlyForHeaders)
 				{
-					startingWithPeriod = true;
+					byte[] crlfPair = Encoding.ASCII.GetBytes("\r\n");
+					byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
 				}
 
-				if (startingWithPeriod)
-				{
-					// Do not write the first period
-					byteArrayBuilder.Write(lineRead, 1, lineRead.Length - 1);
-				}
-				else
-				{
-					// Write everything
-					byteArrayBuilder.Write(lineRead);
-				}
+				// Get out the bytes we have written to byteArrayBuilder
+				byte[] receivedBytes = byteArrayBuilder.ToArray();
+
+				if (MessageTransferFinished != null)
+					MessageTransferFinished(this);
+
+				return receivedBytes;
 			}
-
-			// If we are fetching a header - add an extra line to denote the headers ended
-			if(askOnlyForHeaders)
-			{
-				byteArrayBuilder.Write(Encoding.ASCII.GetBytes("\r\n"));
-			}
-
-			// Get out the bytes we have written to byteArrayBuilder
-			byte[] receivedBytes = byteArrayHolder.ToArray();
-
-			if (MessageTransferFinished != null)
-				MessageTransferFinished(this);
-
-			return receivedBytes;
 		}
 
 		/// <summary>
@@ -962,12 +955,25 @@ namespace OpenPop.Pop3
 		/// <param name="bytesReceived">The last line received from the server, which could be the last response line</param>
 		/// <returns><see langword="true"/> if last line in a multi line response, <see langword="false"/> otherwise</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="bytesReceived"/> is <see langword="null"/></exception>
-		private static bool isLastLineInMultiLineResponse(byte[] bytesReceived)
+		private static bool IsLastLineInMultiLineResponse(byte[] bytesReceived)
 		{
 			if(bytesReceived == null)
 				throw new ArgumentNullException("bytesReceived");
 
 			return bytesReceived.Length == 1 && bytesReceived[0] == '.';
+		}
+
+		/// <see cref="IsLastLineInMultiLineResponse(byte[])"> for documentation</see>
+		private static bool IsLastLineInMultiLineResponse(string lineReceived)
+		{
+			if (lineReceived == null)
+				throw new ArgumentNullException("lineReceived");
+
+			// If the string is indeed the last line, then it is okay to do ASCII encoding
+			// on it. For performance reasons we check if the length is equal to 1
+			// so that we do not need to decode a long message string just to see if
+			// it is the last line
+			return lineReceived.Length == 1 && IsLastLineInMultiLineResponse(Encoding.ASCII.GetBytes(lineReceived));
 		}
 
 		/// <summary>
@@ -979,6 +985,26 @@ namespace OpenPop.Pop3
 		{
 			if(messageNumber <= 0)
 				throw new InvalidUseException("The messageNumber argument cannot have a value of zero or less. Valid messageNumber is in the range [1, messageCount]");
+		}
+
+		/// <summary>
+		/// Closes down the streams and sets the Pop3Client into the initial configuration
+		/// </summary>
+		private void DisconnectStreams()
+		{
+			try
+			{
+				InputStream.Close();
+				OutputStream.Close();
+			}
+			finally
+			{
+				// Reset values
+				Connected = false;
+				ApopSupported = false;
+				ApopTimeStamp = null;
+				State = ConnectionState.Disconnected;
+			}
 		}
 		#endregion
 	}

@@ -29,7 +29,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Connect(inputStream, outputStream);
 
 			// The Pop3Client should now have seen, that the server supports APOP
-			Assert.IsTrue(client.APOPSupported);
+			Assert.IsTrue(client.ApopSupported);
 
 			client.Authenticate("mrose", "tanstaaf", AuthenticationMethod.APOP);
 
@@ -238,7 +238,7 @@ namespace OpenPopUnitTests.Pop3
 			const string expectedOutput = "psycho";
 
 			// Delete all the messages
-			string output = client.GetMessageUID(2);
+			string output = client.GetMessageUid(2);
 
 			// We now expect that the client has given us the correct UID
 			Assert.AreEqual(expectedOutput, output);
@@ -267,7 +267,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Authenticate("test", "test");
 
 			// Get the UIDs for all the messages in sorted order from 1 and upwards
-			System.Collections.Generic.List<string> uids = client.GetMessageUIDs();
+			System.Collections.Generic.List<string> uids = client.GetMessageUids();
 
 			// The list should have size 2
 			Assert.AreEqual(2, uids.Count);
@@ -371,7 +371,7 @@ namespace OpenPopUnitTests.Pop3
 			Assert.NotNull(message.Headers);
 			
 			Assert.AreEqual("CRON-APT completed on test-server [/etc/auto-apt/configuration]", message.Headers.Subject);
-			Assert.AreEqual("E1P2wr0-0003vw-U9@test.com", message.Headers.MessageID);
+			Assert.AreEqual("E1P2wr0-0003vw-U9@test.com", message.Headers.MessageId);
 
 			// The Date header was:
 			// Date: Tue, 05 Oct 2010 04:02:06 +0200
@@ -430,7 +430,7 @@ namespace OpenPopUnitTests.Pop3
 			Assert.NotNull(message.Headers);
 
 			Assert.AreEqual("Email Addresses", message.Headers.Subject);
-			Assert.AreEqual("AANLkTik0O_9JZCeS7Za__w_G6L=9jKq2=BQKnqHVXAQo@mail.gmail.com", message.Headers.MessageID);
+			Assert.AreEqual("AANLkTik0O_9JZCeS7Za__w_G6L=9jKq2=BQKnqHVXAQo@mail.gmail.com", message.Headers.MessageId);
 
 			Assert.AreEqual("1.0", message.Headers.MimeVersion);
 
@@ -509,7 +509,7 @@ namespace OpenPopUnitTests.Pop3
 			Assert.NotNull(message.Headers);
 
 			Assert.AreEqual("Test æøåÆØÅ", message.Headers.Subject);
-			Assert.AreEqual("4CBACC87.8080600@mail.dk", message.Headers.MessageID);
+			Assert.AreEqual("4CBACC87.8080600@mail.dk", message.Headers.MessageId);
 
 			Assert.AreEqual("1.0", message.Headers.MimeVersion);
 
@@ -587,7 +587,7 @@ namespace OpenPopUnitTests.Pop3
 			Assert.NotNull(message.Headers);
 
 			Assert.AreEqual("Test æøåÆØÅ", message.Headers.Subject);
-			Assert.AreEqual("4CBACC87.8080600@spam.mail.dk", message.Headers.MessageID);
+			Assert.AreEqual("4CBACC87.8080600@spam.mail.dk", message.Headers.MessageId);
 
 			Assert.AreEqual("1.0", message.Headers.MimeVersion);
 

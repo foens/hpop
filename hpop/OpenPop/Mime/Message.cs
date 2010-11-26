@@ -88,7 +88,7 @@ namespace OpenPop.Mime
 		/// You should be aware of the following about this method:
 		///  - All sender and receiver mail addresses are set.
 		///    If you send this email using a <see cref="System.Net.Mail.SmtpClient"/> then all
-		///    receivers in To, From, CC and BCC will receive the email once again.
+		///    receivers in To, From, Cc and Bcc will receive the email once again.
 		/// 
 		///  - If you view the source code of this Message and looks at the source code of the forwarded
 		///    <see cref="MailMessage"/> returned by this method, you will notice that the source codes are not the same.
@@ -128,10 +128,10 @@ namespace OpenPop.Mime
 				// we should skip that one
 				if (textVersion == firstPlainTextVersion)
 					continue;
-				
+
 				MemoryStream stream = new MemoryStream(textVersion.Body);
 				AlternateView alternative = new AlternateView(stream);
-				alternative.ContentId = textVersion.ContentID;
+				alternative.ContentId = textVersion.ContentId;
 				alternative.ContentType = textVersion.ContentType;
 				message.AlternateViews.Add(alternative);
 			}
@@ -142,7 +142,7 @@ namespace OpenPop.Mime
 			{
 				MemoryStream stream = new MemoryStream(attachmentMessagePart.Body);
 				Attachment attachment = new Attachment(stream, attachmentMessagePart.ContentType);
-				attachment.ContentId = attachmentMessagePart.ContentID;
+				attachment.ContentId = attachmentMessagePart.ContentId;
 				message.Attachments.Add(attachment);
 			}
 
@@ -161,13 +161,13 @@ namespace OpenPop.Mime
 					message.To.Add(to.MailAddress);
 			}
 
-			foreach (RFCMailAddress cc in Headers.CC)
+			foreach (RFCMailAddress cc in Headers.Cc)
 			{
 				if (cc.HasValidMailAddress)
 					message.CC.Add(cc.MailAddress);
 			}
 
-			foreach (RFCMailAddress bcc in Headers.BCC)
+			foreach (RFCMailAddress bcc in Headers.Bcc)
 			{
 				if (bcc.HasValidMailAddress)
 					message.Bcc.Add(bcc.MailAddress);

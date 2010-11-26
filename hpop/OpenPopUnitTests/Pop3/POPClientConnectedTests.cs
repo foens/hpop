@@ -64,7 +64,7 @@ namespace OpenPopUnitTests.Pop3
 		[Test]
 		public void TestDisconnectDoesNotThrow()
 		{
-			Connect();
+			Connect("+OK"); // OK to quit command
 			Assert.DoesNotThrow(delegate { Client.Disconnect(); });
 		}
 
@@ -107,14 +107,14 @@ namespace OpenPopUnitTests.Pop3
 		public void TestGetMessageUID()
 		{
 			Connect();
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUID(RandomMessageNumber); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUid(RandomMessageNumber); });
 		}
 
 		[Test]
 		public void TestGetMessageUIDs()
 		{
 			Connect();
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUIDs(); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUids(); });
 		}
 
 		[Test]

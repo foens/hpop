@@ -150,8 +150,8 @@ namespace OpenPop.Mime.Header
 			input = EncodedWord.Decode(input.Trim());
 
 			// Find the location of the email address
-			int indexStartEmail = input.LastIndexOf("<");
-			int indexEndEmail = input.LastIndexOf(">");
+			int indexStartEmail = input.LastIndexOf('<');
+			int indexEndEmail = input.LastIndexOf('>');
 
 			try
 			{

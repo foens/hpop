@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
@@ -25,7 +26,7 @@ namespace OpenPop.Mime.Header
 			if(headerValue == null)
 				throw new ArgumentNullException("headerValue");
 
-			switch (headerValue.Trim().ToUpper())
+			switch (headerValue.Trim().ToUpperInvariant())
 			{
 				case "7BIT":
 					return ContentTransferEncoding.SevenBit;
@@ -58,7 +59,7 @@ namespace OpenPop.Mime.Header
 			if(headerValue == null)
 				throw new ArgumentNullException("headerValue");
 
-			switch (headerValue.ToUpper())
+			switch (headerValue.ToUpperInvariant())
 			{
 				case "5":
 				case "HIGH":
@@ -197,7 +198,7 @@ namespace OpenPop.Mime.Header
 						break;
 
 					case "size":
-						contentDisposition.Size = int.Parse(value);
+						contentDisposition.Size = int.Parse(value, CultureInfo.InvariantCulture);
 						break;
 
 					default:
@@ -219,16 +220,16 @@ namespace OpenPop.Mime.Header
 			if (characterSet == null)
 				throw new ArgumentNullException("characterSet");
 
-			string charSetLower = characterSet.ToLower();
-			if (charSetLower.Contains("windows") || charSetLower.Contains("cp"))
+			string charSetUpper = characterSet.ToUpperInvariant();
+			if (charSetUpper.Contains("WINDOWS") || charSetUpper.Contains("CP"))
 			{
 				// It seems the character set contains an codepage value, which we should use to parse the encoding
-				charSetLower = charSetLower.Replace("cp", ""); // Remove cp
-				charSetLower = charSetLower.Replace("windows", ""); // Remove windows
-				charSetLower = charSetLower.Replace("-", ""); // Remove - which could be used as cp-1554
+				charSetUpper = charSetUpper.Replace("CP", ""); // Remove cp
+				charSetUpper = charSetUpper.Replace("WINDOWS", ""); // Remove windows
+				charSetUpper = charSetUpper.Replace("-", ""); // Remove - which could be used as cp-1554
 
 				// Now we hope the only thing left in the characterSet is numbers.
-				int codepageNumber = int.Parse(charSetLower);
+				int codepageNumber = int.Parse(charSetUpper, CultureInfo.InvariantCulture);
 
 				return Encoding.GetEncoding(codepageNumber);
 			}

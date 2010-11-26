@@ -5,7 +5,7 @@ namespace OpenPop.Pop3.Exceptions
 	/// <summary>
 	/// This is the base exception for all <see cref="Pop3Client"/> exceptions
 	/// </summary>
-	public class PopClientException : Exception
+	public abstract class PopClientException : Exception
 	{
 		///<summary>
 		/// Creates a PopClientException with the given message and InnerException

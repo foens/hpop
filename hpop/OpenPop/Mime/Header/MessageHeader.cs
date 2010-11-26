@@ -33,10 +33,10 @@ namespace OpenPop.Mime.Header
 
 		/// <summary>
 		/// ID of the content part (like an attached image). Used with MultiPart messages.
-		/// <see langword="null"/> if no Content-Type header field was present in the message.
+		/// <see langword="null"/> if no Content-ID header field was present in the message.
 		/// </summary>
-		/// <see cref="MessageID">For an ID of the message</see>
-		public string ContentID { get; private set; }
+		/// <see cref="MessageId">For an ID of the message</see>
+		public string ContentId { get; private set; }
 
 		/// <summary>
 		/// Message keywords
@@ -83,14 +83,14 @@ namespace OpenPop.Mime.Header
 		/// Carbon Copy. This specifies who got a copy of the message.
 		/// The list will be empty if no Cc header was present in the message
 		/// </summary>
-		public List<RFCMailAddress> CC { get; private set; }
+		public List<RFCMailAddress> Cc { get; private set; }
 
 		/// <summary>
 		/// Blind Carbon Copy. This specifies who got a copy of the message, but others
 		/// cannot see who these persons are.
 		/// The list will be empty if no Received Bcc was present in the message
 		/// </summary>
-		public List<RFCMailAddress> BCC { get; private set; }
+		public List<RFCMailAddress> Bcc { get; private set; }
 
 		/// <summary>
 		/// Specifies who this mail was for
@@ -159,7 +159,7 @@ namespace OpenPop.Mime.Header
 		/// The ID is unique
 		/// <see langword="null"/> if no Message-ID header field was present in the message
 		/// </summary>
-		public string MessageID { get; private set; }
+		public string MessageId { get; private set; }
 
 		/// <summary>
 		/// The Mime Version.
@@ -196,8 +196,8 @@ namespace OpenPop.Mime.Header
 
 			// Create empty lists as defaults. We do not like null values
 			To = new List<RFCMailAddress>();
-			CC = new List<RFCMailAddress>();
-			BCC = new List<RFCMailAddress>();
+			Cc = new List<RFCMailAddress>();
+			Bcc = new List<RFCMailAddress>();
 			Received = new List<string>();
 			Keywords = new List<string>();
 			DispositionNotificationTo = new List<RFCMailAddress>();
@@ -256,7 +256,7 @@ namespace OpenPop.Mime.Header
 			if (headerValue == null)
 				throw new ArgumentNullException("headerValue");
 
-			switch (headerName.ToUpper())
+			switch (headerName.ToUpperInvariant())
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "TO":
@@ -265,12 +265,12 @@ namespace OpenPop.Mime.Header
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "CC":
-					CC = RFCMailAddress.ParseMailAddresses(headerValue);
+					Cc = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "BCC":
-					BCC = RFCMailAddress.ParseMailAddresses(headerValue);
+					Bcc = RFCMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.2
@@ -344,7 +344,7 @@ namespace OpenPop.Mime.Header
 				// Example Message-ID
 				// <33cdd74d6b89ab2250ecd75b40a41405@nfs.eksperten.dk>
 				case "MESSAGE-ID":
-					MessageID = headerValue.Trim().TrimEnd('>').TrimStart('<');
+					MessageId = headerValue.Trim().TrimEnd('>').TrimStart('<');
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.1
@@ -379,7 +379,7 @@ namespace OpenPop.Mime.Header
 				// See http://www.ietf.org/rfc/rfc2045.txt section 7
 				// Example: <foo4*foo1@bar.net>
 				case "CONTENT-ID":
-					ContentID = headerValue.Trim().Trim('<').Trim('>');
+					ContentId = headerValue.Trim().Trim('<').Trim('>');
 					break;
 
 				default:

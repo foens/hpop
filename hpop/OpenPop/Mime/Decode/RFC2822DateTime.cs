@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Portions Copyright (c)  vendredi13@007.freesurf.fr
+	/// Portions Copyright (c) vendredi13@007.freesurf.fr
 	/// All rights reserved.
 	/// 
 	/// Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,6 @@ namespace OpenPop.Mime.Decode
 			if(aDate == null)
 				throw new ArgumentNullException("aDate");
 
-			string dayName;
-
 			// Strip out comments, handles nested comments as well
 			string temp = Regex.Replace(aDate, @"(\((?>\((?<C>)|\)(?<-C>)|.?)*(?(C)(?!))\))", "");
 
@@ -40,6 +38,7 @@ namespace OpenPop.Mime.Decode
 			temp = Regex.Replace(temp, @"\s+", " ");
 			temp = Regex.Replace(temp, @"^\s*(.*?)\s*$", "$1");
 
+			string dayName;
 			// extract week name part
 			string[] resp = temp.Split(new[] {','}, 2);
 			if (resp.Length == 2)
@@ -53,9 +52,9 @@ namespace OpenPop.Mime.Decode
 			try
 			{
 				// extract date and time
-				int position = temp.LastIndexOf(" ");
+				int position = temp.LastIndexOf(' ');
 				if (position < 1)
-					throw new FormatException("probably not a date");
+					throw new FormatException("Probably not a date");
 
 				string dpart = temp.Substring(0, position);
 				string timeZone = temp.Substring(position + 1);
@@ -65,7 +64,7 @@ namespace OpenPop.Mime.Decode
 
 				// check weekDay name
 				// this must be done before convert to GMT 
-				if (dayName != string.Empty)
+				if (!string.IsNullOrEmpty(dayName))
 				{
 					if ((dateTime.DayOfWeek == DayOfWeek.Friday && dayName != "Fri") ||
 					    (dateTime.DayOfWeek == DayOfWeek.Monday && dayName != "Mon") ||
@@ -75,7 +74,7 @@ namespace OpenPop.Mime.Decode
 					    (dateTime.DayOfWeek == DayOfWeek.Tuesday && dayName != "Tue") ||
 					    (dateTime.DayOfWeek == DayOfWeek.Wednesday && dayName != "Wed")
 						)
-						throw new FormatException("invalid week of day");
+						throw new FormatException("Invalid week of day");
 				}
 
 				// adjust to localtime
@@ -88,11 +87,11 @@ namespace OpenPop.Mime.Decode
 					else if (timeZone.Substring(0, 1) == "-")
 						timezoneFactor = 1;
 					else
-						throw new FormatException("incorrect time zone");
+						throw new FormatException("Incorrect time zone");
 					string hour = timeZone.Substring(1, 2);
 					string minute = timeZone.Substring(3, 2);
-					dateTime = dateTime.AddHours(timezoneFactor*Convert.ToInt32(hour));
-					dateTime = dateTime.AddMinutes(timezoneFactor*Convert.ToInt32(minute));
+					dateTime = dateTime.AddHours(timezoneFactor*Convert.ToInt32(hour, CultureInfo.InvariantCulture));
+					dateTime = dateTime.AddMinutes(timezoneFactor*Convert.ToInt32(minute, CultureInfo.InvariantCulture));
 				} else
 				{
 					// it's a old style military time zone ?
@@ -134,13 +133,13 @@ namespace OpenPop.Mime.Decode
 						case "PST": dateTime = dateTime.AddHours(8); break;
 						case "PDT": dateTime = dateTime.AddHours(7); break;
 						default:
-							throw new FormatException("invalid time zone");
+							throw new FormatException("Invalid time zone");
 					}
 				}
 				return dateTime;
 			} catch (Exception e)
 			{
-				throw new FormatException(string.Format("Invalid date:{0}:{1}", e.Message, aDate), e);
+				throw new FormatException("Invalid Date: " + e.Message + ". Input: \"" + aDate + "\"", e);
 			}
 		}
 	}

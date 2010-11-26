@@ -11,7 +11,6 @@ namespace OpenPop.Shared
 	{
 		/// <summary>
 		/// Read a line from the stream.
-		/// Since only one byte is read at a time, it would be smart to use a <see cref="BufferedStream"/> to improve performance
 		/// A line is interpreted as all the bytes read until a CRLF or LF is encountered.
 		/// CRLF pair or LF is not included in the string.
 		/// </summary>
@@ -23,32 +22,32 @@ namespace OpenPop.Shared
 			if(stream == null)
 				throw new ArgumentNullException("stream");
 
-			MemoryStream memoryStream = new MemoryStream();
-			BinaryWriter writer = new BinaryWriter(memoryStream);
-
-			while (true)
+			using (MemoryStream memoryStream = new MemoryStream())
 			{
-				int justRead = stream.ReadByte();
-				if (justRead == -1 && memoryStream.Length > 0)
-					break;
+				while (true)
+				{
+					int justRead = stream.ReadByte();
+					if (justRead == -1 && memoryStream.Length > 0)
+						break;
 
-				// Check if we started at the end of the stream we read from
-				// and we have not read anything from it yet
-				if (justRead == -1 && memoryStream.Length == 0) 
-					return null;
+					// Check if we started at the end of the stream we read from
+					// and we have not read anything from it yet
+					if (justRead == -1 && memoryStream.Length == 0)
+						return null;
 
-				char readChar = (char)justRead;
+					char readChar = (char)justRead;
 
-				// Do not write \r or \n
-				if (readChar != '\r' && readChar != '\n')
-					writer.Write((byte)justRead);
+					// Do not write \r or \n
+					if (readChar != '\r' && readChar != '\n')
+						memoryStream.WriteByte((byte)justRead);
 
-				// Last point in CRLF pair
-				if (readChar == '\n')
-					break;
+					// Last point in CRLF pair
+					if (readChar == '\n')
+						break;
+				}
+
+				return memoryStream.ToArray();
 			}
-
-			return memoryStream.ToArray();
 		}
 
 		/// <summary>

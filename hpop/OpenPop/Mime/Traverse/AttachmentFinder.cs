@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OpenPop.Mime.Traverse
 {
@@ -9,6 +10,9 @@ namespace OpenPop.Mime.Traverse
 	{
 		protected override List<MessagePart> CaseLeaf(MessagePart messagePart)
 		{
+			if (messagePart == null)
+				throw new ArgumentNullException("messagePart");
+
 			// Maximum space needed is one
 			List<MessagePart> leafAnswer = new List<MessagePart>(1);
 

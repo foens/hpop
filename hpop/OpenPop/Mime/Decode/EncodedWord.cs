@@ -84,7 +84,7 @@ namespace OpenPop.Mime.Decode
 				string decodedText;
 
 				// Encoding may also be written in lowercase
-				switch (encoding.ToUpper())
+				switch (encoding.ToUpperInvariant())
 				{
 						// RFC:
 						// The "B" encoding is identical to the "BASE64" 

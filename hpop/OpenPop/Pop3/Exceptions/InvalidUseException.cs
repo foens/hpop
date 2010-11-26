@@ -1,4 +1,6 @@
-﻿namespace OpenPop.Pop3.Exceptions
+﻿using System;
+
+namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
 	/// Thrown when the <see cref="Pop3Client"/> is being used in an invalid way

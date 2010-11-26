@@ -22,22 +22,23 @@ namespace OpenPop.Mime.Header
 		private static int FindHeaderEndPosition(byte[] messageContent)
 		{
 			// Convert the byte array into a stream
-			Stream stream = new MemoryStream(messageContent);
-
-			while (true)
+			using (Stream stream = new MemoryStream(messageContent))
 			{
-				// Read a line from the stream. We know headers are in US-ASCII
-				// therefore it is not problem to read them as such
-				string line = StreamUtility.ReadLineAsAscii(stream);
+				while (true)
+				{
+					// Read a line from the stream. We know headers are in US-ASCII
+					// therefore it is not problem to read them as such
+					string line = StreamUtility.ReadLineAsAscii(stream);
 
-				// The end of headers is signaled when a blank line is found
-				if (line == "")
-					return (int)stream.Position;
+					// If we have read the full messageContent but no empty line has been found
+					// This will not happen if a valid message was passed to this method
+					if (line == null)
+						throw new ArgumentException("Message does not contain a empty line which tells where the headers of the message end");
 
-				// If we have read the full messageContent but no empty line has been found
-				// This will not happen if a valid message was passed to this method
-				if (line == null)
-					throw new ArgumentException("Message does not contain a empty line which tells where the headers of the message end");
+					// The end of headers is signaled when a blank line is found
+					if (line.Length == 0)
+						return (int)stream.Position;
+				}
 			}
 		}
 
@@ -86,45 +87,46 @@ namespace OpenPop.Mime.Header
 
 			NameValueCollection headers = new NameValueCollection();
 
-			StringReader messageReader = new StringReader(messageContent);
-
-			// Read until all headers have ended.
-			// The headers ends when an empty line is encountered
-			string line;
-			while (!string.Empty.Equals(line = messageReader.ReadLine()))
+			using (StringReader messageReader = new StringReader(messageContent))
 			{
-				// Split into name and value
-				string[] splittedValue = Utility.GetHeadersValue(line);
-
-				// First index is header name
-				string headerName = splittedValue[0];
-
-				// Second index is the header value.
-				// Use a StringBuilder since the header value may be continued on the next line
-				StringBuilder headerValue = new StringBuilder(splittedValue[1]);
-
-				// Keep reading until we would hit next header
-				// This if for handling multi line headers
-				while (IsMoreLinesInHeaderValue(messageReader))
+				// Read until all headers have ended.
+				// The headers ends when an empty line is encountered
+				string line;
+				while (!string.Empty.Equals(line = messageReader.ReadLine()))
 				{
-					// Unfolding is accomplished by simply removing any CRLF
-					// that is immediately followed by WSP
-					// This was done using ReadLine
-					string moreHeaderValue = messageReader.ReadLine();
+					// Split into name and value
+					string[] splittedValue = Utility.GetHeadersValue(line);
 
-					// If this exception is ever raised, there is an serious algorithm failure
-					// IsMoreLinesInHeaderValue does not return true if the next line does not exist
-					// This check is only included to stop the nagging "possibly null" code analysis hint
-					if (moreHeaderValue == null)
-						throw new NullReferenceException("This will never happen");
+					// First index is header name
+					string headerName = splittedValue[0];
 
-					// If a header is continued the first whitespace character is not needed.
-					// It is only there to tell that the header was continued
-					headerValue.Append(moreHeaderValue, 1, moreHeaderValue.Length - 1);
+					// Second index is the header value.
+					// Use a StringBuilder since the header value may be continued on the next line
+					StringBuilder headerValue = new StringBuilder(splittedValue[1]);
+
+					// Keep reading until we would hit next header
+					// This if for handling multi line headers
+					while (IsMoreLinesInHeaderValue(messageReader))
+					{
+						// Unfolding is accomplished by simply removing any CRLF
+						// that is immediately followed by WSP
+						// This was done using ReadLine
+						string moreHeaderValue = messageReader.ReadLine();
+
+						// If this exception is ever raised, there is an serious algorithm failure
+						// IsMoreLinesInHeaderValue does not return true if the next line does not exist
+						// This check is only included to stop the nagging "possibly null" code analysis hint
+						if (moreHeaderValue == null)
+							throw new ArgumentException("This will never happen");
+
+						// If a header is continued the first whitespace character is not needed.
+						// It is only there to tell that the header was continued
+						headerValue.Append(moreHeaderValue, 1, moreHeaderValue.Length - 1);
+					}
+
+					// Now we have the name and full value. Add it
+					headers.Add(headerName, headerValue.ToString());
 				}
-
-				// Now we have the name and full value. Add it
-				headers.Add(headerName, headerValue.ToString());
 			}
 
 			return headers;

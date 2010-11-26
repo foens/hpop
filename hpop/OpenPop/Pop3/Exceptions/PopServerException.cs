@@ -1,3 +1,5 @@
+using System;
+
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>

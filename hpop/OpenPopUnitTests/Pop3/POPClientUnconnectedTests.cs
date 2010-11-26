@@ -83,13 +83,13 @@ namespace OpenPopUnitTests.Pop3
 		[Test]
 		public void TestGetMessageUID()
 		{
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUID(RandomMessageNumber); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUid(RandomMessageNumber); });
 		}
 
 		[Test]
 		public void TestGetMessageUIDs()
 		{
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUIDs(); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUids(); });
 		}
 
 		[Test]

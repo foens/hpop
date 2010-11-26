@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OpenPop.Mime.Traverse
 {
@@ -6,16 +7,19 @@ namespace OpenPop.Mime.Traverse
 	/// This is an abstract class which handles traversing of a <see cref="Message"/> tree structure.
 	/// It runs through the message structure using a depth-first traversal.
 	/// </summary>
-	/// <typeparam name="A">The answer you want from traversing the message tree structure</typeparam>
-	public abstract class AnswerMessageTraverser<A> : IAnswerMessageTraverser<A>
+	/// <typeparam name="TAnswer">The answer you want from traversing the message tree structure</typeparam>
+	public abstract class AnswerMessageTraverser<TAnswer> : IAnswerMessageTraverser<TAnswer>
 	{
 		/// <summary>
 		/// Call this when you want an answer for a full message.
 		/// </summary>
 		/// <param name="message">The message you want to traverse</param>
 		/// <returns>An answer</returns>
-		public A VisitMessage(Message message)
+		public TAnswer VisitMessage(Message message)
 		{
+			if(message == null)
+				throw new ArgumentNullException("message");
+
 			return VisitMessagePart(message.MessagePart);
 		}
 
@@ -25,11 +29,14 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="messagePart">The message part you want an answer from. Must be a MultiPart message.</param>
 		/// <returns>An answer</returns>
-		public A VisitMessagePart(MessagePart messagePart)
+		public TAnswer VisitMessagePart(MessagePart messagePart)
 		{
+			if(messagePart == null)
+				throw new ArgumentNullException("messagePart");
+
 			if(messagePart.IsMultiPart)
 			{
-				List<A> leafAnswers = new List<A>(messagePart.MessageParts.Count);
+				List<TAnswer> leafAnswers = new List<TAnswer>(messagePart.MessageParts.Count);
 				foreach (MessagePart part in messagePart.MessageParts)
 				{
 					leafAnswers.Add(VisitMessagePart(part));
@@ -46,7 +53,7 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="messagePart">The message part which is a leaf and thereby not a MultiPart</param>
 		/// <returns>An answer</returns>
-		protected abstract A CaseLeaf(MessagePart messagePart);
+		protected abstract TAnswer CaseLeaf(MessagePart messagePart);
 
 		/// <summary>
 		/// For a concrete implementation, when a MultiPart <see cref="MessagePart"/> has fetched it's answers from it's children, these
@@ -54,6 +61,6 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="leafAnswers">The answer that the leafs gave</param>
 		/// <returns>A merged answer</returns>
-		protected abstract A MergeLeafAnswers(List<A> leafAnswers);
+		protected abstract TAnswer MergeLeafAnswers(List<TAnswer> leafAnswers);
 	}
 }

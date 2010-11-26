@@ -101,7 +101,7 @@ namespace OpenPop.Mime
 		/// ID of the content part (like an attached image). Used with MultiPart messages.
 		/// Null if not set
 		/// </summary>
-		public string ContentID { get; private set; }
+		public string ContentId { get; private set; }
 
 		/// <summary>
 		/// The ContentDisposition header field
@@ -131,7 +131,7 @@ namespace OpenPop.Mime
 		{
 			get
 			{
-				return ContentType.MediaType.ToLower().StartsWith("multipart/");
+				return ContentType.MediaType.StartsWith("multipart/", StringComparison.OrdinalIgnoreCase);
 			}
 		}
 
@@ -143,8 +143,8 @@ namespace OpenPop.Mime
 		{
 			get
 			{
-				string mediaTypeLower = ContentType.MediaType.ToLower();
-				return mediaTypeLower.StartsWith("text/") || mediaTypeLower.Equals("message/rfc822");
+				string mediaType = ContentType.MediaType;
+				return mediaType.StartsWith("text/", StringComparison.OrdinalIgnoreCase) || mediaType.Equals("message/rfc822", StringComparison.OrdinalIgnoreCase);
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace OpenPop.Mime
 			ContentType = headers.ContentType;
 			ContentDescription = headers.ContentDescription;
 			ContentTransferEncoding = headers.ContentTransferEncoding;
-			ContentID = headers.ContentID;
+			ContentId = headers.ContentId;
 			ContentDisposition = headers.ContentDisposition;
 
 			BodyEncoding = ParseBodyEncoding(ContentType.CharSet);
@@ -310,35 +310,36 @@ namespace OpenPop.Mime
 			List<byte[]> messageBodies = new List<byte[]>();
 
 			// Create a stream from which we can find MultiPart boundaries
-			MemoryStream stream = new MemoryStream(rawBody);
-
-			// Find the start of the first message in this multipart
-			// Since the method returns the first character on a the line containing the MultiPart boundary, we
-			// need to add the MultiPart boundary with prepended "--" and appended CRLF pair to the position returned.
-			int startLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) + ("--" + multipPartBoundary + "\r\n").Length;
-			while(true)
+			using (MemoryStream stream = new MemoryStream(rawBody))
 			{
-				// Find the end location of the current multipart
+				// Find the start of the first message in this multipart
 				// Since the method returns the first character on a the line containing the MultiPart boundary, we
-				// need to go a CRLF pair back, so that we do not get that into the body of the message part
-				int stopLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) - "\r\n".Length;
+				// need to add the MultiPart boundary with prepended "--" and appended CRLF pair to the position returned.
+				int startLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) + ("--" + multipPartBoundary + "\r\n").Length;
+				while (true)
+				{
+					// Find the end location of the current multipart
+					// Since the method returns the first character on a the line containing the MultiPart boundary, we
+					// need to go a CRLF pair back, so that we do not get that into the body of the message part
+					int stopLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) - "\r\n".Length;
 
-				// If no more MultiPart boundaries was found, there are no more message parts and we can stop
-				if (stopLocation <= -1)
-					break;
+					// If no more MultiPart boundaries was found, there are no more message parts and we can stop
+					if (stopLocation <= -1)
+						break;
 
-				// If we came this this place, it means we have found the start and end of a message part
-				// Now we create a byte array with the correct length and put the message part's bytes into
-				// it and add it to our list we want to return
-				int length = stopLocation - startLocation;
-				byte[] messageBody = new byte[length];
-				Array.Copy(rawBody, startLocation, messageBody, 0, length);
-				messageBodies.Add(messageBody);
-				
-				// We want to advance to the next message parts start.
-				// We can find this by jumping forward the MultiPart boundary from the last
-				// message parts end position
-				startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
+					// If we came this this place, it means we have found the start and end of a message part
+					// Now we create a byte array with the correct length and put the message part's bytes into
+					// it and add it to our list we want to return
+					int length = stopLocation - startLocation;
+					byte[] messageBody = new byte[length];
+					Array.Copy(rawBody, startLocation, messageBody, 0, length);
+					messageBodies.Add(messageBody);
+
+					// We want to advance to the next message parts start.
+					// We can find this by jumping forward the MultiPart boundary from the last
+					// message parts end position
+					startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
+				}
 			}
 
 			// We are done
@@ -370,7 +371,7 @@ namespace OpenPop.Mime
 
 				// The MultiPart boundary is the MultiPartBoundary with "--" in front of it
 				// which is to be at the very start of a line
-				if (line.StartsWith("--" + multipPartBoundary))
+				if (line.StartsWith("--" + multipPartBoundary, StringComparison.Ordinal))
 					return currentPos;
 			}
 		}
@@ -405,7 +406,7 @@ namespace OpenPop.Mime
 					return messageBody;
 
 				default:
-					throw new ArgumentOutOfRangeException();
+					throw new ArgumentOutOfRangeException("contentTransferEncoding");
 			}
 		}
 		#endregion

@@ -10,7 +10,7 @@ namespace OpenPop.Pop3
 		/// <summary>
 		/// Returns <see langword="true"/> if this instance has been disposed of, <see langword="false"/> otherwise
 		/// </summary>
-		public bool IsDisposed { get; private set; }
+		protected bool IsDisposed { get; private set; }
 
 		/// <summary>
 		/// Releases unmanaged resources and performs other cleanup operations before the

@@ -17,7 +17,7 @@ namespace OpenPop.Mime.Decode
 				throw new ArgumentNullException("rawHeader");
 
 			string[] array = new[] {string.Empty, string.Empty};
-			int indexOfColon = rawHeader.IndexOf(":");
+			int indexOfColon = rawHeader.IndexOf(':');
 
 			// Check if it is allowed to make substring calls
 			if (indexOfColon >= 0 && rawHeader.Length >= indexOfColon + 1)
@@ -42,9 +42,9 @@ namespace OpenPop.Mime.Decode
 
 			string returner = text;
 
-			if (returner.StartsWith("\""))
+			if (returner.StartsWith("\"", StringComparison.OrdinalIgnoreCase))
 				returner = returner.Substring(1);
-			if (returner.EndsWith("\""))
+			if (returner.EndsWith("\"", StringComparison.OrdinalIgnoreCase))
 				returner = returner.Substring(0, returner.Length - 1);
 
 			return returner;

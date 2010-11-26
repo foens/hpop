@@ -76,7 +76,7 @@ namespace OpenPop.Mime.Decode
 					collection.Add(new KeyValuePair<string, string>(keyValue[0], keyValue[1]));
 				} else
 				{
-					throw new Exception("The split was done wrong on this part: " + part);
+					throw new ArgumentException("When splitting the part \"" + part + "\" by = there was " + keyValue.Length + " parts. Only 1 and 2 are supported");
 				}
 			}
 
@@ -105,7 +105,7 @@ namespace OpenPop.Mime.Decode
 				string value = currentPair.Value;
 
 				// Is it a continuation parameter? (encoded or not)
-				if(key.EndsWith("*0") || key.EndsWith("*0*"))
+				if(key.EndsWith("*0", StringComparison.OrdinalIgnoreCase) || key.EndsWith("*0*", StringComparison.OrdinalIgnoreCase))
 				{
 					// This encoding will not be used if we get into the if which tells us
 					// that the whole continuation is not encoded
@@ -114,7 +114,7 @@ namespace OpenPop.Mime.Decode
 					value = Utility.RemoveQuotesIfAny(value);
 
 					// Now lets find out if it is encoded too.
-					if (key.EndsWith("*0*"))
+					if (key.EndsWith("*0*", StringComparison.OrdinalIgnoreCase))
 					{
 						// It is encoded.
 						
@@ -181,7 +181,7 @@ namespace OpenPop.Mime.Decode
 					value = builder.ToString();
 					resultPairs.Add(new KeyValuePair<string, string>(key, value));
 				}
-				else if (key.EndsWith("*"))
+				else if (key.EndsWith("*", StringComparison.OrdinalIgnoreCase))
 				{
 					// This parameter is only encoded - it is not part of a continuation
 					// We need to change the key from "<key>*" to "<key>" and decode the value
@@ -218,8 +218,8 @@ namespace OpenPop.Mime.Decode
 		/// <returns>The decoded value that corresponds to <paramref name="toDecode"/></returns>
 		private static string DecodeSingleValue(string toDecode, out string encodingUsed)
 		{
-			encodingUsed = toDecode.Substring(0, toDecode.IndexOf("\'"));
-			toDecode = toDecode.Substring(toDecode.LastIndexOf("\'") + 1);
+			encodingUsed = toDecode.Substring(0, toDecode.IndexOf('\''));
+			toDecode = toDecode.Substring(toDecode.LastIndexOf('\'') + 1);
 			return DecodeSingleValue(toDecode, encodingUsed);
 		}
 

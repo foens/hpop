@@ -66,7 +66,7 @@ namespace OpenPop.TestApplication
 
 			// This is how you would override the default logger type
 			// Here we want to log to a file
-			DefaultLogger.Log = new FileLogger();
+			DefaultLogger.SetLog(new FileLogger());
 
 			// Enable file logging and include verbose information
 			FileLogger.Enabled = true;
@@ -182,6 +182,7 @@ namespace OpenPop.TestApplication
 			// uidlButton
 			// 
 			this.uidlButton.Location = new System.Drawing.Point(460, 42);
+			this.uidlButton.Enabled = false;
 			this.uidlButton.Name = "uidlButton";
 			this.uidlButton.Size = new System.Drawing.Size(82, 21);
 			this.uidlButton.TabIndex = 6;
@@ -608,14 +609,14 @@ namespace OpenPop.TestApplication
 			rows.Add(new object[] { "ContentType", m.Headers.ContentType });
 			rows.Add(new object[] { "AttachmentCount", attachments.Count });
 
-			foreach (RFCMailAddress cc in m.Headers.CC)
-				rows.Add(new object[] {"CC", cc});
+			foreach (RFCMailAddress cc in m.Headers.Cc)
+				rows.Add(new object[] {"Cc", cc});
 			foreach (RFCMailAddress to in m.Headers.To)
 				rows.Add(new object[] {"To", to});
 
 			rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});
 			rows.Add(new object[] {"From", m.Headers.From});
-			rows.Add(new object[] {"MessageID", m.Headers.MessageID});
+			rows.Add(new object[] {"MessageId", m.Headers.MessageId});
 			rows.Add(new object[] {"MimeVersion", m.Headers.MimeVersion});
 			rows.Add(new object[] {"ReturnPath", m.Headers.ReturnPath});
 			rows.Add(new object[] {"Subject", m.Headers.Subject});
@@ -702,7 +703,7 @@ namespace OpenPop.TestApplication
 
 		private void UidlButtonClick(object sender, EventArgs e)
 		{
-			List<string> uids = pop3Client.GetMessageUIDs();
+			List<string> uids = pop3Client.GetMessageUids();
 
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append("UIDL:");
