@@ -41,7 +41,7 @@ namespace OpenPop.Mime.Decode
 	/// More information and the specification is available in the RFC.
 	/// <see href="http://tools.ietf.org/html/rfc2231">RFC 2231</see>
 	/// </summary>
-	internal static class RFC2231Decoder
+	internal static class Rfc2231Decoder
 	{
 		/// <summary>
 		/// Decodes a string of the form:

@@ -8,7 +8,7 @@ using OpenPop.Mime;
 using OpenPop.Mime.Header;
 using OpenPop.Pop3;
 using OpenPop.Pop3.Exceptions;
-using OpenPop.Shared.Logging;
+using OpenPop.Common.Logging;
 using Message = OpenPop.Mime.Message;
 
 namespace OpenPop.TestApplication
@@ -609,9 +609,9 @@ namespace OpenPop.TestApplication
 			rows.Add(new object[] { "ContentType", m.Headers.ContentType });
 			rows.Add(new object[] { "AttachmentCount", attachments.Count });
 
-			foreach (RFCMailAddress cc in m.Headers.Cc)
+			foreach (RfcMailAddress cc in m.Headers.Cc)
 				rows.Add(new object[] {"Cc", cc});
-			foreach (RFCMailAddress to in m.Headers.To)
+			foreach (RfcMailAddress to in m.Headers.To)
 				rows.Add(new object[] {"To", to});
 
 			rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});

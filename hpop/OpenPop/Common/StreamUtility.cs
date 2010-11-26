@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace OpenPop.Shared
+namespace OpenPop.Common
 {
 	/// <summary>
 	/// Utility to help reading bytes and strings of a <see cref="Stream"/>

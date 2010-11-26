@@ -10,8 +10,8 @@ using System.Text.RegularExpressions;
 using OpenPop.Mime;
 using OpenPop.Mime.Header;
 using OpenPop.Pop3.Exceptions;
-using OpenPop.Shared;
-using OpenPop.Shared.Logging;
+using OpenPop.Common;
+using OpenPop.Common.Logging;
 
 namespace OpenPop.Pop3
 {

@@ -100,10 +100,10 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mime\Decode\RFC2231Decoder.cs" />
-    <Compile Include="Mime\Decode\RFC2822DateTime.cs" />
+    <Compile Include="Mime\Decode\Rfc2231Decoder.cs" />
+    <Compile Include="Mime\Decode\Rfc2822DateTime.cs" />
     <Compile Include="Mime\Decode\Utility.cs" />
-    <Compile Include="Mime\Header\RFCMailAddress.cs" />
+    <Compile Include="Mime\Header\RfcMailAddress.cs" />
     <Compile Include="Mime\Traverse\AttachmentFinder.cs" />
     <Compile Include="Mime\Traverse\FindAllMessagePartsWithMediaType.cs" />
     <Compile Include="Mime\Traverse\IQuestionAnswerMessageTraverser.cs" />
@@ -135,11 +135,11 @@
     <Compile Include="Pop3\Exceptions\PopServerNotAvailableException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerLockedException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerNotFoundException.cs" />
-    <Compile Include="Shared\Logging\DiagnosticsLogger.cs" />
-    <Compile Include="Shared\Logging\FileLogger.cs" />
-    <Compile Include="Shared\Logging\DefaultLogger.cs" />
-    <Compile Include="Shared\Logging\ILog.cs" />
-    <Compile Include="Shared\StreamUtility.cs" />
+    <Compile Include="Common\Logging\DiagnosticsLogger.cs" />
+    <Compile Include="Common\Logging\FileLogger.cs" />
+    <Compile Include="Common\Logging\DefaultLogger.cs" />
+    <Compile Include="Common\Logging\ILog.cs" />
+    <Compile Include="Common\StreamUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

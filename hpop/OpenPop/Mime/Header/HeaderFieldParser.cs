@@ -5,7 +5,7 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using OpenPop.Mime.Decode;
-using OpenPop.Shared.Logging;
+using OpenPop.Common.Logging;
 
 namespace OpenPop.Mime.Header
 {
@@ -95,7 +95,7 @@ namespace OpenPop.Mime.Header
 			ContentType contentType = new ContentType();
 
 			// Now decode the parameters
-			List<KeyValuePair<string, string>> parameters = RFC2231Decoder.Decode(headerValue);
+			List<KeyValuePair<string, string>> parameters = Rfc2231Decoder.Decode(headerValue);
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
@@ -157,7 +157,7 @@ namespace OpenPop.Mime.Header
 			ContentDisposition contentDisposition = new ContentDisposition();
 
 			// Now decode the parameters
-			List<KeyValuePair<string, string>> parameters = RFC2231Decoder.Decode(headerValue);
+			List<KeyValuePair<string, string>> parameters = Rfc2231Decoder.Decode(headerValue);
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
@@ -183,17 +183,17 @@ namespace OpenPop.Mime.Header
 						// It is the same with ModificationDate and ReadDate.
 						// This is fixed in 4.0 - maybe in 3.0 too.
 						// Therefore we create a new DateTime which have a DateTimeKind set to unspecified
-						DateTime creationDate = new DateTime(RFC2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime creationDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
 						contentDisposition.CreationDate = creationDate;
 						break;
 
 					case "modification-date":
-						DateTime midificationDate = new DateTime(RFC2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
 						contentDisposition.ModificationDate = midificationDate;
 						break;
 
 					case "read-date":
-						DateTime readDate = new DateTime(RFC2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
 						contentDisposition.ReadDate = readDate;
 						break;
 

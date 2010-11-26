@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace OpenPop.Shared.Logging
+namespace OpenPop.Common.Logging
 {
 	/// <summary>
 	/// This logging object writes application error and debug output to a text file.

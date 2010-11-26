@@ -17,7 +17,7 @@ namespace OpenPop.Mime.Decode
 	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">RFC 2822-date-parser</a> for original version.
 	/// See <a href="http://www.codeproject.com/info/cpol10.aspx">CodeProject.com license</a> for license.
 	/// </remarks>
-	internal static class RFC2822DateTime
+	internal static class Rfc2822DateTime
 	{
 		/// <summary>
 		/// Converts a string in RFC 2822 format into a <see cref="DateTime"/> object

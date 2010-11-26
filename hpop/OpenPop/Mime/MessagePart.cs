@@ -5,7 +5,7 @@ using System.Net.Mime;
 using System.Text;
 using OpenPop.Mime.Decode;
 using OpenPop.Mime.Header;
-using OpenPop.Shared;
+using OpenPop.Common;
 
 namespace OpenPop.Mime
 {

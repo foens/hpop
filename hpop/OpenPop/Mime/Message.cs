@@ -155,19 +155,19 @@ namespace OpenPop.Mime
 			if(Headers.Sender != null && Headers.Sender.HasValidMailAddress)
 				message.Sender = Headers.Sender.MailAddress;
 
-			foreach (RFCMailAddress to in Headers.To)
+			foreach (RfcMailAddress to in Headers.To)
 			{
 				if(to.HasValidMailAddress)
 					message.To.Add(to.MailAddress);
 			}
 
-			foreach (RFCMailAddress cc in Headers.Cc)
+			foreach (RfcMailAddress cc in Headers.Cc)
 			{
 				if (cc.HasValidMailAddress)
 					message.CC.Add(cc.MailAddress);
 			}
 
-			foreach (RFCMailAddress bcc in Headers.Bcc)
+			foreach (RfcMailAddress bcc in Headers.Bcc)
 			{
 				if (bcc.HasValidMailAddress)
 					message.Bcc.Add(bcc.MailAddress);

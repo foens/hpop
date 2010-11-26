@@ -54,7 +54,7 @@ namespace OpenPop.Mime.Header
 		/// The list will be empty if no Disposition-Notification-To header was present in the message
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc3798">RFC 3798</a> for details</remarks>
-		public List<RFCMailAddress> DispositionNotificationTo { get; private set; }
+		public List<RfcMailAddress> DispositionNotificationTo { get; private set; }
 
 		/// <summary>
 		/// This is the Received headers. This tells the path that the email went.
@@ -83,32 +83,32 @@ namespace OpenPop.Mime.Header
 		/// Carbon Copy. This specifies who got a copy of the message.
 		/// The list will be empty if no Cc header was present in the message
 		/// </summary>
-		public List<RFCMailAddress> Cc { get; private set; }
+		public List<RfcMailAddress> Cc { get; private set; }
 
 		/// <summary>
 		/// Blind Carbon Copy. This specifies who got a copy of the message, but others
 		/// cannot see who these persons are.
 		/// The list will be empty if no Received Bcc was present in the message
 		/// </summary>
-		public List<RFCMailAddress> Bcc { get; private set; }
+		public List<RfcMailAddress> Bcc { get; private set; }
 
 		/// <summary>
 		/// Specifies who this mail was for
 		/// The list will be empty if no To header was present in the message
 		/// </summary>
-		public List<RFCMailAddress> To { get; private set; }
+		public List<RfcMailAddress> To { get; private set; }
 
 		/// <summary>
 		/// Specifies who sent the email
 		/// <see langword="null"/> if no From header field was present in the message
 		/// </summary>
-		public RFCMailAddress From { get; private set; }
+		public RfcMailAddress From { get; private set; }
 
 		/// <summary>
 		/// Specifies who a reply to the message should be sent to
 		/// <see langword="null"/> if no Reply-To header field was present in the message
 		/// </summary>
-		public RFCMailAddress ReplyTo { get; private set; }
+		public RfcMailAddress ReplyTo { get; private set; }
 
 		/// <summary>
 		/// This is the sender of the email address.
@@ -120,7 +120,7 @@ namespace OpenPop.Mime.Header
 		/// sender should not be included in the message.
 		/// <see langword="null"/> if no Sender header field was present in the message
 		/// </summary>
-		public RFCMailAddress Sender { get; private set; }
+		public RfcMailAddress Sender { get; private set; }
 
 		/// <summary>
 		/// If not set, the ContentType is created by the default string
@@ -173,7 +173,7 @@ namespace OpenPop.Mime.Header
 		/// This is a trace header field, that should be in all messages
 		/// <see langword="null"/> if no Return-Path header field was present in the message
 		/// </summary>
-		public RFCMailAddress ReturnPath { get; private set; }
+		public RfcMailAddress ReturnPath { get; private set; }
 
 		/// <summary>
 		/// The subject line of the message in decoded, one line state.
@@ -195,12 +195,12 @@ namespace OpenPop.Mime.Header
 				throw new ArgumentNullException("headers");
 
 			// Create empty lists as defaults. We do not like null values
-			To = new List<RFCMailAddress>();
-			Cc = new List<RFCMailAddress>();
-			Bcc = new List<RFCMailAddress>();
+			To = new List<RfcMailAddress>();
+			Cc = new List<RfcMailAddress>();
+			Bcc = new List<RfcMailAddress>();
 			Received = new List<string>();
 			Keywords = new List<string>();
-			DispositionNotificationTo = new List<RFCMailAddress>();
+			DispositionNotificationTo = new List<RfcMailAddress>();
 			UnknownHeaders = new NameValueCollection();
 
 			// Default importancetype is Normal (assumed if not set)
@@ -260,23 +260,23 @@ namespace OpenPop.Mime.Header
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "TO":
-					To = RFCMailAddress.ParseMailAddresses(headerValue);
+					To = RfcMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "CC":
-					Cc = RFCMailAddress.ParseMailAddresses(headerValue);
+					Cc = RfcMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "BCC":
-					Bcc = RFCMailAddress.ParseMailAddresses(headerValue);
+					Bcc = RfcMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.2
 				case "FROM":
 					// There is only one MailAddress in the from field
-					From = RFCMailAddress.ParseMailAddress(headerValue);
+					From = RfcMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// http://tools.ietf.org/html/rfc5322#section-3.6.2
@@ -284,12 +284,12 @@ namespace OpenPop.Mime.Header
 				case "REPLY-TO":
 					// This field may actually be a list of addresses, but no
 					// such case has been encountered
-					ReplyTo = RFCMailAddress.ParseMailAddress(headerValue);
+					ReplyTo = RfcMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// http://tools.ietf.org/html/rfc5322#section-3.6.2
 				case "SENDER":
-					Sender = RFCMailAddress.ParseMailAddress(headerValue);
+					Sender = RfcMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.5
@@ -320,7 +320,7 @@ namespace OpenPop.Mime.Header
 
 				// See http://tools.ietf.org/html/rfc3798#section-2.1
 				case "DISPOSITION-NOTIFICATION-TO":
-					DispositionNotificationTo = RFCMailAddress.ParseMailAddresses(headerValue);
+					DispositionNotificationTo = RfcMailAddress.ParseMailAddresses(headerValue);
 					break;
 
 				case "MIME-VERSION":
@@ -337,7 +337,7 @@ namespace OpenPop.Mime.Header
 				case "RETURN-PATH":
 					// Return-paths does not include a username, but we 
 					// may still use the address parser 
-					ReturnPath = RFCMailAddress.ParseMailAddress(headerValue);
+					ReturnPath = RfcMailAddress.ParseMailAddress(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.4
@@ -350,7 +350,7 @@ namespace OpenPop.Mime.Header
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.1
 				case "DATE":
 					Date = headerValue.Trim();
-					DateSent = RFC2822DateTime.StringToDate(headerValue);
+					DateSent = Rfc2822DateTime.StringToDate(headerValue);
 					break;
 
 				// See http://www.ietf.org/rfc/rfc2045.txt section 6

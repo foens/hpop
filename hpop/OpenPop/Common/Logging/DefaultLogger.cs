@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenPop.Shared.Logging
+namespace OpenPop.Common.Logging
 {
 	/// <summary>
 	/// This is the log that all logging will go trough.

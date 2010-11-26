@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using OpenPop.Shared.Logging;
+using OpenPop.Common.Logging;
 
 namespace OpenPop.Mime.Decode
 {

@@ -5,7 +5,7 @@ using OpenPop.Mime.Header;
 namespace OpenPopUnitTests.Mime.Header
 {
 	/// <summary>
-	/// Tests for <see cref="RFCMailAddress"/>
+	/// Tests for <see cref="RfcMailAddress"/>
 	/// </summary>
 	[TestFixture]
 	public class RFCMailAddressTest
@@ -21,7 +21,7 @@ namespace OpenPopUnitTests.Mime.Header
 			const string expectedMailAddress = "jmcdaniel@spam.teltronics.com";
 			const string expectedDisplayName = "John McDaniel";
 
-			RFCMailAddress rfcAddress = RFCMailAddress.ParseMailAddress(address);
+			RfcMailAddress rfcAddress = RfcMailAddress.ParseMailAddress(address);
 
 			Assert.AreEqual(expectedRaw, rfcAddress.Raw);
 			Assert.IsTrue(rfcAddress.HasValidMailAddress);
@@ -43,7 +43,7 @@ namespace OpenPopUnitTests.Mime.Header
 			const string expectedDisplayName = address;
 			const string expectedRaw = address;
 
-			RFCMailAddress rfcAddress = RFCMailAddress.ParseMailAddress(address);
+			RfcMailAddress rfcAddress = RfcMailAddress.ParseMailAddress(address);
 
 			Assert.AreEqual(expectedRaw, rfcAddress.Raw);
 			Assert.AreEqual(expectedDisplayName, rfcAddress.DisplayName);
@@ -63,7 +63,7 @@ namespace OpenPopUnitTests.Mime.Header
 			const string address = "snoopy@peanuts.com";
 			const string expectedAddress = address;
 
-			RFCMailAddress rfcAddress = RFCMailAddress.ParseMailAddress(address);
+			RfcMailAddress rfcAddress = RfcMailAddress.ParseMailAddress(address);
 
 			Assert.IsTrue(rfcAddress.HasValidMailAddress);
 			Assert.AreEqual(expectedAddress, rfcAddress.Address);
@@ -82,7 +82,7 @@ namespace OpenPopUnitTests.Mime.Header
 			string[] expectedRaw = {"\"John McDaniel\" <jmcdaniel@nospam.teltronics.com>", "snoopy@peanuts.com", "<bob@builder.org>"};
 			string[] expectedDisplay = {"John McDaniel", "", "", ""};
 			bool[] expectedValidMailAddress = {true, true, true, true};
-			List<RFCMailAddress> list = RFCMailAddress.ParseMailAddresses(addressList);
+			List<RfcMailAddress> list = RfcMailAddress.ParseMailAddresses(addressList);
 			Assert.AreEqual(expectedAddress.Length, list.Count, "Number of items parsed");
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -109,7 +109,7 @@ namespace OpenPopUnitTests.Mime.Header
 			const string expectedRaw = address;
 			const string expectedMailAddress = "jmcdaniel@spam.teltronics.com";
 			const string expectedMailName = "McDaniel, John";
-			List<RFCMailAddress> list = RFCMailAddress.ParseMailAddresses(address);
+			List<RfcMailAddress> list = RfcMailAddress.ParseMailAddresses(address);
 			Assert.AreEqual(1, list.Count, "Number of items parsed");
 			Assert.IsTrue(list[0].HasValidMailAddress);
 			Assert.AreEqual(expectedRaw, list[0].Raw, "Raw input");

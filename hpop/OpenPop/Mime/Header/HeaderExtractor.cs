@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using OpenPop.Mime.Decode;
-using OpenPop.Shared;
+using OpenPop.Common;
 
 namespace OpenPop.Mime.Header
 {

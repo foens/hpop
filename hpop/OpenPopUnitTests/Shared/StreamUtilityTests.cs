@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using NUnit.Framework;
-using OpenPop.Shared;
+using OpenPop.Common;
 
 namespace OpenPopUnitTests.Shared
 {

@@ -659,7 +659,7 @@ namespace OpenPopUnitTests.Mime
 
 			MailMessage message = new Message(Encoding.ASCII.GetBytes(messageString)).ToMailMessage();
 
-			// Unable to parse to MailAddress from RFCMailAddress
+			// Unable to parse to MailAddress from RfcMailAddress
 			// since no address is specified in the header
 			Assert.IsNull(message.Sender);
 		}
