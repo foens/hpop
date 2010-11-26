@@ -109,6 +109,7 @@ namespace MailMonitor
 				if (components != null) 
 				{
 					components.Dispose();
+					_popClient.Dispose();
 				}
 			}
 			base.Dispose( disposing );
@@ -814,9 +815,10 @@ namespace MailMonitor
 			try
 			{
 				IFormatter formatter = new BinaryFormatter();
-				Stream stream = new FileStream(_path, FileMode.Create, FileAccess.Write, FileShare.None);
-				formatter.Serialize(stream, _settings);
-				stream.Close();
+				using (Stream stream = new FileStream(_path, FileMode.Create, FileAccess.Write, FileShare.None))
+				{
+					formatter.Serialize(stream, _settings);
+				}
 			}
 			catch {}
 		}
@@ -1019,7 +1021,7 @@ namespace MailMonitor
 				int intNewMessages = 0;
 				MailInfo mi;
 
-				List<string> alUIDs = _popClient.GetMessageUIDs();
+				List<string> alUIDs = _popClient.GetMessageUids();
 
 				for(int i=0;i<intCount;i++)
 				{

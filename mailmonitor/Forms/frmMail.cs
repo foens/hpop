@@ -326,14 +326,14 @@ namespace MailMonitor
 					}
 
 					MailInfo mi=new MailInfo();
-					mi.ID = _msg.Headers.MessageID;
-					mi.File = Settings.GetMessageFile(_msg.Headers.MessageID);
+					mi.ID = _msg.Headers.MessageId;
+					mi.File = Settings.GetMessageFile(_msg.Headers.MessageId);
 					string strPath=new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName+"\\mails";
 					if(!Directory.Exists(strPath))
 						Directory.CreateDirectory(strPath);
 					if(!Settings.MessageIDs.ContainsKey(mi.ID))
 						Settings.MessageIDs.Add(mi.ID,mi);
-					_msg.SaveToFile(new FileInfo(Settings.GetMessageFile(_msg.Headers.MessageID)));
+					_msg.SaveToFile(new FileInfo(Settings.GetMessageFile(_msg.Headers.MessageId)));
 				}
 
 				txtSubject.Text = _msg.Headers.Subject;

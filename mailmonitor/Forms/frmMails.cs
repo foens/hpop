@@ -271,7 +271,7 @@ namespace MailMonitor
 							lvi.SubItems.Add(headers.Subject);
 							lvi.SubItems.Add(headers.Date);
 							lvi.SubItems.Add(size.ToString());
-							lvi.SubItems.Add(headers.MessageID);
+							lvi.SubItems.Add(headers.MessageId);
 
 							if (!InvokeRequired)
 							{
@@ -308,10 +308,7 @@ namespace MailMonitor
 				{
 					MessageBox.Show(this, e.ToString());
 				}
-				catch(Exception f)
-				{
-					string asdf = "";
-				}
+				catch(Exception) { }
 			}
 		}
 
