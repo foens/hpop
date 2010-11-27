@@ -181,8 +181,8 @@ namespace OpenPop.TestApplication
 			// 
 			// uidlButton
 			// 
-			this.uidlButton.Location = new System.Drawing.Point(460, 42);
 			this.uidlButton.Enabled = false;
+			this.uidlButton.Location = new System.Drawing.Point(460, 42);
 			this.uidlButton.Name = "uidlButton";
 			this.uidlButton.Size = new System.Drawing.Size(82, 21);
 			this.uidlButton.TabIndex = 6;
@@ -369,8 +369,6 @@ namespace OpenPop.TestApplication
 			this.listMessages.ContextMenu = this.contextMenuMessages;
 			this.listMessages.Location = new System.Drawing.Point(8, 24);
 			this.listMessages.Name = "listMessages";
-			this.listMessages.ShowLines = false;
-			this.listMessages.ShowRootLines = false;
 			this.listMessages.Size = new System.Drawing.Size(160, 160);
 			this.listMessages.TabIndex = 8;
 			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListMessages_MessageSelected);
@@ -508,8 +506,13 @@ namespace OpenPop.TestApplication
 
 						success++;
 						messages.Add(i, m);
-						TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
+						//TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
+						TreeNode node = new TreeNodeBuilder().VisitMessage(m);
 						node.Tag = i;
+
+						listMessages.Nodes.Add(node);
+
+						//listMessages.ExpandAll();
 					} catch (Exception e)
 					{
 						DefaultLogger.Log.LogError(
@@ -561,23 +564,37 @@ namespace OpenPop.TestApplication
 		private void ListMessages_MessageSelected(object sender, TreeViewEventArgs e)
 		{
 			// Fetch out the selected message
-			Message m = messages[(int)listMessages.SelectedNode.Tag];
+			Message m = messages[GetMessageNumberFromSelectedNode(listMessages.SelectedNode)];
 
-			// Find the first text/plain version
-			MessagePart plainTextPart = m.FindFirstPlainTextVersion();
-
-			if (plainTextPart != null)
+			// If the selected node contains a MessagePart and we can display the contents - display them
+			if (listMessages.SelectedNode.Tag is MessagePart)
 			{
-				// The message had a text/plain version - show that one
-				messageTextBox.Text = plainTextPart.GetBodyAsText();
-			} else
-			{
-				// Try to find a body to show in some of the other text versions
-				List<MessagePart> textVersions = m.FindAllTextVersions();
-				if (textVersions.Count >= 1)
-					messageTextBox.Text = textVersions[0].GetBodyAsText();
+				MessagePart selectedMessagePart = (MessagePart)listMessages.SelectedNode.Tag;
+				if (selectedMessagePart.IsText)
+					messageTextBox.Text = selectedMessagePart.GetBodyAsText();
 				else
-					messageTextBox.Text = "<<OpenPop>> Cannot find a text version body in this message <<OpenPop>>";
+					messageTextBox.Text = "<<OpenPop>> Cannot show this part of the email. It is not text. <<OpenPop>>";
+			}
+			else
+			{
+				// If not, we genericly find some content to show
+
+				// Find the first text/plain version
+				MessagePart plainTextPart = m.FindFirstPlainTextVersion();
+
+				if (plainTextPart != null)
+				{
+					// The message had a text/plain version - show that one
+					messageTextBox.Text = plainTextPart.GetBodyAsText();
+				} else
+				{
+					// Try to find a body to show in some of the other text versions
+					List<MessagePart> textVersions = m.FindAllTextVersions();
+					if (textVersions.Count >= 1)
+						messageTextBox.Text = textVersions[0].GetBodyAsText();
+					else
+						messageTextBox.Text = "<<OpenPop>> Cannot find a text version body in this message <<OpenPop>>";
+				}
 			}
 
 			// Clear the attachment list from any previus shown attachments
@@ -643,6 +660,28 @@ namespace OpenPop.TestApplication
 			gridHeaders.DataSource = dataSet;
 		}
 
+		/// <summary>
+		/// Finds the MessageNumber of a Message given a <see cref="TreeNode"/> to search in.
+		/// The root of this <see cref="TreeNode"/> should have the Tag property set to a int, which
+		/// points into the <see cref="messages"/> dictionary.
+		/// </summary>
+		/// <param name="node">The TreeNode to look in. Cannot be null.</param>
+		/// <returns>The found int</returns>
+		private static int GetMessageNumberFromSelectedNode(TreeNode node)
+		{
+			if (node == null)
+				throw new ArgumentNullException("node");
+
+			// Check if we are at the root, by seeing if it has the Tag property set to an int
+			if(node.Tag is int)
+			{
+				return (int) node.Tag;
+			}
+
+			// Otherwise we are not at the root, move up the tree
+			return GetMessageNumberFromSelectedNode(node.Parent);
+		}
+
 		private void ListAttachments_AttachmentSelected(object sender, TreeViewEventArgs args)
 		{
 			// Fetch the attachment part which is currently selected
@@ -690,9 +729,10 @@ namespace OpenPop.TestApplication
 				DialogResult drRet = MessageBox.Show(this, "Are you sure to delete the email?", "Delete email", MessageBoxButtons.YesNo);
 				if (drRet == DialogResult.Yes)
 				{
-					pop3Client.DeleteMessage((int)listMessages.SelectedNode.Tag);
+					int messageNumber = GetMessageNumberFromSelectedNode(listMessages.SelectedNode);
+					pop3Client.DeleteMessage(messageNumber);
 
-					listMessages.SelectedNode.Remove();
+					listMessages.Nodes[messageNumber].Remove();
 
 					drRet = MessageBox.Show(this, "Do you want to receive email again (this will commit your changes)?", "Receive email", MessageBoxButtons.YesNo);
 					if (drRet == DialogResult.Yes)
@@ -760,9 +800,11 @@ namespace OpenPop.TestApplication
 
 		private void MenuViewSource_Click(object sender, EventArgs e)
 		{
+			
 			if (listMessages.SelectedNode != null)
 			{
-				Message m = messages[(int)listMessages.SelectedNode.Tag];
+				int messageNumber = GetMessageNumberFromSelectedNode(listMessages.SelectedNode);
+				Message m = messages[messageNumber];
 
 				// We do not know the encoding of the full message - and the parts could be differently
 				// encoded. Therefore we take a choice of simply using US-ASCII encoding on the raw bytes
