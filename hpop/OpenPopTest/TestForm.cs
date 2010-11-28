@@ -72,7 +72,7 @@ namespace OpenPop.TestApplication
 			FileLogger.Enabled = true;
 			FileLogger.Verbose = true;
 
-			pop3Client = new Pop3Client( /* new DiagnosticsLogger() */ );
+			pop3Client = new Pop3Client();
 			pop3Client.AuthenticationBegan     += Pop3ClientAuthenticationBegan;
 			pop3Client.AuthenticationFinished  += Pop3ClientAuthenticationFinished;
 			pop3Client.CommunicationBegan      += Pop3ClientCommunicationBegan;
@@ -502,17 +502,22 @@ namespace OpenPop.TestApplication
 
 					try
 					{
-						Message m = pop3Client.GetMessage(i);
+						Message message = pop3Client.GetMessage(i);
 
-						success++;
-						messages.Add(i, m);
-						//TreeNode node = listMessages.Nodes.Add("[" + i + "] " + m.Headers.Subject);
-						TreeNode node = new TreeNodeBuilder().VisitMessage(m);
+						// Add the message to the dictionary from the messageNumber to the Message
+						messages.Add(i, message);
+
+						// Create a TreeNode tree that mimics the Message hierarchy
+						TreeNode node = new TreeNodeBuilder().VisitMessage(message);
+
+						// Set the Tag property to the messageNumber
+						// We can use this to find the Message again later
 						node.Tag = i;
 
+						// Show the built node in our list of messages
 						listMessages.Nodes.Add(node);
 
-						//listMessages.ExpandAll();
+						success++;
 					} catch (Exception e)
 					{
 						DefaultLogger.Log.LogError(
@@ -564,24 +569,30 @@ namespace OpenPop.TestApplication
 		private void ListMessages_MessageSelected(object sender, TreeViewEventArgs e)
 		{
 			// Fetch out the selected message
-			Message m = messages[GetMessageNumberFromSelectedNode(listMessages.SelectedNode)];
+			Message message = messages[GetMessageNumberFromSelectedNode(listMessages.SelectedNode)];
 
 			// If the selected node contains a MessagePart and we can display the contents - display them
 			if (listMessages.SelectedNode.Tag is MessagePart)
 			{
 				MessagePart selectedMessagePart = (MessagePart)listMessages.SelectedNode.Tag;
 				if (selectedMessagePart.IsText)
+				{
+					// We can show text MessageParts
 					messageTextBox.Text = selectedMessagePart.GetBodyAsText();
+				}
 				else
-					messageTextBox.Text = "<<OpenPop>> Cannot show this part of the email. It is not text. <<OpenPop>>";
+				{
+					// We are not able to show non-text MessageParts (MultiPart messages, images, pdf's ...)
+					messageTextBox.Text = "<<OpenPop>> Cannot show this part of the email. It is not text <<OpenPop>>";
+				}
 			}
 			else
 			{
-				// If not, we genericly find some content to show
+				// If the selected node is not a subnode and therefore does not
+				// have a MessagePart in it's Tag property, we genericly find some content to show
 
 				// Find the first text/plain version
-				MessagePart plainTextPart = m.FindFirstPlainTextVersion();
-
+				MessagePart plainTextPart = message.FindFirstPlainTextVersion();
 				if (plainTextPart != null)
 				{
 					// The message had a text/plain version - show that one
@@ -589,11 +600,11 @@ namespace OpenPop.TestApplication
 				} else
 				{
 					// Try to find a body to show in some of the other text versions
-					List<MessagePart> textVersions = m.FindAllTextVersions();
+					List<MessagePart> textVersions = message.FindAllTextVersions();
 					if (textVersions.Count >= 1)
 						messageTextBox.Text = textVersions[0].GetBodyAsText();
 					else
-						messageTextBox.Text = "<<OpenPop>> Cannot find a text version body in this message <<OpenPop>>";
+						messageTextBox.Text = "<<OpenPop>> Cannot find a text version body in this message to show <<OpenPop>>";
 				}
 			}
 
@@ -601,7 +612,7 @@ namespace OpenPop.TestApplication
 			listAttachments.Nodes.Clear();
 
 			// Build up the attachment list
-			List<MessagePart> attachments = m.FindAllAttachments();
+			List<MessagePart> attachments = message.FindAllAttachments();
 			foreach (MessagePart attachment in attachments)
 			{
 				// Add the attachment to the list of attachments
@@ -623,31 +634,31 @@ namespace OpenPop.TestApplication
 
 			DataRowCollection rows = table.Rows;
 
-			rows.Add(new object[] { "ContentType", m.Headers.ContentType });
+			rows.Add(new object[] { "ContentType", message.Headers.ContentType });
 			rows.Add(new object[] { "AttachmentCount", attachments.Count });
 
-			foreach (RfcMailAddress cc in m.Headers.Cc)
+			foreach (RfcMailAddress cc in message.Headers.Cc)
 				rows.Add(new object[] {"Cc", cc});
-			foreach (RfcMailAddress to in m.Headers.To)
+			foreach (RfcMailAddress to in message.Headers.To)
 				rows.Add(new object[] {"To", to});
 
-			rows.Add(new object[] {"ContentTransferEncoding", m.Headers.ContentTransferEncoding});
-			rows.Add(new object[] {"From", m.Headers.From});
-			rows.Add(new object[] {"MessageId", m.Headers.MessageId});
-			rows.Add(new object[] {"MimeVersion", m.Headers.MimeVersion});
-			rows.Add(new object[] {"ReturnPath", m.Headers.ReturnPath});
-			rows.Add(new object[] {"Subject", m.Headers.Subject});
-			rows.Add(new object[] {"Date", m.Headers.Date});
-			rows.Add(new object[] {"DateSent", m.Headers.DateSent});
-			foreach (string received in m.Headers.Received)
+			rows.Add(new object[] {"ContentTransferEncoding", message.Headers.ContentTransferEncoding});
+			rows.Add(new object[] {"From", message.Headers.From});
+			rows.Add(new object[] {"MessageId", message.Headers.MessageId});
+			rows.Add(new object[] {"MimeVersion", message.Headers.MimeVersion});
+			rows.Add(new object[] {"ReturnPath", message.Headers.ReturnPath});
+			rows.Add(new object[] {"Subject", message.Headers.Subject});
+			rows.Add(new object[] {"Date", message.Headers.Date});
+			rows.Add(new object[] {"DateSent", message.Headers.DateSent});
+			foreach (string received in message.Headers.Received)
 				rows.Add(new object[] {"Received", received});
-			rows.Add(new object[] {"Importance", m.Headers.Importance});
-			rows.Add(new object[] {"ReplyTo", m.Headers.ReplyTo});
-			foreach (string keyword in m.Headers.Keywords)
+			rows.Add(new object[] {"Importance", message.Headers.Importance});
+			rows.Add(new object[] {"ReplyTo", message.Headers.ReplyTo});
+			foreach (string keyword in message.Headers.Keywords)
 				rows.Add(new object[] {"Keyword", keyword});
-			foreach (string key in m.Headers.UnknownHeaders)
+			foreach (string key in message.Headers.UnknownHeaders)
 			{
-				string[] values = m.Headers.UnknownHeaders.GetValues(key);
+				string[] values = message.Headers.UnknownHeaders.GetValues(key);
 				if (values != null)
 					foreach (string value in values)
 					{
@@ -665,7 +676,7 @@ namespace OpenPop.TestApplication
 		/// The root of this <see cref="TreeNode"/> should have the Tag property set to a int, which
 		/// points into the <see cref="messages"/> dictionary.
 		/// </summary>
-		/// <param name="node">The TreeNode to look in. Cannot be null.</param>
+		/// <param name="node">The <see cref="TreeNode"/> to look in. Cannot be <see langword="null"/>.</param>
 		/// <returns>The found int</returns>
 		private static int GetMessageNumberFromSelectedNode(TreeNode node)
 		{
@@ -718,7 +729,7 @@ namespace OpenPop.TestApplication
 			}
 			else
 			{
-				MessageBox.Show(this, "Attachment object is null!");
+				MessageBox.Show(this, "Attachment object was null!");
 			}
 		}
 
