@@ -417,7 +417,7 @@ namespace OpenPop.Mime
 		/// This is simply the <see cref="BodyEncoding"/> being used on the raw bytes of the <see cref="Body"/> property
 		/// This method is only valid to call if it is not a MultiPart message and therefore contains a body
 		/// </summary>
-		/// <returns>The <see cref="Body"/> in bytes</returns>
+		/// <returns>The <see cref="Body"/> as a string</returns>
 		public string GetBodyAsText()
 		{
 			return BodyEncoding.GetString(Body);
