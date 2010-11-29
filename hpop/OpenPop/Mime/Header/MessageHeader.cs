@@ -111,6 +111,13 @@ namespace OpenPop.Mime.Header
 		public RfcMailAddress ReplyTo { get; private set; }
 
 		/// <summary>
+		/// The message identifier(s) of the original message(s) to which the
+		/// current message is a reply.
+		/// The list will be empty if no In-Reply-To header was present in the message
+		/// </summary>
+		public List<string> InReplyTo { get; private set; }
+
+		/// <summary>
 		/// This is the sender of the email address.
 		/// The RFC states that this field can be used if a secretary
 		/// is sending an email for someone she is working for.
@@ -200,6 +207,7 @@ namespace OpenPop.Mime.Header
 			Bcc = new List<RfcMailAddress>();
 			Received = new List<string>();
 			Keywords = new List<string>();
+			InReplyTo = new List<string>();
 			DispositionNotificationTo = new List<RfcMailAddress>();
 			UnknownHeaders = new NameValueCollection();
 
@@ -344,10 +352,15 @@ namespace OpenPop.Mime.Header
 				// Example Message-ID
 				// <33cdd74d6b89ab2250ecd75b40a41405@nfs.eksperten.dk>
 				case "MESSAGE-ID":
-					MessageId = headerValue.Trim().TrimEnd('>').TrimStart('<');
+					MessageId = HeaderFieldParser.ParseID(headerValue);
 					break;
 
-				// See http://tools.ietf.org/html/rfc5322#section-3.6.1
+				// See http://tools.ietf.org/html/rfc5322#section-3.6.4
+				case "IN-REPLY-TO":
+					InReplyTo = HeaderFieldParser.ParseMultipleIDs(headerValue);
+					break;
+
+				// See http://tools.ietf.org/html/rfc5322#section-3.6.1))
 				case "DATE":
 					Date = headerValue.Trim();
 					DateSent = Rfc2822DateTime.StringToDate(headerValue);
@@ -379,7 +392,7 @@ namespace OpenPop.Mime.Header
 				// See http://www.ietf.org/rfc/rfc2045.txt section 7
 				// Example: <foo4*foo1@bar.net>
 				case "CONTENT-ID":
-					ContentId = headerValue.Trim().Trim('<').Trim('>');
+					ContentId = HeaderFieldParser.ParseID(headerValue);
 					break;
 
 				default:

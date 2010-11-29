@@ -237,5 +237,43 @@ namespace OpenPop.Mime.Header
 			// It seems there is no codepage value in the characterSet. It must be a named encoding
 			return Encoding.GetEncoding(characterSet);
 		}
+
+		/// <summary>
+		/// Parses an ID like Message-Id and Content-Id.
+		/// Example
+		/// <test@test.com>
+		/// into
+		/// test@test.com
+		/// </summary>
+		/// <param name="headerValue">The id to parse</param>
+		/// <returns>A parsed ID</returns>
+		public static string ParseID(string headerValue)
+		{
+			// Remove whitespace in front and behind since
+			// whitespace is allowed there
+			// Remove the last > and the first <
+			return headerValue.Trim().TrimEnd('>').TrimStart('<');
+		}
+
+		/// <summary>
+		/// Parses multiple IDs from a single string like In-Reply-To
+		/// </summary>
+		/// <param name="headerValue">The value to parse</param>
+		/// <returns>A list of IDs</returns>
+		public static List<string> ParseMultipleIDs(string headerValue)
+		{
+			List<string> returner = new List<string>();
+
+			// Split the string by >
+			// We cannot use ' ' (space) here since this is a possible value:
+			// <test@test.com><test2@test.com>
+			string[] ids = headerValue.Trim().Split(new[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
+			foreach (string id in ids)
+			{
+				returner.Add(ParseID(id));
+			}
+
+			return returner;
+		}
 	}
 }

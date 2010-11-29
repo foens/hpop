@@ -49,6 +49,7 @@
     <Compile Include="Mime\Decode\QuotedPrintableTest.cs" />
     <Compile Include="Mime\Decode\UtilityTest.cs" />
     <Compile Include="Mime\Header\HeaderFieldParserTests.cs" />
+    <Compile Include="Mime\Header\MessageHeaderTests.cs" />
     <Compile Include="Mime\Header\RFCMailAddressTest.cs" />
     <Compile Include="Mime\MessagePartTests.cs" />
     <Compile Include="Mime\MessageTest.cs" />
