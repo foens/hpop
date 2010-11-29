@@ -344,7 +344,7 @@ namespace MailMonitor
 
 				foreach (MessagePart attachment in attachments)
 				{
-					ListViewItem attachmentItem = lvwAttachments.Items.Add(attachment.FindFileName, 1);
+					ListViewItem attachmentItem = lvwAttachments.Items.Add(attachment.FileName, 1);
 
 					// Save a reference to the attachment
 					attachmentItem.Tag = attachment;
@@ -387,7 +387,7 @@ namespace MailMonitor
 
 			if(att!=null && _msg!=null)
 			{
-				dlgSave.FileName=att.FindFileName;
+				dlgSave.FileName=att.FileName;
 				DialogResult result=dlgSave.ShowDialog();
 				if(result==DialogResult.OK)
 				{
