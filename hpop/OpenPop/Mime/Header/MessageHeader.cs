@@ -117,6 +117,14 @@ namespace OpenPop.Mime.Header
 		/// </summary>
 		public List<string> InReplyTo { get; private set; }
 
+
+		/// <summary>
+		/// The message identifier(s) of other message(s) to which the current
+		/// message may be related.
+		/// The list will be empty if no References header was present in the message
+		/// </summary>
+		public List<string> References { get; private set; }
+
 		/// <summary>
 		/// This is the sender of the email address.
 		/// The RFC states that this field can be used if a secretary
@@ -202,12 +210,15 @@ namespace OpenPop.Mime.Header
 				throw new ArgumentNullException("headers");
 
 			// Create empty lists as defaults. We do not like null values
-			To = new List<RfcMailAddress>();
-			Cc = new List<RfcMailAddress>();
-			Bcc = new List<RfcMailAddress>();
+			// List with an initial capacity set to zero will be replaced
+			// when a corrosponding header is found
+			To = new List<RfcMailAddress>(0);
+			Cc = new List<RfcMailAddress>(0);
+			Bcc = new List<RfcMailAddress>(0);
 			Received = new List<string>();
 			Keywords = new List<string>();
-			InReplyTo = new List<string>();
+			InReplyTo = new List<string>(0);
+			References = new List<string>(0);
 			DispositionNotificationTo = new List<RfcMailAddress>();
 			UnknownHeaders = new NameValueCollection();
 
@@ -358,6 +369,11 @@ namespace OpenPop.Mime.Header
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.4
 				case "IN-REPLY-TO":
 					InReplyTo = HeaderFieldParser.ParseMultipleIDs(headerValue);
+					break;
+
+				// See http://tools.ietf.org/html/rfc5322#section-3.6.4
+				case "REFERENCES":
+					References = HeaderFieldParser.ParseMultipleIDs(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.1))
