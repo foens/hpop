@@ -89,15 +89,6 @@ namespace MailMonitor
 		public frmMain()
 		{
 			InitializeComponent();
-
-			_popClient.AuthenticationBegan += popClient_AuthenticationBegan;
-			_popClient.AuthenticationFinished += popClient_AuthenticationFinished;
-			_popClient.CommunicationBegan += popClient_CommunicationBegan;
-			_popClient.CommunicationOccurred += popClient_CommunicationOccurred;
-			_popClient.CommunicationLost += popClient_CommunicationLost;
-			_popClient.MessageTransferBegan += popClient_MessageTransferBegan;
-			_popClient.MessageTransferFinished += popClient_MessageTransferFinished;
-
 		}
 
 		protected override void Dispose( bool disposing )
@@ -1146,56 +1137,6 @@ namespace MailMonitor
 				}
 				catch{}
 			}
-		}
-		#endregion
-
-		#region Progress
-		private void AddEvent(string strEvent)
-		{
-			try
-			{
-				ListViewItem lvi=lvwMailBoxes.Items[_currentMailBox];
-				lvi.SubItems[3].Text=strEvent;
-				//lvwMailBoxes.ResumeLayout(true);
-				Thread.Sleep(10);
-			}
-			catch
-			{}
-		}
-
-		private void popClient_CommunicationBegan(Pop3Client sender)
-		{
-			AddEvent("Communication Began");
-		}
-
-		private void popClient_CommunicationOccurred(Pop3Client sender)
-		{
-			AddEvent("Communication Occurred");
-		}
-
-		private void popClient_AuthenticationBegan(Pop3Client sender)
-		{
-			AddEvent("Authentication Began");
-		}
-
-		private void popClient_AuthenticationFinished(Pop3Client sender)
-		{
-			AddEvent("Authentication Finished");
-		}
-
-		private void popClient_MessageTransferBegan(Pop3Client sender)
-		{
-			AddEvent("MessageTransfer Began");
-		}
-
-		private void popClient_MessageTransferFinished(Pop3Client sender)
-		{
-			AddEvent("MessageTransfer Finished");
-		}
-
-		private void popClient_CommunicationLost(Pop3Client sender)
-		{
-			AddEvent("Communication Lost");
 		}
 		#endregion
 	}

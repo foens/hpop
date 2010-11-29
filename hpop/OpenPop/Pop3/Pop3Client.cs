@@ -33,49 +33,6 @@ namespace OpenPop.Pop3
 	/// </example>
 	public class Pop3Client : Disposable
 	{
-		#region Events
-		/// <summary>
-		/// Basic delegate which is used for all events in the Pop3Client
-		/// </summary>
-		/// <param name="sender">The client from which the event happened</param>
-		public delegate void PopClientEvent(Pop3Client sender);
-
-		/// <summary>
-		/// Event that fires when begin to connect with target POP3 server.
-		/// </summary>
-		public event PopClientEvent CommunicationBegan;
-
-		/// <summary>
-		/// Event that fires when connected with target POP3 server.
-		/// </summary>
-		public event PopClientEvent CommunicationOccurred;
-
-		/// <summary>
-		/// Event that fires when disconnected with target POP3 server.
-		/// </summary>
-		public event PopClientEvent CommunicationLost;
-
-		/// <summary>
-		/// Event that fires when authentication began with target POP3 server.
-		/// </summary>
-		public event PopClientEvent AuthenticationBegan;
-
-		/// <summary>
-		/// Event that fires when authentication finished with target POP3 server.
-		/// </summary>
-		public event PopClientEvent AuthenticationFinished;
-
-		/// <summary>
-		/// Event that fires when message transfer has begun.
-		/// </summary>		
-		public event PopClientEvent MessageTransferBegan;
-
-		/// <summary>
-		/// Event that fires when message transfer has finished.
-		/// </summary>
-		public event PopClientEvent MessageTransferFinished;
-		#endregion
-
 		#region Private member properties
 		/// <summary>
 		/// This is the stream used to read off the server response
@@ -197,9 +154,6 @@ namespace OpenPop.Pop3
 				IsOkResponse(response);
 				ExtractApopTimestamp(response);
 				Connected = true;
-				
-				if(CommunicationOccurred != null)
-					CommunicationOccurred(this);
 			}
 			catch (PopServerException e)
 			{
@@ -262,9 +216,6 @@ namespace OpenPop.Pop3
 
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
-
-			if (CommunicationBegan != null)
-				CommunicationBegan(this);
 
 			TcpClient clientSocket = new TcpClient();
 			clientSocket.ReceiveTimeout = receiveTimeout;
@@ -334,9 +285,6 @@ namespace OpenPop.Pop3
 			{
 				DisconnectStreams();
 			}
-
-			if(CommunicationLost != null)
-				CommunicationLost(this);
 		}
 		#endregion
 
@@ -410,9 +358,6 @@ namespace OpenPop.Pop3
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
-			if (AuthenticationBegan != null)
-				AuthenticationBegan(this);
-
 			try
 			{
 				SendCommand("USER " + username);
@@ -439,9 +384,6 @@ namespace OpenPop.Pop3
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidPasswordException("Invalid password", e);
 			}
-
-			if (AuthenticationFinished != null)
-				AuthenticationFinished(this);
 		}
 
 		/// <summary>
@@ -456,9 +398,6 @@ namespace OpenPop.Pop3
 		{
 			if (!ApopSupported)
 				throw new NotSupportedException("APOP is not supported on this server");
-
-			if (AuthenticationBegan != null) 
-				AuthenticationBegan(this);
 
 			try
 			{
@@ -475,9 +414,6 @@ namespace OpenPop.Pop3
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidLoginOrPasswordException("The supplied username or password is wrong", e);
 			}
-
-			if (AuthenticationFinished != null)
-				AuthenticationFinished(this);
 		}
 		#endregion
 
@@ -868,9 +804,6 @@ namespace OpenPop.Pop3
 			if (State != ConnectionState.Transaction)
 				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
 
-			if (MessageTransferBegan != null)
-				MessageTransferBegan(this);
-
 			if (askOnlyForHeaders)
 			{
 				// 0 is the number of lines of the message body to fetch, therefore it is set to zero to fetch only headers
@@ -940,9 +873,6 @@ namespace OpenPop.Pop3
 
 				// Get out the bytes we have written to byteArrayBuilder
 				byte[] receivedBytes = byteArrayBuilder.ToArray();
-
-				if (MessageTransferFinished != null)
-					MessageTransferFinished(this);
 
 				return receivedBytes;
 			}

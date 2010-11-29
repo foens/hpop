@@ -36,7 +36,6 @@ namespace OpenPop.TestApplication
 		private Label labelUsername;
 		private TreeView listAttachments;
 		private TreeView listMessages;
-		private ListBox listOfEvents;
 		private MenuItem menuDeleteMessage;
 		private MenuItem menuViewSource;
 		private Panel panelTop;
@@ -51,6 +50,7 @@ namespace OpenPop.TestApplication
 		private TextBox passwordTextBox;
 		private TextBox portTextBox;
 		private TextBox totalMessagesTextBox;
+		private ProgressBar progressBar;
 		private CheckBox useSslCheckBox;
 
 		private TestForm()
@@ -73,13 +73,6 @@ namespace OpenPop.TestApplication
 			FileLogger.Verbose = true;
 
 			pop3Client = new Pop3Client();
-			pop3Client.AuthenticationBegan     += Pop3ClientAuthenticationBegan;
-			pop3Client.AuthenticationFinished  += Pop3ClientAuthenticationFinished;
-			pop3Client.CommunicationBegan      += Pop3ClientCommunicationBegan;
-			pop3Client.CommunicationOccurred   += Pop3ClientCommunicationOccurred;
-			pop3Client.CommunicationLost       += Pop3ClientCommunicationLost;
-			pop3Client.MessageTransferBegan    += Pop3ClientMessageTransferBegan;
-			pop3Client.MessageTransferFinished += Pop3ClientMessageTransferFinished;
 
 			// This is only for faster debugging purposes
 			// We will try to load in default values for the hostname, port, ssl, username and password from a file
@@ -124,7 +117,6 @@ namespace OpenPop.TestApplication
 			this.gridHeaders = new System.Windows.Forms.DataGrid();
 			this.panelMiddle = new System.Windows.Forms.Panel();
 			this.panelMessageBody = new System.Windows.Forms.Panel();
-			this.listOfEvents = new System.Windows.Forms.ListBox();
 			this.messageTextBox = new System.Windows.Forms.TextBox();
 			this.labelMessageBody = new System.Windows.Forms.Label();
 			this.panelMessagesView = new System.Windows.Forms.Panel();
@@ -137,6 +129,7 @@ namespace OpenPop.TestApplication
 			this.listAttachments = new System.Windows.Forms.TreeView();
 			this.labelAttachments = new System.Windows.Forms.Label();
 			this.saveFile = new System.Windows.Forms.SaveFileDialog();
+			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.panelTop.SuspendLayout();
 			this.panelProperties.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -312,7 +305,7 @@ namespace OpenPop.TestApplication
 			// 
 			// panelMessageBody
 			// 
-			this.panelMessageBody.Controls.Add(this.listOfEvents);
+			this.panelMessageBody.Controls.Add(this.progressBar);
 			this.panelMessageBody.Controls.Add(this.messageTextBox);
 			this.panelMessageBody.Controls.Add(this.labelMessageBody);
 			this.panelMessageBody.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -320,15 +313,6 @@ namespace OpenPop.TestApplication
 			this.panelMessageBody.Name = "panelMessageBody";
 			this.panelMessageBody.Size = new System.Drawing.Size(492, 196);
 			this.panelMessageBody.TabIndex = 6;
-			// 
-			// listOfEvents
-			// 
-			this.listOfEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.listOfEvents.Location = new System.Drawing.Point(7, 171);
-			this.listOfEvents.Name = "listOfEvents";
-			this.listOfEvents.Size = new System.Drawing.Size(475, 17);
-			this.listOfEvents.TabIndex = 8;
 			// 
 			// messageTextBox
 			// 
@@ -435,6 +419,15 @@ namespace OpenPop.TestApplication
 			// 
 			this.saveFile.Title = "Save Attachment";
 			// 
+			// progressBar
+			// 
+			this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBar.Location = new System.Drawing.Point(7, 172);
+			this.progressBar.Name = "progressBar";
+			this.progressBar.Size = new System.Drawing.Size(476, 12);
+			this.progressBar.TabIndex = 10;
+			// 
 			// TestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -474,6 +467,7 @@ namespace OpenPop.TestApplication
 			// Disable buttons while working
 			connectAndRetrieveButton.Enabled = false;
 			uidlButton.Enabled = false;
+			progressBar.Value = 0;
 
 			try
 			{
@@ -526,6 +520,8 @@ namespace OpenPop.TestApplication
 							e.StackTrace);
 						fail++;
 					}
+
+					progressBar.Value = (int)(((double)(count-i)/count) * 100);
 				}
 
 				MessageBox.Show(this, "Mail received!\nSuccesses: " + success + "\nFailed: " + fail, "Message fetching done");
@@ -558,6 +554,7 @@ namespace OpenPop.TestApplication
 				// Enable the buttons again
 				connectAndRetrieveButton.Enabled = true;
 				uidlButton.Enabled = true;
+				progressBar.Value = 100;
 			}
 		}
 
@@ -770,47 +767,6 @@ namespace OpenPop.TestApplication
 			}
 
 			messageTextBox.Text = stringBuilder.ToString();
-		}
-
-		private void AddEvent(string strEvent)
-		{
-			listOfEvents.Items.Add(strEvent);
-			listOfEvents.SelectedIndex = listOfEvents.Items.Count - 1;
-		}
-
-		private void Pop3ClientCommunicationBegan(Pop3Client sender)
-		{
-			AddEvent("CommunicationBegan");
-		}
-
-		private void Pop3ClientCommunicationOccurred(Pop3Client sender)
-		{
-			AddEvent("CommunicationOccurred");
-		}
-
-		private void Pop3ClientAuthenticationBegan(Pop3Client sender)
-		{
-			AddEvent("AuthenticationBegan");
-		}
-
-		private void Pop3ClientAuthenticationFinished(Pop3Client sender)
-		{
-			AddEvent("AuthenticationFinished");
-		}
-
-		private void Pop3ClientMessageTransferBegan(Pop3Client sender)
-		{
-			AddEvent("MessageTransferBegan");
-		}
-
-		private void Pop3ClientMessageTransferFinished(Pop3Client sender)
-		{
-			AddEvent("MessageTransferFinished");
-		}
-
-		private void Pop3ClientCommunicationLost(Pop3Client sender)
-		{
-			AddEvent("CommunicationLost");
 		}
 
 		private void MenuViewSource_Click(object sender, EventArgs e)

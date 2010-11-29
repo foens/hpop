@@ -241,7 +241,7 @@ namespace OpenPop.Mime.Header
 		/// <summary>
 		/// Parses an ID like Message-Id and Content-Id.
 		/// Example
-		/// <test@test.com>
+		/// &lt;test@test.com&gt;
 		/// into
 		/// test@test.com
 		/// </summary>
