@@ -634,28 +634,32 @@ namespace OpenPop.TestApplication
 
 			DataRowCollection rows = table.Rows;
 
-			rows.Add(new object[] { "ContentType", message.Headers.ContentType });
-			rows.Add(new object[] { "AttachmentCount", attachments.Count });
-
-			foreach (RfcMailAddress cc in message.Headers.Cc)
-				rows.Add(new object[] {"Cc", cc});
-			foreach (RfcMailAddress to in message.Headers.To)
-				rows.Add(new object[] {"To", to});
-
-			rows.Add(new object[] {"ContentTransferEncoding", message.Headers.ContentTransferEncoding});
-			rows.Add(new object[] {"From", message.Headers.From});
-			rows.Add(new object[] {"MessageId", message.Headers.MessageId});
-			rows.Add(new object[] {"MimeVersion", message.Headers.MimeVersion});
-			rows.Add(new object[] {"ReturnPath", message.Headers.ReturnPath});
-			rows.Add(new object[] {"Subject", message.Headers.Subject});
-			rows.Add(new object[] {"Date", message.Headers.Date});
-			rows.Add(new object[] {"DateSent", message.Headers.DateSent});
-			foreach (string received in message.Headers.Received)
-				rows.Add(new object[] {"Received", received});
+			// Add all known headers
+			rows.Add(new object[] {"Content-Description", message.Headers.ContentDescription});
+			rows.Add(new object[] {"Content-Id", message.Headers.ContentId});
+			foreach (string keyword in message.Headers.Keywords) rows.Add(new object[] {"Keyword", keyword});
+			foreach (RfcMailAddress dispositionNotificationTo in message.Headers.DispositionNotificationTo) rows.Add(new object[] {"Disposition-Notification-To", dispositionNotificationTo});
+			foreach (string received in message.Headers.Received) rows.Add(new object[] {"Received", received});
 			rows.Add(new object[] {"Importance", message.Headers.Importance});
-			rows.Add(new object[] {"ReplyTo", message.Headers.ReplyTo});
-			foreach (string keyword in message.Headers.Keywords)
-				rows.Add(new object[] {"Keyword", keyword});
+			rows.Add(new object[] {"Content-Transfer-Encoding", message.Headers.ContentTransferEncoding});
+			foreach (RfcMailAddress cc in message.Headers.Cc) rows.Add(new object[] {"Cc", cc});
+			foreach (RfcMailAddress bcc in message.Headers.Bcc) rows.Add(new object[] {"Bcc", bcc});
+			foreach (RfcMailAddress to in message.Headers.To) rows.Add(new object[] { "To", to });
+			rows.Add(new object[] {"From", message.Headers.From});
+			rows.Add(new object[] {"Reply-To", message.Headers.ReplyTo});
+			foreach (string inReplyTo in message.Headers.InReplyTo) rows.Add(new object[] {"In-Reply-To", inReplyTo});
+			foreach (string reference in message.Headers.References) rows.Add(new object[] { "References", reference });
+			rows.Add(new object[] {"Sender", message.Headers.Sender});
+			rows.Add(new object[] {"Content-Type", message.Headers.ContentType});
+			rows.Add(new object[] {"Content-Disposition", message.Headers.ContentDisposition});
+			rows.Add(new object[] {"Date", message.Headers.Date});
+			rows.Add(new object[] {"Date", message.Headers.DateSent});
+			rows.Add(new object[] {"Message-Id", message.Headers.MessageId});
+			rows.Add(new object[] {"Mime-Version", message.Headers.MimeVersion});
+			rows.Add(new object[] {"Return-Path", message.Headers.ReturnPath});
+			rows.Add(new object[] {"Subject", message.Headers.Subject});
+			
+			// Add all unknown headers
 			foreach (string key in message.Headers.UnknownHeaders)
 			{
 				string[] values = message.Headers.UnknownHeaders.GetValues(key);
