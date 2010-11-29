@@ -336,7 +336,6 @@ namespace OpenPop.Mime.Header
 					Importance = HeaderFieldParser.ParseImportance(headerValue.Trim());
 					break;
 
-
 				// See http://tools.ietf.org/html/rfc3798#section-2.1
 				case "DISPOSITION-NOTIFICATION-TO":
 					DispositionNotificationTo = RfcMailAddress.ParseMailAddresses(headerValue);

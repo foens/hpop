@@ -154,5 +154,25 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("hi", header.Keywords[1]);
 		}
 		#endregion
+
+		#region Disposition-Notification-To
+		[Test]
+		public void TestComplexDispositionNotificationTo()
+		{
+			NameValueCollection collection = new NameValueCollection();
+			collection.Add("Disposition-Notification-To", "\"Test with, comma\" <test@test.com>, Foo <foo@bar.com>");
+
+			MessageHeader header = new MessageHeader(collection);
+			Assert.NotNull(header.DispositionNotificationTo);
+			Assert.AreEqual(2, header.DispositionNotificationTo.Count);
+
+			Assert.AreEqual("Test with, comma", header.DispositionNotificationTo[0].DisplayName);
+			Assert.AreEqual("test@test.com", header.DispositionNotificationTo[0].Address);
+
+			Assert.AreEqual("Foo", header.DispositionNotificationTo[1].DisplayName);
+			Assert.AreEqual("foo@bar.com", header.DispositionNotificationTo[1].Address);
+			
+		}
+		#endregion
 	}
 }
