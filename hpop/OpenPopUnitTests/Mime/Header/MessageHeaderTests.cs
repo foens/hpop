@@ -116,5 +116,43 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("test2@test2.com", header.References[1]);
 		}
 		#endregion
+
+		#region Keywords
+		[Test]
+		public void TestNoKeywordsEmptyList()
+		{
+			NameValueCollection collection = new NameValueCollection();
+			MessageHeader header = new MessageHeader(collection);
+
+			Assert.NotNull(header.Keywords);
+			Assert.IsEmpty(header.Keywords);
+		}
+
+		[Test]
+		public void TestSingleKeyword()
+		{
+			NameValueCollection collection = new NameValueCollection();
+			collection.Add("Keywords", "test");
+
+			MessageHeader header = new MessageHeader(collection);
+
+			Assert.AreEqual(1, header.Keywords.Count);
+			Assert.AreEqual("test", header.Keywords[0]);
+		}
+
+		[Test]
+		public void TestMultipleKeywords()
+		{
+			NameValueCollection collection = new NameValueCollection();
+			collection.Add("Keywords", "test, hi");
+
+			MessageHeader header = new MessageHeader(collection);
+
+			Assert.AreEqual(2, header.Keywords.Count);
+			
+			Assert.AreEqual("test", header.Keywords[0]);
+			Assert.AreEqual("hi", header.Keywords[1]);
+		}
+		#endregion
 	}
 }
