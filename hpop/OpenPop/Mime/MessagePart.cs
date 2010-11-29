@@ -169,19 +169,7 @@ namespace OpenPop.Mime
 		/// The FileName can be specified in the <see cref="ContentDisposition"/> or in the <see cref="ContentType"/> properties.
 		/// If none of these places two places tells about the FileName, a default "(no name)" is returned.
 		/// </summary>
-		public string FindFileName
-		{
-			get
-			{
-				if (ContentDisposition != null && ContentDisposition.FileName != null)
-					return ContentDisposition.FileName;
-
-				if (ContentType.Name != null)
-					return ContentType.Name;
-
-				return "(no name)";
-			}
-		}
+		public string FileName { get; private set; }
 
 		/// <summary>
 		/// If this <see cref="MessagePart"/> is a MultiPart message, then this property
@@ -213,6 +201,7 @@ namespace OpenPop.Mime
 			ContentId = headers.ContentId;
 			ContentDisposition = headers.ContentDisposition;
 
+			FileName = FindFileName(ContentType, ContentDisposition, "(no name)");
 			BodyEncoding = ParseBodyEncoding(ContentType.CharSet);
 
 			ParseBody(rawBody);
@@ -236,6 +225,22 @@ namespace OpenPop.Mime
 				encoding = HeaderFieldParser.ParseCharsetToEncoding(characterSet);
 
 			return encoding;
+		}
+
+		/// <see cref="FileName"/> property.
+		/// <exception cref="ArgumentNullException">if <param name="contentType"/> is <see langword="null"/></exception>
+		private static string FindFileName(ContentType contentType, ContentDisposition contentDisposition, string defaultName)
+		{
+			if(contentType == null)
+				throw new ArgumentNullException("contentType");
+
+			if (contentDisposition != null && contentDisposition.FileName != null)
+				return contentDisposition.FileName;
+
+			if (contentType.Name != null)
+				return contentType.Name;
+
+			return defaultName;
 		}
 
 		/// <summary>

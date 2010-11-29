@@ -613,7 +613,7 @@ namespace OpenPop.TestApplication
 			foreach (MessagePart attachment in attachments)
 			{
 				// Add the attachment to the list of attachments
-				TreeNode addedNode = listAttachments.Nodes.Add((attachment.FindFileName));
+				TreeNode addedNode = listAttachments.Nodes.Add((attachment.FileName));
 
 				// Keep a reference to the attachment in the Tag property
 				addedNode.Tag = attachment;
@@ -701,7 +701,7 @@ namespace OpenPop.TestApplication
 
 			if (attachment != null)
 			{
-				saveFile.FileName = attachment.FindFileName;
+				saveFile.FileName = attachment.FileName;
 				DialogResult result = saveFile.ShowDialog();
 				if (result != DialogResult.OK)
 					return;
