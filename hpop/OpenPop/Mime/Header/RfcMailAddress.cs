@@ -7,7 +7,8 @@ using OpenPop.Common.Logging;
 namespace OpenPop.Mime.Header
 {
 	/// <summary>
-	/// This class is used for RFC compliant email addresses
+	/// This class is used for RFC compliant email addresses.
+	/// The class cannot be instantiated from outside the library.
 	/// </summary>
 	/// <remarks>
 	/// The <seealso cref="MailAddress"/> does not cover all the possible formats 
@@ -141,7 +142,7 @@ namespace OpenPop.Mime.Header
 		/// <param name="input">The value to parse out and email and/or a username</param>
 		/// <returns>A <see cref="RfcMailAddress"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
-		public static RfcMailAddress ParseMailAddress(string input)
+		internal static RfcMailAddress ParseMailAddress(string input)
 		{
 			if (input == null)
 				throw new ArgumentNullException("input");
@@ -209,7 +210,7 @@ namespace OpenPop.Mime.Header
 		/// <param name="input">The input that is a comma-separated list of EmailAddresses to parse</param>
 		/// <returns>A List of <seealso cref="RfcMailAddress"/> objects extracted from the <paramref name="input"/> parameter.</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
-		public static List<RfcMailAddress> ParseMailAddresses(string input)
+		internal static List<RfcMailAddress> ParseMailAddresses(string input)
 		{
 			if (input == null)
 				throw new ArgumentNullException("input");

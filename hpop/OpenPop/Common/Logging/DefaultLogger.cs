@@ -23,7 +23,7 @@ namespace OpenPop.Common.Logging
 		/// <summary>
 		/// Changes the default logging to log to a new logger
 		/// </summary>
-		/// <param name="newLogger"></param>
+		/// <param name="newLogger">The new logger to use to send log messages to</param>
 		/// <exception cref="ArgumentNullException">
 		/// Never set this to <see langword="null"/>.
 		/// Instead you should implement a NullLogger which just does nothing.
