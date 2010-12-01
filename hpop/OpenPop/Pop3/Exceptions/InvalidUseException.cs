@@ -3,7 +3,8 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// Thrown when the <see cref="Pop3Client"/> is being used in an invalid way
+	/// Thrown when the <see cref="Pop3Client"/> is being used in an invalid way.<br/>
+	/// This could for example happen if a someone tries to fetch a message without authenticating.
 	/// </summary>
 	public class InvalidUseException : PopClientException
 	{

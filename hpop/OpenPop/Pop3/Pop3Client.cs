@@ -16,27 +16,18 @@ using OpenPop.Common.Logging;
 namespace OpenPop.Pop3
 {
 	/// <summary>
-	/// POP3 compliant POP Client
-	/// 
-	/// This implementation does not support threads at all.
-	/// 
+	/// POP3 compliant POP Client<br/>
+	/// <br/>	
 	/// If you want to override where logging is sent, look at <see cref="DefaultLogger"/>
 	/// </summary>
 	/// <example>
-	/// Here is an example how the Pop3Client could be used:
-	/// 
-	/// Pop3Client client = new Pop3Client();
-	/// client.Connect(serverHostName, serverPort, useSsl);
-	/// client.Authenticate(username, password);
-	/// Message messageNumber1 = client.GetMessage(1, false);
-	/// client.Disconnect();
+	/// Examples are available on the <a href="http://hpop.sourceforge.net/">project homepage</a>.
 	/// </example>
 	public class Pop3Client : Disposable
 	{
 		#region Private member properties
 		/// <summary>
-		/// This is the stream used to read off the server response
-		/// to a command
+		/// This is the stream used to read off the server response to a command
 		/// </summary>
 		private Stream InputStream { get; set; }
 
@@ -46,14 +37,12 @@ namespace OpenPop.Pop3
 		private Stream OutputStream { get; set; }
 
 		/// <summary>
-		/// This is the last response the server sent back when a
-		/// command was issued to it
+		/// This is the last response the server sent back when a command was issued to it
 		/// </summary>
 		private string LastServerResponse { get; set; }
 
 		/// <summary>
-		/// The APOP time stamp sent by the server in it's welcome
-		/// message if APOP is supported.
+		/// The APOP time stamp sent by the server in it's welcome message if APOP is supported.
 		/// </summary>
 		private string ApopTimeStamp { get; set; }
 		#endregion
@@ -65,7 +54,8 @@ namespace OpenPop.Pop3
 		public bool Connected { get; private set; }
 
 		/// <summary>
-		/// Allows you to check if the server supports APOP.
+		/// Allows you to check if the server supports the APOP authentication method.<br/>
+		/// <br/>
 		/// This value is filled when the connect method has returned,
 		/// as the server tells in its welcome message if APOP is supported.
 		/// </summary>
@@ -79,7 +69,7 @@ namespace OpenPop.Pop3
 
 		#region Constructors
 		/// <summary>
-		/// Constructs a new Pop3Client with default settings.
+		/// Constructs a new Pop3Client for you to use.
 		/// </summary>
 		public Pop3Client()
 		{
@@ -99,7 +89,8 @@ namespace OpenPop.Pop3
 
 		#region IDisposable implementation
 		/// <summary>
-		/// Disposes the <see cref="Pop3Client"/>. This is the implementation of the <see cref="IDisposable"/> interface.
+		/// Disposes the <see cref="Pop3Client"/>.<br/>
+		/// This is the implementation of the <see cref="IDisposable"/> interface.
 		/// </summary>
 		/// <param name="disposing"><see langword="true"/> if managed and unmanaged code should be disposed, <see langword="false"/> if only managed code should be disposed</param>
 		protected override void Dispose(bool disposing)
@@ -350,7 +341,7 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Authenticates a user towards the POP server using the USER, PASSWORD commands
+		/// Authenticates a user towards the POP server using the USER and PASSWORD commands
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
@@ -434,12 +425,13 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Marks the message with the given message number as deleted.
-		/// The message will not be deleted until a QUIT command is sent to the server.
-		/// This is done on disconnect.
+		/// Marks the message with the given message number as deleted.<br/>
+		/// <br/>
+		/// The message will not be deleted until a QUIT command is sent to the server.<br/>
+		/// This is done when you call <see cref="Disconnect()"/>.
 		/// </summary>
 		/// <param name="messageNumber">
-		/// The number of the message to be deleted. This message may not already have been deleted.
+		/// The number of the message to be deleted. This message may not already have been deleted.<br/>
 		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
 		/// </param>
 		/// <exception cref="PopServerException">If the server did not accept the delete command</exception>
@@ -456,10 +448,11 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Marks all messages as deleted.
-		/// The messages will not be deleted until a QUIT command is sent to the server.
-		/// This is done on disconnect.
-		/// Assumes that no prior message has been marked as deleted.
+		/// Marks all messages as deleted.<br/>
+		/// <br/>
+		/// The messages will not be deleted until a QUIT command is sent to the server.<br/>
+		/// This is done when you call <see cref="Disconnect()"/>.<br/>
+		/// The method assumes that no prior message has been marked as deleted, and is not valid to call if this is wrong.
 		/// </summary>
 		/// <exception cref="PopServerException">If the server did not accept one of the delete commands. All prior marked messages will still be marked.</exception>
 		public void DeleteAllMessages()
@@ -475,11 +468,11 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Keep server active by sending a NOOP command.
-		/// This might keep the server from closing the connection due to inactivity.
-		/// 
-		/// RFC:
-		/// The POP3 server does nothing, it merely replies with a positive response
+		/// Keep server active by sending a NOOP command.<br/>
+		/// This might keep the server from closing the connection due to inactivity.<br/>
+		/// <br/>
+		/// RFC:<br/>
+		/// The POP3 server does nothing, it merely replies with a positive response.
 		/// </summary>
 		/// <exception cref="PopServerException">If the server did not accept the NOOP command</exception>
 		public void NoOperation()
@@ -493,9 +486,9 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Send a reset command to the server.
-		/// 
-		/// RFC:
+		/// Send a reset command to the server.<br/>
+		/// <br/>
+		/// RFC:<br/>
 		/// If any messages have been marked as deleted by the POP3
 		/// server, they are unmarked. The POP3 server then replies
 		/// with a positive response.
@@ -515,7 +508,7 @@ namespace OpenPop.Pop3
 		/// Get a unique ID for a single message
 		/// </summary>
 		/// <param name="messageNumber">
-		/// Message number, which may not be marked as deleted.
+		/// Message number, which may not be marked as deleted.<br/>
 		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
 		/// </param>
 		/// <returns>The unique ID for the message</returns>
@@ -540,7 +533,7 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Gets a list of unique IDs for all messages.
+		/// Gets a list of unique IDs for all messages.<br/>
 		/// Messages marked as deleted are not listed.
 		/// </summary>
 		/// <returns>
@@ -580,7 +573,7 @@ namespace OpenPop.Pop3
 		/// Gets the size in bytes of a single message
 		/// </summary>
 		/// <param name="messageNumber">
-		/// The number of a message which may not be a message marked as deleted.
+		/// The number of a message which may not be a message marked as deleted.<br/>
 		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
 		/// </param>
 		/// <returns>Size of the message</returns>
@@ -601,8 +594,8 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Get the sizes in bytes of all the messages.
-		/// Messages marked as deleted are not listed
+		/// Get the sizes in bytes of all the messages.<br/>
+		/// Messages marked as deleted are not listed.
 		/// </summary>
 		/// <returns>Size of each message excluding deleted ones</returns>
 		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
@@ -638,7 +631,7 @@ namespace OpenPop.Pop3
 		/// Fetches a message from the server and parses it
 		/// </summary>
 		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.
+		/// Message number on server, which may not be marked as deleted.<br/>
 		/// Must be inside the range [1, messageCount]
 		/// </param>
 		/// <returns>The message, containing the email message</returns>
@@ -661,7 +654,7 @@ namespace OpenPop.Pop3
 		/// Fetches a message in raw form from the server
 		/// </summary>
 		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.
+		/// Message number on server, which may not be marked as deleted.<br/>
 		/// Must be inside the range [1, messageCount]
 		/// </param>
 		/// <returns>The raw bytes of the message</returns>
@@ -680,11 +673,11 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Get all the headers for a message.
-		/// The server will not need to send the body of the message
+		/// Get all the headers for a message.<br/>
+		/// The server will not need to send the body of the message.
 		/// </summary>
 		/// <param name="messageNumber">
-		/// Message number, which may not be marked as deleted.
+		/// Message number, which may not be marked as deleted.<br/>
 		/// Must be inside the range [1, messageCount]
 		/// </param>
 		/// <returns>MessageHeaders object</returns>
@@ -708,8 +701,8 @@ namespace OpenPop.Pop3
 
 		#region Private helper methods
 		/// <summary>
-		/// Examines string to see if it contains a time stamp to use with the APOP command
-		/// If it does, sets the <see cref="ApopTimeStamp"/> property to this value
+		/// Examines string to see if it contains a time stamp to use with the APOP command.<br/>
+		/// If it does, sets the <see cref="ApopTimeStamp"/> property to this value.
 		/// </summary>
 		/// <param name="response">The string to examine</param>
 		private void ExtractApopTimestamp(string response)
@@ -725,11 +718,11 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Tests a string to see if it is a "+OK" string.
+		/// Tests a string to see if it is a "+OK" string.<br/>
 		/// An "+OK" string should be returned by a compliant POP3
-		/// server if the request could be served.
-		/// 
-		/// The method does only check if it starts with an "+OK"
+		/// server if the request could be served.<br/>
+		/// <br/>
+		/// The method does only check if it starts with "+OK".
 		/// </summary>
 		/// <param name="response">The string to examine</param>
 		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
@@ -745,10 +738,10 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Sends a command to the POP server.
-		/// If this fails, an exception is thrown
+		/// Sends a command to the POP server.<br/>
+		/// If this fails, an exception is thrown.
 		/// </summary>
-		/// <param name="command">command to send to server</param>
+		/// <param name="command">The command to send to server</param>
 		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
 		private void SendCommand(string command)
 		{
@@ -770,13 +763,13 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="command">command to send to server</param>
 		/// <param name="location">
-		/// The location of the int to return.
-		/// Example:
-		/// S: +OK 2 200
-		/// Set <paramref name="location"/>=1 to get 2
-		/// Set <paramref name="location"/>=2 to get 200
+		/// The location of the int to return.<br/>
+		/// Example:<br/>
+		/// <c>S: +OK 2 200</c><br/>
+		/// Set <paramref name="location"/>=1 to get 2<br/>
+		/// Set <paramref name="location"/>=2 to get 200<br/>
 		/// </param>
-		/// <returns>integer value in the reply</returns>
+		/// <returns>Integer value in the reply</returns>
 		/// <exception cref="PopServerException">If the server did not accept the command</exception>
 		private int SendCommandIntResponse(string command, int location)
 		{
@@ -786,10 +779,10 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Asks the server for a message and returns the message response as a byte array
+		/// Asks the server for a message and returns the message response as a byte array.
 		/// </summary>
 		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.
+		/// Message number on server, which may not be marked as deleted.<br/>
 		/// Must be inside the range [1, messageCount]
 		/// </param>
 		/// <param name="askOnlyForHeaders">If <see langword="true"/> only the header part of the message is requested from the server. If <see langword="false"/> the full message is requested</param>

@@ -9,19 +9,24 @@ using System.Net.Mail;
 namespace OpenPop.Mime
 {
 	/// <summary>
-	/// This is the root of the email tree structure.
-	/// <see cref="Mime.MessagePart"/> for a description about the structure.
-	/// 
-	/// A <see cref="Message"/> (this class) contains the headers of an email message such as 
+	/// This is the root of the email tree structure.<br/>
+	/// <see cref="Mime.MessagePart"/> for a description about the structure.<br/>
+	/// <br/>
+	/// A Message (this class) contains the headers of an email message such as:
+	/// <code>
 	///  - To
 	///  - From
 	///  - Subject
 	///  - Content-Type
 	///  - Message-ID
-	/// which are located in the <see cref="Headers"/> property.
-	/// 
+	/// </code>
+	/// which are located in the <see cref="Headers"/> property.<br/>
+	/// <br/>
 	/// Use the <see cref="Message.MessagePart"/> property to find the actual content of the email message.
 	/// </summary>
+	/// <example>
+	/// Examples are available on the <a href="http://hpop.sourceforge.net/">project homepage</a>.
+	/// </example>
 	public class Message
 	{
 		#region Public properties
@@ -31,21 +36,23 @@ namespace OpenPop.Mime
 		public MessageHeader Headers { get; private set; }
 
 		/// <summary>
-		/// These are the message bodies that could be found in the message.
-		/// The last message should be the message most faithful to what the user sent
-		/// Commonly the second message is HTML and the first is plain text
+		/// This is the body of the email Message.<br/>
+		/// <br/>
+		/// If the body was parsed for this Message, this property will never be <see langword="null"/>.
 		/// </summary>
 		public MessagePart MessagePart { get; private set; }
 
 		/// <summary>
-		/// The raw content from which this message has been constructed
+		/// The raw content from which this message has been constructed.<br/>
+		/// These bytes can be persisted and later used to recreate the Message.
 		/// </summary>
 		public byte[] RawMessage { get; private set; }
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Convenience constructor for <see cref="Mime.Message(byte[], bool)"/>.
+		/// Convenience constructor for <see cref="Mime.Message(byte[], bool)"/>.<br/>
+		/// <br/>
 		/// Creates a message from a byte array. The full message including its body is parsed.
 		/// </summary>
 		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
@@ -55,11 +62,12 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Creates a message from a byte array.
+		/// Constructs a message from a byte array.<br/>
+		/// <br/>
 		/// The headers are always parsed, but if <paramref name="parseBody"/> is <see langword="false"/>, the body is not parsed.
 		/// </summary>
 		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
-		/// <param name="parseBody"><see langword="true"/> if the body should be parsed, <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> array</param>
+		/// <param name="parseBody"><see langword="true"/> if the body should be parsed, <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> byte array</param>
 		public Message(byte[] rawMessageContent, bool parseBody)
 		{
 			RawMessage = rawMessageContent;
@@ -82,21 +90,27 @@ namespace OpenPop.Mime
 		#endregion
 
 		/// <summary>
-		/// This method will convert this <see cref="Message"/> into a <see cref="MailMessage"/> equivalent.
-		/// The returned <see cref="MailMessage"/> can be used with <see cref="System.Net.Mail.SmtpClient"/> to forward the email.
-		/// 
+		/// This method will convert this <see cref="Message"/> into a <see cref="MailMessage"/> equivalent.<br/>
+		/// The returned <see cref="MailMessage"/> can be used with <see cref="System.Net.Mail.SmtpClient"/> to forward the email.<br/>
+		/// <br/>
 		/// You should be aware of the following about this method:
-		///  - All sender and receiver mail addresses are set.
+		/// <list type="bullet">
+		/// <item>
+		///    All sender and receiver mail addresses are set.
 		///    If you send this email using a <see cref="System.Net.Mail.SmtpClient"/> then all
 		///    receivers in To, From, Cc and Bcc will receive the email once again.
-		/// 
-		///  - If you view the source code of this Message and looks at the source code of the forwarded
+		/// </item>
+		/// <item>
+		///    If you view the source code of this Message and looks at the source code of the forwarded
 		///    <see cref="MailMessage"/> returned by this method, you will notice that the source codes are not the same.
 		///    The content that is presented by a mail client reading the forwarded <see cref="MailMessage"/> should be the
 		///    same as the original, though.
-		/// 
-		///  - Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
+		/// </item>
+		/// <item>
+		///    Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
 		///    It is simply not possible to set these on Attachments.
+		/// </item>
+		/// </list>
 		/// </summary>
 		/// <returns>A <see cref="MailMessage"/> object that contains the same information that this Message does</returns>
 		public MailMessage ToMailMessage()
@@ -177,9 +191,9 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Finds the first text/plain <see cref="MessagePart"/> in this message.
-		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.
-		/// 
+		/// Finds the first text/plain <see cref="MessagePart"/> in this message.<br/>
+		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
+		/// <br/>
 		/// If no text/plain version is found, <see langword="null"/> is returned.
 		/// </summary>
 		/// <returns>
@@ -192,9 +206,9 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Finds the first text/html <see cref="MessagePart"/> in this message.
-		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.
-		/// 
+		/// Finds the first text/html <see cref="MessagePart"/> in this message.<br/>
+		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
+		/// <br/>
 		/// If no text/html version is found, <see langword="null"/> is returned.
 		/// </summary>
 		/// <returns>
@@ -207,13 +221,16 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Finds all the <see cref="MessagePart"/>'s which contains a text version.
-		/// 
-		/// <see cref="Mime.MessagePart.IsText"/> for MessageParts which are considered to be text versions.
-		/// 
+		/// Finds all the <see cref="MessagePart"/>'s which contains a text version.<br/>
+		/// <br/>
+		/// <see cref="Mime.MessagePart.IsText"/> for MessageParts which are considered to be text versions.<br/>
+		/// <br/>
 		/// Examples of MessageParts media types are:
-		/// text/plain
-		/// text/html
+		/// <list type="bullet">
+		///    <item>text/plain</item>
+		///    <item>text/html</item>
+		///    <item>text/xml</item>
+		/// </list>
 		/// </summary>
 		/// <returns>A List of MessageParts where each part is a text version</returns>
 		public List<MessagePart> FindAllTextVersions()
@@ -222,8 +239,8 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Finds all the <see cref="MessagePart"/>'s which are attachments to this message.
-		/// 
+		/// Finds all the <see cref="MessagePart"/>'s which are attachments to this message.<br/>
+		/// <br/>
 		/// <see cref="Mime.MessagePart.IsAttachment"/> for MessageParts which are considered to be attachments.
 		/// </summary>
 		/// <returns>A List of MessageParts where each is considered an attachment</returns>
@@ -233,7 +250,8 @@ namespace OpenPop.Mime
 		}
 
 		///<summary>
-		/// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.
+		/// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.<br/>
+		/// <br/>
 		/// The search in the hierarchy is a depth-first traversal.
 		///</summary>
 		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
@@ -248,8 +266,8 @@ namespace OpenPop.Mime
 		///</summary>
 		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
 		/// <returns>
-		/// A List of <see cref="MessagePart"/>s with the given MediaType.
-		/// The List might be empty if no such <see cref="MessagePart"/>s were found.
+		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
+		/// The List might be empty if no such <see cref="MessagePart"/>s were found.<br/>
 		/// The order of the elements in the list is the order which they are found using
 		/// a depth first traversal of the <see cref="Message"/> hierarchy.
 		/// </returns>
@@ -259,7 +277,8 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Save this <see cref="Message"/> to a file.
+		/// Save this <see cref="Message"/> to a file.<br/>
+		/// <br/>
 		/// Can be loaded at a later time using the <see cref="LoadFromFile"/> method.
 		/// </summary>
 		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>

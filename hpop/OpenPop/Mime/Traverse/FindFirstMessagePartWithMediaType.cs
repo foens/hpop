@@ -3,8 +3,7 @@
 namespace OpenPop.Mime.Traverse
 {
 	///<summary>
-	/// Finds the first <see cref="MessagePart"/> which have a given MediaType in a
-	/// depth first traversal.
+	/// Finds the first <see cref="MessagePart"/> which have a given MediaType in a depth first traversal.
 	///</summary>
 	internal class FindFirstMessagePartWithMediaType : IQuestionAnswerMessageTraverser<string, MessagePart>
 	{

@@ -3,9 +3,9 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// Thrown when the supplied login doesn't exist on the server
+	/// Thrown when the supplied username is not accepted by the POP3 server.
 	/// </summary>
-	/// <remarks>Should be used only when using USER/PASS Authentication Method</remarks>
+	/// <remarks>Should be used only when using <see cref="AuthenticationMethod.UsernameAndPassword"/>.</remarks>
 	public class InvalidLoginException : PopClientException
 	{
 		///<summary>

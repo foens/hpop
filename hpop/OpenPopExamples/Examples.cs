@@ -253,7 +253,7 @@ namespace OpenPopExamples
 					}
 				}
 
-				// Return our new found message
+				// Return our new found messages
 				return newMessages;
 			}
 		}
@@ -265,10 +265,8 @@ namespace OpenPopExamples
     	/// </summary>
     	/// <param name="hostname">Hostname of the server. For example: pop3.live.com</param>
     	/// <param name="port">Host port to connect to. Normally: 110 for plain POP3, 995 for SSL POP3</param>
-    	/// <param name="username">Username of the user on the server</param>
-    	/// <param name="password">Password of the user on the server</param>
     	/// <param name="timeouts">Read and write timeouts used by the Pop3Client</param>
-    	public static void BypassSslCertificateCheck(string hostname, int port, string username, string password, int timeouts)
+    	public static void BypassSslCertificateCheck(string hostname, int port, int timeouts)
 		{
 			// The client disconnects from the server when being disposed
 			using (Pop3Client client = new Pop3Client())

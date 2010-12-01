@@ -3,7 +3,7 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// Thrown when the specified POP3 Server can not be found or connected with
+	/// Thrown when the specified POP3 server can not be found or connected to.
 	/// </summary>	
 	public class PopServerNotFoundException : PopClientException
 	{

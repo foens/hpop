@@ -43,8 +43,9 @@ namespace OpenPop.Pop3
 		/// Releases unmanaged and - optionally - managed resources. Remember to call this method from your derived classes.
 		/// </summary>
 		/// <param name="disposing">
-		/// Set to <c>true</c> to release both managed and unmanaged resources.
-		/// Set to <c>false</c> to release only unmanaged resources.</param>
+		/// Set to <c>true</c> to release both managed and unmanaged resources.<br/>
+		/// Set to <c>false</c> to release only unmanaged resources.
+		/// </param>
 		protected virtual void Dispose(bool disposing)
 		{
 		}
@@ -53,8 +54,10 @@ namespace OpenPop.Pop3
 		/// Used to assert that the object has not been disposed
 		/// </summary>
 		/// <exception cref="ObjectDisposedException">Thrown if the object is in a disposed state.</exception>
-		/// <remarks>The method is to be used by the subclasses in order to provide a simple method for checking the 
-		/// disposal state of the object.</remarks>
+		/// <remarks>
+		/// The method is to be used by the subclasses in order to provide a simple method for checking the 
+		/// disposal state of the object.
+		/// </remarks>
 		protected void AssertDisposed()
 		{
 			if (IsDisposed)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace OpenPop.Mime.Traverse
 {
 	/// <summary>
-	/// This is an abstract class which handles traversing of a <see cref="Message"/> tree structure.
+	/// This is an abstract class which handles traversing of a <see cref="Message"/> tree structure.<br/>
 	/// It runs through the message structure using a depth-first traversal.
 	/// </summary>
 	/// <typeparam name="TAnswer">The answer you want from traversing the message tree structure</typeparam>
@@ -26,9 +26,8 @@ namespace OpenPop.Mime.Traverse
 
 		/// <summary>
 		/// Call this method when you want to find an answer for a <see cref="MessagePart"/>
-		/// which is a <see cref="MessagePart.IsMultiPart">MultiPart</see> message.
 		/// </summary>
-		/// <param name="messagePart">The message part you want an answer from. Must be a MultiPart message.</param>
+		/// <param name="messagePart">The <see cref="MessagePart"/> part you want an answer from.</param>
 		/// <returns>An answer</returns>
 		/// <exception cref="ArgumentNullException">if <param name="messagePart"/> is <see langword="null"/></exception>
 		public TAnswer VisitMessagePart(MessagePart messagePart)

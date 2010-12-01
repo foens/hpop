@@ -8,13 +8,13 @@ using OpenPop.Common;
 namespace OpenPop.Mime.Header
 {
 	///<summary>
-	/// Utility class that divides a message into a body and a header.
+	/// Utility class that divides a message into a body and a header.<br/>
 	/// The header is then parsed to a strongly typed <see cref="MessageHeader"/> object.
 	///</summary>
 	internal static class HeaderExtractor
 	{
 		/// <summary>
-		/// Find the end of the header section in a byte array.
+		/// Find the end of the header section in a byte array.<br/>
 		/// The headers have ended when a blank line is found
 		/// </summary>
 		/// <param name="messageContent">The full message stored as a byte array</param>
@@ -43,7 +43,7 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Extract the header part and body part of a message.
+		/// Extract the header part and body part of a message.<br/>
 		/// The headers are then parsed to a strongly typed <see cref="MessageHeader"/> object.
 		/// </summary>
 		/// <param name="fullRawMessage">The full message in bytes where header and body needs to be extracted from</param>
@@ -134,8 +134,8 @@ namespace OpenPop.Mime.Header
 
 		/// <summary>
 		/// Check if the next line is part of the current header value we are parsing by
-		/// peeking on the next character of the <see cref="TextReader"/>.
-		/// This should only be called while parsing headers
+		/// peeking on the next character of the <see cref="TextReader"/>.<br/>
+		/// This should only be called while parsing headers.
 		/// </summary>
 		/// <param name="reader">The reader from which the header is read from</param>
 		/// <returns><see langword="true"/> if multi-line header. <see langword="false"/> otherwise</returns>

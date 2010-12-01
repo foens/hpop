@@ -4,8 +4,7 @@ using System.Collections.Generic;
 namespace OpenPop.Mime.Traverse
 {
 	///<summary>
-	/// Finds all the <see cref="MessagePart"/>s which have a given MediaType using a
-	/// depth first traversal.
+	/// Finds all the <see cref="MessagePart"/>s which have a given MediaType using a depth first traversal.
 	///</summary>
 	internal class FindAllMessagePartsWithMediaType : IQuestionAnswerMessageTraverser<string, List<MessagePart>>
 	{
@@ -15,8 +14,9 @@ namespace OpenPop.Mime.Traverse
 		/// <param name="message">The <see cref="Message"/> to start looking in</param>
 		/// <param name="question">The MediaType to look for. Has to be in lowercase.</param>
 		/// <returns>
-		/// A List of <see cref="MessagePart"/>s with the given MediaType.
-		/// The List might be empty if no such <see cref="MessagePart"/>s were found.
+		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
+		/// <br/>
+		/// The List might be empty if no such <see cref="MessagePart"/>s were found.<br/>
 		/// The order of the elements in the list is the order which they are found using
 		/// a depth first traversal of the <see cref="Message"/> hierarchy.
 		/// </returns>
@@ -34,8 +34,9 @@ namespace OpenPop.Mime.Traverse
 		/// <param name="messagePart">The <see cref="MessagePart"/> to start looking in</param>
 		/// <param name="question">The MediaType to look for. Has to be in lowercase.</param>
 		/// <returns>
-		/// A List of <see cref="MessagePart"/>s with the given MediaType.
-		/// The List might be empty if no such <see cref="MessagePart"/>s were found.
+		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
+		/// <br/>
+		/// The List might be empty if no such <see cref="MessagePart"/>s were found.<br/>
 		/// The order of the elements in the list is the order which they are found using
 		/// a depth first traversal of the <see cref="Message"/> hierarchy.
 		/// </returns>

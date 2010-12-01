@@ -3,7 +3,7 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// This is the base exception for all <see cref="Pop3Client"/> exceptions
+	/// This is the base exception for all <see cref="Pop3Client"/> exceptions.
 	/// </summary>
 	public abstract class PopClientException : Exception
 	{

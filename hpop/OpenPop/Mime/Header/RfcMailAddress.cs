@@ -7,7 +7,8 @@ using OpenPop.Common.Logging;
 namespace OpenPop.Mime.Header
 {
 	/// <summary>
-	/// This class is used for RFC compliant email addresses.
+	/// This class is used for RFC compliant email addresses.<br/>
+	/// <br/>
 	/// The class cannot be instantiated from outside the library.
 	/// </summary>
 	/// <remarks>
@@ -19,34 +20,34 @@ namespace OpenPop.Mime.Header
 	{
 		#region Properties
 		///<summary>
-		/// The email address of this <see cref="RfcMailAddress"/>
+		/// The email address of this <see cref="RfcMailAddress"/><br/>
 		/// It is possibly string.Empty since RFC mail addresses does not require an email address specified.
 		///</summary>
 		///<example>
-		/// Example header with email address:
-		/// To: Test test@mail.com
-		/// Address will be test@mail.com
+		/// Example header with email address:<br/>
+		/// To: <c>Test test@mail.com</c><br/>
+		/// Address will be <c>test@mail.com</c><br/>
 		///</example>
 		///<example>
-		/// Example header without email address:
-		/// To: Test
-		/// Address will be string.Empty
+		/// Example header without email address:<br/>
+		/// To: <c>Test</c><br/>
+		/// Address will be <see cref="string.Empty"/>.
 		///</example>
 		public string Address { get; private set; }
 
 		///<summary>
-		/// The display name of this <see cref="RfcMailAddress"/>
-		/// It is possibly string.Empty since RFC mail addresses does not require a display name to be specified.
+		/// The display name of this <see cref="RfcMailAddress"/><br/>
+		/// It is possibly <see cref="string.Empty"/> since RFC mail addresses does not require a display name to be specified.
 		///</summary>
 		///<example>
-		/// Example header with display name:
-		/// To: Test test@mail.com
-		/// DisplayName will be Test
+		/// Example header with display name:<br/>
+		/// To: <c>Test test@mail.com</c><br/>
+		/// DisplayName will be <c>Test</c>
 		///</example>
 		///<example>
-		/// Example header without display name:
-		/// To: test@test.com
-		/// DisplayName will be string.Empty
+		/// Example header without display name:<br/>
+		/// To: <c>test@test.com</c><br/>
+		/// DisplayName will be <see cref="string.Empty"/>
 		///</example>
 		public string DisplayName { get; private set; }
 
@@ -59,7 +60,7 @@ namespace OpenPop.Mime.Header
 		/// The <see cref="MailAddress"/> associated with the <see cref="RfcMailAddress"/>. 
 		/// </summary>
 		/// <remarks>
-		/// The value of this property can be <see lanword="null"/> in instances where the <see cref="MailAddress"/> cannot represent the address properly.
+		/// The value of this property can be <see lanword="null"/> in instances where the <see cref="MailAddress"/> cannot represent the address properly.<br/>
 		/// Use <see cref="HasValidMailAddress"/> property to see if this property is valid.
 		/// </remarks>
 		public MailAddress MailAddress { get; private set; }
@@ -75,7 +76,7 @@ namespace OpenPop.Mime.Header
 
 		#region Constructors
 		/// <summary>
-		/// Constructs an <see cref="RfcMailAddress"/> object from a <see cref="MailAddress"/> object.
+		/// Constructs an <see cref="RfcMailAddress"/> object from a <see cref="MailAddress"/> object.<br/>
 		/// This constructor is used when we were able to construct a <see cref="MailAddress"/> from a string.
 		/// </summary>
 		/// <param name="mailAddress">The address that <paramref name="raw"/> was parsed into</param>
@@ -127,21 +128,23 @@ namespace OpenPop.Mime.Header
 
 		#region Parsing
 		/// <summary>
-		/// Parses an email address from a MIME header
-		/// <see href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 section-3.4</see> for more details.
-		/// 
+		/// Parses an email address from a MIME header<br/>
+		/// <br/>
 		/// Examples of input:
-		/// Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;
-		/// "Eksperten mailrobot" &lt;noreply@mail.eksperten.dk&gt;
-		/// &lt;noreply@mail.eksperten.dk&gt;
-		/// noreply@mail.eksperten.dk
-		/// 
-		/// It might also contain encoded text.
-		/// <see cref="EncodedWord.Decode">For more information about encoded text</see>
+		/// <c>Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;</c><br/>
+		/// <c>"Eksperten mailrobot" &lt;noreply@mail.eksperten.dk&gt;</c><br/>
+		/// <c>&lt;noreply@mail.eksperten.dk&gt;</c><br/>
+		/// <c>noreply@mail.eksperten.dk</c><br/>
+		/// <br/>
+		/// It might also contain encoded text, which will then be decoded.
 		/// </summary>
 		/// <param name="input">The value to parse out and email and/or a username</param>
 		/// <returns>A <see cref="RfcMailAddress"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
+		/// <remarks>
+		/// <see href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 section-3.4</see> for more details on email syntax.<br/>
+		/// <see cref="EncodedWord.Decode">For more information about encoded text</see>.
+		/// </remarks>
 		internal static RfcMailAddress ParseMailAddress(string input)
 		{
 			if (input == null)
@@ -203,8 +206,8 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parses input of the form
-		/// Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;, ...
+		/// Parses input of the form<br/>
+		/// <c>Eksperten mailrobot &lt;noreply@mail.eksperten.dk&gt;, ...</c><br/>
 		/// to a list of RFCMailAddresses
 		/// </summary>
 		/// <param name="input">The input that is a comma-separated list of EmailAddresses to parse</param>
@@ -230,9 +233,8 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Split a list of addresses in one string into a elements of addresses.
-		/// Basically a split is needed at each comma, except if the comma is
-		/// inside a quote.
+		/// Split a list of addresses in one string into a elements of addresses.<br/>
+		/// Basically a split is needed at each comma, except if the comma is inside a quote.
 		/// </summary>
 		/// <param name="input">The list of addresses to be split</param>
 		/// <returns>Each address as an element</returns>

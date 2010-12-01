@@ -3,12 +3,12 @@
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Contains common operations needed while decoding
+	/// Contains common operations needed while decoding.
 	/// </summary>
 	internal static class Utility
 	{
 		/// <summary>
-		/// Separate header name and header value
+		/// Separate header name and header value.
 		/// </summary>
 		/// <exception cref="ArgumentNullException">If <paramref name="rawHeader"/> is <see langword="null"/></exception>
 		public static string[] GetHeadersValue(string rawHeader)
@@ -30,7 +30,7 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// Remove quotes, if found, around the string
+		/// Remove quotes, if found, around the string.
 		/// </summary>
 		/// <param name="text">Text with quotes or without quotes</param>
 		/// <returns>Text without quotes</returns>

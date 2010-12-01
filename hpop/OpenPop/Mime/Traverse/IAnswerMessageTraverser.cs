@@ -1,7 +1,7 @@
 ﻿namespace OpenPop.Mime.Traverse
 {
 	/// <summary>
-	/// This interface describes a MessageTraverser which is able to traverse a Message structure
+	/// This interface describes a MessageTraverser which is able to traverse a Message hierarchy structure
 	/// and deliver some answer.
 	/// </summary>
 	/// <typeparam name="TAnswer">This is the type of the answer you want to have delivered.</typeparam>

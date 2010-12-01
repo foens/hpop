@@ -11,7 +11,7 @@ namespace OpenPop.Common
 	{
 		/// <summary>
 		/// Read a line from the stream.
-		/// A line is interpreted as all the bytes read until a CRLF or LF is encountered.
+		/// A line is interpreted as all the bytes read until a CRLF or LF is encountered.<br/>
 		/// CRLF pair or LF is not included in the string.
 		/// </summary>
 		/// <param name="stream">The stream from which the line is to be read</param>

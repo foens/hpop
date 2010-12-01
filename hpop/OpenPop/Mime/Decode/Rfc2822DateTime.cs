@@ -5,16 +5,16 @@ using System.Text.RegularExpressions;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Portions Copyright (c) vendredi13@007.freesurf.fr
-	/// All rights reserved.
-	/// 
+	/// Portions Copyright (c) vendredi13@007.freesurf.fr<br/>
+	/// All rights reserved.<br/>
+	/// <br/>
 	/// Redistribution and use in source and binary forms, with or without
-	/// modification, are permitted.
-	/// 
+	/// modification, are permitted.<br/>
+	/// <br/>
 	/// Bugs supplied by Ross Presser on codeProject.com has been incorporated.
 	/// </summary>
 	/// <remarks> 
-	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">RFC 2822-date-parser</a> for original version.
+	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">RFC 2822-date-parser</a> for original version.<br/>
 	/// See <a href="http://www.codeproject.com/info/cpol10.aspx">CodeProject.com license</a> for license.
 	/// </remarks>
 	internal static class Rfc2822DateTime

@@ -3,9 +3,12 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// Thrown when the user mailbox is in a locked state
+	/// Thrown when the user mailbox is in a locked state.<br/>
 	/// </summary>
-	/// <remarks>The mail boxes are locked when an existing session is open on the mail server. Lock conditions are also met in case of aborted sessions</remarks>
+	/// <remarks>
+	/// The mail boxes are locked when an existing session is open on the POP3 server.<br/>
+	/// Lock conditions are also met in case of aborted sessions.
+	/// </remarks>
 	public class PopServerLockedException : PopClientException
 	{
 		///<summary>

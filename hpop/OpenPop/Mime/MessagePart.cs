@@ -10,30 +10,34 @@ using OpenPop.Common;
 namespace OpenPop.Mime
 {
 	/// <summary>
-	/// A MessagePart is a part of an email message used to describe the whole email parse tree.
-	/// 
-	/// Email messages are tree structures:
-	/// Email messages may contain large tree structures, and the MessagePart are the nodes of the this structure.
-	/// A MessagePart may either be a leaf in the structure or a internal node with links to other MessageParts.
-	/// The root of the message tree is the <see cref="Message"/> class.
-	/// 
-	/// Leafs:
-	/// If a MessagePart is a leaf, the part is not a <see cref="IsMultiPart">MultiPart</see> message.
-	/// Leafs are where the contents of an email are placed.
-	/// This includes, but is not limited to: attachments, text or images referenced from HTML.
-	/// The content of an attachment can be fetched by using the <see cref="Body"/> property.
-	/// If you want to have the text version of a MessagePart, use the <see cref="GetBodyAsText"/> method which will
-	/// convert the <see cref="Body"/> into a string using the encoding the message was sent with.
-	/// 
-	/// Internal nodes:
-	/// If a MessagePart is an internal node in the email tree structure, then the part is a <see cref="IsMultiPart">MultiPart</see> message.
-	/// The <see cref="MessageParts"/> property will then contain links to the parts it contain.
-	/// The <see cref="Body"/> property of the MessagePart will not be set.
+	/// A MessagePart is a part of an email message used to describe the whole email parse tree.<br/>
+	/// <br/>
+	/// <b>Email messages are tree structures</b>:<br/>
+	/// Email messages may contain large tree structures, and the MessagePart are the nodes of the this structure.<br/>
+	/// A MessagePart may either be a leaf in the structure or a internal node with links to other MessageParts.<br/>
+	/// The root of the message tree is the <see cref="Message"/> class.<br/>
+	/// <br/>
+	/// <b>Leafs</b>:<br/>
+	/// If a MessagePart is a leaf, the part is not a <see cref="IsMultiPart">MultiPart</see> message.<br/>
+	/// Leafs are where the contents of an email are placed.<br/>
+	/// This includes, but is not limited to: attachments, text or images referenced from HTML.<br/>
+	/// The content of an attachment can be fetched by using the <see cref="Body"/> property.<br/>
+	/// If you want to have the text version of a MessagePart, use the <see cref="GetBodyAsText"/> method which will<br/>
+	/// convert the <see cref="Body"/> into a string using the encoding the message was sent with.<br/>
+	/// <br/>
+	/// <b>Internal nodes</b>:<br/>
+	/// If a MessagePart is an internal node in the email tree structure, then the part is a <see cref="IsMultiPart">MultiPart</see> message.<br/>
+	/// The <see cref="MessageParts"/> property will then contain links to the parts it contain.<br/>
+	/// The <see cref="Body"/> property of the MessagePart will not be set.<br/>
+	/// <br/>
+	/// See the example for a parsing example.<br/>
+	/// This class cannot be instantiated from outside the library.
 	/// </summary>
 	/// <example>
-	/// This example illustrates how the message parse tree looks like given a specific message
-	/// 
-	/// The message source in this example is:
+	/// This example illustrates how the message parse tree looks like given a specific message<br/>
+	/// <br/>
+	/// The message source in this example is:<br/>
+	/// <code>
 	/// MIME-Version: 1.0
 	///	Content-Type: multipart/mixed; boundary="frontier"
 	///	
@@ -49,14 +53,16 @@ namespace OpenPop.Mime
 	///	PGh0bWw+CiAgPGHLYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUg
 	///	Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==
 	///	--frontier--
-	/// 
-	/// The tree will look as follows, where the content-type media type of the message is listed
+	/// </code>
+	/// The tree will look as follows, where the content-type media type of the message is listed<br/>
+	/// <code>
 	/// - Message root
 	///   - multipart/mixed MessagePart
 	///     - text/plain MessagePart
 	///     - application/octet-stream MessagePart
-	/// 
-	/// It is possible to have more complex message trees like the following:
+	/// </code>
+	/// It is possible to have more complex message trees like the following:<br/>
+	/// <code>
 	/// - Message root
 	///   - multipart/mixed MessagePart
 	///     - text/plain MessagePart
@@ -66,66 +72,77 @@ namespace OpenPop.Mime
 	///       - image/tiff
 	///     - text/enriched
 	///     - message/rfc822
-	/// 
-	/// But it is also possible to have very simple message trees like:
+	/// </code>
+	/// But it is also possible to have very simple message trees like:<br/>
+	/// <code>
 	/// - Message root
 	///   - text/plain
+	/// </code>
 	/// </example>
 	public class MessagePart
 	{
 		#region Public properties
 		/// <summary>
-		/// The ContentType header field.
-		/// If not set, the ContentType is created by the default string
-		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 5.2
-		/// which is "text/plain; charset=us-ascii"
+		/// The Content-Type header field.<br/>
+		/// <br/>
+		/// If not set, the ContentType is created by the default "text/plain; charset=us-ascii" which is
+		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 5.2.<br/>
+		/// <br/>
+		/// If set, the default is overridden.
 		/// </summary>
 		public ContentType ContentType { get; private set; }
 
 		/// <summary>
-		/// A human readable description of the body
-		/// Null if not set
+		/// A human readable description of the body<br/>
+		/// <br/>
+		/// <see langword="null"/> if no Content-Description header was present in the message.<br/>
 		/// </summary>
 		public string ContentDescription { get; private set; }
 
 		/// <summary>
-		/// The CONTENT-TRANSFER-ENCODING header field
-		/// 
-		/// If the header was not found when this object was created, it is set
-		/// to the default of 7BIT
+		/// This header describes the Content encoding during transfer.<br/>
+		/// <br/>
+		/// If no Content-Transfer-Encoding header was present in the message, it is set
+		/// to the default of <see cref="Header.ContentTransferEncoding.SevenBit">SevenBit</see> in accordance to the RFC.
 		/// </summary>
 		/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Part 6 for details</remarks>
 		public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>
-		/// ID of the content part (like an attached image). Used with MultiPart messages.
-		/// Null if not set
+		/// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
+		/// <br/>
+		/// <see langword="null"/> if no Content-ID header field was present in the message.
 		/// </summary>
 		public string ContentId { get; private set; }
 
 		/// <summary>
-		/// The ContentDisposition header field
-		/// Null if not set
+		/// Used to describe if a <see cref="MessagePart"/> is to be displayed or to be though of as an attachment.<br/>
+		/// Also contains information about filename if such was sent.<br/>
+		/// <br/>
+		/// <see langword="null"/> if no Content-Disposition header field was present in the message
 		/// </summary>
 		public ContentDisposition ContentDisposition { get; private set; }
 
 		/// <summary>
-		/// This is the encoding used to parse the message body if the <see cref="MessagePart"/>
+		/// This is the encoding used to parse the message body if the <see cref="MessagePart"/><br/>
 		/// is not a MultiPart message. It is derived from the <see cref="ContentType"/> character set property.
 		/// </summary>
 		public Encoding BodyEncoding { get; private set; }
 
 		/// <summary>
-		/// This is the parsed body of this <see cref="MessagePart"/>.
+		/// This is the parsed body of this <see cref="MessagePart"/>.<br/>
 		/// It is parsed in that way, if the body was ContentTransferEncoded, it has been decoded to the
-		/// correct bytes.
-		/// It will be <see langword="null"/> if this <see cref="MessagePart"/> is a MultiPart message.
+		/// correct bytes.<br/>
+		/// <br/>
+		/// It will be <see langword="null"/> if this <see cref="MessagePart"/> is a MultiPart message.<br/>
 		/// Use <see cref="IsMultiPart"/> to check if this <see cref="MessagePart"/> is a MultiPart message.
 		/// </summary>
 		public byte[] Body { get; private set; }
 
 		/// <summary>
-		/// Describes if this <see cref="MessagePart"/> is a MultiPart message
+		/// Describes if this <see cref="MessagePart"/> is a MultiPart message<br/>
+		/// <br/>
+		/// The <see cref="MessagePart"/> is a MultiPart message if the <see cref="ContentType"/> media type property starts with "multipart/"
 		/// </summary>
 		public bool IsMultiPart
 		{
@@ -149,10 +166,10 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// A <see cref="MessagePart"/> is considered to be an attachment, if
-		///  - it is not holding <see cref="IsText">text</see> and is not a <see cref="IsMultiPart">MultiPart</see> message
-		///  or
-		///  - it has a Content-Disposition header that says it is an attachment
+		/// A <see cref="MessagePart"/> is considered to be an attachment, if<br/>
+		/// - it is not holding <see cref="IsText">text</see> and is not a <see cref="IsMultiPart">MultiPart</see> message<br/>
+		/// or<br/>
+		/// - it has a Content-Disposition header that says it is an attachment
 		/// </summary>
 		public bool IsAttachment
 		{
@@ -164,17 +181,19 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// This is a convenient-property for figuring out a FileName for this <see cref="MessagePart"/>.
-		/// If the <see cref="MessagePart"/> is a MultiPart message, then it makes no sense to try to find a FileName.
-		/// The FileName can be specified in the <see cref="ContentDisposition"/> or in the <see cref="ContentType"/> properties.
+		/// This is a convenient-property for figuring out a FileName for this <see cref="MessagePart"/>.<br/>
+		/// If the <see cref="MessagePart"/> is a MultiPart message, then it makes no sense to try to find a FileName.<br/>
+		/// <br/>
+		/// The FileName can be specified in the <see cref="ContentDisposition"/> or in the <see cref="ContentType"/> properties.<br/>
 		/// If none of these places two places tells about the FileName, a default "(no name)" is returned.
 		/// </summary>
 		public string FileName { get; private set; }
 
 		/// <summary>
 		/// If this <see cref="MessagePart"/> is a MultiPart message, then this property
-		/// has a list of each of the Multiple parts that the message consists of
-		/// It is <see langword="null"/> if it is not a MultiPart message.
+		/// has a list of each of the Multiple parts that the message consists of.<br/>
+		/// <br/>
+		/// It is <see langword="null"/> if it is not a MultiPart message.<br/>
 		/// Use <see cref="IsMultiPart"/> to check if this <see cref="MessagePart"/> is a MultiPart message.
 		/// </summary>
 		public List<MessagePart> MessageParts { get; private set; }
@@ -262,8 +281,8 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Parses the <paramref name="rawBody"/> byte array as a MultiPart message.
-		/// It is not valid to call this method if <see cref="IsMultiPart"/> returned <see langword="false"/>.
+		/// Parses the <paramref name="rawBody"/> byte array as a MultiPart message.<br/>
+		/// It is not valid to call this method if <see cref="IsMultiPart"/> returned <see langword="false"/>.<br/>
 		/// Fills the <see cref="MessageParts"/> property of this <see cref="MessagePart"/>.
 		/// </summary>
 		/// <param name="rawBody">The byte array which is to be parsed as a MultiPart message</param>
@@ -287,7 +306,7 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Given a byte array describing a full message.
+		/// Given a byte array describing a full message.<br/>
 		/// Parses the byte array into a <see cref="MessagePart"/>.
 		/// </summary>
 		/// <param name="rawMessageContent">The byte array containing both headers and body of a message</param>
@@ -352,7 +371,7 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Method that is able to find a specific MultiPart boundary in a Stream.
+		/// Method that is able to find a specific MultiPart boundary in a Stream.<br/>
 		/// The Stream passed should not be used for anything else then for looking for MultiPart boundaries
 		/// <param name="stream">The stream to find the next MultiPart boundary in. Do not use it for anything else then with this method.</param>
 		/// <param name="multipPartBoundary">The MultiPart boundary to look for. This should be found in the <see cref="ContentType"/> header</param>
@@ -418,18 +437,18 @@ namespace OpenPop.Mime
 
 		#region Public methods
 		/// <summary>
-		/// Gets this MessagePart's <see cref="Body"/> as text.
-		/// This is simply the <see cref="BodyEncoding"/> being used on the raw bytes of the <see cref="Body"/> property
-		/// This method is only valid to call if it is not a MultiPart message and therefore contains a body
+		/// Gets this MessagePart's <see cref="Body"/> as text.<br/>
+		/// This is simply the <see cref="BodyEncoding"/> being used on the raw bytes of the <see cref="Body"/> property.<br/>
+		/// This method is only valid to call if it is not a MultiPart message and therefore contains a body.<br/>
 		/// </summary>
-		/// <returns>The <see cref="Body"/> as a string</returns>
+		/// <returns>The <see cref="Body"/> property as a string</returns>
 		public string GetBodyAsText()
 		{
 			return BodyEncoding.GetString(Body);
 		}
 
 		/// <summary>
-		/// Save this <see cref="MessagePart"/> to a file.
+		/// Save this <see cref="MessagePart"/> to a file.<br/>
 		/// There are no methods to reload the file.
 		/// </summary>
 		/// <param name="file">The File location to save the <see cref="MessagePart"/> to. Existent files will be overwritten.</param>

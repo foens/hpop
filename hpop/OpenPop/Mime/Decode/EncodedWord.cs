@@ -6,39 +6,41 @@ using OpenPop.Mime.Header;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Utility class for dealing with encoded word strings
-	/// 
+	/// Utility class for dealing with encoded word strings<br/>
+	/// <br/>
 	/// EncodedWord encoded strings are only in ASCII, but can embed information
-	/// about characters in other character sets.
-	/// 
+	/// about characters in other character sets.<br/>
+	/// <br/>
 	/// It is done by specifying the character set, an encoding that maps from ASCII to
-	/// the correct bytes and the actual encoded string.
-	/// 
-	/// It is specified in a format that is best summarized by a BNF:
-	/// "=?" character_set "?" encoding "?" encoded-text "?="
-	/// Example:
-	/// =?ISO-8859-1?Q?=2D?=
-	/// Here ISO-8859-1 is the character set
-	/// Q is the encoding method (quoted-printable). B is also supported (Base 64).
-	/// The encoded text is the =2D part which is decoded to a space.
+	/// the correct bytes and the actual encoded string.<br/>
+	/// <br/>
+	/// It is specified in a format that is best summarized by a BNF:<br/>
+	/// <c>"=?" character_set "?" encoding "?" encoded-text "?="</c><br/>
 	/// </summary>
+	/// <example>
+	/// <c>=?ISO-8859-1?Q?=2D?=</c>
+	/// Here <c>ISO-8859-1</c> is the character set.<br/>
+	/// <c>Q</c> is the encoding method (quoted-printable). <c>B</c> is also supported (Base 64).<br/>
+	/// The encoded text is the <c>=2D</c> part which is decoded to a space.
+	/// </example>
 	internal static class EncodedWord
 	{
 		/// <summary>
-		/// Decode text that is encoded with the <see cref="EncodedWord"/> encoding.
-		///
-		/// This method will decode any encoded-word found in the string.
-		/// All parts which is not encoded will not be touched.
-		/// 
-		/// From <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a>:
+		/// Decode text that is encoded with the <see cref="EncodedWord"/> encoding.<br/>
+		///<br/>
+		/// This method will decode any encoded-word found in the string.<br/>
+		/// All parts which is not encoded will not be touched.<br/>
+		/// <br/>
+		/// From <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a>:<br/>
+		/// <code>
 		/// Generally, an "encoded-word" is a sequence of printable ASCII
 		/// characters that begins with "=?", ends with "?=", and has two "?"s in
 		/// between.  It specifies a character set and an encoding method, and
 		/// also includes the original text encoded as graphic ASCII characters,
 		/// according to the rules for that encoding method.
-		/// 
-		/// Example:
-		/// =?ISO-8859-1?q?this=20is=20some=20text?= other text here
+		/// </code>
+		/// Example:<br/>
+		/// <c>=?ISO-8859-1?q?this=20is=20some=20text?= other text here</c>
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-2">RFC 2047 section-2</a> "Syntax of encoded-words" for more details</remarks>
 		/// <param name="encodedWords">Source text. May be content which is not encoded.</param>

@@ -3,7 +3,7 @@
 namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
-	/// Thrown when the POP3 Server sends an error (-ERR) during initial handshake (HELO)
+	/// Thrown when the POP3 server sends an error "-ERR" during initial handshake "HELO".
 	/// </summary>	
 	public class PopServerNotAvailableException : PopClientException
 	{

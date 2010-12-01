@@ -6,19 +6,19 @@ using System.Text.RegularExpressions;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Used for decoding Quoted-Printable text
-	/// This is a robust implementation of a Quoted-Printable decoder defined in RFC 2047.
+	/// Used for decoding Quoted-Printable text.<br/>
+	/// This is a robust implementation of a Quoted-Printable decoder defined in RFC 2047.<br/>
 	/// Every measurement has been taken to conform to the RFC.
 	/// </summary>
 	/// <remarks>
-	/// <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> This is the RFC which the decoder conforms to.
+	/// <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> is the RFC which the decoder conforms to.<br/>
 	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">RFC 2045</a> which originally
 	/// defined what a Quoted-Printable string was.
 	/// </remarks>
 	internal static class QuotedPrintable
 	{
 		/// <summary>
-		/// Decodes a Quoted-Printable string
+		/// Decodes a Quoted-Printable string.
 		/// </summary>
 		/// <param name="toDecode">Quoted-Printable encoded string</param>
 		/// <param name="encoding">Specifies which encoding the returned string will be in</param>
@@ -37,7 +37,7 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// Decodes a Quoted-Printable string
+		/// Decodes a Quoted-Printable string.
 		/// </summary>
 		/// <param name="toDecode">Quoted-Printable encoded string</param>
 		/// <returns>A decoded byte array that the Quoted-Printable encoded string described</returns>
@@ -51,13 +51,14 @@ namespace OpenPop.Mime.Decode
 			return RFC2047QuotedPrintableDecode(toDecode);
 		}
 
-		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> for RFC details</remarks>
+		
 		/// <summary>
-		/// This is the actual decoder
+		/// This is the actual decoder.
 		/// </summary>
 		/// <param name="toDecode">The string to be decoded from Quoted-Printable</param>
 		/// <returns>A decoded byte array that was described by <paramref name="toDecode"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> for RFC details</remarks>
 		private static byte[] RFC2047QuotedPrintableDecode(string toDecode)
 		{
 			if (toDecode == null)
@@ -118,15 +119,16 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// RFC 2045 states about robustness:
+		/// RFC 2045 states about robustness:<br/>
+		/// <code>
 		/// Control characters other than TAB, or CR and LF as parts of CRLF pairs,
 		/// must not appear. The same is true for octets with decimal values greater
 		/// than 126.  If found in incoming quoted-printable data by a decoder, a
 		/// robust implementation might exclude them from the decoded data and warn
 		/// the user that illegal characters were discovered.
-		/// 
-		/// Control characters are defined in RFC 2396 as
-		/// control = US-ASCII coded characters 00-1F and 7F hexadecimal
+		/// </code>
+		/// Control characters are defined in RFC 2396 as<br/>
+		/// <c>control = US-ASCII coded characters 00-1F and 7F hexadecimal</c>
 		/// </summary>
 		/// <param name="input">String to be stripped from illegal control characters</param>
 		/// <returns>A string with no illegal control characters</returns>
@@ -190,11 +192,13 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// RFC 2045 says that a robust implementation should handle:
+		/// RFC 2045 says that a robust implementation should handle:<br/>
+		/// <code>
 		/// An "=" cannot be the ultimate or penultimate character in an encoded
 		/// object. This could be handled as in case (2) above.
-		/// 
-		/// Case (2) is:
+		/// </code>
+		/// Case (2) is:<br/>
+		/// <code>
 		/// An "=" followed by a character that is neither a
 		/// hexadecimal digit (including "abcdef") nor the CR character of a CRLF pair
 		/// is illegal.  This case can be the result of US-ASCII text having been
@@ -204,10 +208,11 @@ namespace OpenPop.Mime.Decode
 		/// following character in the decoded data without any transformation and, if
 		/// possible, indicate to the user that proper decoding was not possible at
 		/// this point in the data.
+		/// </code>
 		/// </summary>
 		/// <param name="decode">
 		/// The string to decode which cannot have length above or equal to 3
-		/// and must start with an equal sign
+		/// and must start with an equal sign.
 		/// </param>
 		/// <returns>A decoded byte array</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="decode"/> is <see langword="null"/></exception>
@@ -231,8 +236,8 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// This helper method will decode a string of the form "=XX" where X is any character.
-		/// This method will never fail, unless an argument of length not equal to three is passed
+		/// This helper method will decode a string of the form "=XX" where X is any character.<br/>
+		/// This method will never fail, unless an argument of length not equal to three is passed.
 		/// </summary>
 		/// <param name="decode">The length 3 character that needs to be decoded</param>
 		/// <returns>A decoded byte array</returns>

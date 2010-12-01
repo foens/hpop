@@ -10,12 +10,12 @@ using OpenPop.Common.Logging;
 namespace OpenPop.Mime.Header
 {
 	/// <summary>
-	/// Class that can parse different fields in the header sections of a MIME message
+	/// Class that can parse different fields in the header sections of a MIME message.
 	/// </summary>
 	internal static class HeaderFieldParser
 	{
 		/// <summary>
-		/// Parses the Content-Transfer-Encoding header
+		/// Parses the Content-Transfer-Encoding header.
 		/// </summary>
 		/// <param name="headerValue">The value for the header to be parsed</param>
 		/// <returns>A <see cref="ContentTransferEncoding"/></returns>
@@ -49,7 +49,7 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parses an ImportanceType from a given Importance header value
+		/// Parses an ImportanceType from a given Importance header value.
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="MailPriority"/>. If the <paramref name="headerValue"/> is not recognized, Normal is returned.</returns>
@@ -81,7 +81,7 @@ namespace OpenPop.Mime.Header
 
 		/// <summary>
 		/// Parses a the value for the header Content-Type to 
-		/// a <see cref="ContentType"/> object
+		/// a <see cref="ContentType"/> object.
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="ContentType"/> object</returns>
@@ -141,7 +141,7 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parses a the value for the header Content-Disposition to a <see cref="ContentDisposition"/> object
+		/// Parses a the value for the header Content-Disposition to a <see cref="ContentDisposition"/> object.
 		/// </summary>
 		/// <param name="headerValue">The value to be parsed</param>
 		/// <returns>A <see cref="ContentDisposition"/> object</returns>
@@ -210,7 +210,7 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parse a character set into an encoding
+		/// Parse a character set into an encoding.
 		/// </summary>
 		/// <param name="characterSet">The character set to parse</param>
 		/// <returns>An encoding which corresponds to the character set</returns>
@@ -239,11 +239,11 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parses an ID like Message-Id and Content-Id.
-		/// Example
-		/// &lt;test@test.com&gt;
-		/// into
-		/// test@test.com
+		/// Parses an ID like Message-Id and Content-Id.<br/>
+		/// Example:<br/>
+		/// <c>&lt;test@test.com&gt;</c><br/>
+		/// into<br/>
+		/// <c>test@test.com</c>
 		/// </summary>
 		/// <param name="headerValue">The id to parse</param>
 		/// <returns>A parsed ID</returns>
@@ -256,7 +256,7 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parses multiple IDs from a single string like In-Reply-To
+		/// Parses multiple IDs from a single string like In-Reply-To.
 		/// </summary>
 		/// <param name="headerValue">The value to parse</param>
 		/// <returns>A list of IDs</returns>

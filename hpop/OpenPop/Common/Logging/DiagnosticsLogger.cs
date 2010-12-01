@@ -9,9 +9,9 @@ namespace OpenPop.Common.Logging
 	public class DiagnosticsLogger : ILog
 	{
 		/// <summary>
-		/// Logs an error to the System Trace facility
+		/// Logs an error message to the System Trace facility
 		/// </summary>
-		/// <param name="message">This is the string to log</param>
+		/// <param name="message">This is the error message to log</param>
 		public void LogError(string message)
 		{
 			if(message == null)

@@ -5,60 +5,68 @@ using System.Text;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// This class is responsible for decoding parameters that has been encoded with:
-	///  - Continuation
+	/// This class is responsible for decoding parameters that has been encoded with:<br/>
+	/// <list type="bullet">
+	/// <item>
+	///    <b>Continuation</b><br/>
 	///    This is where a single parameter has such a long value that it could
-	///    be wrapped while in transit. Instead multiple parameters is used on each line.
-	///    Example
-	///    From: Content-Type: text/html; boundary="someVeryLongStringHereWhichCouldBeWrappedInTransit"
-	///    To: Content-Type: text/html; boundary*0="someVeryLongStringHere"
-	///    boundary*1="WhichCouldBeWrappedInTransit"
-	/// 
-	///  - Encoding
-	///    Sometimes other characters then ASCII characters are needed in parameters.
-	///    The parameter is then given a different name to specify that it is encoded.
-	///    Example
-	///    From: Content-Disposition attachment; filename="specialCharsÆØÅ"
-	///    To: Content-Disposition attachment; filename*="ISO-8859-1'en-us'specialCharsC6D8C0"
-	///    This encoding is almost the same as <see cref="EncodedWord"/> encoding.
-	///    <see cref="EncodedWord"/> is used to decode the value.
-	/// 
-	///  - Continuation and Encoding
-	///    Both Continuation and Encoding can be used on the same time
-	///    Example
-	///    From: Content-Disposition attachment; filename="specialCharsÆØÅWhichIsSoLong"
-	///    To: Content-Disposition attachment; filename*0*="ISO-8859-1'en-us'specialCharsC6D8C0";
-	///    filename*1*="WhichIsSoLong"
-	///    This could also be encoded as
-	///    To: Content-Disposition attachment; filename*0*="ISO-8859-1'en-us'specialCharsC6D8C0";
-	///    filename*1="WhichIsSoLong"
-	///    Notice that filename*1 does not have an * after it - denoting it IS NOT encoded.
-	///    There are some rules about this:
-	///    The encoding must be mentioned in the first part (filename*0*), which has to be encoded.
-	///    No other part must specify an encoding, but if encoded it uses the encoding mentioned in the first part.
-	///    Parts may be encoded or not in any order.
-	/// 
-	/// More information and the specification is available in the RFC.
-	/// <see href="http://tools.ietf.org/html/rfc2231">RFC 2231</see>
+	///    be wrapped while in transit. Instead multiple parameters is used on each line.<br/>
+	///    <br/>
+	///    <b>Example</b><br/>
+	///    From: <c>Content-Type: text/html; boundary="someVeryLongStringHereWhichCouldBeWrappedInTransit"</c><br/>
+	///    To: <c>Content-Type: text/html; boundary*0="someVeryLongStringHere" boundary*1="WhichCouldBeWrappedInTransit"</c><br/>
+	/// </item>
+	/// <item>
+	///    <b>Encoding</b><br/>
+	///    Sometimes other characters then ASCII characters are needed in parameters.<br/>
+	///    The parameter is then given a different name to specify that it is encoded.<br/>
+	///    <br/>
+	///    <b>Example</b><br/>
+	///    From: <c>Content-Disposition attachment; filename="specialCharsÆØÅ"</c><br/>
+	///    To: <c>Content-Disposition attachment; filename*="ISO-8859-1'en-us'specialCharsC6D8C0"</c><br/>
+	///    This encoding is almost the same as <see cref="EncodedWord"/> encoding, and is used to decode the value.<br/>
+	/// </item>
+	/// <item>
+	///    <b>Continuation and Encoding</b><br/>
+	///    Both Continuation and Encoding can be used on the same time.<br/>
+	///    <br/>
+	///    <b>Example</b><br/>
+	///    From: <c>Content-Disposition attachment; filename="specialCharsÆØÅWhichIsSoLong"</c><br/>
+	///    To: <c>Content-Disposition attachment; filename*0*="ISO-8859-1'en-us'specialCharsC6D8C0"; filename*1*="WhichIsSoLong"</c><br/>
+	///    This could also be encoded as:<br/>
+	///    To: <c>Content-Disposition attachment; filename*0*="ISO-8859-1'en-us'specialCharsC6D8C0"; filename*1="WhichIsSoLong"</c><br/>
+	///    Notice that <c>filename*1</c> does not have an <c>*</c> after it - denoting it IS NOT encoded.<br/>
+	///    There are some rules about this:<br/>
+	///    <list type="number">
+	///      <item>The encoding must be mentioned in the first part (filename*0*), which has to be encoded.</item>
+	///      <item>No other part must specify an encoding, but if encoded it uses the encoding mentioned in the first part.</item>
+	///      <item>Parts may be encoded or not in any order.</item>
+	///    </list>
+	///    <br/>
+	/// </item>
+	/// </list>
+	/// More information and the specification is available in <see href="http://tools.ietf.org/html/rfc2231">RFC 2231</see>.
 	/// </summary>
 	internal static class Rfc2231Decoder
 	{
 		/// <summary>
-		/// Decodes a string of the form:
-		/// value0; key1=value1; key2=value2; key3=value3
-		/// The returned List of key value pairs will have the key as key and the decoded value as value.
-		/// The first value0 will have a key of String.Empty.
-		/// 
+		/// Decodes a string of the form:<br/>
+		/// <c>value0; key1=value1; key2=value2; key3=value3</c><br/>
+		/// The returned List of key value pairs will have the key as key and the decoded value as value.<br/>
+		/// The first value0 will have a key of <see cref="string.Empty"/>.<br/>
+		/// <br/>
 		/// If continuation is used, then multiple keys will be merged into one key with the different values
-		/// decoded into on big value for that key.
-		/// Example:
+		/// decoded into on big value for that key.<br/>
+		/// Example:<br/>
+		/// <code>
 		/// title*0=part1
 		/// title*1=part2
-		/// will have key and value of:
-		/// title=decode(part1)decode(part2)
+		/// </code>
+		/// will have key and value of:<br></br>
+		/// <c>title=decode(part1)decode(part2)</c>
 		/// </summary>
-		/// <param name="toDecode"></param>
-		/// <returns></returns>
+		/// <param name="toDecode">The string to decode.</param>
+		/// <returns>A list of decoded key value pairs.</returns>
 		public static List<KeyValuePair<string, string>> Decode(string toDecode)
 		{
 			string[] splitted = toDecode.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -84,7 +92,7 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// Decodes the list of key value pairs into a decoded list of key value pairs
+		/// Decodes the list of key value pairs into a decoded list of key value pairs.<br/>
 		/// There may be less keys in the decoded list, but then the values for the lost keys will have been appended
 		/// to the new key.
 		/// </summary>
@@ -209,9 +217,9 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// This will decode a single value of the form: ISO-8859-1'en-us'%3D%3DIamHere
-		/// Which is basically a <see cref="EncodedWord"/> form just using % instead of =
-		/// Notice that 'en-us' part is not used for anything
+		/// This will decode a single value of the form: <c>ISO-8859-1'en-us'%3D%3DIamHere</c><br/>
+		/// Which is basically a <see cref="EncodedWord"/> form just using % instead of =<br/>
+		/// Notice that 'en-us' part is not used for anything.
 		/// </summary>
 		/// <param name="encodingUsed">The encoding used to decode with - it is given back for later use</param>
 		/// <param name="toDecode">The value to decode</param>

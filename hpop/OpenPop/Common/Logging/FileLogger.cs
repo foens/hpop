@@ -65,9 +65,9 @@ namespace OpenPop.Common.Logging
 
 		#region ILog Implementation
 		/// <summary>
-		/// Logs an error to the logs
+		/// Logs an error message to the logs
 		/// </summary>
-		/// <param name="message">This is the string to log</param>
+		/// <param name="message">This is the error message to log</param>
 		public void LogError(string message)
 		{
 			if (Enabled)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace OpenPop.Mime.Traverse
 {
 	///<summary>
-	/// An abstract class that implements the MergeLeafAnswers method.
+	/// An abstract class that implements the MergeLeafAnswers method.<br/>
 	/// The method simply returns the union of all answers from the leaves.
 	///</summary>
 	public abstract class MultipleMessagePartFinder : AnswerMessageTraverser<List<MessagePart>>
