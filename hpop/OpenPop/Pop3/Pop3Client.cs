@@ -837,8 +837,7 @@ namespace OpenPop.Pop3
 					}
 
 					bool startingWithPeriod = false;
-					// This is a multi-line. See RFC 1939 Part 3 "Basic Operation"
-					// http://tools.ietf.org/html/rfc1939#section-3
+					// This is a multi-line. See http://tools.ietf.org/html/rfc1939#section-3
 					// It says that a line starting with "." and not having CRLF after it
 					// is a multi line, and the "." should be stripped
 					if (lineRead.Length > 0 && lineRead[0] == '.')

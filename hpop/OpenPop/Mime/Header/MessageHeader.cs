@@ -14,7 +14,7 @@ namespace OpenPop.Mime.Header
 	/// This class cannot be instantiated from outside the library.
 	/// </summary>
 	/// <remarks>
-	/// See <a href="http://www.rfc-editor.org/rfc/rfc4021.txt">RFC 4021</a> for a large list of headers.<br/>
+	/// See <a href="http://tools.ietf.org/html/rfc4021">RFC 4021</a> for a large list of headers.<br/>
 	/// </remarks>
 	public sealed class MessageHeader
 	{
@@ -88,7 +88,7 @@ namespace OpenPop.Mime.Header
 		/// If no Content-Transfer-Encoding header was present in the message, it is set
 		/// to the default of <see cref="Header.ContentTransferEncoding.SevenBit">SevenBit</see> in accordance to the RFC.
 		/// </summary>
-		/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Part 6 for details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2045#section-6">RFC 2045 section 6</a> for details</remarks>
 		public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>
@@ -163,7 +163,7 @@ namespace OpenPop.Mime.Header
 		/// The Content-Type header field.<br/>
 		/// <br/>
 		/// If not set, the ContentType is created by the default "text/plain; charset=us-ascii" which is
-		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 5.2.<br/>
+		/// defined in <a href="http://tools.ietf.org/html/rfc2045#section-5.2">RFC 2045 section 5.2</a>.<br/>
 		/// If set, the default is overridden.
 		/// </summary>
 		public ContentType ContentType { get; private set; }
@@ -182,7 +182,7 @@ namespace OpenPop.Mime.Header
 		/// <br/>
 		/// <see langword="null"/> if no Date header field was present in the message
 		/// </summary>
-		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section-3.6.1</a> for more details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section 3.6.1</a> for more details</remarks>
 		public string Date { get; private set; }
 
 		/// <summary>
@@ -191,7 +191,7 @@ namespace OpenPop.Mime.Header
 		/// Notice that the <see cref="TimeZone"/> of the <see cref="DateTime"/> object is in UTC and has NOT been converted
 		/// to local <see cref="TimeZone"/>.
 		/// </summary>
-		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section-3.6.1</a> for more details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section 3.6.1</a> for more details</remarks>
 		public DateTime DateSent { get; private set; }
 
 		/// <summary>
@@ -411,30 +411,30 @@ namespace OpenPop.Mime.Header
 					DateSent = Rfc2822DateTime.StringToDate(headerValue);
 					break;
 
-				// See http://www.ietf.org/rfc/rfc2045.txt section 6
+				// See http://tools.ietf.org/html/rfc2045#section-6
 				// See ContentTransferEncoding class for more details
 				case "CONTENT-TRANSFER-ENCODING":
 					ContentTransferEncoding = HeaderFieldParser.ParseContentTransferEncoding(headerValue.Trim());
 					break;
 
-				// See http://www.ietf.org/rfc/rfc2045.txt section 8.
+				// See http://tools.ietf.org/html/rfc2045#section-8
 				case "CONTENT-DESCRIPTION":
 					// Human description of for example a file. Can be encoded
 					ContentDescription = EncodedWord.Decode(headerValue.Trim());
 					break;
 
-				// See http://www.ietf.org/rfc/rfc2045.txt section 5.1.
+				// See http://tools.ietf.org/html/rfc2045#section-5.1
 				// Example: Content-type: text/plain; charset="us-ascii"
 				case "CONTENT-TYPE":
 					ContentType = HeaderFieldParser.ParseContentType(headerValue);
 					break;
 
-				// See http://www.ietf.org/rfc/rfc2183.txt
+				// See http://tools.ietf.org/html/rfc2183
 				case "CONTENT-DISPOSITION":
 					ContentDisposition = HeaderFieldParser.ParseContentDisposition(headerValue);
 					break;
 
-				// See http://www.ietf.org/rfc/rfc2045.txt section 7
+				// See http://tools.ietf.org/html/rfc2045#section-7
 				// Example: <foo4*foo1@bar.net>
 				case "CONTENT-ID":
 					ContentId = HeaderFieldParser.ParseID(headerValue);

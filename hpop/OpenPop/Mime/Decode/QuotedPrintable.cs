@@ -12,7 +12,7 @@ namespace OpenPop.Mime.Decode
 	/// </summary>
 	/// <remarks>
 	/// <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> is the RFC which the decoder conforms to.<br/>
-	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">RFC 2045</a> which originally
+	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">RFC 2045 section 6.7</a> which originally
 	/// defined what a Quoted-Printable string was.
 	/// </remarks>
 	internal static class QuotedPrintable
@@ -58,7 +58,7 @@ namespace OpenPop.Mime.Decode
 		/// <param name="toDecode">The string to be decoded from Quoted-Printable</param>
 		/// <returns>A decoded byte array that was described by <paramref name="toDecode"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
-		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> for RFC details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-4.2">RFC 2047 section 4.2</a> for RFC details</remarks>
 		private static byte[] RFC2047QuotedPrintableDecode(string toDecode)
 		{
 			if (toDecode == null)

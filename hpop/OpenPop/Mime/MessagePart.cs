@@ -86,7 +86,7 @@ namespace OpenPop.Mime
 		/// The Content-Type header field.<br/>
 		/// <br/>
 		/// If not set, the ContentType is created by the default "text/plain; charset=us-ascii" which is
-		/// defined in <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 5.2.<br/>
+		/// defined in <a href="http://tools.ietf.org/html/rfc2045#section-5.2">RFC 2045 section 5.2</a>.<br/>
 		/// <br/>
 		/// If set, the default is overridden.
 		/// </summary>
@@ -105,7 +105,7 @@ namespace OpenPop.Mime
 		/// If no Content-Transfer-Encoding header was present in the message, it is set
 		/// to the default of <see cref="Header.ContentTransferEncoding.SevenBit">SevenBit</see> in accordance to the RFC.
 		/// </summary>
-		/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Part 6 for details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2045#section-6">RFC 2045 section 6</a> for details</remarks>
 		public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>

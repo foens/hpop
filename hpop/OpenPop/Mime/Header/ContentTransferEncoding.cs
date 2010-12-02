@@ -5,7 +5,7 @@ namespace OpenPop.Mime.Header
 	/// <summary>
 	/// <see cref="Enum"/> that describes the ContentTransferEncoding header field
 	/// </summary>
-	/// <remarks>See <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> Section 6 or Section 2 for more details</remarks>
+	/// <remarks>See <a href="http://tools.ietf.org/html/rfc2045#section-6">RFC 2045 section 6</a> for more details</remarks>
 	public enum ContentTransferEncoding
 	{
 		/// <summary>

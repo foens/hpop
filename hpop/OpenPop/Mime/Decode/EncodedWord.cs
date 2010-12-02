@@ -42,7 +42,7 @@ namespace OpenPop.Mime.Decode
 		/// Example:<br/>
 		/// <c>=?ISO-8859-1?q?this=20is=20some=20text?= other text here</c>
 		/// </summary>
-		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-2">RFC 2047 section-2</a> "Syntax of encoded-words" for more details</remarks>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-2">RFC 2047 section 2</a> "Syntax of encoded-words" for more details</remarks>
 		/// <param name="encodedWords">Source text. May be content which is not encoded.</param>
 		/// <returns>Decoded text</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="encodedWords"/> is <see langword="null"/></exception>
@@ -91,6 +91,7 @@ namespace OpenPop.Mime.Decode
 						// RFC:
 						// The "B" encoding is identical to the "BASE64" 
 						// encoding defined by RFC 2045.
+						// http://tools.ietf.org/html/rfc2045#section-6.8
 					case "B":
 						decodedText = Base64.Decode(encodedText, charsetEncoding);
 						break;
@@ -98,8 +99,9 @@ namespace OpenPop.Mime.Decode
 						// RFC:
 						// The "Q" encoding is similar to the "Quoted-Printable" content-
 						// transfer-encoding defined in RFC 2045.
-						// There are more details to this. Please check section 4.2 in
-						// http://tools.ietf.org/html/rfc2047
+						// There are more details to this. Please check
+						// http://tools.ietf.org/html/rfc2047#section-4.2
+						// 
 					case "Q":
 						decodedText = QuotedPrintable.Decode(encodedText, charsetEncoding);
 						break;

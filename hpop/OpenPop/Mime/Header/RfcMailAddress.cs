@@ -13,7 +13,7 @@ namespace OpenPop.Mime.Header
 	/// </summary>
 	/// <remarks>
 	/// The <seealso cref="MailAddress"/> does not cover all the possible formats 
-	/// for <a href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322</a> compliant email addresses.
+	/// for <a href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 section 3.4</a> compliant email addresses.
 	/// This class is used as an address wrapper to account for that deficiency.
 	/// </remarks>
 	public class RfcMailAddress
@@ -142,7 +142,7 @@ namespace OpenPop.Mime.Header
 		/// <returns>A <see cref="RfcMailAddress"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		/// <remarks>
-		/// <see href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 section-3.4</see> for more details on email syntax.<br/>
+		/// <see href="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 section 3.4</see> for more details on email syntax.<br/>
 		/// <see cref="EncodedWord.Decode">For more information about encoded text</see>.
 		/// </remarks>
 		internal static RfcMailAddress ParseMailAddress(string input)
