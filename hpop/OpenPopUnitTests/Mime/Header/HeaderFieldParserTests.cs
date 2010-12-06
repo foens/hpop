@@ -395,6 +395,36 @@ namespace OpenPopUnitTests.Mime.Header
 
 			Assert.AreEqual("us-ascii", contentType.CharSet);
 		}
+
+		/// <summary>
+		/// Test with extra semicolon at the end, which is not needed
+		/// </summary>
+		[Test]
+		public void TestContentTypeWithExcessEndingSemicolon()
+		{
+			const string contentTypeString = 
+				"application/vnd.ms-excel;name=\"MMSCecpmcountry12_06_2010.xls\";";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+
+			Assert.AreEqual("application/vnd.ms-excel", contentType.MediaType);
+			Assert.AreEqual("MMSCecpmcountry12_06_2010.xls", contentType.Name);
+		}
+
+		/// <summary>
+		/// Test with extra semicolon and whitespace at the end, which is not needed
+		/// </summary>
+		[Test]
+		public void TestContentTypeWithExcessEndingSemicolonAndWhitespace()
+		{
+			const string contentTypeString =
+				"application/vnd.ms-excel;name=\"MMSCecpmcountry12_06_2010.xls\"; ";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+
+			Assert.AreEqual("application/vnd.ms-excel", contentType.MediaType);
+			Assert.AreEqual("MMSCecpmcountry12_06_2010.xls", contentType.Name);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests
