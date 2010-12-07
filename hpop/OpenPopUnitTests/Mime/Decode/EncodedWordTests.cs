@@ -37,5 +37,14 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual("SV: Ticket(13349550) - Spørgsmål omkring CBB privat", result);
 		}
+
+		[Test]
+		public void TestEncodedWordLithuanian()
+		{
+			const string input = "=?ISO-8859-13?Q?Fwd=3A_Dvira=E8iai_vasar=E0_vagiami_da=FEniau=2C_bet_draust?=";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("Fwd: Dviračiai vasarą vagiami dažniau, bet draust", result);
+		}
 	}
 }
