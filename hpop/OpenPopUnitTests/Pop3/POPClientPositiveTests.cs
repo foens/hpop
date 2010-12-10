@@ -867,6 +867,35 @@ namespace OpenPopUnitTests.Pop3
 			Assert.AreEqual(expectedBytes, messageBytes);
 		}
 
+		[Test]
+		public void TestFetchingMessageWithoutBodyWorks()
+		{
+			const string welcomeMessage = "+OK";
+			const string okUsername = "+OK";
+			const string okPassword = "+OK";
+			const string okMessageFetch = "+OK";
+			const string message = "Return-Path: <thefeds@spam.mail.dk>";
+			const string messageEnd = ".";
+
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + okMessageFetch + "\r\n" + message + "\r\n" + messageEnd + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			Stream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			client.Authenticate("something", "else");
+
+			Message messageFetched = client.GetMessage(3);
+
+			Assert.NotNull(messageFetched);
+			Assert.IsEmpty(messageFetched.Headers.ReturnPath.DisplayName);
+			Assert.AreEqual("thefeds@spam.mail.dk", messageFetched.Headers.ReturnPath.Address);
+
+			Assert.NotNull(messageFetched.MessagePart);
+			Assert.IsEmpty(messageFetched.MessagePart.Body);
+		}
+
 		/// <summary>
 		/// Helper method to get the last line from a <see cref="StringBuilder"/>
 		/// which is the last line that the client has sent.

@@ -30,13 +30,10 @@ namespace OpenPop.Mime.Header
 					// therefore it is not problem to read them as such
 					string line = StreamUtility.ReadLineAsAscii(stream);
 
-					// If we have read the full messageContent but no empty line has been found
-					// This will not happen if a valid message was passed to this method
-					if (line == null)
-						throw new ArgumentException("Message does not contain a empty line which tells where the headers of the message end");
-
 					// The end of headers is signaled when a blank line is found
-					if (line.Length == 0)
+					// or if the line is null - in which case the email is actually an email with
+					// only headers but no body
+					if (string.IsNullOrEmpty(line))
 						return (int)stream.Position;
 				}
 			}
@@ -91,8 +88,10 @@ namespace OpenPop.Mime.Header
 			{
 				// Read until all headers have ended.
 				// The headers ends when an empty line is encountered
+				// An empty message might actually not have an empty line, in which
+				// case the headers end with null value.
 				string line;
-				while (!string.Empty.Equals(line = messageReader.ReadLine()))
+				while (!string.IsNullOrEmpty(line = messageReader.ReadLine()))
 				{
 					// Split into name and value
 					string[] splittedValue = Utility.GetHeadersValue(line);

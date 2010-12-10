@@ -1221,5 +1221,22 @@ namespace OpenPopUnitTests.Mime
 			Assert.AreEqual("Secretary", message.Headers.Sender.DisplayName);
 			Assert.AreEqual("secretary@example.com", message.Headers.Sender.Address);
 		}
+
+		[Test]
+		public void TestMessageWithonlyHeaders()
+		{
+			const string messageString =
+				"Content-Type: text/plain";
+
+			Message message = new Message(Encoding.ASCII.GetBytes(messageString));
+
+			Assert.NotNull(message);
+			Assert.AreEqual("text/plain", message.Headers.ContentType.MediaType);
+
+			Assert.NotNull(message.MessagePart);
+			Assert.IsFalse(message.MessagePart.IsMultiPart);
+			Assert.IsEmpty(message.MessagePart.Body);
+			Assert.IsEmpty(message.MessagePart.GetBodyAsText());
+		}
 	}
 }
