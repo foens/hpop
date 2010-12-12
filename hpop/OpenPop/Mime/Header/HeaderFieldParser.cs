@@ -234,6 +234,10 @@ namespace OpenPop.Mime.Header
 				return Encoding.GetEncoding(codepageNumber);
 			}
 
+			// Some emails incorrectly specify the encoding to be utf8 - but it has to be utf-8
+			if (characterSet.Equals("utf8", StringComparison.InvariantCultureIgnoreCase))
+				characterSet = "utf-8";
+
 			// It seems there is no codepage value in the characterSet. It must be a named encoding
 			return Encoding.GetEncoding(characterSet);
 		}

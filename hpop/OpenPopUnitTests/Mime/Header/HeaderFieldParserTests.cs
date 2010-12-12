@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mime;
+using System.Text;
 using NUnit.Framework;
 using OpenPop.Mime.Header;
 
@@ -495,6 +496,30 @@ namespace OpenPopUnitTests.Mime.Header
 			ContentTransferEncoding encoding = HeaderFieldParser.ParseContentTransferEncoding(contentTransferEncodingString);
 
 			Assert.AreEqual(ContentTransferEncoding.QuotedPrintable, encoding);
+		}
+		#endregion
+
+		#region Content-Type CharacterSet tests
+		[Test]
+		public void TestUTF8()
+		{
+			const string inputCharacterSet = "utf-8";
+
+			Encoding expected = Encoding.UTF8;
+			Encoding actual = HeaderFieldParser.ParseCharsetToEncoding(inputCharacterSet);
+
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestUTF8NoHyphenDecoding()
+		{
+			const string inputCharacterSet = "utf8";
+
+			Encoding expected = Encoding.UTF8;
+			Encoding actual = HeaderFieldParser.ParseCharsetToEncoding(inputCharacterSet);
+
+			Assert.AreEqual(expected, actual);
 		}
 		#endregion
 	}
