@@ -45,6 +45,11 @@ namespace OpenPop.Pop3
 		/// The APOP time stamp sent by the server in it's welcome message if APOP is supported.
 		/// </summary>
 		private string ApopTimeStamp { get; set; }
+
+		/// <summary>
+		/// Describes what state the <see cref="Pop3Client"/> is in
+		/// </summary>
+		private ConnectionState State { get; set; }
 		#endregion
 
 		#region Public member properties
@@ -60,11 +65,6 @@ namespace OpenPop.Pop3
 		/// as the server tells in its welcome message if APOP is supported.
 		/// </summary>
 		public bool ApopSupported { get; private set; }
-
-		/// <summary>
-		/// Describes what state the <see cref="Pop3Client"/> is in
-		/// </summary>
-		private ConnectionState State { get; set; }
 		#endregion
 
 		#region Constructors
