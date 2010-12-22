@@ -12,12 +12,11 @@ namespace OpenPop.Pop3.Exceptions
 	public class PopServerLockedException : PopClientException
 	{
 		///<summary>
-		/// Creates a PopServerLockedException with the given message and InnerException
+		/// Creates a PopServerLockedException with the given inner exception
 		///</summary>
-		///<param name="message">The message to include in the exception</param>
 		///<param name="innerException">The exception that is the course of this exception</param>
-		public PopServerLockedException(string message, Exception innerException)
-			: base(message, innerException)
+		public PopServerLockedException(Exception innerException)
+			: base("The account is locked", innerException)
 		{ }
 	}
 }

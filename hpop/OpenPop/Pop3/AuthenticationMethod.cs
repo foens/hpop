@@ -20,6 +20,7 @@ namespace OpenPop.Pop3
 		/// Authenticate using the Authenticated Post Office Protocol method, which is more secure then UsernameAndPassword
 		/// since it is a request-response protocol where server checks if the client knows a shared secret, which
 		/// is the password, without the password itself being transmitted.<br/>
+		/// This authentication method uses MD5 under its hood.<br/>
 		/// <br/>
 		/// This authentication method is not supported by many servers.<br/>
 		/// Choose this option if you want maximum security.
@@ -31,6 +32,12 @@ namespace OpenPop.Pop3
 		/// If APOP is supported by the server, APOP is used for authentication.<br/>
 		/// If APOP is not supported, TryBoth will fall back to UsernameAndPassword authentication.
 		/// </summary>
-		TryBoth
+		TryBoth,
+
+		/// <summary>
+		/// Logs in the the POP3 server using CRAM-MD5 authentication scheme.<br/>
+		/// This in essence uses the MD5 hashing algorithm on the user password and a server challenge.
+		/// </summary>
+		CramMd5
 	}
 }

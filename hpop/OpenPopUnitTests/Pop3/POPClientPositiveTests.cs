@@ -5,6 +5,7 @@ using NUnit.Framework;
 using OpenPop.Mime;
 using OpenPop.Mime.Header;
 using OpenPop.Pop3;
+using OpenPop.Pop3.Exceptions;
 
 namespace OpenPopUnitTests.Pop3
 {
@@ -894,6 +895,123 @@ namespace OpenPopUnitTests.Pop3
 
 			Assert.NotNull(messageFetched.MessagePart);
 			Assert.IsEmpty(messageFetched.MessagePart.Body);
+		}
+
+		[Test]
+		public void TestCramMd5Login()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
+			const string okCramMd5 = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n" + okCramMd5 + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5);
+
+			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			Assert.NotNull(commandsFromClient);
+			Assert.AreEqual(2, commandsFromClient.Length);
+
+			const string expectedCommand = "AUTH CRAM-MD5";
+			string actualCommand = commandsFromClient[0];
+			Assert.AreEqual(expectedCommand, actualCommand);
+
+			const string expectedResponse = "dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw";
+			string actualResponse = commandsFromClient[1];
+			Assert.AreEqual(expectedResponse, actualResponse);
+		}
+
+		[Test]
+		public void TestCramMd5LoginOtherUser()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "+ PHRoaXMuaXMudGhlLmJhc2U2NC5lbmNvZGVkLmNoYWxsZW5nZUBzZXJ2ZXIuY29tPg==";
+			const string okCramMd5 = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n" + okCramMd5 + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			client.Authenticate("foens", "thisIsAnInsanelyLongPasswordManWoot", AuthenticationMethod.CramMd5);
+
+			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			Assert.NotNull(commandsFromClient);
+			Assert.AreEqual(2, commandsFromClient.Length);
+
+			const string expectedCommand = "AUTH CRAM-MD5";
+			string actualCommand = commandsFromClient[0];
+			Assert.AreEqual(expectedCommand, actualCommand);
+
+			const string expectedResponse = "Zm9lbnMgNTAyNDU5OTU1NjMwNTliNWUxZWQyMmMzMzQzYzYxNDg=";
+			string actualResponse = commandsFromClient[1];
+			Assert.AreEqual(expectedResponse, actualResponse);
+		}
+
+		[Test]
+		public void TestCramMd5LoginNotSupported()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "-ERR CRAM-MD5 is not supported on this server";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			Assert.Throws<NotSupportedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+
+			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			Assert.NotNull(commandsFromClient);
+			// Check the the client only sent one command
+			Assert.AreEqual(1, commandsFromClient.Length);
+
+			const string expectedCommand = "AUTH CRAM-MD5";
+			string actualCommand = commandsFromClient[0];
+			Assert.AreEqual(expectedCommand, actualCommand);
+		}
+
+		[Test]
+		public void TestCramMd5LoginNotCorrect()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
+			const string okCramMd5 = "-ERR Login not correct";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n" + okCramMd5 + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			Assert.Throws<InvalidLoginOrPasswordException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+		}
+
+		[Test]
+		public void TestCramMd5LoginCorrectButMaildropLocked()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
+			const string okCramMd5 = "-ERR The maildrop is locked, please try later";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n" + okCramMd5 + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(inputStream, outputStream);
+			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 		}
 
 		/// <summary>

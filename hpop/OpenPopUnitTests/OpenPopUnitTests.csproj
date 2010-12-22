@@ -54,6 +54,7 @@
     <Compile Include="Mime\MessagePartTests.cs" />
     <Compile Include="Mime\MessageTest.cs" />
     <Compile Include="Mime\ToMailMessageTests.cs" />
+    <Compile Include="Pop3\CramMD5Tests.cs" />
     <Compile Include="Pop3\POPClientAuthenticatedTests.cs" />
     <Compile Include="Pop3\POPClientConnectedTests.cs" />
     <Compile Include="Pop3\POPClientPositiveTests.cs" />

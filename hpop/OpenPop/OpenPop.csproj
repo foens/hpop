@@ -124,6 +124,7 @@
     <Compile Include="Mime\Header\HeaderFieldParser.cs" />
     <Compile Include="Mime\Header\HeaderExtractor.cs" />
     <Compile Include="Pop3\AuthenticationMethod.cs" />
+    <Compile Include="Pop3\CramMd5.cs" />
     <Compile Include="Pop3\Disposable.cs" />
     <Compile Include="Pop3\Exceptions\PopClientException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerException.cs" />

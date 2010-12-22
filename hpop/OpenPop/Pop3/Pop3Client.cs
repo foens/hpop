@@ -334,6 +334,10 @@ namespace OpenPop.Pop3
 					else
 						AuthenticateUsingUserAndPassword(username, password);
 					break;
+
+				case AuthenticationMethod.CramMd5:
+					AuthenticateUsingCramMd5(username, password);
+					break;
 			}
 
 			// We are now authenticated and therefore we enter the transaction state
@@ -366,7 +370,7 @@ namespace OpenPop.Pop3
 				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
 				{
 					DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword(): maildrop is locked");
-					throw new PopServerLockedException("The account is locked", e);
+					throw new PopServerLockedException(e);
 				}
 
 				// Lastcommand might contain an error description like:
@@ -398,13 +402,68 @@ namespace OpenPop.Pop3
 				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
 				{
 					DefaultLogger.Log.LogError("AuthenticateUsingApop(): maildrop is locked");
-					throw new PopServerLockedException("The account is locked", e);
+					throw new PopServerLockedException(e);
 				}
 
 				DefaultLogger.Log.LogError("AuthenticateUsingApop(): wrong user or password");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginOrPasswordException("The supplied username or password is wrong", e);
+				throw new InvalidLoginOrPasswordException(e);
 			}
+		}
+
+		/// <summary>
+		/// Authenticates using the CRAM-MD5 authentication method
+		/// </summary>
+		/// <param name="username">The username</param>
+		/// <param name="password">The user password</param>
+		/// <exception cref="NotSupportedException">Thrown when the server does not support AUTH CRAM-MD5</exception>
+		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		private void AuthenticateUsingCramMd5(string username, string password)
+		{
+			// Example of communication:
+			// C: AUTH CRAM-MD5
+			// S: + PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+
+			// C: dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
+			// S: +OK CRAM authentication successful
+			
+			// Other example, where AUTH CRAM-MD5 is not supported
+			// C: AUTH CRAM-MD5
+			// S: -ERR Authenticationmethod CRAM-MD5 not supported
+			
+			try
+			{
+				SendCommand("AUTH CRAM-MD5");
+			} catch (PopServerException e)
+			{
+				// A PopServerException will be thrown if the server responds with a -ERR not supported
+				throw new NotSupportedException("CRAM-MD5 authentication not supported", e);
+			}
+			
+			// Fetch out the challenge from the server response
+			string challenge = LastServerResponse.Substring(2);
+
+			// Compute the challenge response
+			string response = CramMd5.ComputeDigest(username, password, challenge);
+
+			try
+			{
+				// Send the response to the server
+				SendCommand(response);
+			}
+			catch (PopServerException e)
+			{
+				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
+				{
+					DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): maildrop is locked");
+					throw new PopServerLockedException(e);
+				}
+
+				DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): wrong user or password");
+				throw new InvalidLoginOrPasswordException(e);
+			}
+
+			// Authentication was successful.
 		}
 		#endregion
 
@@ -718,23 +777,23 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Tests a string to see if it is a "+OK" string.<br/>
-		/// An "+OK" string should be returned by a compliant POP3
+		/// Tests a string to see if it is a "+" string.<br/>
+		/// An "+" string should be returned by a compliant POP3
 		/// server if the request could be served.<br/>
 		/// <br/>
-		/// The method does only check if it starts with "+OK".
+		/// The method does only check if it starts with "+".
 		/// </summary>
 		/// <param name="response">The string to examine</param>
-		/// <exception cref="PopServerException">Thrown if server did not respond with "+OK" message</exception>
+		/// <exception cref="PopServerException">Thrown if server did not respond with "+" message</exception>
 		private static void IsOkResponse(string response)
 		{
 			if (response == null)
 				throw new PopServerException("The stream used to retrieve responses from was closed");
 
-			if (response.StartsWith("+OK", StringComparison.OrdinalIgnoreCase))
+			if (response.StartsWith("+", StringComparison.OrdinalIgnoreCase))
 				return;
 
-			throw new PopServerException("The server did not respond with a +OK response. The response was: \"" + response + "\"");
+			throw new PopServerException("The server did not respond with a + response. The response was: \"" + response + "\"");
 		}
 
 		/// <summary>
