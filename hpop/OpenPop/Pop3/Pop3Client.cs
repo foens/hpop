@@ -396,7 +396,7 @@ namespace OpenPop.Pop3
 
 			try
 			{
-				SendCommand("APOP " + username + " " + MD5.ComputeHashHex(Encoding.ASCII.GetBytes(ApopTimeStamp + password)));
+				SendCommand("APOP " + username + " " + Apop.ComputeDigest(password, ApopTimeStamp));
 			} catch (PopServerException e)
 			{
 				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
