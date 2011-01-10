@@ -497,6 +497,20 @@ namespace OpenPopUnitTests.Mime.Header
 
 			Assert.AreEqual(ContentTransferEncoding.QuotedPrintable, encoding);
 		}
+
+		[Test]
+		public void TestInvalidContentTransferEncoding()
+		{
+			const string wrongContentTransferEncoding = "ISO-8859-1";
+
+			ContentTransferEncoding encoding = HeaderFieldParser.ParseContentTransferEncoding(wrongContentTransferEncoding);
+
+			Assert.NotNull(encoding);
+
+			// We want the implementation to return the default encoding instead of the wrongly specified one
+			const ContentTransferEncoding defaultEncoding = ContentTransferEncoding.SevenBit;
+			Assert.AreEqual(defaultEncoding, encoding);
+		}
 		#endregion
 
 		#region Content-Type CharacterSet tests

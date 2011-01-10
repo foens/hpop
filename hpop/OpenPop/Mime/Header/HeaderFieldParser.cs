@@ -43,8 +43,12 @@ namespace OpenPop.Mime.Header
 				case "BINARY":
 					return ContentTransferEncoding.Binary;
 
+				// If a wrong argument is passed to this parser method, then we assume
+				// default encoding, which is SevenBit.
+				// This is to ensure that we do not throw exceptions, even if the email not MIME valid.
 				default:
-					throw new ArgumentException("Unknown ContentTransferEncoding: " + headerValue);
+					DefaultLogger.Log.LogDebug("Wrong ContentTransferEncoding was used. It was: " + headerValue);
+					return ContentTransferEncoding.SevenBit;
 			}
 		}
 
