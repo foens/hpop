@@ -121,7 +121,10 @@ namespace OpenPopExamples
 		/// <param name="useSsl">Whether or not to use SSL to connect to server</param>
 		/// <param name="username">Username of the user on the server</param>
 		/// <param name="password">Password of the user on the server</param>
-		/// <param name="messageNumber">The number of the message to examine. Must be in range [1, messageCount] where messageCount is the number of messages on the server.</param>
+		/// <param name="messageNumber">
+		/// The number of the message to examine.
+		/// Must be in range [1, messageCount] where messageCount is the number of messages on the server.
+		/// </param>
 		public static void HeadersFromAndSubject(string hostname, int port, bool useSsl, string username, string password, int messageNumber)
 		{
 			// The client disconnects from the server when being disposed
@@ -171,7 +174,10 @@ namespace OpenPopExamples
 		/// <param name="useSsl">Whether or not to use SSL to connect to server</param>
 		/// <param name="username">Username of the user on the server</param>
 		/// <param name="password">Password of the user on the server</param>
-		/// <param name="messageNumber">The number of the message to delete. Must be in range [1, messageCount] where messageCount is the number of messages on the server.</param>
+		/// <param name="messageNumber">
+		/// The number of the message to delete.
+		/// Must be in range [1, messageCount] where messageCount is the number of messages on the server.
+		/// </param>
 		public static void DeleteMessageOnServer(string hostname, int port, bool useSsl, string username, string password, int messageNumber)
 		{
 			// The client disconnects from the server when being disposed
@@ -187,15 +193,12 @@ namespace OpenPopExamples
 				// Notice that it is only MARKED as deleted
 				// POP3 requires you to "commit" the changes
 				// which is done by sending a QUIT command to the server
+				// You can also reset all marked messages, by sending a RSET command.
 				client.DeleteMessage(messageNumber);
 
-				// Disconnect sends the QUIT command to the server
-				// and shut downs the connection (the server will close the connection
-				// when QUIT is issued to it).
-				// Notice that if you do not call Disconnect(), the message will NOT be
-				// deleted on the server. Pop3Client.Dispose will only disconnect from the server,
-				// but will NOT send the QUIT command
-				client.Disconnect();
+				// When a QUIT command is sent to the server, the connection between them are closed.
+				// When the client is disposed, the QUIT command will be sent to the server
+				// just as if you had called the Disconnect method yourself.
 			}
 		}
 
@@ -211,7 +214,11 @@ namespace OpenPopExamples
     	/// <param name="useSsl">Whether or not to use SSL to connect to server</param>
     	/// <param name="username">Username of the user on the server</param>
     	/// <param name="password">Password of the user on the server</param>
-    	/// <param name="seenUids">List of UID's of all messages seen before. New message UID's will be added to the list. Consider using a HashSet if you are using >= 3.5 .NET</param>
+    	/// <param name="seenUids">
+    	/// List of UID's of all messages seen before.
+    	/// New message UID's will be added to the list.
+    	/// Consider using a HashSet if you are using >= 3.5 .NET
+    	/// </param>
     	/// <returns>A List of new Messages on the server</returns>
     	public static List<Message> FetchUnseenMessages(string hostname, int port, bool useSsl, string username, string password, List<string> seenUids)
 		{

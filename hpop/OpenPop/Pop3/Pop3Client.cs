@@ -90,7 +90,8 @@ namespace OpenPop.Pop3
 		#region IDisposable implementation
 		/// <summary>
 		/// Disposes the <see cref="Pop3Client"/>.<br/>
-		/// This is the implementation of the <see cref="IDisposable"/> interface.
+		/// This is the implementation of the <see cref="IDisposable"/> interface.<br/>
+		/// Sends the QUIT command to the server before closing the streams.
 		/// </summary>
 		/// <param name="disposing"><see langword="true"/> if managed and unmanaged code should be disposed, <see langword="false"/> if only managed code should be disposed</param>
 		protected override void Dispose(bool disposing)
@@ -99,7 +100,7 @@ namespace OpenPop.Pop3
 			{
 				if (Connected)
 				{
-					DisconnectStreams();
+					Disconnect();
 				}
 			}
 
@@ -487,7 +488,7 @@ namespace OpenPop.Pop3
 		/// Marks the message with the given message number as deleted.<br/>
 		/// <br/>
 		/// The message will not be deleted until a QUIT command is sent to the server.<br/>
-		/// This is done when you call <see cref="Disconnect()"/>.
+		/// This is done when you call <see cref="Disconnect()"/> or when the Pop3Client is <see cref="Dispose">Disposed</see>.
 		/// </summary>
 		/// <param name="messageNumber">
 		/// The number of the message to be deleted. This message may not already have been deleted.<br/>

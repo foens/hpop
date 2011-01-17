@@ -1014,6 +1014,32 @@ namespace OpenPopUnitTests.Pop3
 			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 		}
 
+		[Test]
+		public void TestDisposeSendsQuit()
+		{
+			const string welcomeMessage = "+OK";
+			const string QuitOk = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + QuitOk + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			using (Pop3Client client = new Pop3Client())
+			{
+				client.Connect(inputStream, outputStream);
+			}
+
+			// Check that a command was sent
+			Assert.IsNotEmpty(outputStream.ToArray());
+
+			const string expectedCommand = "QUIT";
+			string actualCommand = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+			// Check last command was QUIT
+			Assert.AreEqual(expectedCommand, actualCommand);
+		}
+
 		/// <summary>
 		/// Helper method to get the last line from a <see cref="StringBuilder"/>
 		/// which is the last line that the client has sent.
