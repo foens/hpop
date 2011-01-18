@@ -148,5 +148,22 @@ namespace OpenPopUnitTests.Mime
 
 			Assert.AreEqual(correctBytes, fileBytes);
 		}
+
+		[Test]
+		public void TestQuotedPrintableDoesNotDecodeUnderscoresInBody()
+		{
+			const string messagePartContent =
+				"Content-Transfer-Encoding: quoted-printable\r\n" +
+				"\r\n" + // End of message headers
+				"a_a";
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+			// QuotedPrintable, when used as Content-Transfer-Encoding does not decode _ to spaces
+			const string expectedBody = "a_a";
+			string actualBody = messagePart.GetBodyAsText();
+
+			Assert.AreEqual(expectedBody, actualBody);
+		}
 	}
 }

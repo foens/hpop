@@ -417,7 +417,7 @@ namespace OpenPop.Mime
 			{
 				case ContentTransferEncoding.QuotedPrintable:
 					// If encoded in QuotedPrintable, everything in the body is in US-ASCII
-					return QuotedPrintable.Decode(Encoding.ASCII.GetString(messageBody));
+					return QuotedPrintable.DecodeContentTransferEncoding(Encoding.ASCII.GetString(messageBody));
 
 				case ContentTransferEncoding.Base64:
 					// If encoded in Base64, everything in the body is in US-ASCII

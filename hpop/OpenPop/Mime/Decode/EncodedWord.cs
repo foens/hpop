@@ -103,7 +103,7 @@ namespace OpenPop.Mime.Decode
 						// http://tools.ietf.org/html/rfc2047#section-4.2
 						// 
 					case "Q":
-						decodedText = QuotedPrintable.Decode(encodedText, charsetEncoding);
+						decodedText = QuotedPrintable.DecodeEncodedWord(encodedText, charsetEncoding);
 						break;
 
 					default:

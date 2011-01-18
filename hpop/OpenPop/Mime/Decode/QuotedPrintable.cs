@@ -7,59 +7,62 @@ namespace OpenPop.Mime.Decode
 {
 	/// <summary>
 	/// Used for decoding Quoted-Printable text.<br/>
-	/// This is a robust implementation of a Quoted-Printable decoder defined in RFC 2047.<br/>
+	/// This is a robust implementation of a Quoted-Printable decoder defined in <a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a> and <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a>.<br/>
 	/// Every measurement has been taken to conform to the RFC.
 	/// </summary>
-	/// <remarks>
-	/// <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a> is the RFC which the decoder conforms to.<br/>
-	/// The RFC above overrides <a href="http://tools.ietf.org/html/rfc2045#section-6.7">RFC 2045 section 6.7</a> which originally
-	/// defined what a Quoted-Printable string was.
-	/// </remarks>
 	internal static class QuotedPrintable
 	{
 		/// <summary>
-		/// Decodes a Quoted-Printable string.
+		/// Decodes a Quoted-Printable string according to <a href="http://tools.ietf.org/html/rfc2047">RFC 2047</a>.<br/>
+		/// RFC 2047 is used for decoding Encoded-Word encoded strings.
 		/// </summary>
 		/// <param name="toDecode">Quoted-Printable encoded string</param>
 		/// <param name="encoding">Specifies which encoding the returned string will be in</param>
 		/// <returns>A decoded string in the correct encoding</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> or <paramref name="encoding"/> is <see langword="null"/></exception>
-		public static string Decode(string toDecode, Encoding encoding)
+		public static string DecodeEncodedWord(string toDecode, Encoding encoding)
 		{
-			if(toDecode == null)
+			if (toDecode == null)
 				throw new ArgumentNullException("toDecode");
 
-			if(encoding == null)
+			if (encoding == null)
 				throw new ArgumentNullException("encoding");
 
 			// Decode the QuotedPrintable string and return it
-			return encoding.GetString(Decode(toDecode));
+			return encoding.GetString(RFC2047QuotedPrintableDecode(toDecode, true));
 		}
 
 		/// <summary>
-		/// Decodes a Quoted-Printable string.
+		/// Decodes a Quoted-Printable string according to <a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a>.<br/>
+		/// RFC 2045 specifies the decoding of a body encoded with Content-Transfer-Encoding of quoted-printable.
 		/// </summary>
 		/// <param name="toDecode">Quoted-Printable encoded string</param>
 		/// <returns>A decoded byte array that the Quoted-Printable encoded string described</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
-		public static byte[] Decode(string toDecode)
+		public static byte[] DecodeContentTransferEncoding(string toDecode)
 		{
 			if (toDecode == null)
 				throw new ArgumentNullException("toDecode");
 
 			// Decode the QuotedPrintable string and return it
-			return RFC2047QuotedPrintableDecode(toDecode);
+			return RFC2047QuotedPrintableDecode(toDecode, false);
 		}
 
-		
 		/// <summary>
 		/// This is the actual decoder.
 		/// </summary>
 		/// <param name="toDecode">The string to be decoded from Quoted-Printable</param>
+		/// <param name="encodedWordVariant">
+		/// If <see langword="true"/>, specifies that RFC 2047 quoted printable decoding is used.<br/>
+		/// This is for quoted-printable encoded words<br/>
+		/// <br/>
+		/// If <see langword="false"/>, specifies that RFC 2045 quoted printable decoding is used.<br/>
+		/// This is for quoted-printable Content-Transfer-Encoding
+		/// </param>
 		/// <returns>A decoded byte array that was described by <paramref name="toDecode"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-4.2">RFC 2047 section 4.2</a> for RFC details</remarks>
-		private static byte[] RFC2047QuotedPrintableDecode(string toDecode)
+		private static byte[] RFC2047QuotedPrintableDecode(string toDecode, bool encodedWordVariant)
 		{
 			if (toDecode == null)
 				throw new ArgumentNullException("toDecode");
@@ -96,11 +99,19 @@ namespace OpenPop.Mime.Decode
 					{
 						// This character is not quoted printable hex encoded.
 
-						// Could it be the _ character, which represents space?
-						if (currentChar == '_')
-							byteArrayBuilder.WriteByte((byte)' ');
+						// Could it be the _ character, which represents space
+						// and are we using the encoded word variant of QuotedPrintable
+						if (currentChar == '_' && encodedWordVariant)
+						{
+							// The RFC specifies that the "_" always represents hexadecimal 20 even if the
+							// SPACE character occupies a different code position in the character set in use.
+							byteArrayBuilder.WriteByte(0x20);
+						}
 						else
-							byteArrayBuilder.WriteByte((byte)currentChar); // This is not encoded at all. This is a literal which should just be included into the output.
+						{
+							// This is not encoded at all. This is a literal which should just be included into the output.
+							byteArrayBuilder.WriteByte((byte)currentChar);
+						}
 					}
 				}
 

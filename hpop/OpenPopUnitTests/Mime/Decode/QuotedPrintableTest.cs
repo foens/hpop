@@ -19,7 +19,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "=3D";
 			const string expectedOutput = "=";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);  
 		}
@@ -33,7 +33,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "=3D=3D";
 			const string expectedOutput = "==";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -47,7 +47,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "=3D3D";
 			const string expectedOutput = "=3D"; // Checks that the output itself is not decoded, as this is encoded equal sign
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -71,7 +71,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "_";
 			const string expectedOutput = " ";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -96,7 +96,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			// =20 should be a space
 			// = just after should be a soft line break
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -128,7 +128,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "Test for space\tand\ttabs";
 			const string expectedOutput = input; // Nothing should happen, spaces and tabs should be kept
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -142,7 +142,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "=A1Hola,_se=F1or!";
 			const string expectedOutput = "¡Hola, señor!";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -164,7 +164,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "!\"#$%&'()*+,-./0123456789:;<>@ABCDEFGHIJKLMNIOQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 			const string expectedOutput = "!\"#$%&'()*+,-./0123456789:;<>@ABCDEFGHIJKLMNIOQRSTUVWXYZ[\\]^ `abcdefghijklmnopqrstuvwxyz{|}~"; // Only change is that _ delimits SPACE
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -187,10 +187,10 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string expectedOutput = "If you believe that truth=beauty, then surely mathematics is the most beautiful branch of philosophy.";
 			
 			// No exceptions
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); });
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); });
 
 			// And output is to be decoded anyway
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -213,7 +213,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "Now is the time =\r\nfor all folk to come=\r\n to the aid of their country.";
 			const string expectedOutput = "Now is the time for all folk to come to the aid of their country.";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -245,9 +245,9 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string expectedOutput = "\r\n\t"; // All other illegal control characters should have been deleted
 
 			// Do not throw exceptions
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); });
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); });
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			// And output should be correct
 			Assert.AreEqual(expectedOutput, output);
@@ -272,9 +272,9 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string expectedOutput = "united"; // All illegal control characters should have been deleted
 
 			// Do not throw exceptions
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); });
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); });
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			// And output should be correct
 			Assert.AreEqual(expectedOutput, output);
@@ -306,12 +306,12 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string input = "="; // This is clearly illigal input, as the RFC says there MUST be something after
 			// the equal sign. It also states that the parser should be robust. Therefore no exceptions must be thrown
 
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); }); // Maybe exception thrown?
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); }); // Maybe exception thrown?
 
 			// The RFC says that the input should be though of as not encoded at all
 			const string expectedOutput = "=";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			// And output should be correct
 			Assert.AreEqual(expectedOutput, output);
@@ -333,9 +333,9 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string expectedOutput = "=¡"; // Should simply be decoded as if hex characters were uppercase
 
 			// Therefore no exceptions must be thrown
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); });
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); });
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			// And output should be correct
 			Assert.AreEqual(expectedOutput, output);
@@ -365,9 +365,9 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string expectedOutput = input;
 
 			// Therefore no exceptions must be thrown
-			Assert.DoesNotThrow(delegate { QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1")); });
+			Assert.DoesNotThrow(delegate { QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1")); });
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding("iso-8859-1"));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
 
 			// And output should be equal input
 			Assert.AreEqual(expectedOutput, output);
@@ -381,7 +381,18 @@ namespace OpenPopUnitTests.Mime.Decode
 			// http://en.wikipedia.org/wiki/Windows-1254
 			const string expectedOutput = "Å÷–";
 
-			string output = QuotedPrintable.Decode(input, Encoding.GetEncoding(1252));
+			string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding(1252));
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestUnderscoresNotConvertedToSpacesInContentTransferEncoding()
+		{
+			const string input = "a_b_c_d_e_f";
+
+			const string expectedOutput = "a_b_c_d_e_f";
+
+			string output = Encoding.ASCII.GetString(QuotedPrintable.DecodeContentTransferEncoding(input));
 			Assert.AreEqual(expectedOutput, output);
 		}
 	}
