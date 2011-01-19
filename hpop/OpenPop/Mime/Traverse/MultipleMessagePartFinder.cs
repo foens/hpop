@@ -14,7 +14,7 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="leafAnswers">The answers to merge</param>
 		/// <returns>A list with has all the elements in the <paramref name="leafAnswers"/> lists</returns>
-		/// <exception cref="ArgumentNullException">if <param name="leafAnswers"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">if <paramref name="leafAnswers"/> is <see langword="null"/></exception>
 		protected override List<MessagePart> MergeLeafAnswers(List<List<MessagePart>> leafAnswers)
 		{
 			if(leafAnswers == null)

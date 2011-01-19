@@ -15,7 +15,7 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="message">The message you want to traverse</param>
 		/// <returns>An answer</returns>
-		/// <exception cref="ArgumentNullException">if <param name="message"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">if <paramref name="message"/> is <see langword="null"/></exception>
 		public TAnswer VisitMessage(Message message)
 		{
 			if(message == null)
@@ -29,7 +29,7 @@ namespace OpenPop.Mime.Traverse
 		/// </summary>
 		/// <param name="messagePart">The <see cref="MessagePart"/> part you want an answer from.</param>
 		/// <returns>An answer</returns>
-		/// <exception cref="ArgumentNullException">if <param name="messagePart"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">if <paramref name="messagePart"/> is <see langword="null"/></exception>
 		public TAnswer VisitMessagePart(MessagePart messagePart)
 		{
 			if(messagePart == null)

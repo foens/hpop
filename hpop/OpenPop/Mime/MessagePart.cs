@@ -246,8 +246,15 @@ namespace OpenPop.Mime
 			return encoding;
 		}
 
+		/// <summary>
+		/// Figures out the filename of this message part from some headers.
 		/// <see cref="FileName"/> property.
-		/// <exception cref="ArgumentNullException">if <param name="contentType"/> is <see langword="null"/></exception>
+		/// </summary>
+		/// <param name="contentType">The Content-Type header</param>
+		/// <param name="contentDisposition">The Content-Disposition header</param>
+		/// <param name="defaultName">The default filename to use, if no other could be found</param>
+		/// <returns>The filename found, or the default one if not such filename could be found in the headers</returns>
+		/// <exception cref="ArgumentNullException">if <paramref name="contentType"/> is <see langword="null"/></exception>
 		private static string FindFileName(ContentType contentType, ContentDisposition contentDisposition, string defaultName)
 		{
 			if(contentType == null)
