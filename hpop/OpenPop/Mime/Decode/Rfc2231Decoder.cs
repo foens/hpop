@@ -200,7 +200,7 @@ namespace OpenPop.Mime.Decode
 
 					// Decode the value
 					string throwAway;
-					value = DecodeSingleValue(value, out throwAway);
+					value = DecodeSingleValue(Utility.RemoveQuotesIfAny(value), out throwAway);
 
 					// Now input the new value with the new key
 					resultPairs.Add(new KeyValuePair<string, string>(key, value));

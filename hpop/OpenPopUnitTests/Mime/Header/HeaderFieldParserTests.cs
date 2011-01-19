@@ -198,6 +198,49 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("very long text document name is here to test if we can parse" +
 			" continuation in the name in a header now with ÆØÅ.txt", contentDisposition.FileName);
 		}
+
+		[Test]
+		public void ParseContentDispositionFilenameWithQuotes()
+		{
+			const string contentDispositionString =
+				"Content-Disposition: attachment;\r\n" +
+				"\tfilename*=\"utf-8\'\'foobar.jpg\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("foobar.jpg", contentDisposition.FileName);
+		}
+
+		[Test]
+		public void ParseContentDispositionFilenameLongWithQuotes()
+		{
+			const string contentDispositionString =
+				"Content-Disposition: attachment;" +
+				" filename*0*=ISO-8859-1\'\'%76%65%72%79%20%6C%6F%6E%67%20%74%65%78%74%20%64;" +
+				" filename*1*=\"%6F%63%75%6D%65%6E%74%20%6E%61%6D%65%20%69%73%20%68%65%72%65\";" +
+				" filename*2*=%20%74%6F%20%74%65%73%74%20%69%66%20%77%65%20%63%61%6E%20%70;" +
+				" filename*3*=%61%72%73%65%20%63%6F%6E%74%69%6E%75%61%74%69%6F%6E%20%69%6E;" +
+				" filename*4*=\"%20%74%68%65%20%6E%61%6D%65%20%69%6E%20%61%20%68%65%61%64%65\";" +
+				" filename*5*=%72%20%6E%6F%77%20%77%69%74%68%20%C6%D8%C5%2E%74%78%74";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("very long text document name is here to test if we can parse" +
+			" continuation in the name in a header now with ÆØÅ.txt", contentDisposition.FileName);
+		}
+
+		[Test]
+		public void ParseContentDispositionFilenameWithBackwardsSupport()
+		{
+			const string contentDispositionString =
+				"Content-Disposition: attachment;\r\n" +
+				"\tfilename=\"=?utf-8?b?dHJhbnNmwqouanBn?=\";\r\n" +
+				"\tfilename*=\"utf-8\'\'transf%C2%AA.jpg\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("transfª.jpg", contentDisposition.FileName);
+		}
 		#endregion
 
 		#region Content-Type tests
