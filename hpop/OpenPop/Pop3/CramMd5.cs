@@ -97,7 +97,7 @@ namespace OpenPop.Pop3
 			if(toHash == null)
 				throw new ArgumentNullException("toHash");
 
-			using (System.Security.Cryptography.MD5 md5 = new MD5CryptoServiceProvider())
+			using (MD5 md5 = new MD5CryptoServiceProvider())
 			{
 				return md5.ComputeHash(toHash);
 			}

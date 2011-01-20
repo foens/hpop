@@ -165,5 +165,45 @@ namespace OpenPopUnitTests.Mime
 
 			Assert.AreEqual(expectedBody, actualBody);
 		}
+
+		[Test]
+		public void TestContentDescription()
+		{
+			const string messagePartContent =
+				"Content-Description: This is some human readable text\r\n" +
+				"\r\n"; // End of message headers
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+			const string expectedDescription = "This is some human readable text";
+			string actualDescription = messagePart.ContentDescription;
+			Assert.AreEqual(expectedDescription, actualDescription);
+		}
+
+		[Test]
+		public void TestContentDescriptionTwo()
+		{
+			const string messagePartContent =
+				"Content-Description: This is some OTHER human readable text\r\n" +
+				"\r\n"; // End of message headers
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+			const string expectedDescription = "This is some OTHER human readable text";
+			string actualDescription = messagePart.ContentDescription;
+			Assert.AreEqual(expectedDescription, actualDescription);
+		}
+
+		[Test]
+		public void TestContentDisposition()
+		{
+			const string messagePartContent =
+				"Content-Disposition: attachment\r\n" +
+				"\r\n"; // End of message headers
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+			Assert.IsFalse(messagePart.ContentDisposition.Inline);
+		}
 	}
 }

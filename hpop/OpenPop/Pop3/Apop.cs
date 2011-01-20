@@ -29,7 +29,7 @@ namespace OpenPop.Pop3
 			// in clear text, and the server can still verify we have the password.
 			byte[] digestToHash = Encoding.ASCII.GetBytes(serverTimestamp + password);
 
-			using (System.Security.Cryptography.MD5 md5 = new MD5CryptoServiceProvider())
+			using (MD5 md5 = new MD5CryptoServiceProvider())
 			{
 				// MD5 hash the digest
 				byte[] result = md5.ComputeHash(digestToHash);

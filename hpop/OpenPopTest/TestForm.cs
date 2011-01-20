@@ -99,6 +99,7 @@ namespace OpenPop.TestApplication
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestForm));
 			this.panelTop = new System.Windows.Forms.Panel();
 			this.useSslCheckBox = new System.Windows.Forms.CheckBox();
 			this.uidlButton = new System.Windows.Forms.Button();
@@ -117,6 +118,7 @@ namespace OpenPop.TestApplication
 			this.gridHeaders = new System.Windows.Forms.DataGrid();
 			this.panelMiddle = new System.Windows.Forms.Panel();
 			this.panelMessageBody = new System.Windows.Forms.Panel();
+			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.messageTextBox = new System.Windows.Forms.TextBox();
 			this.labelMessageBody = new System.Windows.Forms.Label();
 			this.panelMessagesView = new System.Windows.Forms.Panel();
@@ -129,7 +131,6 @@ namespace OpenPop.TestApplication
 			this.listAttachments = new System.Windows.Forms.TreeView();
 			this.labelAttachments = new System.Windows.Forms.Label();
 			this.saveFile = new System.Windows.Forms.SaveFileDialog();
-			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.panelTop.SuspendLayout();
 			this.panelProperties.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.gridHeaders)).BeginInit();
@@ -314,6 +315,15 @@ namespace OpenPop.TestApplication
 			this.panelMessageBody.Size = new System.Drawing.Size(492, 196);
 			this.panelMessageBody.TabIndex = 6;
 			// 
+			// progressBar
+			// 
+			this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBar.Location = new System.Drawing.Point(7, 172);
+			this.progressBar.Name = "progressBar";
+			this.progressBar.Size = new System.Drawing.Size(476, 12);
+			this.progressBar.TabIndex = 10;
+			// 
 			// messageTextBox
 			// 
 			this.messageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -419,15 +429,6 @@ namespace OpenPop.TestApplication
 			// 
 			this.saveFile.Title = "Save Attachment";
 			// 
-			// progressBar
-			// 
-			this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.progressBar.Location = new System.Drawing.Point(7, 172);
-			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(476, 12);
-			this.progressBar.TabIndex = 10;
-			// 
 			// TestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -435,6 +436,7 @@ namespace OpenPop.TestApplication
 			this.Controls.Add(this.panelMiddle);
 			this.Controls.Add(this.panelProperties);
 			this.Controls.Add(this.panelTop);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "TestForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "OpenPOP.NET Test Application";
