@@ -110,7 +110,7 @@ namespace OpenPop.Mime.Decode
 			{
 				KeyValuePair<string, string> currentPair = pairs[i];
 				string key = currentPair.Key;
-				string value = currentPair.Value;
+				string value = Utility.RemoveQuotesIfAny(currentPair.Value);
 
 				// Is it a continuation parameter? (encoded or not)
 				if(key.EndsWith("*0", StringComparison.OrdinalIgnoreCase) || key.EndsWith("*0*", StringComparison.OrdinalIgnoreCase))
@@ -119,7 +119,6 @@ namespace OpenPop.Mime.Decode
 					// that the whole continuation is not encoded
 
 					string encoding = "notEncoded - Value here is never used";
-					value = Utility.RemoveQuotesIfAny(value);
 
 					// Now lets find out if it is encoded too.
 					if (key.EndsWith("*0*", StringComparison.OrdinalIgnoreCase))
@@ -152,13 +151,13 @@ namespace OpenPop.Mime.Decode
 					for (int j = i + 1, continuationCount = 1; j < pairsCount; j++, continuationCount++)
 					{
 						string jKey = pairs[j].Key;
-						string valueJKey = pairs[j].Value;
+						string valueJKey = Utility.RemoveQuotesIfAny(pairs[j].Value);
 
 						if (jKey.Equals(key + "*" + continuationCount))
 						{
 							// This value part of the continuation is not encoded
 							// Therefore remove qoutes if any and add to our stringbuilder
-							builder.Append(Utility.RemoveQuotesIfAny(valueJKey));
+							builder.Append(valueJKey);
 
 							// Remember to increment i, as we have now treated one more KeyValuePair
 							i++;
@@ -172,7 +171,7 @@ namespace OpenPop.Mime.Decode
 							// This value part of the continuation is encoded
 							// the encoding is not given in the current value,
 							// but was given in the first continuation, which we remembered for use here
-							valueJKey = DecodeSingleValue(Utility.RemoveQuotesIfAny(valueJKey), encoding);
+							valueJKey = DecodeSingleValue(valueJKey, encoding);
 							builder.Append(valueJKey);
 
 							// Remember to increment i, as we have now treated one more KeyValuePair
@@ -200,7 +199,7 @@ namespace OpenPop.Mime.Decode
 
 					// Decode the value
 					string throwAway;
-					value = DecodeSingleValue(Utility.RemoveQuotesIfAny(value), out throwAway);
+					value = DecodeSingleValue(value, out throwAway);
 
 					// Now input the new value with the new key
 					resultPairs.Add(new KeyValuePair<string, string>(key, value));
