@@ -107,7 +107,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="TreeNodeBuilder.cs" />
-    <Content Include="App.ico" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
