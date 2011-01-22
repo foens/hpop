@@ -5,142 +5,236 @@ using System.Text.RegularExpressions;
 namespace OpenPop.Mime.Decode
 {
 	/// <summary>
-	/// Portions Copyright (c) vendredi13@007.freesurf.fr<br/>
-	/// All rights reserved.<br/>
-	/// <br/>
-	/// Redistribution and use in source and binary forms, with or without
-	/// modification, are permitted.<br/>
-	/// <br/>
-	/// Bugs supplied by Ross Presser on codeProject.com has been incorporated.
+	/// Class used to decode RFC 2822 Date header fields.
 	/// </summary>
-	/// <remarks> 
-	/// See <a href="http://www.codeproject.com/KB/recipes/rfc2822-date-parser.aspx">RFC 2822-date-parser</a> for original version.<br/>
-	/// See <a href="http://www.codeproject.com/info/cpol10.aspx">CodeProject.com license</a> for license.
-	/// </remarks>
 	internal static class Rfc2822DateTime
 	{
 		/// <summary>
 		/// Converts a string in RFC 2822 format into a <see cref="DateTime"/> object
 		/// </summary>
-		/// <param name="aDate">The date to convert</param>
+		/// <param name="inputDate">The date to convert</param>
 		/// <returns>A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted</returns>
-		/// <exception cref="ArgumentNullException"><exception cref="ArgumentNullException">If <paramref name="aDate"/> is <see langword="null"/></exception></exception>
-		/// <exception cref="FormatException">If the <paramref name="aDate"/> could not be parsed into a <see cref="DateTime"/> object</exception>
-		public static DateTime StringToDate(string aDate)
+		/// <exception cref="ArgumentNullException"><exception cref="ArgumentNullException">If <paramref name="inputDate"/> is <see langword="null"/></exception></exception>
+		/// <exception cref="ArgumentException">If the <paramref name="inputDate"/> could not be parsed into a <see cref="DateTime"/> object</exception>
+		public static DateTime StringToDate(string inputDate)
 		{
-			if(aDate == null)
-				throw new ArgumentNullException("aDate");
+			if(inputDate == null)
+				throw new ArgumentNullException("inputDate");
 
-			// Strip out comments, handles nested comments as well
-			string temp = Regex.Replace(aDate, @"(\((?>\((?<C>)|\)(?<-C>)|.?)*(?(C)(?!))\))", "");
-
-			// strip extra white spaces
-			temp = Regex.Replace(temp, @"\s+", " ");
-			temp = Regex.Replace(temp, @"^\s*(.*?)\s*$", "$1");
-
-			string dayName;
-			// extract week name part
-			string[] resp = temp.Split(new[] {','}, 2);
-			if (resp.Length == 2)
-			{
-				// there's week name
-				dayName = resp[0];
-				temp = resp[1];
-			} else
-				dayName = "";
+			// Old date specification allows comments and a lot of whitespace
+			inputDate = StripCommentsAndExcessWhitespace(inputDate);
 
 			try
 			{
-				// extract date and time
-				int position = temp.LastIndexOf(' ');
-				if (position < 1)
-					throw new FormatException("Probably not a date");
+				// Extract the date
+				string date = ExtractDate(inputDate);
+			
+				// Convert the date string into a DateTime
+				DateTime dateTime = Convert.ToDateTime(date, CultureInfo.InvariantCulture);
 
-				string dpart = temp.Substring(0, position);
-				string timeZone = temp.Substring(position + 1);
+				// If a day-name is specified in the inputDate string, check if it fits with the date
+				ValidateDayNameIfAny(dateTime, inputDate);
 
-				// Date parts should always be parsed as english, and represented as UTC
-				DateTime dateTime = new DateTime(Convert.ToDateTime(dpart, CultureInfo.InvariantCulture).Ticks, DateTimeKind.Utc);
+				// Conver the date into UTC
+				dateTime = new DateTime(dateTime.Ticks, DateTimeKind.Utc);
 
-				// check weekDay name
-				// this must be done before convert to GMT 
-				if (!string.IsNullOrEmpty(dayName))
-				{
-					if ((dateTime.DayOfWeek == DayOfWeek.Friday && dayName != "Fri") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Monday && dayName != "Mon") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Saturday && dayName != "Sat") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Sunday && dayName != "Sun") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Thursday && dayName != "Thu") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Tuesday && dayName != "Tue") ||
-					    (dateTime.DayOfWeek == DayOfWeek.Wednesday && dayName != "Wed")
-						)
-						throw new FormatException("Invalid week of day");
-				}
-
-				// adjust to localtime
-				if (Regex.IsMatch(timeZone, @"[+\-][0-9][0-9][0-9][0-9]"))
-				{
-					// it's a modern ANSI style timezone
-					int timezoneFactor;
-					if (timeZone.Substring(0, 1) == "+")
-						timezoneFactor = -1;
-					else if (timeZone.Substring(0, 1) == "-")
-						timezoneFactor = 1;
-					else
-						throw new FormatException("Incorrect time zone");
-					string hour = timeZone.Substring(1, 2);
-					string minute = timeZone.Substring(3, 2);
-					dateTime = dateTime.AddHours(timezoneFactor*Convert.ToInt32(hour, CultureInfo.InvariantCulture));
-					dateTime = dateTime.AddMinutes(timezoneFactor*Convert.ToInt32(minute, CultureInfo.InvariantCulture));
-				} else
-				{
-					// it's a old style military time zone ?
-					switch (timeZone)
-					{
-						case "A": dateTime = dateTime.AddHours(1); break;
-						case "B": dateTime = dateTime.AddHours(2); break;
-						case "C": dateTime = dateTime.AddHours(3); break;
-						case "D": dateTime = dateTime.AddHours(4); break;
-						case "E": dateTime = dateTime.AddHours(5); break;
-						case "F": dateTime = dateTime.AddHours(6); break;
-						case "G": dateTime = dateTime.AddHours(7); break;
-						case "H": dateTime = dateTime.AddHours(8); break;
-						case "I": dateTime = dateTime.AddHours(9); break;
-						case "K": dateTime = dateTime.AddHours(10); break;
-						case "L": dateTime = dateTime.AddHours(11); break;
-						case "M": dateTime = dateTime.AddHours(12); break;
-						case "N": dateTime = dateTime.AddHours(-1); break;
-						case "O": dateTime = dateTime.AddHours(-2); break;
-						case "P": dateTime = dateTime.AddHours(-3); break;
-						case "Q": dateTime = dateTime.AddHours(-4); break;
-						case "R": dateTime = dateTime.AddHours(-5); break;
-						case "S": dateTime = dateTime.AddHours(-6); break;
-						case "T": dateTime = dateTime.AddHours(-7); break;
-						case "U": dateTime = dateTime.AddHours(-8); break;
-						case "V": dateTime = dateTime.AddHours(-9); break;
-						case "W": dateTime = dateTime.AddHours(-10); break;
-						case "X": dateTime = dateTime.AddHours(-11); break;
-						case "Y": dateTime = dateTime.AddHours(-12); break;
-						case "Z":
-						case "UT":
-						case "GMT": break;    // It's UTC
-						case "EST": dateTime = dateTime.AddHours(5); break;
-						case "EDT": dateTime = dateTime.AddHours(4); break;
-						case "CST": dateTime = dateTime.AddHours(6); break;
-						case "CDT": dateTime = dateTime.AddHours(5); break;
-						case "MST": dateTime = dateTime.AddHours(7); break;
-						case "MDT": dateTime = dateTime.AddHours(6); break;
-						case "PST": dateTime = dateTime.AddHours(8); break;
-						case "PDT": dateTime = dateTime.AddHours(7); break;
-						default:
-							throw new FormatException("Invalid time zone");
-					}
-				}
+				// Adjust according to the time zone
+				dateTime = AdjustTimezone(dateTime, inputDate);
+				
+				// Return the parsed date
 				return dateTime;
-			} catch (Exception e)
+			} catch (ArgumentException e)
 			{
-				throw new FormatException("Invalid Date: " + e.Message + ". Input: \"" + aDate + "\"", e);
+				throw new ArgumentException("Could not parse date: " + e.Message + ". Input was: \"" + inputDate + "\"", e);
 			}
+		}
+
+		/// <summary>
+		/// Adjust the <paramref name="dateTime"/> object given according to the timezone specified in the <paramref name="dateInput"/>.
+		/// </summary>
+		/// <param name="dateTime">The date to alter</param>
+		/// <param name="dateInput">The input date, in which the timezone can be found</param>
+		/// <returns>An date altered according to the timezone</returns>
+		/// <exception cref="ArgumentException">If no timezone was found in <paramref name="dateInput"/></exception>
+		private static DateTime AdjustTimezone(DateTime dateTime, string dateInput)
+		{
+			// We know that the timezones are always in the last part of the date input
+			string[] parts = dateInput.Split(' ');
+			string lastPart = parts[parts.Length - 1];
+
+			// Convert timezones in older formats to [+-]dddd format.
+			lastPart = Regex.Replace(lastPart, @"UT|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|[A-I]|[K-Y]|Z", MatchEvaluator);
+
+			// Find the timezone specification
+			// Example: Fri, 21 Nov 1997 09:55:06 -0600
+			// finds -0600
+			Match match = Regex.Match(lastPart, @"[\+-](?<hours>\d\d)(?<minutes>\d\d)");
+			if (match.Success)
+			{
+				// We have found that the timezone is in +dddd or -dddd format
+				// Add the number of hours and minutes to our found date
+				int hours = int.Parse(match.Groups["hours"].Value);
+				int minutes = int.Parse(match.Groups["minutes"].Value);
+
+				int factor = match.Value[0] == '+' ? -1 : 1;
+
+				dateTime = dateTime.AddHours(factor*hours);
+				dateTime = dateTime.AddMinutes(factor*minutes);
+
+				return dateTime;
+			}
+			
+			throw new ArgumentException("No timezone part found");
+		}
+
+		/// <summary>
+		/// Convert timezones in older formats to [+-]dddd format.
+		/// </summary>
+		/// <param name="match">The match that was found</param>
+		/// <returns>The string to replace the matched string with</returns>
+		private static string MatchEvaluator(Match match)
+		{
+			if (!match.Success)
+			{
+				throw new ArgumentException("Match success are always true");
+			}
+
+			switch (match.Value)
+			{
+				// "A" through "I"
+				// are equivalent to "+0100" through "+0900" respectively
+				case "A": return "+0100";
+				case "B": return "+0200";
+				case "C": return "+0300";
+				case "D": return "+0400";
+				case "E": return "+0500";
+				case "F": return "+0600";
+				case "G": return "+0700";
+				case "H": return "+0800";
+				case "I": return "+0900";
+
+				// "K", "L", and "M"
+				// are equivalent to "+1000", "+1100", and "+1200" respectively
+				case "K": return "+1000";
+				case "L": return "+1100";
+				case "M": return "+1200";
+
+				// "N" through "Y"
+				// are equivalent to "-0100" through "-1200" respectively
+				case "N": return "-0100";
+				case "O": return "-0200";
+				case "P": return "-0300";
+				case "Q": return "-0400";
+				case "R": return "-0500";
+				case "S": return "-0600";
+				case "T": return "-0700";
+				case "U": return "-0800";
+				case "V": return "-0900";
+				case "W": return "-1000";
+				case "X": return "-1100";
+				case "Y": return "-1200";
+
+				// "Z", "UT" and "GMT"
+				// is equivalent to "+0000"
+				case "Z":
+				case "UT":
+				case "GMT":
+					return "+0000";
+
+				// US time zones
+				case "EDT": return "-0400"; // EDT is semantically equivalent to -0400
+				case "EST": return "-0500"; // EST is semantically equivalent to -0500
+				case "CDT": return "-0500"; // CDT is semantically equivalent to -0500
+				case "CST": return "-0600"; // CST is semantically equivalent to -0600
+				case "MDT": return "-0600"; // MDT is semantically equivalent to -0600
+				case "MST": return "-0700"; // MST is semantically equivalent to -0700
+				case "PDT": return "-0700"; // PDT is semantically equivalent to -0700
+				case "PST": return "-0800"; // PST is semantically equivalent to -0800
+
+				default:
+					throw new ArgumentException("Unexpected input");
+			}
+		}
+
+		/// <summary>
+		/// Extracts the date part from the <paramref name="dateInput"/>
+		/// </summary>
+		/// <param name="dateInput">The date input string, from which to extract the date part</param>
+		/// <returns>The extracted date part</returns>
+		/// <exception cref="ArgumentException">If a date part could not be extracted from <paramref name="dateInput"/></exception>
+		private static string ExtractDate(string dateInput)
+		{
+			// Matches the date and time part of a string
+			// Example: Fri, 21 Nov 1997 09:55:06 -0600
+			// Finds: 21 Nov 1997 09:55:06
+			// Seconds does not need to be specified
+			Match match = Regex.Match(dateInput, @"\d\d? .+ (\d\d\d\d|\d\d) \d\d:\d\d(:\d\d)?");
+			if(match.Success)
+			{
+				return match.Value;
+			}
+
+			throw new ArgumentException("No date part found");
+		}
+
+		/// <summary>
+		/// Validates that the given <paramref name="dateTime"/> agrees with a day-name specified
+		/// in <paramref name="dateInput"/>.
+		/// </summary>
+		/// <param name="dateTime">The time to check</param>
+		/// <param name="dateInput">The date input to extract the day-name from</param>
+		/// <exception cref="ArgumentException">If <paramref name="dateTime"/> and <paramref name="dateInput"/> does not agree on the day</exception>
+		private static void ValidateDayNameIfAny(DateTime dateTime, string dateInput)
+		{
+			// Check if there is a day name in front of the date
+			// Example: Fri, 21 Nov 1997 09:55:06 -0600
+			if (dateInput.Length >= 4 && dateInput[3] == ',')
+			{
+				string dayName = dateInput.Substring(0, 3);
+
+				// If a dayName was specified. Check that the dateTime and the dayName
+				// agrees on which day it is
+				// This is just a failure-check and could be left out
+				if ((dateTime.DayOfWeek == DayOfWeek.Monday    && !dayName.Equals("Mon")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Tuesday   && !dayName.Equals("Tue")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Wednesday && !dayName.Equals("Wed")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Thursday  && !dayName.Equals("Thu")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Friday    && !dayName.Equals("Fri")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Saturday  && !dayName.Equals("Sat")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Sunday    && !dayName.Equals("Sun")))
+				{
+					throw new ArgumentException("Day-name does not correspond to the weekday of the date");
+				}
+			}
+
+			// If no day name was found no checks can be made
+		}
+
+		/// <summary>
+		/// Strips and removes all comments and excessive whitespace from the string
+		/// </summary>
+		/// <param name="input">The input to strip from</param>
+		/// <returns>The stripped string</returns>
+		private static string StripCommentsAndExcessWhitespace(string input)
+		{
+			// Strip out comments
+			// Also strips out nested comments
+			input = Regex.Replace(input, @"(\((?>\((?<C>)|\)(?<-C>)|.?)*(?(C)(?!))\))", "");
+
+			// Reduce any whitespace character to one space only
+			input = Regex.Replace(input, @"\s+", " ");
+
+			// Remove all initial whitespace
+			input = Regex.Replace(input, @"^\s+", "");
+
+			// Remove all ending whitespace
+			input = Regex.Replace(input, @"\s+$", "");
+
+			// Remove spaces at colons
+			// Example: 22: 33 : 44 => 22:33:44
+			input = Regex.Replace(input, @" ?: ?", ":");
+
+			return input;
 		}
 	}
 }
