@@ -77,7 +77,7 @@ namespace OpenPop.TestApplication
 			// This is only for faster debugging purposes
 			// We will try to load in default values for the hostname, port, ssl, username and password from a file
 			string myDocs = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-			string file = Path.Combine(myDocs, "OpenPOPLogin.txt");
+			string file = Path.Combine(myDocs, "OpenPopLogin.txt");
 			if (File.Exists(file))
 			{
 				using (StreamReader reader = new StreamReader(File.OpenRead(file)))
@@ -365,7 +365,7 @@ namespace OpenPop.TestApplication
 			this.listMessages.Name = "listMessages";
 			this.listMessages.Size = new System.Drawing.Size(160, 160);
 			this.listMessages.TabIndex = 8;
-			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListMessages_MessageSelected);
+			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListMessagesMessageSelected);
 			// 
 			// contextMenuMessages
 			// 
@@ -377,13 +377,13 @@ namespace OpenPop.TestApplication
 			// 
 			this.menuDeleteMessage.Index = 0;
 			this.menuDeleteMessage.Text = "Delete Mail";
-			this.menuDeleteMessage.Click += new System.EventHandler(this.MenuDeleteMessage_Click);
+			this.menuDeleteMessage.Click += new System.EventHandler(this.MenuDeleteMessageClick);
 			// 
 			// menuViewSource
 			// 
 			this.menuViewSource.Index = 1;
 			this.menuViewSource.Text = "View source";
-			this.menuViewSource.Click += new System.EventHandler(this.MenuViewSource_Click);
+			this.menuViewSource.Click += new System.EventHandler(this.MenuViewSourceClick);
 			// 
 			// labelMessageNumber
 			// 
@@ -415,7 +415,7 @@ namespace OpenPop.TestApplication
 			this.listAttachments.ShowRootLines = false;
 			this.listAttachments.Size = new System.Drawing.Size(121, 160);
 			this.listAttachments.TabIndex = 10;
-			this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListAttachments_AttachmentSelected);
+			this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListAttachmentsAttachmentSelected);
 			// 
 			// labelAttachments
 			// 
@@ -565,7 +565,7 @@ namespace OpenPop.TestApplication
 			ReceiveMails();
 		}
 
-		private void ListMessages_MessageSelected(object sender, TreeViewEventArgs e)
+		private void ListMessagesMessageSelected(object sender, TreeViewEventArgs e)
 		{
 			// Fetch out the selected message
 			Message message = messages[GetMessageNumberFromSelectedNode(listMessages.SelectedNode)];
@@ -696,7 +696,7 @@ namespace OpenPop.TestApplication
 			return GetMessageNumberFromSelectedNode(node.Parent);
 		}
 
-		private void ListAttachments_AttachmentSelected(object sender, TreeViewEventArgs args)
+		private void ListAttachmentsAttachmentSelected(object sender, TreeViewEventArgs args)
 		{
 			// Fetch the attachment part which is currently selected
 			MessagePart attachment = (MessagePart)listAttachments.SelectedNode.Tag;
@@ -736,7 +736,7 @@ namespace OpenPop.TestApplication
 			}
 		}
 
-		private void MenuDeleteMessage_Click(object sender, EventArgs e)
+		private void MenuDeleteMessageClick(object sender, EventArgs e)
 		{
 			if (listMessages.SelectedNode != null)
 			{
@@ -771,7 +771,7 @@ namespace OpenPop.TestApplication
 			messageTextBox.Text = stringBuilder.ToString();
 		}
 
-		private void MenuViewSource_Click(object sender, EventArgs e)
+		private void MenuViewSourceClick(object sender, EventArgs e)
 		{
 			
 			if (listMessages.SelectedNode != null)
