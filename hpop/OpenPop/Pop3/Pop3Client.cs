@@ -27,14 +27,9 @@ namespace OpenPop.Pop3
 	{
 		#region Private member properties
 		/// <summary>
-		/// This is the stream used to read off the server response to a command
+		/// The stream used to communicate with the server
 		/// </summary>
-		private Stream InputStream { get; set; }
-
-		/// <summary>
-		/// This is the stream used to write commands to the server
-		/// </summary>
-		private Stream OutputStream { get; set; }
+		private Stream Stream { get; set; }
 
 		/// <summary>
 		/// This is the last response the server sent back when a command was issued to it
@@ -113,27 +108,22 @@ namespace OpenPop.Pop3
 		/// <summary>
 		/// Connect to the server using user supplied input stream and output stream
 		/// </summary>
-		/// <param name="inputStream">The <see cref="TextReader"/> to read server responses from</param>
-		/// <param name="outputStream">The <see cref="TextWriter"/> to send commands to the server</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="inputStream"/> or <paramref name="outputStream"/> is <see langword="null"/></exception>
-		public void Connect(Stream inputStream, Stream outputStream)
+		/// <param name="stream">The stream used to communicate with the server</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="stream"/> is <see langword="null"/></exception>
+		public void Connect(Stream stream)
 		{
 			AssertDisposed();
 
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
 
-			if(inputStream == null)
-				throw new ArgumentNullException("inputStream");
+			if (stream == null)
+				throw new ArgumentNullException("stream");
 
-			if(outputStream == null)
-				throw new ArgumentNullException("outputStream");
-
-			InputStream = inputStream;
-			OutputStream = outputStream;
+			Stream = stream;
 
 			// Fetch the server one-line welcome greeting
-			string response = StreamUtility.ReadLineAsAscii(InputStream);
+			string response = StreamUtility.ReadLineAsAscii(Stream);
 
 			// Check if the response was an OK response
 			try
@@ -257,7 +247,7 @@ namespace OpenPop.Pop3
 			}
 
 			// Now do the connect with the same stream being used to read and write to
-			Connect(stream, stream);
+			Connect(stream);
 		}
 
 		/// <summary>
@@ -621,7 +611,7 @@ namespace OpenPop.Pop3
 
 			string response;
 			// Keep reading until multi-line ends with a "."
-			while (!IsLastLineInMultiLineResponse(response = StreamUtility.ReadLineAsAscii(InputStream)))
+			while (!IsLastLineInMultiLineResponse(response = StreamUtility.ReadLineAsAscii(Stream)))
 			{
 				// Add the unique ID to the list
 				uids.Add(response.Split(' ')[1]);
@@ -680,7 +670,7 @@ namespace OpenPop.Pop3
 
 			string response;
 			// Read until end of multi-line
-			while (!".".Equals(response = StreamUtility.ReadLineAsAscii(InputStream)))
+			while (!".".Equals(response = StreamUtility.ReadLineAsAscii(Stream)))
 			{
 				sizes.Add(int.Parse(response.Split(' ')[1], CultureInfo.InvariantCulture));
 			}
@@ -810,11 +800,11 @@ namespace OpenPop.Pop3
 			byte[] commandBytes = Encoding.ASCII.GetBytes(command + "\r\n");
 
 			// Write the command to the server
-			OutputStream.Write(commandBytes, 0, commandBytes.Length);
-			OutputStream.Flush(); // Flush the content as we now wait for a response
+			Stream.Write(commandBytes, 0, commandBytes.Length);
+			Stream.Flush(); // Flush the content as we now wait for a response
 
 			// Read the response from the server. The response should be in ASCII
-			LastServerResponse = StreamUtility.ReadLineAsAscii(InputStream);
+			LastServerResponse = StreamUtility.ReadLineAsAscii(Stream);
 
 			IsOkResponse(LastServerResponse);
 		}
@@ -883,7 +873,7 @@ namespace OpenPop.Pop3
 				byte[] lineRead;
 
 				// Keep reading until we are at the end of the multi line response
-				while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(InputStream)))
+				while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(Stream)))
 				{
 					// We should not write CRLF on the very last line, therefore we do this
 					if (!first)
@@ -977,8 +967,7 @@ namespace OpenPop.Pop3
 		{
 			try
 			{
-				InputStream.Close();
-				OutputStream.Close();
+				Stream.Close();
 			}
 			finally
 			{

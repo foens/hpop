@@ -47,6 +47,7 @@
       <Link>AssemblyCommon.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CombinedStream.cs" />
     <Compile Include="Mime\Decode\EncodedWordTests.cs" />
     <Compile Include="Mime\Decode\QuotedPrintableTest.cs" />
     <Compile Include="Mime\Decode\Rfc2822DateTimeTests.cs" />

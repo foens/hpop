@@ -110,7 +110,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes("+OK")); // Welcome message
 			Stream outputStream = new MemoryStream();
 
-			Assert.DoesNotThrow(delegate { Client.Connect(inputStream, outputStream); });
+			Assert.DoesNotThrow(delegate { Client.Connect(new CombinedStream(inputStream, outputStream)); });
 		}
 
 		[Test]
@@ -121,7 +121,7 @@ namespace OpenPopUnitTests.Pop3
 
 			// There was a problem, where an InvalidUseException was being thrown, if the server
 			// did not respond or the stream was closed. That was the wrong exception
-			Assert.Throws(typeof(PopServerNotAvailableException), delegate { Client.Connect(inputStream, outputStream); });
+			Assert.Throws(typeof(PopServerNotAvailableException), delegate { Client.Connect(new CombinedStream(inputStream, outputStream)); });
 		}
 	}
 }

@@ -43,7 +43,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			// Authenticate with the client
-			Client.Connect(inputStream, outputStream);
+			Client.Connect(new CombinedStream(inputStream, outputStream));
 			Client.Authenticate(RandomString, RandomString);
 		}
 
@@ -175,7 +175,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			// Try connect again
-			Assert.Throws(typeof(InvalidUseException), delegate { Client.Connect(inputStream, outputStream); });
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.Connect(new CombinedStream(inputStream, outputStream)); });
 		}
 	}
 }

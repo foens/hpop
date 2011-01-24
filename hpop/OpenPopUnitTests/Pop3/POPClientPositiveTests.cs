@@ -27,7 +27,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server supports APOP
 			Assert.IsTrue(client.ApopSupported);
@@ -57,7 +57,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			int numberOfMessages = client.GetMessageCount();
@@ -83,7 +83,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			client.DeleteMessage(5);
@@ -121,7 +121,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			// Delete all the messages
@@ -173,7 +173,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			client.NoOperation();
@@ -203,7 +203,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			client.Reset();
@@ -233,7 +233,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			const string expectedOutput = "psycho";
@@ -264,7 +264,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			// Get the UIDs for all the messages in sorted order from 1 and upwards
@@ -296,7 +296,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			// Message 9 should have size 200
@@ -325,7 +325,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			// Message 9 should have size 200
@@ -363,7 +363,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			Message message = client.GetMessage(132);
@@ -422,7 +422,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("something", "else");
 
 			Message message = client.GetMessage(132);
@@ -501,7 +501,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("something", "else");
 
 			Message message = client.GetMessage(132);
@@ -579,7 +579,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("user", "password");
 
 			Message message = client.GetMessage(132);
@@ -652,7 +652,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("user", "password");
 
 			Message message = client.GetMessage(132);
@@ -697,7 +697,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("user", "password");
 
 			Message message = client.GetMessage(132);
@@ -745,7 +745,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("user", "password");
 
 			Message message = client.GetMessage(132);
@@ -783,7 +783,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("test", "test");
 
 			// Fetch the header of message 7
@@ -817,7 +817,7 @@ namespace OpenPopUnitTests.Pop3
 			byte[] expectedBytes = Encoding.ASCII.GetBytes(message);
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("something", "else");
 
 			byte[] messageBytes = client.GetMessageAsBytes(132);
@@ -860,7 +860,7 @@ namespace OpenPopUnitTests.Pop3
 			byte[] expectedBytes = Encoding.ASCII.GetBytes(ExpectedMessage);
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("something", "else");
 
 			byte[] messageBytes = client.GetMessageAsBytes(139);
@@ -884,7 +884,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("something", "else");
 
 			Message messageFetched = client.GetMessage(3);
@@ -910,7 +910,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5);
 
 			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -939,7 +939,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("foens", "thisIsAnInsanelyLongPasswordManWoot", AuthenticationMethod.CramMd5);
 
 			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -967,7 +967,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			Assert.Throws<NotSupportedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 
 			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -993,7 +993,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			Assert.Throws<InvalidLoginOrPasswordException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 		}
 
@@ -1010,7 +1010,7 @@ namespace OpenPopUnitTests.Pop3
 			MemoryStream outputStream = new MemoryStream();
 
 			Pop3Client client = new Pop3Client();
-			client.Connect(inputStream, outputStream);
+			client.Connect(new CombinedStream(inputStream, outputStream));
 			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 		}
 
@@ -1027,7 +1027,7 @@ namespace OpenPopUnitTests.Pop3
 
 			using (Pop3Client client = new Pop3Client())
 			{
-				client.Connect(inputStream, outputStream);
+				client.Connect(new CombinedStream(inputStream, outputStream));
 			}
 
 			// Check that a command was sent
