@@ -5,7 +5,7 @@ namespace OpenPop.Pop3.Exceptions
 	/// <summary>
 	/// Thrown when either the username or the password is not accepted by the POP3 server.
 	/// </summary>
-	/// <remarks>Should be used only when using <see cref="AuthenticationMethod.APOP"/>.</remarks>
+	/// <remarks>Should be used only when using <see cref="AuthenticationMethod.Apop"/>.</remarks>
 	public class InvalidLoginOrPasswordException : PopClientException
 	{
 		///<summary>

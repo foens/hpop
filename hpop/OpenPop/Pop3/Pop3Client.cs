@@ -59,7 +59,8 @@ namespace OpenPop.Pop3
 		public bool Connected { get; private set; }
 
 		/// <summary>
-		/// Allows you to check if the server supports the APOP authentication method.<br/>
+		/// Allows you to check if the server supports
+		/// the <see cref="AuthenticationMethod.Apop"/> authentication method.<br/>
 		/// <br/>
 		/// This value is filled when the connect method has returned,
 		/// as the server tells in its welcome message if APOP is supported.
@@ -282,7 +283,7 @@ namespace OpenPop.Pop3
 
 		#region Authentication methods
 		/// <summary>
-		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.TryBoth"/>
+		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>
 		/// which is the most secure method to use.
 		/// </summary>
 		/// <param name="username">The username</param>
@@ -293,7 +294,7 @@ namespace OpenPop.Pop3
 		public void Authenticate(string username, string password)
 		{
 			AssertDisposed();
-			Authenticate(username, password, AuthenticationMethod.TryBoth);
+			Authenticate(username, password, AuthenticationMethod.Auto);
 		}
 
 		/// <summary>
@@ -302,7 +303,7 @@ namespace OpenPop.Pop3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
-		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.APOP"/> is used, but not supported by the server</exception>
+		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.Apop"/> is used, but not supported by the server</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
@@ -325,11 +326,11 @@ namespace OpenPop.Pop3
 					AuthenticateUsingUserAndPassword(username, password);
 					break;
 
-				case AuthenticationMethod.APOP:
+				case AuthenticationMethod.Apop:
 					AuthenticateUsingApop(username, password);
 					break;
 
-				case AuthenticationMethod.TryBoth:
+				case AuthenticationMethod.Auto:
 					if (ApopSupported)
 						AuthenticateUsingApop(username, password);
 					else

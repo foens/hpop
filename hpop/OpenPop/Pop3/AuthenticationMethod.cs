@@ -8,31 +8,30 @@ namespace OpenPop.Pop3
 		/// <summary>
 		/// Authenticate using the UsernameAndPassword method.<br/>
 		/// This will pass the username and password to the server in cleartext.<br/>
-		/// APOP is more secure but might not be supported on a server.<br/>
-		/// This method is not recommended. Use TryBoth instead, which will use APOP if supported and
-		/// fall back to UsernameAndPassword if not.<br/>
+		/// <see cref="Apop"/> is more secure but might not be supported on a server.<br/>
+		/// This method is not recommended. Use <see cref="Auto"/> instead.
 		/// <br/>
 		/// If SSL is used, there is no loss of security by using this authentication method.
 		/// </summary>
 		UsernameAndPassword,
 
 		/// <summary>
-		/// Authenticate using the Authenticated Post Office Protocol method, which is more secure then UsernameAndPassword
-		/// since it is a request-response protocol where server checks if the client knows a shared secret, which
-		/// is the password, without the password itself being transmitted.<br/>
+		/// Authenticate using the Authenticated Post Office Protocol method, which is more secure then
+		/// <see cref="UsernameAndPassword"/> since it is a request-response protocol where server checks if the
+		///  client knows a shared secret, which is the password, without the password itself being transmitted.<br/>
 		/// This authentication method uses MD5 under its hood.<br/>
 		/// <br/>
 		/// This authentication method is not supported by many servers.<br/>
 		/// Choose this option if you want maximum security.
 		/// </summary>
-		APOP,
+		Apop,
 
 		/// <summary>
 		/// This is the recomended method to authenticate with.<br/>
-		/// If APOP is supported by the server, APOP is used for authentication.<br/>
-		/// If APOP is not supported, TryBoth will fall back to UsernameAndPassword authentication.
+		/// If <see cref="Apop"/> is supported by the server, <see cref="Apop"/> is used for authentication.<br/>
+		/// If <see cref="Apop"/> is not supported, Auto will fall back to <see cref="UsernameAndPassword"/> authentication.
 		/// </summary>
-		TryBoth,
+		Auto,
 
 		/// <summary>
 		/// Logs in the the POP3 server using CRAM-MD5 authentication scheme.<br/>

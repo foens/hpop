@@ -32,7 +32,7 @@ namespace OpenPopUnitTests.Pop3
 			// The Pop3Client should now have seen, that the server supports APOP
 			Assert.IsTrue(client.ApopSupported);
 
-			client.Authenticate("mrose", "tanstaaf", AuthenticationMethod.APOP);
+			client.Authenticate("mrose", "tanstaaf", AuthenticationMethod.Apop);
 
 			const string expectedOutput = "APOP mrose c4c9334bac560ecc979e58001b3e22fb\r\n";
 			string output = Encoding.ASCII.GetString(outputStream.ToArray());
