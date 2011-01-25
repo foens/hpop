@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
@@ -75,9 +76,9 @@ namespace OpenPopUnitTests.Pop3
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
 			const string okPassword = "+OK";
-			const string DeleteResponse = "+OK"; // Message was deleted
-			const string QuitAccepted = "+OK";
-			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + DeleteResponse + "\r\n" + QuitAccepted + "\r\n";
+			const string deleteResponse = "+OK"; // Message was deleted
+			const string quitAccepted = "+OK";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + deleteResponse + "\r\n" + quitAccepted + "\r\n";
 
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
@@ -89,7 +90,7 @@ namespace OpenPopUnitTests.Pop3
 			client.DeleteMessage(5);
 
 			const string expectedOutput = "DELE 5";
-			string output = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// We expected that the last command is the delete command
 			Assert.AreEqual(expectedOutput, output);
@@ -97,7 +98,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Disconnect();
 
 			const string expectedOutputAfterQuit = "QUIT";
-			string outputAfterQuit = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string outputAfterQuit = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// We now expect that the client has sent the QUIT command
 			Assert.AreEqual(expectedOutputAfterQuit, outputAfterQuit);
@@ -113,9 +114,9 @@ namespace OpenPopUnitTests.Pop3
 			const string okUsername = "+OK";
 			const string okPassword = "+OK";
 			const string messageCountResponse = "+OK 2 5"; // 2 messages with total size of 5 octets
-			const string DeleteResponse = "+OK"; // Message was deleted
-			const string QuitAccepted = "+OK";
-			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + messageCountResponse  + "\r\n" + DeleteResponse + "\r\n" + DeleteResponse + "\r\n" + QuitAccepted + "\r\n";
+			const string deleteResponse = "+OK"; // Message was deleted
+			const string quitAccepted = "+OK";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + messageCountResponse  + "\r\n" + deleteResponse + "\r\n" + deleteResponse + "\r\n" + quitAccepted + "\r\n";
 
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
@@ -128,7 +129,7 @@ namespace OpenPopUnitTests.Pop3
 			client.DeleteAllMessages();
 
 			// Check that message 1 and message 2 was deleted
-			string[] commandsFired = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			bool message1Deleted = false;
 			bool message2Deleted = false;
@@ -151,7 +152,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Disconnect();
 
 			const string expectedOutputAfterQuit = "QUIT";
-			string outputAfterQuit = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string outputAfterQuit = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// We now expect that the client has sent the QUIT command
 			Assert.AreEqual(expectedOutputAfterQuit, outputAfterQuit);
@@ -166,8 +167,8 @@ namespace OpenPopUnitTests.Pop3
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
 			const string okPassword = "+OK";
-			const string noopOK = "+OK";
-			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + noopOK + "\r\n";
+			const string noOperationOk = "+OK";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + noOperationOk + "\r\n";
 
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
@@ -179,7 +180,7 @@ namespace OpenPopUnitTests.Pop3
 			client.NoOperation();
 
 			// Get the last command issued by the client
-			string output = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// We expect it to be NOOP
 			const string expectedOutput = "NOOP";
@@ -196,8 +197,8 @@ namespace OpenPopUnitTests.Pop3
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
 			const string okPassword = "+OK";
-			const string rsetOK = "+OK";
-			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + rsetOK + "\r\n";
+			const string resetOk = "+OK";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + resetOk + "\r\n";
 
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
@@ -209,7 +210,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Reset();
 
 			// Get the last command issued by the client
-			string output = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// We expect it to be RSET
 			const string expectedOutput = "RSET";
@@ -221,7 +222,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-12
 		/// </summary>
 		[Test]
-		public void TestGetMessageUID()
+		public void TestGetMessageUid()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -249,7 +250,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-12
 		/// </summary>
 		[Test]
-		public void TestGetMessageUIDs()
+		public void TestGetMessageUids()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -268,7 +269,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Authenticate("test", "test");
 
 			// Get the UIDs for all the messages in sorted order from 1 and upwards
-			System.Collections.Generic.List<string> uids = client.GetMessageUids();
+			List<string> uids = client.GetMessageUids();
 
 			// The list should have size 2
 			Assert.AreEqual(2, uids.Count);
@@ -329,7 +330,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Authenticate("test", "test");
 
 			// Message 9 should have size 200
-			System.Collections.Generic.List<int> messageSizes = client.GetMessageSizes();
+			List<int> messageSizes = client.GetMessageSizes();
 
 			// The list should have size 2
 			Assert.AreEqual(2, messageSizes.Count);
@@ -849,7 +850,7 @@ namespace OpenPopUnitTests.Pop3
 			const string messageEnd = ".";
 
 			const string message		 = "Return-Path: <thefeds@spam.mail.dk>" + "\r\n" + "" + "\r\n" + "..";
-			const string ExpectedMessage = "Return-Path: <thefeds@spam.mail.dk>" + "\r\n" + "" + "\r\n" + ".";
+			const string expectedMessage = "Return-Path: <thefeds@spam.mail.dk>" + "\r\n" + "" + "\r\n" + ".";
 			
 			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + okMessageFetch + "\r\n" + message + "\r\n" + messageEnd + "\r\n";
 
@@ -857,7 +858,7 @@ namespace OpenPopUnitTests.Pop3
 			Stream outputStream = new MemoryStream();
 
 			// When a .. is expected as the first character of a line, it really means that it is only a .
-			byte[] expectedBytes = Encoding.ASCII.GetBytes(ExpectedMessage);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedMessage);
 
 			Pop3Client client = new Pop3Client();
 			client.Connect(new CombinedStream(inputStream, outputStream));
@@ -913,7 +914,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5);
 
-			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
 			Assert.AreEqual(2, commandsFromClient.Length);
 
@@ -942,7 +943,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Connect(new CombinedStream(inputStream, outputStream));
 			client.Authenticate("foens", "thisIsAnInsanelyLongPasswordManWoot", AuthenticationMethod.CramMd5);
 
-			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
 			Assert.AreEqual(2, commandsFromClient.Length);
 
@@ -970,7 +971,7 @@ namespace OpenPopUnitTests.Pop3
 			client.Connect(new CombinedStream(inputStream, outputStream));
 			Assert.Throws<NotSupportedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 
-			string[] commandsFromClient = getCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
 			// Check the the client only sent one command
 			Assert.AreEqual(1, commandsFromClient.Length);
@@ -1018,9 +1019,9 @@ namespace OpenPopUnitTests.Pop3
 		public void TestDisposeSendsQuit()
 		{
 			const string welcomeMessage = "+OK";
-			const string QuitOk = "+OK";
+			const string quitOk = "+OK";
 
-			const string serverResponses = welcomeMessage + "\r\n" + QuitOk + "\r\n";
+			const string serverResponses = welcomeMessage + "\r\n" + quitOk + "\r\n";
 
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
@@ -1034,10 +1035,237 @@ namespace OpenPopUnitTests.Pop3
 			Assert.IsNotEmpty(outputStream.ToArray());
 
 			const string expectedCommand = "QUIT";
-			string actualCommand = getLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+			string actualCommand = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
 			// Check last command was QUIT
 			Assert.AreEqual(expectedCommand, actualCommand);
+		}
+
+		[Test]
+		public void TestCapabilityRfcExample()
+		{
+			const string welcomeMessage = "+OK";
+			const string capabilityResponse =
+				"+OK Capability list follows\r\n" +
+				"TOP\r\n" +
+				"USER\r\n" +
+				"SASL CRAM-MD5 KERBEROS_V4\r\n" +
+				"RESP-CODES\r\n" +
+				"LOGIN-DELAY 900\r\n" +
+				"PIPELINING\r\n" +
+				"EXPIRE 60\r\n" +
+				"UIDL\r\n" +
+				"IMPLEMENTATION Shlemazle-Plotz-v302\r\n" +
+				".";
+			const string quitOk = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + capabilityResponse + "\r\n" + quitOk + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			using (Pop3Client client = new Pop3Client())
+			{
+				client.Connect(new CombinedStream(inputStream, outputStream));
+
+				Dictionary<string, List<string>> capabilities = client.Capabilities();
+
+				// Check the capabilities received was correct
+				Assert.Contains("TOP", capabilities.Keys);
+				Assert.Contains("USER", capabilities.Keys);
+				Assert.Contains("SASL", capabilities.Keys);
+				Assert.Contains("RESP-CODES", capabilities.Keys);
+				Assert.Contains("LOGIN-DELAY", capabilities.Keys);
+				Assert.Contains("PIPELINING", capabilities.Keys);
+				Assert.Contains("EXPIRE", capabilities.Keys);
+				Assert.Contains("UIDL", capabilities.Keys);
+				Assert.Contains("IMPLEMENTATION", capabilities.Keys);
+				Assert.AreEqual(9, capabilities.Keys.Count);
+
+				// Check arguments
+				Assert.IsEmpty(capabilities["TOP"]);
+				Assert.IsEmpty(capabilities["USER"]);
+
+				List<string> saslArguments = capabilities["SASL"];
+				Assert.NotNull(saslArguments);
+				Assert.Contains("CRAM-MD5", saslArguments);
+				Assert.Contains("KERBEROS_V4", saslArguments);
+				Assert.AreEqual(2, saslArguments.Count);
+
+				Assert.IsEmpty(capabilities["RESP-CODES"]);
+
+				List<string> loginDelayArguments = capabilities["LOGIN-DELAY"];
+				Assert.NotNull(loginDelayArguments);
+				Assert.Contains("900", loginDelayArguments);
+				Assert.AreEqual(1, loginDelayArguments.Count);
+
+				Assert.IsEmpty(capabilities["PIPELINING"]);
+
+				List<string> expireArguments = capabilities["EXPIRE"];
+				Assert.NotNull(expireArguments);
+				Assert.Contains("60", expireArguments);
+				Assert.AreEqual(1, expireArguments.Count);
+
+				Assert.IsEmpty(capabilities["UIDL"]);
+
+				List<string> implementationArguments = capabilities["IMPLEMENTATION"];
+				Assert.NotNull(implementationArguments);
+				Assert.Contains("Shlemazle-Plotz-v302", implementationArguments);
+				Assert.AreEqual(1, implementationArguments.Count);
+
+				// Check the correct command was sent
+				const string expectedCommand = "CAPA";
+				string actualCommand = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+				Assert.AreEqual(expectedCommand, actualCommand);
+			}
+		}
+
+		[Test]
+		public void TestCapabilityOtherCapabilities()
+		{
+			const string welcomeMessage = "+OK";
+			const string capabilityResponse =
+				"+OK Capability list follows\r\n" +
+				"FOO\r\n" +
+				"BAR BAZ\r\n" +
+				"SSS SSS1 SSS2\r\n" +
+				"IMPLEMENTATION Foo-bar-baz-Server\r\n" +
+				".";
+			const string quitOk = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + capabilityResponse + "\r\n" + quitOk + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			using (Pop3Client client = new Pop3Client())
+			{
+				client.Connect(new CombinedStream(inputStream, outputStream));
+
+				Dictionary<string, List<string>> capabilities = client.Capabilities();
+
+				// Check the capabilities received was correct
+				Assert.Contains("FOO", capabilities.Keys);
+				Assert.Contains("BAR", capabilities.Keys);
+				Assert.Contains("SSS", capabilities.Keys);
+				Assert.Contains("IMPLEMENTATION", capabilities.Keys);
+				Assert.AreEqual(4, capabilities.Keys.Count);
+
+				// Check arguments
+				Assert.IsEmpty(capabilities["FOO"]);
+
+				List<string> barArguments = capabilities["BAR"];
+				Assert.NotNull(barArguments);
+				Assert.Contains("BAZ", barArguments);
+				Assert.AreEqual(1, barArguments.Count);
+
+				List<string> sssArguments = capabilities["SSS"];
+				Assert.NotNull(sssArguments);
+				Assert.Contains("SSS1", sssArguments);
+				Assert.Contains("SSS2", sssArguments);
+				Assert.AreEqual(2, sssArguments.Count);
+
+				List<string> implementationArguments = capabilities["IMPLEMENTATION"];
+				Assert.NotNull(implementationArguments);
+				Assert.Contains("Foo-bar-baz-Server", implementationArguments);
+				Assert.AreEqual(1, implementationArguments.Count);
+
+				// Check the correct command was sent
+				const string expectedCommand = "CAPA";
+				string actualCommand = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+				Assert.AreEqual(expectedCommand, actualCommand);
+			}
+		}
+
+		[Test]
+		public void TestCapabilityInTransactionState()
+		{
+			const string welcomeMessage = "+OK";
+			const string okUsername = "+OK";
+			const string okPassword = "+OK";
+			const string capabilityResponse =
+				"+OK Capability list follows\r\n" +
+				"TEST\r\n" +
+				"TEST2 TEST\r\n" +
+				".";
+			const string quitOk = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n" + capabilityResponse + "\r\n" + quitOk + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			using (Pop3Client client = new Pop3Client())
+			{
+				client.Connect(new CombinedStream(inputStream, outputStream));
+
+				client.Authenticate("user", "password");
+
+				Dictionary<string, List<string>> capabilities = client.Capabilities();
+
+				// Check the capabilities received was correct
+				Assert.Contains("TEST", capabilities.Keys);
+				Assert.Contains("TEST2", capabilities.Keys);
+				Assert.AreEqual(2, capabilities.Keys.Count);
+
+				// Check arguments
+				Assert.IsEmpty(capabilities["TEST"]);
+
+				List<string> test2Arguments = capabilities["TEST2"];
+				Assert.NotNull(test2Arguments);
+				Assert.Contains("TEST", test2Arguments);
+				Assert.AreEqual(1, test2Arguments.Count);
+
+				// Check the correct command was sent
+				const string expectedCommand = "CAPA";
+				string actualCommand = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+				Assert.AreEqual(expectedCommand, actualCommand);
+			}
+		}
+
+		[Test]
+		public void TestCapabilityCaseInsensitivity()
+		{
+			const string welcomeMessage = "+OK";
+			const string capabilityResponse =
+				"+OK Capability list follows\r\n" +
+				"TEST\r\n" +
+				"TEST2 TEST\r\n" +
+				"aBcDeFg\r\n" +
+				".";
+			const string quitOk = "+OK";
+
+			const string serverResponses = welcomeMessage + "\r\n" + capabilityResponse + "\r\n" + quitOk + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			using (Pop3Client client = new Pop3Client())
+			{
+				client.Connect(new CombinedStream(inputStream, outputStream));
+
+				Dictionary<string, List<string>> capabilities = client.Capabilities();
+
+				// Check the capabilities received was correct
+				Assert.IsTrue(capabilities.ContainsKey("test"));
+				Assert.IsTrue(capabilities.ContainsKey("TeSt2"));
+				Assert.IsTrue(capabilities.ContainsKey("aBcDeFg"));
+				Assert.IsTrue(capabilities.ContainsKey("AbCdEfG"));
+				Assert.AreEqual(3, capabilities.Keys.Count);
+
+				// Check arguments
+				Assert.IsEmpty(capabilities["TEST"]);
+
+				List<string> test2Arguments = capabilities["tEsT2"];
+				Assert.NotNull(test2Arguments);
+				Assert.Contains("TEST", test2Arguments);
+				Assert.AreEqual(1, test2Arguments.Count);
+
+				Assert.IsEmpty(capabilities["aBcDeFg"]);
+			}
 		}
 
 		/// <summary>
@@ -1046,9 +1274,9 @@ namespace OpenPopUnitTests.Pop3
 		/// </summary>
 		/// <param name="builder">The builder to get the last line from</param>
 		/// <returns>A single line, which is the last one in the builder</returns>
-		private static string getLastCommand(string builder)
+		private static string GetLastCommand(string builder)
 		{
-			string[] commands = getCommands(builder);
+			string[] commands = GetCommands(builder);
 			return commands[commands.Length - 1];
 		}
 
@@ -1057,7 +1285,7 @@ namespace OpenPopUnitTests.Pop3
 		/// </summary>
 		/// <param name="builder">The builder to get the commands from</param>
 		/// <returns>A string array where each entry is a command</returns>
-		private static string[] getCommands(string builder)
+		private static string[] GetCommands(string builder)
 		{
 			return builder.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
 		}

@@ -748,6 +748,83 @@ namespace OpenPop.Pop3
 			// Do not parse the body - as it is not in the byte array
 			return new Message(messageContent, false).Headers;
 		}
+
+		/// <summary>
+		/// Asks the server to return it's capability listing.<br/>
+		/// This is an optional, which a server is not enforced to accept.
+		/// </summary>
+		/// <returns>
+		/// The returned Dictionary keys are the capability names.<br/>
+		/// The Lists pointed to are the capability parameters fitting that certain capability name.
+		/// See <a href="http://tools.ietf.org/html/rfc2449#section-6">RFC section 6</a> for explanation for some of the capabilities.
+		/// </returns>
+		/// <remarks>
+		/// Capabilities are case-insensitive.<br/>
+		/// The dictionary uses case-insensitive searching, but the Lists inside
+		/// does not. Therefore you will have to use something like the code below
+		/// to search for a capability parameter.<br/>
+		/// If we were running on .NET framework >= 3.5, a HashSet could have been used.<br/> 
+		/// <code>
+		/// List&lt;string&gt; arguments = capabilities["foo"];
+		///	bool contains = null != arguments.Find(delegate(string str)
+		///				{
+		///					return String.Compare(str, "bar", true) == 0;
+		///				});
+		/// </code>
+		/// </remarks>
+		/// <exception cref="PopServerException">If the server did not accept the capability command</exception>
+		public Dictionary<string, List<string>> Capabilities()
+		{
+			AssertDisposed();
+
+			if(State != ConnectionState.Authorization && State != ConnectionState.Transaction)
+				throw new InvalidUseException("Capability command only available while connected or authenticated");
+
+			// RFC Example
+			// Examples:
+			// C: CAPA
+            // S: +OK Capability list follows
+            // S: TOP
+            // S: USER
+            // S: SASL CRAM-MD5 KERBEROS_V4
+            // S: RESP-CODES
+            // S: LOGIN-DELAY 900
+            // S: PIPELINING
+            // S: EXPIRE 60
+            // S: UIDL
+            // S: IMPLEMENTATION Shlemazle-Plotz-v302
+            // S: .
+			SendCommand("CAPA");
+
+			// Capablities are case-insensitive
+			Dictionary<string, List<string>> capabilities = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+			string lineRead;
+			// Keep reading until we are at the end of the multi line response
+			while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsAscii(Stream)))
+			{
+				// Example of read line
+				// SASL CRAM-MD5 KERBEROS_V4
+				// SASL is the name of the capability while
+				// CRAM-MD5 and KERBEROS_V4 are arguments to SASL
+				string[] splitted = lineRead.Split(' ');
+
+				// There should always be a capability name
+				string capabilityName = splitted[0];
+				
+				// Find all the arguments
+				List<string> capabilityArguments = new List<string>();
+				for(int i = 1; i<splitted.Length; i++)
+				{
+					capabilityArguments.Add(splitted[i]);
+				}
+
+				// Add the capability found to the dictionary
+				capabilities.Add(capabilityName, capabilityArguments);
+			}
+
+			return capabilities;
+		}
 		#endregion
 
 		#region Private helper methods

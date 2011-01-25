@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using NUnit.Framework;
 using OpenPop.Pop3;
@@ -81,25 +82,25 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestGetMessageUID()
+		public void TestGetMessageUid()
 		{
 			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUid(RandomMessageNumber); });
 		}
 
 		[Test]
-		public void TestGetMessageUIDs()
+		public void TestGetMessageUids()
 		{
 			Assert.Throws(typeof(InvalidUseException), delegate { Client.GetMessageUids(); });
 		}
 
 		[Test]
-		public void TestNOOP()
+		public void TestNoOperation()
 		{
 			Assert.Throws(typeof(InvalidUseException), delegate { Client.NoOperation(); });
 		}
 
 		[Test]
-		public void TestRSET()
+		public void TestReset()
 		{
 			Assert.Throws(typeof(InvalidUseException), delegate { Client.Reset(); });
 		}
@@ -122,6 +123,19 @@ namespace OpenPopUnitTests.Pop3
 			// There was a problem, where an InvalidUseException was being thrown, if the server
 			// did not respond or the stream was closed. That was the wrong exception
 			Assert.Throws(typeof(PopServerNotAvailableException), delegate { Client.Connect(new CombinedStream(inputStream, outputStream)); });
+		}
+
+		[Test]
+		public void TestCapability()
+		{
+			Assert.Throws(typeof(InvalidUseException), delegate { Client.Capabilities(); });
+		}
+
+		[Test]
+		public void TestCapabilityDiposed()
+		{
+			Client.Dispose();
+			Assert.Throws(typeof(ObjectDisposedException), delegate { Client.Capabilities(); });
 		}
 	}
 }
