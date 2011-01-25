@@ -18,7 +18,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-16
 		/// </summary>
 		[Test]
-		public void TestAPOPAuthentication()
+		public void TestApopAuthentication()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string loginMessage = "+OK mrose's maildrop has 2 messages (320 octets)";
@@ -40,6 +40,147 @@ namespace OpenPopUnitTests.Pop3
 
 			// The correct APOP command should have been sent
 			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestAutoAuthenticationApop()
+		{
+			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
+			const string loginMessage = "+OK mrose's maildrop has 2 messages (320 octets)";
+			const string serverResponses = welcomeMessage + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server supports APOP
+			Assert.IsTrue(client.ApopSupported);
+
+			client.Authenticate("mrose", "tanstaaf");
+
+			const string expectedOutput = "APOP mrose c4c9334bac560ecc979e58001b3e22fb\r\n";
+			string output = Encoding.ASCII.GetString(outputStream.ToArray());
+
+			// The correct APOP command should have been sent
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestAutoAuthenticationUsernameAndPassword()
+		{
+			const string welcomeMessage = "+OK POP3 server ready";
+			const string okUsername = "+OK";
+			const string loginMessage = "+OK mrose's maildrop has 2 messages (320 octets)";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername  + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server does not support APOP
+			Assert.IsFalse(client.ApopSupported);
+
+			client.Authenticate("mrose", "tanstaaf");
+
+			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+			const string firstCommand = "USER mrose";
+			Assert.AreEqual(firstCommand, commandsFired[0]);
+
+			const string secondCommand = "PASS tanstaaf";
+			Assert.AreEqual(secondCommand, commandsFired[1]);
+		}
+
+		[Test]
+		public void TestUsernameAndPasswordAuthentication()
+		{
+			const string welcomeMessage = "+OK POP3 server ready";
+			const string okUsername = "+OK";
+			const string loginMessage = "+OK";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server does not support APOP
+			Assert.IsFalse(client.ApopSupported);
+
+			client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword);
+
+			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
+
+			const string firstCommand = "USER foo";
+			Assert.AreEqual(firstCommand, commandsFired[0]);
+
+			const string secondCommand = "PASS bar";
+			Assert.AreEqual(secondCommand, commandsFired[1]);
+		}
+
+		[Test]
+		public void TestUsernameAndPasswordAuthenticationLocked()
+		{
+			const string welcomeMessage = "+OK POP3 server ready";
+			const string okUsername = "+OK";
+			const string loginMessage = "-ERR account is locked";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server does not support APOP
+			Assert.IsFalse(client.ApopSupported);
+
+			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+		}
+
+		[Test]
+		public void TestUsernameAndPasswordAuthenticationInUse()
+		{
+			const string welcomeMessage = "+OK POP3 server ready";
+			const string okUsername = "+OK";
+			const string loginMessage = "-ERR [IN-USE]";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server does not support APOP
+			Assert.IsFalse(client.ApopSupported);
+
+			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+		}
+
+		[Test]
+		public void TestUsernameAndPasswordAuthenticationInUseCaseInsensitive()
+		{
+			const string welcomeMessage = "+OK POP3 server ready";
+			const string okUsername = "+OK";
+			const string loginMessage = "-ERR [In-use]";
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			// The Pop3Client should now have seen, that the server does not support APOP
+			Assert.IsFalse(client.ApopSupported);
+
+			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
 		}
 
 		/// <summary>
@@ -1266,6 +1407,74 @@ namespace OpenPopUnitTests.Pop3
 
 				Assert.IsEmpty(capabilities["aBcDeFg"]);
 			}
+		}
+
+		[Test]
+		public void TestAccountLoginDelayResponseApop()
+		{
+			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
+			const string loginMessage = "-ERR [LOGIN-DELAY] wait some time before loggin in";
+			const string serverResponses = welcomeMessage + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.Apop); });
+		}
+
+		[Test]
+		public void TestAccountLoginDelayResponseCramMd5()
+		{
+			const string welcomeMessage = "+OK";
+			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
+			const string loginDelay = "-ERR [LOGIN-DELAY]";
+
+			const string serverResponses = welcomeMessage + "\r\n" + challengeResponse + "\r\n" + loginDelay + "\r\n";
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+		}
+
+		[Test]
+		public void TestAccountLoginDelayResponseUsernamePassword()
+		{
+			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
+			const string userOk = "+OK";
+			const string loginMessage = "-ERR [LOGIN-DELAY] wait some time before loggin in";
+			const string serverResponses = welcomeMessage + "\r\n" + userOk + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+		}
+
+		[Test]
+		public void TestAccountLoginDelayResponseUsernamePasswordInsensitiveCasing()
+		{
+			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
+			const string userOk = "+OK";
+			const string loginMessage = "-ERR [login-DeLay] wait some time before loggin in";
+			const string serverResponses = welcomeMessage + "\r\n" + userOk + "\r\n" + loginMessage + "\r\n";
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+
+			MemoryStream outputStream = new MemoryStream();
+
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+
+			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
 		}
 
 		/// <summary>

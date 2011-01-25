@@ -11,7 +11,7 @@ namespace OpenPop.Pop3.Exceptions
 		///<summary>
 		/// Creates a InvalidLoginOrPasswordException with the given message and inner exception
 		///</summary>
-		///<param name="innerException">The exception that is the course of this exception</param>
+		///<param name="innerException">The exception that is the cause of this exception</param>
 		public InvalidLoginOrPasswordException(Exception innerException)
 			: base("The supplied username or password are wrong", innerException)
 		{ }

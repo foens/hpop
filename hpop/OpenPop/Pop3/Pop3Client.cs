@@ -281,6 +281,7 @@ namespace OpenPop.Pop3
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		public void Authenticate(string username, string password)
 		{
 			AssertDisposed();
@@ -297,6 +298,7 @@ namespace OpenPop.Pop3
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		public void Authenticate(string username, string password, AuthenticationMethod authenticationMethod)
 		{
 			AssertDisposed();
@@ -343,6 +345,7 @@ namespace OpenPop.Pop3
 		/// <param name="password">The user password</param>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
 			try
@@ -359,11 +362,7 @@ namespace OpenPop.Pop3
 				SendCommand("PASS " + password);
 			} catch (PopServerException e)
 			{
-				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
-				{
-					DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword(): maildrop is locked");
-					throw new PopServerLockedException(e);
-				}
+				CheckFailedLoginServerResponse(LastServerResponse, e);
 
 				// Lastcommand might contain an error description like:
 				// S: -ERR maildrop already locked
@@ -381,6 +380,7 @@ namespace OpenPop.Pop3
 		/// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingApop(string username, string password)
 		{
 			if (!ApopSupported)
@@ -391,11 +391,7 @@ namespace OpenPop.Pop3
 				SendCommand("APOP " + username + " " + Apop.ComputeDigest(password, ApopTimeStamp));
 			} catch (PopServerException e)
 			{
-				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
-				{
-					DefaultLogger.Log.LogError("AuthenticateUsingApop(): maildrop is locked");
-					throw new PopServerLockedException(e);
-				}
+				CheckFailedLoginServerResponse(LastServerResponse, e);
 
 				DefaultLogger.Log.LogError("AuthenticateUsingApop(): wrong user or password");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
@@ -411,6 +407,7 @@ namespace OpenPop.Pop3
 		/// <exception cref="NotSupportedException">Thrown when the server does not support AUTH CRAM-MD5</exception>
 		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingCramMd5(string username, string password)
 		{
 			// Example of communication:
@@ -445,13 +442,10 @@ namespace OpenPop.Pop3
 			}
 			catch (PopServerException e)
 			{
-				if (LastServerResponse.ToUpperInvariant().Contains("LOCK"))
-				{
-					DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): maildrop is locked");
-					throw new PopServerLockedException(e);
-				}
+				CheckFailedLoginServerResponse(LastServerResponse, e);
 
 				DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): wrong user or password");
+				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
 				throw new InvalidLoginOrPasswordException(e);
 			}
 
@@ -1053,6 +1047,37 @@ namespace OpenPop.Pop3
 				ApopSupported = false;
 				ApopTimeStamp = null;
 				State = ConnectionState.Disconnected;
+			}
+		}
+
+		/// <summary>
+		/// Checks for extra response codes when an authentication has failed and throws
+		/// the correct exception.
+		/// If no such response codes is found, nothing happens.
+		/// </summary>
+		/// <param name="serverErrorResponse">The server response string</param>
+		/// <param name="e">The exception thrown because the server responded with -ERR</param>
+		/// <exception cref="PopServerLockedException">If the account is locked or in use</exception>
+		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
+		private static void CheckFailedLoginServerResponse(string serverErrorResponse, PopServerException e)
+		{
+			string upper = serverErrorResponse.ToUpperInvariant();
+
+			// Bracketed strings are extra response codes addded
+			// in RFC http://tools.ietf.org/html/rfc2449
+			// together with the CAPA command.
+
+			// Specifies the account is in use
+			if (upper.Contains("[IN-USE]") || upper.Contains("LOCK"))
+			{
+				DefaultLogger.Log.LogError("Authentication: maildrop is locked or in-use");
+				throw new PopServerLockedException(e);
+			}
+
+			// Specifies that there must go some time between logins
+			if (upper.Contains("[LOGIN-DELAY]"))
+			{
+				throw new LoginDelayException(e);
 			}
 		}
 		#endregion
