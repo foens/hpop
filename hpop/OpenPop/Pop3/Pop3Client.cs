@@ -106,7 +106,7 @@ namespace OpenPop.Pop3
 
 		#region Connection managing methods
 		/// <summary>
-		/// Connect to the server using user supplied input stream and output stream
+		/// Connect to the server using user supplied stream
 		/// </summary>
 		/// <param name="stream">The stream used to communicate with the server</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="stream"/> is <see langword="null"/></exception>
@@ -273,8 +273,7 @@ namespace OpenPop.Pop3
 
 		#region Authentication methods
 		/// <summary>
-		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>
-		/// which is the most secure method to use.
+		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>.
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
@@ -496,7 +495,7 @@ namespace OpenPop.Pop3
 		/// Marks all messages as deleted.<br/>
 		/// <br/>
 		/// The messages will not be deleted until a QUIT command is sent to the server.<br/>
-		/// This is done when you call <see cref="Disconnect()"/>.<br/>
+		/// This is done when you call <see cref="Disconnect()"/> or when the Pop3Client is <see cref="Dispose">Disposed</see>.<br/>
 		/// The method assumes that no prior message has been marked as deleted, and is not valid to call if this is wrong.
 		/// </summary>
 		/// <exception cref="PopServerException">If the server did not accept one of the delete commands. All prior marked messages will still be marked.</exception>
@@ -550,7 +549,7 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
-		/// Get a unique ID for a single message
+		/// Get a unique ID for a single message.<br/>
 		/// </summary>
 		/// <param name="messageNumber">
 		/// Message number, which may not be marked as deleted.<br/>
@@ -745,7 +744,7 @@ namespace OpenPop.Pop3
 
 		/// <summary>
 		/// Asks the server to return it's capability listing.<br/>
-		/// This is an optional, which a server is not enforced to accept.
+		/// This is an optional command, which a server is not enforced to accept.
 		/// </summary>
 		/// <returns>
 		/// The returned Dictionary keys are the capability names.<br/>
@@ -757,7 +756,7 @@ namespace OpenPop.Pop3
 		/// The dictionary uses case-insensitive searching, but the Lists inside
 		/// does not. Therefore you will have to use something like the code below
 		/// to search for a capability parameter.<br/>
-		/// If we were running on .NET framework >= 3.5, a HashSet could have been used.<br/> 
+		/// foo is the capability name and bar is the capability parameter.
 		/// <code>
 		/// List&lt;string&gt; arguments = capabilities["foo"];
 		///	bool contains = null != arguments.Find(delegate(string str)
@@ -765,6 +764,7 @@ namespace OpenPop.Pop3
 		///					return String.Compare(str, "bar", true) == 0;
 		///				});
 		/// </code>
+		/// If we were running on .NET framework >= 3.5, a HashSet could have been used.
 		/// </remarks>
 		/// <exception cref="PopServerException">If the server did not accept the capability command</exception>
 		public Dictionary<string, List<string>> Capabilities()
