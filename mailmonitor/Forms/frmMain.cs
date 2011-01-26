@@ -1069,10 +1069,8 @@ namespace MailMonitor
 				Utilities.PlayBeep();
 				//MessageBox.Show(this,e.Message);
 				string strRet;
-				if(e is InvalidPasswordException)
-					strRet="Invlaid password";
-				else if(e is InvalidLoginException)
-					strRet="Invlaid user";
+				if(e is InvalidLoginException)
+					strRet="Invlaid user credentials";
 				else if(e is PopServerNotAvailableException)
 					strRet="POP server error";
 				else if(e is PopServerNotFoundException)
