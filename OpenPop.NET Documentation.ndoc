@@ -24,9 +24,10 @@
             <property name="ShowMissingReturns" value="True" />
             <property name="DocumentInheritedFrameworkMembers" value="False" />
             <property name="AssemblyVersionInfo" value="AssemblyVersion" />
-            <property name="CopyrightText" value="Public Domain" />
-            <property name="CopyrightHref" value="http://en.wikipedia.org/wiki/Public_domain" />
+            <property name="CopyrightText" value="Public Domain Dedication" />
+            <property name="CopyrightHref" value="http://creativecommons.org/publicdomain/zero/1.0/" />
             <property name="FeedbackEmailAddress" value="hpop-users@lists.sourceforge.net" />
+			<property name="SdkDocVersion" value="SDK_v2_0" />
             <property name="SdkDocVersionString" value="VS.80" />
             <property name="CleanIntermediates" value="True" />
         </documenter>
