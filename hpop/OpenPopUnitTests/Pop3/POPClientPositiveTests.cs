@@ -1136,7 +1136,7 @@ namespace OpenPopUnitTests.Pop3
 
 			Pop3Client client = new Pop3Client();
 			client.Connect(new CombinedStream(inputStream, outputStream));
-			Assert.Throws<InvalidLoginOrPasswordException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+			Assert.Throws<InvalidLoginException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
 		}
 
 		[Test]

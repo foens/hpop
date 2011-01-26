@@ -111,8 +111,6 @@
     <Compile Include="Pop3\Exceptions\PopClientException.cs" />
     <Compile Include="Pop3\Exceptions\PopServerException.cs" />
     <Compile Include="Pop3\Exceptions\InvalidLoginException.cs" />
-    <Compile Include="Pop3\Exceptions\InvalidLoginOrPasswordException.cs" />
-    <Compile Include="Pop3\Exceptions\InvalidPasswordException.cs" />
     <Compile Include="Pop3\Exceptions\InvalidUseException.cs" />
     <Compile Include="Pop3\Apop.cs" />
     <Compile Include="Pop3\Pop3Client.cs" />

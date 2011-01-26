@@ -538,10 +538,7 @@ namespace OpenPop.TestApplication
 				}
 			} catch (InvalidLoginException)
 			{
-				MessageBox.Show(this, "Unknown username!", "POP3 Server Authentication");
-			} catch (InvalidPasswordException)
-			{
-				MessageBox.Show(this, "Invalid password!", "POP3 Server Authentication");
+				MessageBox.Show(this, "User did not accept user credentials!", "POP3 Server Authentication");
 			} catch (PopServerNotFoundException)
 			{
 				MessageBox.Show(this, "The server could not be found", "POP3 Retrieval");

@@ -277,7 +277,7 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
-		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
@@ -294,7 +294,7 @@ namespace OpenPop.Pop3
 		/// <param name="password">The user password</param>
 		/// <param name="authenticationMethod">The way that the client should authenticate towards the server</param>
 		/// <exception cref="NotSupportedException">If <see cref="AuthenticationMethod.Apop"/> is used, but not supported by the server</exception>
-		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="username"/> or <paramref name="password"/> is <see langword="null"/></exception>
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
@@ -342,7 +342,7 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
-		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
@@ -353,7 +353,7 @@ namespace OpenPop.Pop3
 			} catch (PopServerException e)
 			{
 				DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword():wrong user: " + username);
-				throw new InvalidLoginException("Invalid user", e);
+				throw new InvalidLoginException(e);
 			}
 
 			try
@@ -367,7 +367,7 @@ namespace OpenPop.Pop3
 				// S: -ERR maildrop already locked
 				DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword(): wrong password.");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidPasswordException("Invalid password", e);
+				throw new InvalidLoginException(e);
 			}
 		}
 
@@ -377,7 +377,7 @@ namespace OpenPop.Pop3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
-		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingApop(string username, string password)
@@ -394,7 +394,7 @@ namespace OpenPop.Pop3
 
 				DefaultLogger.Log.LogError("AuthenticateUsingApop(): wrong user or password");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginOrPasswordException(e);
+				throw new InvalidLoginException(e);
 			}
 		}
 
@@ -404,7 +404,7 @@ namespace OpenPop.Pop3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <exception cref="NotSupportedException">Thrown when the server does not support AUTH CRAM-MD5</exception>
-		/// <exception cref="InvalidLoginOrPasswordException">If the login was not accepted</exception>
+		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
 		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private void AuthenticateUsingCramMd5(string username, string password)
@@ -445,7 +445,7 @@ namespace OpenPop.Pop3
 
 				DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): wrong user or password");
 				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginOrPasswordException(e);
+				throw new InvalidLoginException(e);
 			}
 
 			// Authentication was successful.
