@@ -69,12 +69,17 @@ namespace OpenPop.Mime.Decode
 		/// <returns>A list of decoded key value pairs.</returns>
 		public static List<KeyValuePair<string, string>> Decode(string toDecode)
 		{
-			string[] splitted = toDecode.Trim().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+			// Split by semicolon, but only if not inside quotes
+			List<string> splitted = Utility.SplitStringWithCharNotInsideQuotes(toDecode.Trim(), ';');
 
-			List<KeyValuePair<string, string>> collection = new List<KeyValuePair<string, string>>(splitted.Length);
+			List<KeyValuePair<string, string>> collection = new List<KeyValuePair<string, string>>(splitted.Count);
 
 			foreach (string part in splitted)
 			{
+				// Empty strings should not be processed
+				if (part.Length == 0)
+					continue;
+
 				string[] keyValue = part.Split(new [] {'='}, 2);
 				if(keyValue.Length == 1)
 				{

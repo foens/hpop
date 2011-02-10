@@ -469,6 +469,18 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("application/vnd.ms-excel", contentType.MediaType);
 			Assert.AreEqual("MMSCecpmcountry12_06_2010.xls", contentType.Name);
 		}
+
+		[Test]
+		public void TestContentTypeWithFilenameIncludingSemicolon()
+		{
+			const string contentTypeString =
+				"application/msword; name=\"NUMMER; 251478.doc\"";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+
+			Assert.AreEqual("application/msword", contentType.MediaType);
+			Assert.AreEqual("NUMMER; 251478.doc", contentType.Name);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests

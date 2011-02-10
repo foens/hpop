@@ -221,7 +221,7 @@ namespace OpenPop.Mime.Header
 			List<RfcMailAddress> returner = new List<RfcMailAddress>();
 
 			// MailAddresses are split by commas
-			IEnumerable<string> mailAddresses = SplitMailAddresses(input);
+			IEnumerable<string> mailAddresses = Utility.SplitStringWithCharNotInsideQuotes(input, ',');
 
 			// Parse each of these
 			foreach (string mailAddress in mailAddresses)
@@ -230,46 +230,6 @@ namespace OpenPop.Mime.Header
 			}
 
 			return returner;
-		}
-
-		/// <summary>
-		/// Split a list of addresses in one string into a elements of addresses.<br/>
-		/// Basically a split is needed at each comma, except if the comma is inside a quote.
-		/// </summary>
-		/// <param name="input">The list of addresses to be split</param>
-		/// <returns>Each address as an element</returns>
-		private static IEnumerable<string> SplitMailAddresses(string input)
-		{
-			List<string> addresses = new List<string>();
-			
-			int lastSplitLocation = 0;
-			bool insideQuote = false;
-
-			char[] characters = input.ToCharArray();
-
-			for (int i = 0; i < characters.Length; i++)
-			{
-				char character = characters[i];
-				if (character == '\"')
-					insideQuote = !insideQuote;
-
-				// Only split if a comma is met, but we are not inside quotes
-				if (character == ',' && !insideQuote)
-				{
-					// We need to split
-					int length = i - lastSplitLocation;
-					addresses.Add(input.Substring(lastSplitLocation, length));
-
-					// Update last split location
-					// + 1 so that we do not include comma next time
-					lastSplitLocation = i + 1;
-				}
-			}
-
-			// Add the last part
-			addresses.Add(input.Substring(lastSplitLocation, input.Length - lastSplitLocation));
-
-			return addresses;
 		}
 		#endregion
 	}
