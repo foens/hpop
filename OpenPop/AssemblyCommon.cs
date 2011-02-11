@@ -15,10 +15,7 @@
 [assembly: AssemblyTrademark("OpenPop")]
 
 // To clarify this License:
-// All software delivered to you are delivered AS IS.
-// No authors can be held liable for anything that might happen by using this software.
-// You may do whatever you feel like with the software - no constraints attached.
-// You may use the software to whatever purpose you feel like - no constraints attached.
+// See http://creativecommons.org/publicdomain/zero/1.0/
 [assembly: AssemblyCopyright("Public Domain")]
 
 // OpenPop is culture neutral, which is specified with an emptry string
