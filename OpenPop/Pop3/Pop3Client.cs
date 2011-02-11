@@ -958,16 +958,10 @@ namespace OpenPop.Pop3
 						first = false;
 					}
 
-					bool startingWithPeriod = false;
 					// This is a multi-line. See http://tools.ietf.org/html/rfc1939#section-3
 					// It says that a line starting with "." and not having CRLF after it
 					// is a multi line, and the "." should be stripped
 					if (lineRead.Length > 0 && lineRead[0] == '.')
-					{
-						startingWithPeriod = true;
-					}
-
-					if (startingWithPeriod)
 					{
 						// Do not write the first period
 						byteArrayBuilder.Write(lineRead, 1, lineRead.Length - 1);
