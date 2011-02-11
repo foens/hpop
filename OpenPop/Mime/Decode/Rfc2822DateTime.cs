@@ -35,7 +35,7 @@ namespace OpenPop.Mime.Decode
 				// If a day-name is specified in the inputDate string, check if it fits with the date
 				ValidateDayNameIfAny(dateTime, inputDate);
 
-				// Conver the date into UTC
+				// Convert the date into UTC
 				dateTime = new DateTime(dateTime.Ticks, DateTimeKind.Utc);
 
 				// Adjust according to the time zone
