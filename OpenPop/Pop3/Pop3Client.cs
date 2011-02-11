@@ -69,17 +69,7 @@ namespace OpenPop.Pop3
 		/// </summary>
 		public Pop3Client()
 		{
-			// We have not seen the APOPTimestamp yet
-			ApopTimeStamp = null;
-
-			// We are not connected
-			Connected = false;
-
-			// APOP is not supported before we check on login
-			ApopSupported = false;
-
-			// We are not connected yet
-			State = ConnectionState.Disconnected;
+			SetInitialValues();
 		}
 		#endregion
 
@@ -154,7 +144,7 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="hostname">The <paramref name="hostname"/> of the POP3 server</param>
 		/// <param name="port">The port of the POP3 server</param>
-		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
+		/// <param name="useSsl"><see langword="true"/> if SSL should be used. <see langword="false"/> if plain TCP should be used.</param>
 		/// <exception cref="PopServerNotAvailableException">If the server did not send an OK message when a connection was established</exception>
 		/// <exception cref="PopServerNotFoundException">If it was not possible to connect to the server</exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="hostname"/> is <see langword="null"/></exception>
@@ -170,7 +160,7 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="hostname">The <paramref name="hostname"/> of the POP3 server</param>
 		/// <param name="port">The port of the POP3 server</param>
-		/// <param name="useSsl">True if SSL should be used. False if plain TCP should be used.</param>
+		/// <param name="useSsl"><see langword="true"/> if SSL should be used. <see langword="false"/> if plain TCP should be used.</param>
 		/// <param name="receiveTimeout">Timeout in milliseconds before a socket should time out from reading. Set to 0 or -1 to specify infinite timeout.</param>
 		/// <param name="sendTimeout">Timeout in milliseconds before a socket should time out from sending. Set to 0 or -1 to specify infinite timeout.</param>
 		/// <param name="certificateValidator">If you want to validate the certificate in a SSL connection, pass a reference to your validator. Supply <see langword="null"/> if default should be used.</param>
@@ -311,26 +301,39 @@ namespace OpenPop.Pop3
 			if(State != ConnectionState.Authorization)
 				throw new InvalidUseException("You have to be connected and not authorized when trying to authorize yourself");
 
-			switch (authenticationMethod)
+			try
 			{
-				case AuthenticationMethod.UsernameAndPassword:
-					AuthenticateUsingUserAndPassword(username, password);
-					break;
-
-				case AuthenticationMethod.Apop:
-					AuthenticateUsingApop(username, password);
-					break;
-
-				case AuthenticationMethod.Auto:
-					if (ApopSupported)
-						AuthenticateUsingApop(username, password);
-					else
+				switch (authenticationMethod)
+				{
+					case AuthenticationMethod.UsernameAndPassword:
 						AuthenticateUsingUserAndPassword(username, password);
-					break;
+						break;
 
-				case AuthenticationMethod.CramMd5:
-					AuthenticateUsingCramMd5(username, password);
-					break;
+					case AuthenticationMethod.Apop:
+						AuthenticateUsingApop(username, password);
+						break;
+
+					case AuthenticationMethod.Auto:
+						if (ApopSupported)
+							AuthenticateUsingApop(username, password);
+						else
+							AuthenticateUsingUserAndPassword(username, password);
+						break;
+
+					case AuthenticationMethod.CramMd5:
+						AuthenticateUsingCramMd5(username, password);
+						break;
+				}
+			} catch(PopServerException e)
+			{
+				DefaultLogger.Log.LogError("Problem logging in using method " + authenticationMethod + ". Server response was: " + LastServerResponse);
+
+				// Throw a more specific exception if special cases of failure is detected
+				// using the response the server generated when the last command was sent
+				CheckFailedLoginServerResponse(LastServerResponse, e);
+
+				// If no special failure is detected, tell that the login credentials were wrong
+				throw new InvalidLoginException(e);
 			}
 
 			// We are now authenticated and therefore we enter the transaction state
@@ -342,33 +345,13 @@ namespace OpenPop.Pop3
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
-		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
-		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
-		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
+		/// <exception cref="PopServerException">If the server responded with -ERR</exception>
 		private void AuthenticateUsingUserAndPassword(string username, string password)
 		{
-			try
-			{
-				SendCommand("USER " + username);
-			} catch (PopServerException e)
-			{
-				DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword():wrong user: " + username);
-				throw new InvalidLoginException(e);
-			}
+			SendCommand("USER " + username);
+			SendCommand("PASS " + password);
 
-			try
-			{
-				SendCommand("PASS " + password);
-			} catch (PopServerException e)
-			{
-				CheckFailedLoginServerResponse(LastServerResponse, e);
-
-				// Lastcommand might contain an error description like:
-				// S: -ERR maildrop already locked
-				DefaultLogger.Log.LogError("AuthenticateUsingUserAndPassword(): wrong password.");
-				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginException(e);
-			}
+			// Authentication was successful if no exceptions thrown before getting here
 		}
 
 		/// <summary>
@@ -377,25 +360,15 @@ namespace OpenPop.Pop3
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
 		/// <exception cref="NotSupportedException">Thrown when the server does not support APOP</exception>
-		/// <exception cref="InvalidLoginException">If the user credentials was not accepted</exception>
-		/// <exception cref="PopServerLockedException">If the server said the the mailbox was locked</exception>
-		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
+		/// <exception cref="PopServerException">If the server responded with -ERR</exception>
 		private void AuthenticateUsingApop(string username, string password)
 		{
 			if (!ApopSupported)
 				throw new NotSupportedException("APOP is not supported on this server");
 
-			try
-			{
-				SendCommand("APOP " + username + " " + Apop.ComputeDigest(password, ApopTimeStamp));
-			} catch (PopServerException e)
-			{
-				CheckFailedLoginServerResponse(LastServerResponse, e);
+			SendCommand("APOP " + username + " " + Apop.ComputeDigest(password, ApopTimeStamp));
 
-				DefaultLogger.Log.LogError("AuthenticateUsingApop(): wrong user or password");
-				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginException(e);
-			}
+			// Authentication was successful if no exceptions thrown before getting here
 		}
 
 		/// <summary>
@@ -417,7 +390,7 @@ namespace OpenPop.Pop3
 			
 			// Other example, where AUTH CRAM-MD5 is not supported
 			// C: AUTH CRAM-MD5
-			// S: -ERR Authenticationmethod CRAM-MD5 not supported
+			// S: -ERR Authentication method CRAM-MD5 not supported
 			
 			try
 			{
@@ -434,21 +407,10 @@ namespace OpenPop.Pop3
 			// Compute the challenge response
 			string response = CramMd5.ComputeDigest(username, password, challenge);
 
-			try
-			{
-				// Send the response to the server
-				SendCommand(response);
-			}
-			catch (PopServerException e)
-			{
-				CheckFailedLoginServerResponse(LastServerResponse, e);
+			// Send the response to the server
+			SendCommand(response);
 
-				DefaultLogger.Log.LogError("AuthenticateUsingCramMd5(): wrong user or password");
-				DefaultLogger.Log.LogDebug("Server response was: " + LastServerResponse);
-				throw new InvalidLoginException(e);
-			}
-
-			// Authentication was successful.
+			// Authentication was successful if no exceptions thrown before getting here
 		}
 		#endregion
 
@@ -1036,12 +998,25 @@ namespace OpenPop.Pop3
 			}
 			finally
 			{
-				// Reset values
-				Connected = false;
-				ApopSupported = false;
-				ApopTimeStamp = null;
-				State = ConnectionState.Disconnected;
+				// Reset values to initial state
+				SetInitialValues();
 			}
+		}
+
+		/// <summary>
+		/// Sets the initial values on the public properties of this Pop3Client.
+		/// </summary>
+		private void SetInitialValues()
+		{
+			// We have not seen the APOPTimestamp yet
+			ApopTimeStamp = null;
+
+			// We are not connected
+			Connected = false;
+			State = ConnectionState.Disconnected;
+
+			// APOP is not supported before we check on login
+			ApopSupported = false;
 		}
 
 		/// <summary>
