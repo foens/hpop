@@ -266,5 +266,19 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual(expectedOutput, output);
 		}
+
+		[Test]
+		public void TestDateWithOnlyOneDigitForHour()
+		{
+			// This is actually an illigal string
+			// But such a string was met, and therefore a robust parser should be able to parse it
+			// The RFC states that 2 digits must be used for hours
+			const string inputDate = "Wed, 16 Feb 2011 1:11:19 +0000";
+
+			DateTime expectedOutput = new DateTime(2011, 2, 16, 1, 11, 19, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }
