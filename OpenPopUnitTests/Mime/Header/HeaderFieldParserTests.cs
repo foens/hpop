@@ -147,7 +147,7 @@ namespace OpenPopUnitTests.Mime.Header
 		public void ParseContentDispositionFilenameWithEncoding()
 		{
 			const string contentDispositionString =
-				"Content-Disposition: attachment;" +
+				"attachment;" +
 				" filename*=ISO-8859-1\'\'%D8%6E%73%6B%65%6C%69%73%74%65%2E%70%64%66";
 
 			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
@@ -185,7 +185,7 @@ namespace OpenPopUnitTests.Mime.Header
 		public void ParseContentDispositionFilenameWithContinuationAndEncoding()
 		{
 			const string contentDispositionString =
-				"Content-Disposition: attachment;" +
+				"attachment;" +
 				" filename*0*=ISO-8859-1\'\'%76%65%72%79%20%6C%6F%6E%67%20%74%65%78%74%20%64;" +
 				" filename*1*=%6F%63%75%6D%65%6E%74%20%6E%61%6D%65%20%69%73%20%68%65%72%65;" +
 				" filename*2*=%20%74%6F%20%74%65%73%74%20%69%66%20%77%65%20%63%61%6E%20%70;" +
@@ -203,7 +203,7 @@ namespace OpenPopUnitTests.Mime.Header
 		public void ParseContentDispositionFilenameWithQuotes()
 		{
 			const string contentDispositionString =
-				"Content-Disposition: attachment;\r\n" +
+				"attachment;\r\n" +
 				"\tfilename*=\"utf-8\'\'foobar.jpg\"";
 
 			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
@@ -215,7 +215,7 @@ namespace OpenPopUnitTests.Mime.Header
 		public void ParseContentDispositionFilenameLongWithQuotes()
 		{
 			const string contentDispositionString =
-				"Content-Disposition: attachment;" +
+				"attachment;" +
 				" filename*0*=ISO-8859-1\'\'%76%65%72%79%20%6C%6F%6E%67%20%74%65%78%74%20%64;" +
 				" filename*1*=\"%6F%63%75%6D%65%6E%74%20%6E%61%6D%65%20%69%73%20%68%65%72%65\";" +
 				" filename*2*=%20%74%6F%20%74%65%73%74%20%69%66%20%77%65%20%63%61%6E%20%70;" +
@@ -233,13 +233,26 @@ namespace OpenPopUnitTests.Mime.Header
 		public void ParseContentDispositionFilenameWithBackwardsSupport()
 		{
 			const string contentDispositionString =
-				"Content-Disposition: attachment;\r\n" +
+				"attachment;\r\n" +
 				"\tfilename=\"=?utf-8?b?dHJhbnNmwqouanBn?=\";\r\n" +
 				"\tfilename*=\"utf-8\'\'transf%C2%AA.jpg\"";
 
 			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
 
 			Assert.AreEqual("transfª.jpg", contentDisposition.FileName);
+		}
+
+		[Test]
+		public void ParseContentDispositionSizeInQuotes()
+		{
+			const string contentDispositionString =
+				"attachment;" +
+				" creation-date=\"Fri, 11 Feb 2011 16:09:17 GMT\";" +
+				" filename=\"test.csv\";" +
+				" modification-date=\"Fri, 11 Feb 2011 16:09:17 GMT\";" +
+				" size=\"104710\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
 		}
 		#endregion
 

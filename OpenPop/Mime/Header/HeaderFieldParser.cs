@@ -202,7 +202,7 @@ namespace OpenPop.Mime.Header
 						break;
 
 					case "size":
-						contentDisposition.Size = int.Parse(value, CultureInfo.InvariantCulture);
+						contentDisposition.Size = int.Parse(Utility.RemoveQuotesIfAny(value), CultureInfo.InvariantCulture);
 						break;
 
 					default:
