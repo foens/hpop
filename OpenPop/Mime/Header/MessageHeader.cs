@@ -392,7 +392,7 @@ namespace OpenPop.Mime.Header
 				// Example Message-ID
 				// <33cdd74d6b89ab2250ecd75b40a41405@nfs.eksperten.dk>
 				case "MESSAGE-ID":
-					MessageId = HeaderFieldParser.ParseID(headerValue);
+					MessageId = HeaderFieldParser.ParseId(headerValue);
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.4
@@ -437,7 +437,7 @@ namespace OpenPop.Mime.Header
 				// See http://tools.ietf.org/html/rfc2045#section-7
 				// Example: <foo4*foo1@bar.net>
 				case "CONTENT-ID":
-					ContentId = HeaderFieldParser.ParseID(headerValue);
+					ContentId = HeaderFieldParser.ParseId(headerValue);
 					break;
 
 				default:

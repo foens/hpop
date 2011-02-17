@@ -187,17 +187,17 @@ namespace OpenPop.Mime.Header
 						// It is the same with ModificationDate and ReadDate.
 						// This is fixed in 4.0 - maybe in 3.0 too.
 						// Therefore we create a new DateTime which have a DateTimeKind set to unspecified
-						DateTime creationDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime creationDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
 						contentDisposition.CreationDate = creationDate;
 						break;
 
 					case "modification-date":
-						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
 						contentDisposition.ModificationDate = midificationDate;
 						break;
 
 					case "read-date":
-						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(value.Replace("\"", "")).Ticks);
+						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
 						contentDisposition.ReadDate = readDate;
 						break;
 
@@ -255,7 +255,7 @@ namespace OpenPop.Mime.Header
 		/// </summary>
 		/// <param name="headerValue">The id to parse</param>
 		/// <returns>A parsed ID</returns>
-		public static string ParseID(string headerValue)
+		public static string ParseId(string headerValue)
 		{
 			// Remove whitespace in front and behind since
 			// whitespace is allowed there
@@ -278,7 +278,7 @@ namespace OpenPop.Mime.Header
 			string[] ids = headerValue.Trim().Split(new[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
 			foreach (string id in ids)
 			{
-				returner.Add(ParseID(id));
+				returner.Add(ParseId(id));
 			}
 
 			return returner;
