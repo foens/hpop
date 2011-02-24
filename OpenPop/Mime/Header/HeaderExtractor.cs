@@ -109,7 +109,8 @@ namespace OpenPop.Mime.Header
 					{
 						// Unfolding is accomplished by simply removing any CRLF
 						// that is immediately followed by WSP
-						// This was done using ReadLine
+						// This was done using ReadLine (it discards CRLF)
+						// See http://tools.ietf.org/html/rfc822#section-3.1.1 for more information
 						string moreHeaderValue = messageReader.ReadLine();
 
 						// If this exception is ever raised, there is an serious algorithm failure
@@ -118,9 +119,8 @@ namespace OpenPop.Mime.Header
 						if (moreHeaderValue == null)
 							throw new ArgumentException("This will never happen");
 
-						// If a header is continued the first whitespace character is not needed.
-						// It is only there to tell that the header was continued
-						headerValue.Append(moreHeaderValue, 1, moreHeaderValue.Length - 1);
+						// Simply append the line just read to the header value
+						headerValue.Append(moreHeaderValue);
 					}
 
 					// Now we have the name and full value. Add it

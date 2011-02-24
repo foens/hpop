@@ -1024,7 +1024,7 @@ namespace OpenPopUnitTests.Mime
 			Assert.NotNull(headers.ContentType);
 
 			Assert.AreEqual("very long email testvery long email testvery long email testvery long email" +
-			"testvery long email testvery long email testvery long email test.txt", headers.ContentType.Name);
+			" testvery long email testvery long email testvery long email test.txt", headers.ContentType.Name);
 		}
 
 		/// <summary>

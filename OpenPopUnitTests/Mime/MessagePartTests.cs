@@ -202,8 +202,32 @@ namespace OpenPopUnitTests.Mime
 				"\r\n"; // End of message headers
 
 			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+			Assert.IsFalse(messagePart.ContentDisposition.Inline);
+		}
+
+		[Test]
+		public void TestHeaderWhiteSpace()
+		{
+			const string messagePartContent =
+				"Content-Disposition: attachment; filename=Attach2.txt; modification-date=\"21\r\n" +
+				" Feb 2011 17:09:47 +0000\"; read-date=\"21 Feb 2011 17:09:47 +0000\";\r\n" +
+				" creation-date=\"21 Feb 2011 12:59:07 +0000\"\r\n" +
+				"\r\n"; // End of message headers
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
 
 			Assert.IsFalse(messagePart.ContentDisposition.Inline);
+
+			DateTime modificationDate = new DateTime(2011, 2, 21, 17, 09, 47, DateTimeKind.Utc);
+			Assert.AreEqual(modificationDate, messagePart.ContentDisposition.ModificationDate);
+
+			DateTime readDate = modificationDate;
+			Assert.AreEqual(readDate, messagePart.ContentDisposition.ReadDate);
+
+			DateTime creationDate = new DateTime(2011, 2, 21, 12, 59, 07, DateTimeKind.Utc);
+			Assert.AreEqual(creationDate, messagePart.ContentDisposition.CreationDate);
+
+			Assert.AreEqual("Attach2.txt", messagePart.ContentDisposition.FileName);
 		}
 	}
 }
