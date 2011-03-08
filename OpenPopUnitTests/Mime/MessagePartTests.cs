@@ -229,5 +229,19 @@ namespace OpenPopUnitTests.Mime
 
 			Assert.AreEqual("Attach2.txt", messagePart.ContentDisposition.FileName);
 		}
+
+		[Test]
+		public void TestContentTypeCharsetWithLargeFirstChar()
+		{
+			const string messagePartContent =
+				"Content-Type: TEXT/PLAIN; Charset=\"US-ASCII\"\r\n" +
+				"\r\n" + // End of message headers
+				"foo";
+
+			MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+			Assert.AreEqual(Encoding.ASCII, messagePart.BodyEncoding);
+			Assert.AreEqual("foo", messagePart.GetBodyAsText());
+		}
 	}
 }

@@ -103,7 +103,7 @@ namespace OpenPop.Mime.Header
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
-				string key = keyValuePair.Key.Trim();
+				string key = keyValuePair.Key.ToLowerInvariant().Trim();
 				string value = keyValuePair.Value.Trim();
 				switch (key)
 				{
@@ -118,8 +118,7 @@ namespace OpenPop.Mime.Header
 						break;
 
 					case "charset":
-						string toInsert = Utility.RemoveQuotesIfAny(value);
-						contentType.CharSet = toInsert;
+						contentType.CharSet = Utility.RemoveQuotesIfAny(value);
 						break;
 
 					case "name":
@@ -165,7 +164,7 @@ namespace OpenPop.Mime.Header
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
-				string key = keyValuePair.Key.Trim();
+				string key = keyValuePair.Key.ToLowerInvariant().Trim();
 				string value = keyValuePair.Value;
 				switch (key)
 				{
@@ -206,7 +205,7 @@ namespace OpenPop.Mime.Header
 						break;
 
 					default:
-						throw new ArgumentException("Unknown parameter in Content-Disposition. Ask developer to fix!");
+						throw new ArgumentException("Unknown parameter in Content-Disposition. Ask developer to fix! Parameter: " + key);
 				}
 			}
 
