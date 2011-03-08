@@ -1238,5 +1238,28 @@ namespace OpenPopUnitTests.Mime
 			Assert.IsEmpty(message.MessagePart.Body);
 			Assert.IsEmpty(message.MessagePart.GetBodyAsText());
 		}
+
+		[Test]
+		public void TestContentTypeWithLargeCharactersCanStillBeFound()
+		{
+			const string messagePartContent =
+				"Content-Type: TEXT/PLAIN\r\n" +
+				"\r\n" + // End of message headers
+				"foo";
+
+			Message message = new Message(Encoding.ASCII.GetBytes(messagePartContent));
+
+			// Cna be found
+			MessagePart textHtml = message.FindFirstPlainTextVersion();
+			Assert.NotNull(textHtml);
+
+			Assert.AreEqual("foo", textHtml.GetBodyAsText());
+
+			// Can still be found
+			System.Collections.Generic.List<MessagePart> messageParts = message.FindAllTextVersions();
+			Assert.IsNotEmpty(messageParts);
+			Assert.AreEqual(1, messageParts.Count);
+			Assert.AreEqual(textHtml, messageParts[0]);
+		}
 	}
 }

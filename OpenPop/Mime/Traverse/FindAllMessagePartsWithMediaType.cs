@@ -12,7 +12,7 @@ namespace OpenPop.Mime.Traverse
 		/// Finds all the <see cref="MessagePart"/>s with the given MediaType
 		/// </summary>
 		/// <param name="message">The <see cref="Message"/> to start looking in</param>
-		/// <param name="question">The MediaType to look for. Has to be in lowercase.</param>
+		/// <param name="question">The MediaType to look for. Case is ignored.</param>
 		/// <returns>
 		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
 		/// <br/>
@@ -32,7 +32,7 @@ namespace OpenPop.Mime.Traverse
 		/// Finds all the <see cref="MessagePart"/>s with the given MediaType
 		/// </summary>
 		/// <param name="messagePart">The <see cref="MessagePart"/> to start looking in</param>
-		/// <param name="question">The MediaType to look for. Has to be in lowercase.</param>
+		/// <param name="question">The MediaType to look for. Case is ignored.</param>
 		/// <returns>
 		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
 		/// <br/>
@@ -47,7 +47,7 @@ namespace OpenPop.Mime.Traverse
 
 			List<MessagePart> results = new List<MessagePart>();
 
-			if (messagePart.ContentType.MediaType.Equals(question))
+			if (messagePart.ContentType.MediaType.Equals(question, StringComparison.OrdinalIgnoreCase))
 				results.Add(messagePart);
 
 			if (messagePart.IsMultiPart)
