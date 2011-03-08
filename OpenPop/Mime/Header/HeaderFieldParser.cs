@@ -103,7 +103,7 @@ namespace OpenPop.Mime.Header
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
-				string key = keyValuePair.Key.ToLowerInvariant().Trim();
+				string key = keyValuePair.Key.ToUpperInvariant().Trim();
 				string value = keyValuePair.Value.Trim();
 				switch (key)
 				{
@@ -113,15 +113,15 @@ namespace OpenPop.Mime.Header
 						contentType.MediaType = value;
 						break;
 
-					case "boundary":
+					case "BOUNDARY":
 						contentType.Boundary = Utility.RemoveQuotesIfAny(value);
 						break;
 
-					case "charset":
+					case "CHARSET":
 						contentType.CharSet = Utility.RemoveQuotesIfAny(value);
 						break;
 
-					case "name":
+					case "NAME":
 						contentType.Name = EncodedWord.Decode(Utility.RemoveQuotesIfAny(value));
 						break;
 
@@ -164,7 +164,7 @@ namespace OpenPop.Mime.Header
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
-				string key = keyValuePair.Key.ToLowerInvariant().Trim();
+				string key = keyValuePair.Key.ToUpperInvariant().Trim();
 				string value = keyValuePair.Value;
 				switch (key)
 				{
@@ -174,12 +174,12 @@ namespace OpenPop.Mime.Header
 						contentDisposition.DispositionType = value;
 						break;
 
-					case "filename":
+					case "FILENAME":
 						// The filename might be in qoutes, and it might be encoded-word encoded
 						contentDisposition.FileName = EncodedWord.Decode(Utility.RemoveQuotesIfAny(value));
 						break;
 
-					case "creation-date":
+					case "CREATION-DATE":
 						// Notice that we need to create a new DateTime because of a failure in .NET 2.0.
 						// The failure is: you cannot give contentDisposition a DateTime with a Kind of UTC
 						// It will set the CreationDate correctly, but when trying to read it out it will throw an exception.
@@ -190,17 +190,17 @@ namespace OpenPop.Mime.Header
 						contentDisposition.CreationDate = creationDate;
 						break;
 
-					case "modification-date":
+					case "MODIFICATION-DATE":
 						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
 						contentDisposition.ModificationDate = midificationDate;
 						break;
 
-					case "read-date":
+					case "READ-DATE":
 						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
 						contentDisposition.ReadDate = readDate;
 						break;
 
-					case "size":
+					case "SIZE":
 						contentDisposition.Size = int.Parse(Utility.RemoveQuotesIfAny(value), CultureInfo.InvariantCulture);
 						break;
 
