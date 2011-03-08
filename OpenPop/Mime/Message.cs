@@ -254,7 +254,7 @@ namespace OpenPop.Mime
 		/// <br/>
 		/// The search in the hierarchy is a depth-first traversal.
 		///</summary>
-		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
+		///<param name="mediaType">The MediaType to search for. Case is ignored.</param>
 		///<returns>A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found</returns>
 		public MessagePart FindFirstMessagePartWithMediaType(string mediaType)
 		{
@@ -264,7 +264,7 @@ namespace OpenPop.Mime
 		///<summary>
 		/// Finds all the <see cref="MessagePart"/>s in the <see cref="Message"/> hierarchy with the given MediaType.
 		///</summary>
-		///<param name="mediaType">The MediaType to search for. Has to be in lowercase.</param>
+		///<param name="mediaType">The MediaType to search for. Case is ignored.</param>
 		/// <returns>
 		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
 		/// The List might be empty if no such <see cref="MessagePart"/>s were found.<br/>
