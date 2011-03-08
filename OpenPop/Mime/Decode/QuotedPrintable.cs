@@ -29,7 +29,7 @@ namespace OpenPop.Mime.Decode
 				throw new ArgumentNullException("encoding");
 
 			// Decode the QuotedPrintable string and return it
-			return encoding.GetString(RFC2047QuotedPrintableDecode(toDecode, true));
+			return encoding.GetString(Rfc2047QuotedPrintableDecode(toDecode, true));
 		}
 
 		/// <summary>
@@ -45,7 +45,7 @@ namespace OpenPop.Mime.Decode
 				throw new ArgumentNullException("toDecode");
 
 			// Decode the QuotedPrintable string and return it
-			return RFC2047QuotedPrintableDecode(toDecode, false);
+			return Rfc2047QuotedPrintableDecode(toDecode, false);
 		}
 
 		/// <summary>
@@ -62,7 +62,7 @@ namespace OpenPop.Mime.Decode
 		/// <returns>A decoded byte array that was described by <paramref name="toDecode"/></returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2047#section-4.2">RFC 2047 section 4.2</a> for RFC details</remarks>
-		private static byte[] RFC2047QuotedPrintableDecode(string toDecode, bool encodedWordVariant)
+		private static byte[] Rfc2047QuotedPrintableDecode(string toDecode, bool encodedWordVariant)
 		{
 			if (toDecode == null)
 				throw new ArgumentNullException("toDecode");
@@ -71,7 +71,7 @@ namespace OpenPop.Mime.Decode
 			using (MemoryStream byteArrayBuilder = new MemoryStream())
 			{
 				// Remove illegal control characters
-				toDecode = removeIllegalControlCharacters(toDecode);
+				toDecode = RemoveIllegalControlCharacters(toDecode);
 
 				// Run through the whole string that needs to be decoded
 				for (int i = 0; i < toDecode.Length; i++)
@@ -144,7 +144,7 @@ namespace OpenPop.Mime.Decode
 		/// <param name="input">String to be stripped from illegal control characters</param>
 		/// <returns>A string with no illegal control characters</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
-		private static string removeIllegalControlCharacters(string input)
+		private static string RemoveIllegalControlCharacters(string input)
 		{
 			if(input == null)
 				throw new ArgumentNullException("input");
