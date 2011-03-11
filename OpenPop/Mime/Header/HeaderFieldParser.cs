@@ -174,6 +174,9 @@ namespace OpenPop.Mime.Header
 						contentDisposition.DispositionType = value;
 						break;
 
+					// The correct name of the parameter is filename, but some emails also contains the parameter
+					// name, which also holds the name of the file. Therefore we use both names for the same field.
+					case "NAME":
 					case "FILENAME":
 						// The filename might be in qoutes, and it might be encoded-word encoded
 						contentDisposition.FileName = EncodedWord.Decode(Utility.RemoveQuotesIfAny(value));

@@ -266,6 +266,18 @@ namespace OpenPopUnitTests.Mime.Header
 
 			Assert.AreEqual("test.csv", contentDisposition.FileName);
 		}
+
+		[Test]
+		public void ParseContentDispoistionWithNameParameter()
+		{
+			const string contentDispositionString =
+				"attachment; name=\"010294-0011841.pdf\"; filename=\"010294-0011841.pdf\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("010294-0011841.pdf", contentDisposition.FileName);
+			Assert.IsFalse(contentDisposition.Inline);
+		}
 		#endregion
 
 		#region Content-Type tests
