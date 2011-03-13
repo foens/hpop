@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using OpenPop.Common.Logging;
 
 namespace OpenPop.Mime.Decode
 {
@@ -83,8 +84,11 @@ namespace OpenPop.Mime.Decode
 
 				return dateTime;
 			}
-			
-			throw new ArgumentException("No timezone part found");
+
+			DefaultLogger.Log.LogDebug("No timezone found in date: " + dateInput + ". Using -0000 as default.");
+
+			// A timezone of -0000 is the same as doing nothing
+			return dateTime;
 		}
 
 		/// <summary>
@@ -204,7 +208,7 @@ namespace OpenPop.Mime.Decode
 					(dateTime.DayOfWeek == DayOfWeek.Saturday  && !dayName.Equals("Sat")) ||
 					(dateTime.DayOfWeek == DayOfWeek.Sunday    && !dayName.Equals("Sun")))
 				{
-					throw new ArgumentException("Day-name does not correspond to the weekday of the date");
+					DefaultLogger.Log.LogDebug("Day-name does not correspond to the weekday of the date: " + dateInput);					
 				}
 			}
 

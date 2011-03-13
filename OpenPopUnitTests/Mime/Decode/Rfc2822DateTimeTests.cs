@@ -92,22 +92,6 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
-		public void ThrowsIfWrongDayNameUsed()
-		{
-			const string inputDate = "Tue, 20 Apr 1988 18:10+0133";
-
-			Assert.Throws<ArgumentException>(delegate { Rfc2822DateTime.StringToDate(inputDate); });
-		}
-
-		[Test]
-		public void ThrowsIfWrongDayNameUsedWithWhitespace()
-		{
-			const string inputDate = " (foo)Tue, 20 Apr 1988 18:10+0133";
-
-			Assert.Throws<ArgumentException>(delegate { Rfc2822DateTime.StringToDate(inputDate); });
-		}
-
-		[Test]
 		public void OnlineExample()
 		{
 			const string inputDate = "Wed, 9 May 2007 12:39:13 -0500 (CDT)";
@@ -152,7 +136,11 @@ namespace OpenPopUnitTests.Mime.Decode
 			const string inputDate = "Wed, 9 May 2007 12:39:13 J";
 
 			// J is not a military time
-			Assert.Throws<ArgumentException>(delegate { Rfc2822DateTime.StringToDate(inputDate); });
+			// Therefore it will be interpreted as -0000
+			DateTime expectedOutput = new DateTime(2007, 5, 9, 12, 39, 13, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+			
+			Assert.AreEqual(expectedOutput, output);
 		}
 
 		[Test]
@@ -280,5 +268,32 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual(expectedOutput, output);
 		}
+
+		[Test]
+		public void TestCanHandleInvalidTimezone()
+		{
+			// This is actually an illigal date
+			const string inputDate = "Tue, 08 Mar 2011 07:24:27 0";
+
+			// Expect -0000 used as timezone instead
+			DateTime expectedOutput = new DateTime(2011, 3, 8, 7, 24, 27, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestInvalidWeekdayIgnored()
+		{
+			// This is actually an illigal date - 08 mar is a tuesday!
+			const string inputDate = "Sun, 08 Mar 2011 16:16:13 -0000";
+
+			DateTime expectedOutput = new DateTime(2011, 3, 8, 16, 16, 13, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		
 	}
 }
