@@ -518,6 +518,34 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("application/msword", contentType.MediaType);
 			Assert.AreEqual("NUMMER; 251478.doc", contentType.Name);
 		}
+
+		[Test]
+		public void TestContentTypeWithMissingSemicolon()
+		{
+			// Notice there is no semicolon after charset="iso-8859-1"
+			const string contentTypeString =
+				"text/plain; charset=\"iso-8859-1\" name=\"somefile.txt\"";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+
+			Assert.AreEqual("text/plain", contentType.MediaType);
+			Assert.AreEqual("iso-8859-1", contentType.CharSet);
+			Assert.AreEqual("somefile.txt", contentType.Name);
+		}
+
+		[Test]
+		public void TestContentTypeWithMissingSemicolonAndExcesiveWhitespace()
+		{
+			// Notice there is no semicolon after charset="iso-8859-1"
+			const string contentTypeString =
+				"text/plain; charset   =   \"iso-8859-1\" name   =   \"somefile.txt\"";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+
+			Assert.AreEqual("text/plain", contentType.MediaType);
+			Assert.AreEqual("iso-8859-1", contentType.CharSet);
+			Assert.AreEqual("somefile.txt", contentType.Name);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OpenPop.Mime.Decode
 {
@@ -69,6 +70,15 @@ namespace OpenPop.Mime.Decode
 		/// <returns>A list of decoded key value pairs.</returns>
 		public static List<KeyValuePair<string, string>> Decode(string toDecode)
 		{
+			// Normalize the input to take account for missing semicolons after parameters.
+			// Example
+			// text/plain; charset=\"iso-8859-1\" name=\"somefile.txt\"
+			// is normalized to
+			// text/plain; charset=\"iso-8859-1\"; name=\"somefile.txt\"
+			// Only works for parameters inside quotes
+			// \s = matches whitespace
+			toDecode = Regex.Replace(toDecode, "=\\s*\"(?<value>[^\"]*)\" ", "=\"${value}\"; ");
+
 			// Split by semicolon, but only if not inside quotes
 			List<string> splitted = Utility.SplitStringWithCharNotInsideQuotes(toDecode.Trim(), ';');
 
