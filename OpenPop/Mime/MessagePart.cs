@@ -343,22 +343,40 @@ namespace OpenPop.Mime
 			// Create a stream from which we can find MultiPart boundaries
 			using (MemoryStream stream = new MemoryStream(rawBody))
 			{
+				bool lastMultipartBoundaryEncountered;
+
 				// Find the start of the first message in this multipart
 				// Since the method returns the first character on a the line containing the MultiPart boundary, we
 				// need to add the MultiPart boundary with prepended "--" and appended CRLF pair to the position returned.
-				int startLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) + ("--" + multipPartBoundary + "\r\n").Length;
+				int startLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary, out lastMultipartBoundaryEncountered) + ("--" + multipPartBoundary + "\r\n").Length;
 				while (true)
 				{
+					// When we have just parsed the last multipart entry, stop parsing on
+					if(lastMultipartBoundaryEncountered)
+						break;
+
 					// Find the end location of the current multipart
 					// Since the method returns the first character on a the line containing the MultiPart boundary, we
 					// need to go a CRLF pair back, so that we do not get that into the body of the message part
-					int stopLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary) - "\r\n".Length;
+					int stopLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary, out lastMultipartBoundaryEncountered) - "\r\n".Length;
 
-					// If no more MultiPart boundaries was found, there are no more message parts and we can stop
+					// If we could not find the next multipart boundary, but we had not yet discovered the last boundary, then
+					// we will consider the rest of the bytes as contained in a last message part.
 					if (stopLocation <= -1)
-						break;
+					{
+						// Include everything except the last CRLF.
+						stopLocation = (int) stream.Length - "\r\n".Length;
 
-					// If we came this this place, it means we have found the start and end of a message part
+						// We consider this as the last part
+						lastMultipartBoundaryEncountered = true;
+
+						// Special case: when the last multipart delimiter is not ending with "--", but is indeed the last
+						// one, then the next multipart would contain nothing, and we should not include such one.
+						if (startLocation >= stopLocation)
+							break;
+					}
+
+					// We have now found the start and end of a message part
 					// Now we create a byte array with the correct length and put the message part's bytes into
 					// it and add it to our list we want to return
 					int length = stopLocation - startLocation;
@@ -381,11 +399,13 @@ namespace OpenPop.Mime
 		/// Method that is able to find a specific MultiPart boundary in a Stream.<br/>
 		/// The Stream passed should not be used for anything else then for looking for MultiPart boundaries
 		/// <param name="stream">The stream to find the next MultiPart boundary in. Do not use it for anything else then with this method.</param>
-		/// <param name="multipPartBoundary">The MultiPart boundary to look for. This should be found in the <see cref="ContentType"/> header</param>
+		/// <param name="multiPartBoundary">The MultiPart boundary to look for. This should be found in the <see cref="ContentType"/> header</param>
+		/// <param name="lastMultipartBoundaryFound">Is set to <see langword="true"/> if the next MultiPart boundary was indicated to be the last one, by having -- appended to it. Otherwise set to <see langword="false"/></param>
 		/// </summary>
 		/// <returns>The position of the first character of the line that contained MultiPartBoundary or -1 if no (more) MultiPart boundaries was found</returns>
-		private static int FindPositionOfNextMultiPartBoundary(Stream stream, string multipPartBoundary)
+		private static int FindPositionOfNextMultiPartBoundary(Stream stream, string multiPartBoundary, out bool lastMultipartBoundaryFound)
 		{
+			lastMultipartBoundaryFound = false;
 			while(true)
 			{
 				// Get the current position. This is the first position on the line - no characters of the line will
@@ -402,8 +422,12 @@ namespace OpenPop.Mime
 
 				// The MultiPart boundary is the MultiPartBoundary with "--" in front of it
 				// which is to be at the very start of a line
-				if (line.StartsWith("--" + multipPartBoundary, StringComparison.Ordinal))
+				if (line.StartsWith("--" + multiPartBoundary, StringComparison.Ordinal))
+				{
+					// Check if the found boundary was also the last one
+					lastMultipartBoundaryFound = line.StartsWith("--" + multiPartBoundary + "--", StringComparison.OrdinalIgnoreCase);
 					return currentPos;
+				}
 			}
 		}
 

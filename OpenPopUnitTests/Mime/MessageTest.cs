@@ -557,6 +557,34 @@ namespace OpenPopUnitTests.Mime
 			Assert.AreEqual("<html></html>", message.MessagePart.MessageParts[1].GetBodyAsText());
 		}
 
+		[Test]
+		public void TestMultiPartMessageWithNoBoundaryEnd()
+		{
+			const string multipartMessage =
+				"MIME-Version: 1.0\r\n" +
+				"Content-Type: multipart/alternative; boundary=\"boundary\"\r\n" +
+				"\r\n" +
+				"This is a message with multiple parts in MIME format.\r\n" +
+				"--boundary\r\n" + "Content-Type: text/plain\r\n" +
+				"\r\n" +
+				"This is the body of the message.\r\n" +
+				"--boundary\r\n" +
+				"Content-Type: text/html\r\n" +
+				"\r\n" +
+				"<html></html>\r\n";
+				// Here there should have been a boundary "--boundary--" to delimit last ending
+
+			Message message = null;
+
+			Assert.DoesNotThrow(delegate { message = new Message(Encoding.ASCII.GetBytes(multipartMessage)); });
+
+			Assert.NotNull(message);
+
+			Assert.AreEqual(2, message.MessagePart.MessageParts.Count);
+			Assert.AreEqual("This is the body of the message.", message.MessagePart.MessageParts[0].GetBodyAsText());
+			Assert.AreEqual("<html></html>", message.MessagePart.MessageParts[1].GetBodyAsText());
+		}
+
 		/// <summary>
 		/// See http://tools.ietf.org/html/rfc2046#section-5.1.1 for the example
 		/// </summary>
