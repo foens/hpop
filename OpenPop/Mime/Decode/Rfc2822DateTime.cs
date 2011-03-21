@@ -172,8 +172,8 @@ namespace OpenPop.Mime.Decode
 			// Example: Fri, 21 Nov 1997 09:55:06 -0600
 			// Finds: 21 Nov 1997 09:55:06
 			// Seconds does not need to be specified
-			// Even though it is illigal, sometimes hours are only specified with one digit
-			Match match = Regex.Match(dateInput, @"\d\d? .+ (\d\d\d\d|\d\d) \d?\d:\d\d(:\d\d)?");
+			// Even though it is illigal, sometimes hours, minutes or seconds are only specified with one digit
+			Match match = Regex.Match(dateInput, @"\d\d? .+ (\d\d\d\d|\d\d) \d?\d:\d?\d(:\d?\d)?");
 			if(match.Success)
 			{
 				return match.Value;

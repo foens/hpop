@@ -270,6 +270,34 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestDateWithOnlyOneDigitForMinute()
+		{
+			// This is actually an illigal string
+			// But such a string was met, and therefore a robust parser should be able to parse it
+			// The RFC states that 2 digits must be used for minutes
+			const string inputDate = "Wed, 16 Mar 2011 00:3:41 +0000";
+
+			DateTime expectedOutput = new DateTime(2011, 3, 16, 0, 3, 41, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestDateWithOnlyOneDigitForSecond()
+		{
+			// This is actually an illigal string
+			// But such a string was met, and therefore a robust parser should be able to parse it
+			// The RFC states that 2 digits must be used for seconds
+			const string inputDate = "Wed, 16 Mar 2011 01:03:1 +0000";
+
+			DateTime expectedOutput = new DateTime(2011, 3, 16, 1, 3, 1, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
 		public void TestCanHandleInvalidTimezone()
 		{
 			// This is actually an illigal date
