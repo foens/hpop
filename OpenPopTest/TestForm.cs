@@ -538,13 +538,16 @@ namespace OpenPop.TestApplication
 				}
 			} catch (InvalidLoginException)
 			{
-				MessageBox.Show(this, "User did not accept user credentials!", "POP3 Server Authentication");
+				MessageBox.Show(this, "The server did not accept the user credentials!", "POP3 Server Authentication");
 			} catch (PopServerNotFoundException)
 			{
 				MessageBox.Show(this, "The server could not be found", "POP3 Retrieval");
 			} catch(PopServerLockedException)
 			{
 				MessageBox.Show(this, "The mailbox is locked. It might be in use or under maintenance. Are you connected elsewhere?", "POP3 Account Locked");
+			} catch (LoginDelayException)
+			{
+				MessageBox.Show(this, "Login not allowed. Server enforces delay between logins. Have you connected recently?", "POP3 Account Login Delay");
 			} catch (Exception e)
 			{
 				MessageBox.Show(this, "Error occurred retrieving mail. " + e.Message, "POP3 Retrieval");
