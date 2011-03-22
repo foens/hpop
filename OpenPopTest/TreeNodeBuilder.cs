@@ -27,7 +27,7 @@ namespace OpenPop.TestApplication
 			// First build up the child TreeNode
 			TreeNode child = VisitMessagePart(message.MessagePart);
 
-			// The create the topmost root node with the subject as text
+			// Then create the topmost root node with the subject as text
 			TreeNode topNode = new TreeNode(message.Headers.Subject, new[] { child });
 
 			return topNode;
