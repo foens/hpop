@@ -174,5 +174,20 @@ namespace OpenPopUnitTests.Mime.Header
 			
 		}
 		#endregion
+
+		#region Subject
+		[Test]
+		public void TestSubjectCorrectWhenThreadTopicIsIncluded()
+		{
+			NameValueCollection collection = new NameValueCollection();
+			// A real-life example included a Subject that was different than Thread-Topic
+			collection.Add("Subject", "Foo");
+			collection.Add("Thread-Topic", "Bar");
+
+			MessageHeader header = new MessageHeader(collection);
+
+			Assert.AreEqual("Foo", header.Subject);
+		}
+		#endregion
 	}
 }

@@ -377,7 +377,6 @@ namespace OpenPop.Mime.Header
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.5
 				case "SUBJECT":
-				case "THREAD-TOPIC":
 					Subject = EncodedWord.Decode(headerValue);
 					break;
 
