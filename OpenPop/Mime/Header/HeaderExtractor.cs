@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Text;
-using OpenPop.Mime.Decode;
 using OpenPop.Common;
 
 namespace OpenPop.Mime.Header
@@ -94,14 +94,14 @@ namespace OpenPop.Mime.Header
 				while (!string.IsNullOrEmpty(line = messageReader.ReadLine()))
 				{
 					// Split into name and value
-					string[] splittedValue = Utility.GetHeadersValue(line);
+					KeyValuePair<string, string> header = SeparateHeaderNameAndValue(line);
 
 					// First index is header name
-					string headerName = splittedValue[0];
+					string headerName = header.Key;
 
 					// Second index is the header value.
 					// Use a StringBuilder since the header value may be continued on the next line
-					StringBuilder headerValue = new StringBuilder(splittedValue[1]);
+					StringBuilder headerValue = new StringBuilder(header.Value);
 
 					// Keep reading until we would hit next header
 					// This if for handling multi line headers
@@ -149,6 +149,31 @@ namespace OpenPop.Mime.Header
 			// A multi line header must have a whitespace character
 			// on the next line if it is to be continued
 			return peekChar == ' ' || peekChar == '\t';
+		}
+
+		/// <summary>
+		/// Separate a full header line into a header name and a header value.
+		/// </summary>
+		/// <param name="rawHeader">The raw header line to be separated</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="rawHeader"/> is <see langword="null"/></exception>
+		internal static KeyValuePair<string, string> SeparateHeaderNameAndValue(string rawHeader)
+		{
+			if (rawHeader == null)
+				throw new ArgumentNullException("rawHeader");
+
+			string key = string.Empty;
+			string value = string.Empty;
+
+			int indexOfColon = rawHeader.IndexOf(':');
+
+			// Check if it is allowed to make substring calls
+			if (indexOfColon >= 0 && rawHeader.Length >= indexOfColon + 1)
+			{
+				key = rawHeader.Substring(0, indexOfColon).Trim();
+				value = rawHeader.Substring(indexOfColon + 1).Trim();
+			}
+
+			return new KeyValuePair<string, string>(key, value);
 		}
 	}
 }

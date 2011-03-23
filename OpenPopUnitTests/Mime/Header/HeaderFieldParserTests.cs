@@ -546,6 +546,30 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("iso-8859-1", contentType.CharSet);
 			Assert.AreEqual("somefile.txt", contentType.Name);
 		}
+
+		[Test]
+		public void TestContentTypeWithSpaceAndSemicolon()
+		{
+			const string contentTypeString =
+				"text/plain; charset=\"us-ascii\" ; name=\"foo\"";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+			Assert.AreEqual("text/plain", contentType.MediaType);
+			Assert.AreEqual("us-ascii", contentType.CharSet);
+			Assert.AreEqual("foo", contentType.Name);
+		}
+
+		[Test]
+		public void TestContentTypeWithFormat()
+		{
+			const string contentTypeString =
+				"text/plain; charset=\"us-ascii\"; format=\"flowed\"";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+			Assert.AreEqual("text/plain", contentType.MediaType);
+			Assert.AreEqual("us-ascii", contentType.CharSet);
+			Assert.AreEqual("flowed", contentType.Parameters["format"]);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests

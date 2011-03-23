@@ -104,7 +104,7 @@ namespace OpenPop.Mime.Header
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
 				string key = keyValuePair.Key.ToUpperInvariant().Trim();
-				string value = keyValuePair.Value.Trim();
+				string value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
 				switch (key)
 				{
 					case "":
@@ -114,15 +114,15 @@ namespace OpenPop.Mime.Header
 						break;
 
 					case "BOUNDARY":
-						contentType.Boundary = Utility.RemoveQuotesIfAny(value);
+						contentType.Boundary = value;
 						break;
 
 					case "CHARSET":
-						contentType.CharSet = Utility.RemoveQuotesIfAny(value);
+						contentType.CharSet = value;
 						break;
 
 					case "NAME":
-						contentType.Name = EncodedWord.Decode(Utility.RemoveQuotesIfAny(value));
+						contentType.Name = EncodedWord.Decode(value);
 						break;
 
 					default:

@@ -51,7 +51,7 @@
     <Compile Include="Mime\Decode\EncodedWordTests.cs" />
     <Compile Include="Mime\Decode\QuotedPrintableTest.cs" />
     <Compile Include="Mime\Decode\Rfc2822DateTimeTests.cs" />
-    <Compile Include="Mime\Decode\UtilityTest.cs" />
+    <Compile Include="Mime\Header\HeaderExtractorTests.cs" />
     <Compile Include="Mime\Header\HeaderFieldParserTests.cs" />
     <Compile Include="Mime\Header\MessageHeaderTests.cs" />
     <Compile Include="Mime\Header\RFCMailAddressTest.cs" />

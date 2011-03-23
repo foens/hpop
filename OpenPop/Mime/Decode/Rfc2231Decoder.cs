@@ -87,7 +87,7 @@ namespace OpenPop.Mime.Decode
 			foreach (string part in splitted)
 			{
 				// Empty strings should not be processed
-				if (part.Length == 0)
+				if (part.Trim().Length == 0)
 					continue;
 
 				string[] keyValue = part.Split(new [] {'='}, 2);

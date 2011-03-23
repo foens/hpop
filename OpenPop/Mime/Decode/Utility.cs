@@ -9,28 +9,6 @@ namespace OpenPop.Mime.Decode
 	internal static class Utility
 	{
 		/// <summary>
-		/// Separate header name and header value.
-		/// </summary>
-		/// <exception cref="ArgumentNullException">If <paramref name="rawHeader"/> is <see langword="null"/></exception>
-		public static string[] GetHeadersValue(string rawHeader)
-		{
-			if (rawHeader == null)
-				throw new ArgumentNullException("rawHeader");
-
-			string[] array = new[] {string.Empty, string.Empty};
-			int indexOfColon = rawHeader.IndexOf(':');
-
-			// Check if it is allowed to make substring calls
-			if (indexOfColon >= 0 && rawHeader.Length >= indexOfColon + 1)
-			{
-				array[0] = rawHeader.Substring(0, indexOfColon).Trim();
-				array[1] = rawHeader.Substring(indexOfColon + 1).Trim();
-			}
-
-			return array;
-		}
-
-		/// <summary>
 		/// Remove quotes, if found, around the string.
 		/// </summary>
 		/// <param name="text">Text with quotes or without quotes</param>
@@ -41,14 +19,15 @@ namespace OpenPop.Mime.Decode
 			if(text == null)
 				throw new ArgumentNullException("text");
 
-			string returner = text;
+			// Check if there are qoutes at both ends
+			if(text[0] == '"' && text[text.Length-1] == '"')
+			{
+				// Remove quotes at both ends
+				return text.Substring(1, text.Length - 2);
+			}
 
-			if (returner.StartsWith("\"", StringComparison.OrdinalIgnoreCase))
-				returner = returner.Substring(1);
-			if (returner.EndsWith("\"", StringComparison.OrdinalIgnoreCase))
-				returner = returner.Substring(0, returner.Length - 1);
-
-			return returner;
+			// If no quotes were found, the text is just returned
+			return text;
 		}
 
 		/// <summary>
