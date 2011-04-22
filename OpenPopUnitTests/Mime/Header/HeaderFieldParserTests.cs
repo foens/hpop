@@ -291,6 +291,47 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("KB - Examen BedrijfskundigFinancieel Management - 11980 - uitwerkingen.doc", contentDisposition.FileName);
 			Assert.IsFalse(contentDisposition.Inline);
 		}
+
+		[Test]
+		public void ParseContentDispositionWithXTokens()
+		{
+			// x-extensions should be ignored
+			const string contentDispositionString =
+				"attachment; x-foo=true";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("true", contentDisposition.Parameters["X-FOO"]);
+			Assert.IsFalse(contentDisposition.Inline);
+		}
+
+		[Test]
+		public void ParseContentDispositionWithXTokens2()
+		{
+			// x-extensions should be ignored
+			const string contentDispositionString =
+				"attachment; x-maiconizer-user=yes";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("yes", contentDisposition.Parameters["X-MAICONIZER-USER"]);
+			Assert.AreEqual("yes", contentDisposition.Parameters["x-maiconizer-user"]); // Both upper and lower case keys should work
+			Assert.IsFalse(contentDisposition.Inline);
+		}
+
+		[Test]
+		public void ParseContentDispositionWithXTokensQuotesShouldBeRemoved()
+		{
+			// x-extensions should be ignored
+			const string contentDispositionString =
+				"attachment; x-some-special-parameter-with-quotes=\"foobar\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("foobar", contentDisposition.Parameters["x-some-special-parameter-with-quotes"]);
+			Assert.AreNotEqual("\"foobar\"", contentDisposition.Parameters["x-some-special-parameter-with-quotes"]);
+			Assert.IsFalse(contentDisposition.Inline);
+		}
 		#endregion
 
 		#region Content-Type tests

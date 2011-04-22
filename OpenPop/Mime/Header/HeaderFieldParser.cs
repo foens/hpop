@@ -208,6 +208,12 @@ namespace OpenPop.Mime.Header
 						break;
 
 					default:
+						if(key.StartsWith("X-"))
+						{
+							contentDisposition.Parameters.Add(key, Utility.RemoveQuotesIfAny(value));
+							break;
+						}
+
 						throw new ArgumentException("Unknown parameter in Content-Disposition. Ask developer to fix! Parameter: " + key);
 				}
 			}
