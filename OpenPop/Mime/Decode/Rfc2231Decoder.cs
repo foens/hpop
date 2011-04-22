@@ -90,7 +90,7 @@ namespace OpenPop.Mime.Decode
 				if (part.Trim().Length == 0)
 					continue;
 
-				string[] keyValue = part.Split(new [] {'='}, 2);
+				string[] keyValue = part.Trim().Split(new [] {'='}, 2);
 				if(keyValue.Length == 1)
 				{
 					collection.Add(new KeyValuePair<string, string>("", keyValue[0]));

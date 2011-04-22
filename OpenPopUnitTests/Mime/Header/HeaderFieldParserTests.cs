@@ -278,6 +278,19 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("010294-0011841.pdf", contentDisposition.FileName);
 			Assert.IsFalse(contentDisposition.Inline);
 		}
+
+		[Test]
+		public void ParseContentDispositionWithNoSpaceAfterContinuation()
+		{
+			// Notice there is no space before filename*1
+			const string contentDispositionString =
+				"attachment; filename*0=\"KB - Examen BedrijfskundigFinancieel Management - 11980 - uitwe\";filename*1=\"rkingen.doc\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("KB - Examen BedrijfskundigFinancieel Management - 11980 - uitwerkingen.doc", contentDisposition.FileName);
+			Assert.IsFalse(contentDisposition.Inline);
+		}
 		#endregion
 
 		#region Content-Type tests
