@@ -139,7 +139,7 @@ namespace OpenPopUnitTests.Mime.Decode
 			// Therefore it will be interpreted as -0000
 			DateTime expectedOutput = new DateTime(2007, 5, 9, 12, 39, 13, DateTimeKind.Utc);
 			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
-			
+
 			Assert.AreEqual(expectedOutput, output);
 		}
 
@@ -322,6 +322,24 @@ namespace OpenPopUnitTests.Mime.Decode
 			Assert.AreEqual(expectedOutput, output);
 		}
 
-		
+		[Test]
+		public void TestUnparsableReturnsMinDate()
+		{
+			const string inputDate = "foo";
+
+			DateTime expectedOutput = DateTime.MinValue;
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestInvalidDateThrowsArgumentException()
+		{
+			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 00:77:00 -0000"));
+			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 77:00:00 -0000"));
+			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 00:00:00 -0000"));
+			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 77:77:77 -9999"));
+		}
 	}
 }

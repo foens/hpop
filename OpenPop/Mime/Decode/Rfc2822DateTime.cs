@@ -14,7 +14,10 @@ namespace OpenPop.Mime.Decode
 		/// Converts a string in RFC 2822 format into a <see cref="DateTime"/> object
 		/// </summary>
 		/// <param name="inputDate">The date to convert</param>
-		/// <returns>A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted</returns>
+		/// <returns>
+		/// A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted. 
+		/// If <paramref name="inputDate"/> is not a valid date representation, then <see cref="DateTime.MinValue"/> is returned.
+		/// </returns>
 		/// <exception cref="ArgumentNullException"><exception cref="ArgumentNullException">If <paramref name="inputDate"/> is <see langword="null"/></exception></exception>
 		/// <exception cref="ArgumentException">If the <paramref name="inputDate"/> could not be parsed into a <see cref="DateTime"/> object</exception>
 		public static DateTime StringToDate(string inputDate)
@@ -31,7 +34,7 @@ namespace OpenPop.Mime.Decode
 				string date = ExtractDate(inputDate);
 			
 				// Convert the date string into a DateTime
-				DateTime dateTime = Convert.ToDateTime(date, CultureInfo.InvariantCulture);
+				DateTime dateTime = (date == null) ? DateTime.MinValue : Convert.ToDateTime(date, CultureInfo.InvariantCulture);
 
 				// If a day-name is specified in the inputDate string, check if it fits with the date
 				ValidateDayNameIfAny(dateTime, inputDate);
@@ -44,7 +47,12 @@ namespace OpenPop.Mime.Decode
 				
 				// Return the parsed date
 				return dateTime;
-			} catch (ArgumentException e)
+			}
+			catch (FormatException e)	// Convert.ToDateTime() Failure
+			{
+				throw new ArgumentException("Could not parse date: " + e.Message + ". Input was: \"" + inputDate + "\"", e);
+			}
+			catch (ArgumentException e)
 			{
 				throw new ArgumentException("Could not parse date: " + e.Message + ". Input was: \"" + inputDate + "\"", e);
 			}
@@ -164,8 +172,7 @@ namespace OpenPop.Mime.Decode
 		/// Extracts the date part from the <paramref name="dateInput"/>
 		/// </summary>
 		/// <param name="dateInput">The date input string, from which to extract the date part</param>
-		/// <returns>The extracted date part</returns>
-		/// <exception cref="ArgumentException">If a date part could not be extracted from <paramref name="dateInput"/></exception>
+		/// <returns>The extracted date part or <see langword="null"/> if <paramref name="dateInput"/> is not recognized as a valid date.</returns>
 		private static string ExtractDate(string dateInput)
 		{
 			// Matches the date and time part of a string
@@ -179,7 +186,8 @@ namespace OpenPop.Mime.Decode
 				return match.Value;
 			}
 
-			throw new ArgumentException("No date part found");
+			DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
+			return null;
 		}
 
 		/// <summary>

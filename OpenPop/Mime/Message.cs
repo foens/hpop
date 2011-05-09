@@ -134,6 +134,9 @@ namespace OpenPop.Mime
 				message.BodyEncoding = firstPlainTextVersion.BodyEncoding;
 			}
 
+			// Make sure that the IsBodyHtml property is being set correctly for our content
+			message.IsBodyHtml = FindFirstHtmlVersion() != null;
+
 			// Add body and alternative views (html and such) to the message
 			IEnumerable<MessagePart> textVersions = FindAllTextVersions();
 			foreach (MessagePart textVersion in textVersions)

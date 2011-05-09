@@ -496,7 +496,7 @@ namespace OpenPopUnitTests.Mime
 		}
 
 		[Test]
-		public void ToMailMessageMultipleBodies()
+		public void ToMailMessageMultipleBodiesWithHtmlContent()
 		{
 			const string multipartMessage =
 				"MIME-Version: 1.0\r\n" +
@@ -521,7 +521,7 @@ namespace OpenPopUnitTests.Mime
 			Assert.NotNull(mailMessage.Body);
 			Assert.AreEqual("This is the body of the message - in plain text.", mailMessage.Body);
 			Assert.AreEqual(Encoding.ASCII, mailMessage.BodyEncoding);
-			Assert.IsFalse(mailMessage.IsBodyHtml);
+			Assert.IsTrue(mailMessage.IsBodyHtml);
 
 			// Check html alternative view
 			Assert.IsNotEmpty(mailMessage.AlternateViews);
