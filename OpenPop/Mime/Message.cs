@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Mail;
 using System.Text;
 using OpenPop.Mime.Header;
 using OpenPop.Mime.Traverse;
-using System.Net.Mail;
 
 namespace OpenPop.Mime
 {
@@ -67,7 +67,10 @@ namespace OpenPop.Mime
 		/// The headers are always parsed, but if <paramref name="parseBody"/> is <see langword="false"/>, the body is not parsed.
 		/// </summary>
 		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
-		/// <param name="parseBody"><see langword="true"/> if the body should be parsed, <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> byte array</param>
+		/// <param name="parseBody">
+		/// <see langword="true"/> if the body should be parsed,
+		/// <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> byte array
+		/// </param>
 		public Message(byte[] rawMessageContent, bool parseBody)
 		{
 			RawMessage = rawMessageContent;
@@ -193,6 +196,8 @@ namespace OpenPop.Mime
 			return message;
 		}
 
+		#region MessagePart Searching Methods
+
 		/// <summary>
 		/// Finds the first text/plain <see cref="MessagePart"/> in this message.<br/>
 		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
@@ -252,22 +257,24 @@ namespace OpenPop.Mime
 			return new AttachmentFinder().VisitMessage(this);
 		}
 
-		///<summary>
+		/// <summary>
 		/// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.<br/>
 		/// <br/>
 		/// The search in the hierarchy is a depth-first traversal.
-		///</summary>
-		///<param name="mediaType">The MediaType to search for. Case is ignored.</param>
-		///<returns>A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found</returns>
+		/// </summary>
+		/// <param name="mediaType">The MediaType to search for. Case is ignored.</param>
+		/// <returns>
+		/// A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found
+		/// </returns>
 		public MessagePart FindFirstMessagePartWithMediaType(string mediaType)
 		{
 			return new FindFirstMessagePartWithMediaType().VisitMessage(this, mediaType);
 		}
 
-		///<summary>
+		/// <summary>
 		/// Finds all the <see cref="MessagePart"/>s in the <see cref="Message"/> hierarchy with the given MediaType.
-		///</summary>
-		///<param name="mediaType">The MediaType to search for. Case is ignored.</param>
+		/// </summary>
+		/// <param name="mediaType">The MediaType to search for. Case is ignored.</param>
 		/// <returns>
 		/// A List of <see cref="MessagePart"/>s with the given MediaType.<br/>
 		/// The List might be empty if no such <see cref="MessagePart"/>s were found.<br/>
@@ -279,6 +286,10 @@ namespace OpenPop.Mime
 			return new FindAllMessagePartsWithMediaType().VisitMessage(this, mediaType);
 		}
 
+		#endregion
+
+		#region Message Persistence
+
 		/// <summary>
 		/// Save this <see cref="Message"/> to a file.<br/>
 		/// <br/>
@@ -287,12 +298,43 @@ namespace OpenPop.Mime
 		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
 		/// <exception>Other exceptions relevant to file saving might be thrown as well</exception>
+		[Obsolete("Use one of the Save method overrides instead of SaveToFile")]
 		public void SaveToFile(FileInfo file)
+		{
+			Save(file);
+		}
+
+		/// <summary>
+		/// Save this <see cref="Message"/> to a file.<br/>
+		/// <br/>
+		/// Can be loaded at a later time using the <see cref="Load(FileInfo)"/> method.
+		/// </summary>
+		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
+		/// <exception>Other exceptions relevant to using a <see cref="FileStream"/> might be thrown as well</exception>
+		public void Save(FileInfo file)
 		{
 			if (file == null)
 				throw new ArgumentNullException("file");
 
-			File.WriteAllBytes(file.FullName, RawMessage);
+			using (FileStream stream = new FileStream(file.FullName, FileMode.OpenOrCreate))
+			{
+				Save(stream);
+			}
+		}
+
+		/// <summary>
+		/// Save this <see cref="Message"/> to a stream.<br/>
+		/// </summary>
+		/// <param name="messageStream">The stream to write to</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="messageStream"/> is <see langword="null"/></exception>
+		/// <exception>Other exceptions relevant to <see cref="Stream.Write"/> might be thrown as well</exception>
+		public void Save(Stream messageStream)
+		{
+			if (messageStream == null)
+				throw new ArgumentNullException("messageStream");
+
+			messageStream.Write(RawMessage, 0, RawMessage.Length);
 		}
 
 		/// <summary>
@@ -302,17 +344,69 @@ namespace OpenPop.Mime
 		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
 		/// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
 		/// <exception>Other exceptions relevant to file loading might be thrown as well</exception>
-		/// <returns>A <see cref="Message"/> with the content located in the <paramref name="file"/></returns>
+		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="file"/></returns>
+		[Obsolete("Use one of the Load method overrides instead of LoadFromFile")]
 		public static Message LoadFromFile(FileInfo file)
+		{
+			return Load(file);
+		}
+
+		/// <summary>
+		/// Loads a <see cref="Message"/> from a file containing a raw email.
+		/// </summary>
+		/// <param name="file">The File location to load the <see cref="Message"/> from. The file must exist.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
+		/// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
+		/// <exception>Other exceptions relevant to a <see cref="FileStream"/> might be thrown as well</exception>
+		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="file"/></returns>
+		public static Message Load(FileInfo file)
 		{
 			if (file == null)
 				throw new ArgumentNullException("file");
 
-			if(!file.Exists)
+			if (!file.Exists)
 				throw new FileNotFoundException("Cannot load message from non-existent file", file.FullName);
 
-			byte[] content = File.ReadAllBytes(file.FullName);
-			return new Message(content);
+			using (FileStream stream = new FileStream(file.FullName, FileMode.Open))
+			{
+				return Load(stream);
+			}
 		}
+
+
+		/// <summary>
+		/// Loads a <see cref="Message"/> from a <see cref="Stream"/> containing a raw email.
+		/// </summary>
+		/// <param name="messageStream">The <see cref="Stream"/> from which to load the raw <see cref="Message"/></param>
+		/// <exception cref="ArgumentNullException">If <paramref name="messageStream"/> is <see langword="null"/></exception>
+		/// <exception>Other exceptions relevant to <see cref="Stream.Read"/> might be thrown as well</exception>
+		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="messageStream"/></returns>
+		public static Message Load(Stream messageStream)
+		{
+			if (messageStream == null)
+				throw new ArgumentNullException("messageStream");
+
+			using (var outStream = new MemoryStream())
+			{
+#if DOTNET4
+				// TODO: Enable using native v4 framework methods when support is formally added.
+				messageStream.CopyTo(outStream);
+#else
+				int bytesRead = 0;
+				byte[] buffer = new byte[4096];
+
+				while ((bytesRead = messageStream.Read(buffer, 0, 4096)) > 0)
+				{
+					outStream.Write(buffer, 0, bytesRead);
+				}
+#endif
+				byte[] content = outStream.ToArray();
+				// The ToArray result may be longer than the real data due to internal buffer sizing.
+				Array.Resize(ref content, (int)outStream.Length);
+
+				return new Message(content);
+			}
+		}
+		#endregion
 	}
 }

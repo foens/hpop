@@ -308,10 +308,10 @@ namespace OpenPopExamples
 			FileInfo file = new FileInfo("someFile.eml");
 
 			// Save the full message to some file
-			message.SaveToFile(file);
+			message.Save(file);
 
 			// Now load the message again. This could be done at a later point
-			Message loadedMessage = Message.LoadFromFile(file);
+			Message loadedMessage = Message.Load(file);
 
 			// use the message again
 			return loadedMessage;

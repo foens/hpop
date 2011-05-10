@@ -1119,7 +1119,7 @@ namespace OpenPopUnitTests.Mime
 		}
 
 		[Test]
-		public void TestSaveToFaile()
+		public void TestSaveAndLoad()
 		{
 			const string messageString =
 				"Content-Type: text/plain\r\n" +
@@ -1131,9 +1131,9 @@ namespace OpenPopUnitTests.Mime
 
 			FileInfo testFile = new FileInfo("test_message_save_.testFile");
 
-			message.SaveToFile(testFile);
+			message.Save(testFile);
 
-			Message message2 = Message.LoadFromFile(testFile);
+			Message message2 = Message.Load(testFile);
 
 			Assert.AreEqual("Testing", message.MessagePart.GetBodyAsText());
 			Assert.AreEqual("Testing", message2.MessagePart.GetBodyAsText());
@@ -1148,7 +1148,7 @@ namespace OpenPopUnitTests.Mime
 		}
 
 		[Test]
-		public void TestSaveToFaileComplex()
+		public void TestSaveAndLoadComplex()
 		{
 			const string rfcExample =
 				"From: Nathaniel Borenstein <nsb@bellcore.com>\r\n" +
@@ -1196,9 +1196,9 @@ namespace OpenPopUnitTests.Mime
 			}
 
 			FileInfo testFile = new FileInfo("test_message_save_.testFile");
-			message.SaveToFile(testFile);
+			message.Save(testFile);
 
-			Message message2 = Message.LoadFromFile(testFile);
+			Message message2 = Message.Load(testFile);
 			{
 				System.Collections.Generic.List<MessagePart> parts2 = message2.FindAllMessagePartsWithMediaType("multipart/mixed");
 
