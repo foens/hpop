@@ -30,11 +30,8 @@ namespace OpenPop.Mime.Decode
 
 			try
 			{
-				// Extract the date
-				string date = ExtractDate(inputDate);
-			
-				// Convert the date string into a DateTime
-				DateTime dateTime = (date == null) ? DateTime.MinValue : Convert.ToDateTime(date, CultureInfo.InvariantCulture);
+                // Extract the DateTime
+                DateTime dateTime = ExtractDateTime(inputDate);
 
 				// If a day-name is specified in the inputDate string, check if it fits with the date
 				ValidateDayNameIfAny(dateTime, inputDate);
@@ -169,11 +166,11 @@ namespace OpenPop.Mime.Decode
 		}
 
 		/// <summary>
-		/// Extracts the date part from the <paramref name="dateInput"/>
+		/// Extracts the date and time parts from the <paramref name="dateInput"/>
 		/// </summary>
-		/// <param name="dateInput">The date input string, from which to extract the date part</param>
-		/// <returns>The extracted date part or <see langword="null"/> if <paramref name="dateInput"/> is not recognized as a valid date.</returns>
-		private static string ExtractDate(string dateInput)
+		/// <param name="dateInput">The date input string, from which to extract the date and time parts</param>
+		/// <returns>The extracted date part or <see langword="DateTime.MinValue"/> if <paramref name="dateInput"/> is not recognized as a valid date.</returns>
+		private static DateTime ExtractDateTime(string dateInput)
 		{
 			// Matches the date and time part of a string
 			// Example: Fri, 21 Nov 1997 09:55:06 -0600
@@ -183,11 +180,11 @@ namespace OpenPop.Mime.Decode
 			Match match = Regex.Match(dateInput, @"\d\d? .+ (\d\d\d\d|\d\d) \d?\d:\d?\d(:\d?\d)?");
 			if(match.Success)
 			{
-				return match.Value;
+                return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
 			}
 
 			DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
-			return null;
+			return DateTime.MinValue;
 		}
 
 		/// <summary>

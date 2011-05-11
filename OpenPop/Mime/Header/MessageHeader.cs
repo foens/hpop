@@ -180,7 +180,7 @@ namespace OpenPop.Mime.Header
 		/// The Date when the email was sent.<br/>
 		/// This is the raw value. <see cref="DateSent"/> for a parsed up <see cref="DateTime"/> value of this field.<br/>
 		/// <br/>
-		/// <see langword="null"/> if no Date header field was present in the message
+		/// <see langword="DateTime.MinValue"/> if no Date header field was present in the message or if the date could not be parsed.
 		/// </summary>
 		/// <remarks>See <a href="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 section 3.6.1</a> for more details</remarks>
 		public string Date { get; private set; }
