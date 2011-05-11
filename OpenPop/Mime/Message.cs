@@ -386,13 +386,13 @@ namespace OpenPop.Mime
 			if (messageStream == null)
 				throw new ArgumentNullException("messageStream");
 
-			using (var outStream = new MemoryStream())
+            using (MemoryStream outStream = new MemoryStream())
 			{
 #if DOTNET4
 				// TODO: Enable using native v4 framework methods when support is formally added.
 				messageStream.CopyTo(outStream);
 #else
-				int bytesRead = 0;
+				int bytesRead;
 				byte[] buffer = new byte[4096];
 
 				while ((bytesRead = messageStream.Read(buffer, 0, 4096)) > 0)
@@ -401,8 +401,6 @@ namespace OpenPop.Mime
 				}
 #endif
 				byte[] content = outStream.ToArray();
-				// The ToArray result may be longer than the real data due to internal buffer sizing.
-				Array.Resize(ref content, (int)outStream.Length);
 
 				return new Message(content);
 			}
