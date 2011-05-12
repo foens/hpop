@@ -1289,5 +1289,21 @@ namespace OpenPopUnitTests.Mime
 			Assert.AreEqual(1, messageParts.Count);
 			Assert.AreEqual(textHtml, messageParts[0]);
 		}
+
+        [Test]
+        public void TestLoadSimple()
+        {
+            const string input =
+                "Content-Type: text/plain; charset=iso-8859-1\r\n" +
+                "Content-Transfer-Encoding: quoted-printable\r\n" +
+                "\r\n" + // Headers end
+                "Hello=\r\n";
+
+            // The QP encoding would have decoded Hello=\r\n into Hello, since =\r\n is a soft line break
+            const string expectedOutput = "Hello";
+
+            string output = Message.Load(new MemoryStream(Encoding.ASCII.GetBytes(input))).MessagePart.GetBodyAsText();
+            Assert.AreEqual(expectedOutput, output);
+        }
 	}
 }
