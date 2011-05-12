@@ -113,6 +113,10 @@ namespace OpenPop.Mime
 		///    Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
 		///    It is simply not possible to set these on Attachments.
 		/// </item>
+		/// <item>
+		///    HTML content will be treated as the preferred view for the <see cref="MailMessage.Body"/>. Plain text content will be used for the
+		///    <see cref="MailMessage.Body"/> when HTML is not available.
+		/// </item>
 		/// </list>
 		/// </summary>
 		/// <returns>A <see cref="MailMessage"/> object that contains the same information that this Message does</returns>
@@ -128,25 +132,33 @@ namespace OpenPop.Mime
 			// But since we know that strings in .NET is stored in UTF, we can
 			// use UTF-8 to decode the subject into bytes
 			message.SubjectEncoding = Encoding.UTF8;
-
-			// Add the first plain text version as the body, if it exists
-			MessagePart firstPlainTextVersion = FindFirstPlainTextVersion();
-			if (firstPlainTextVersion != null)
+			
+			// The HTML version should take precedent over the plain text if it is available
+			MessagePart preferredVersion = FindFirstHtmlVersion();
+			if ( preferredVersion != null )
 			{
-				message.Body = firstPlainTextVersion.GetBodyAsText();
-				message.BodyEncoding = firstPlainTextVersion.BodyEncoding;
+				// Make sure that the IsBodyHtml property is being set correctly for our content
+				message.IsBodyHtml = true;
+			}
+			else
+			{
+				// otherwise use the first plain text version as the body, if it exists
+				preferredVersion = FindFirstPlainTextVersion();
 			}
 
-			// Make sure that the IsBodyHtml property is being set correctly for our content
-			message.IsBodyHtml = FindFirstHtmlVersion() != null;
+			if (preferredVersion != null)
+			{
+				message.Body = preferredVersion.GetBodyAsText();
+				message.BodyEncoding = preferredVersion.BodyEncoding;
+			}
 
 			// Add body and alternative views (html and such) to the message
 			IEnumerable<MessagePart> textVersions = FindAllTextVersions();
 			foreach (MessagePart textVersion in textVersions)
 			{
-				// The textVersions also contain the plainText version, therefore
+				// The textVersions also contain the preferred version, therefore
 				// we should skip that one
-				if (textVersion == firstPlainTextVersion)
+				if (textVersion == preferredVersion)
 					continue;
 
 				MemoryStream stream = new MemoryStream(textVersion.Body);
@@ -386,7 +398,7 @@ namespace OpenPop.Mime
 			if (messageStream == null)
 				throw new ArgumentNullException("messageStream");
 
-            using (MemoryStream outStream = new MemoryStream())
+			using (MemoryStream outStream = new MemoryStream())
 			{
 #if DOTNET4
 				// TODO: Enable using native v4 framework methods when support is formally added.

@@ -498,6 +498,8 @@ namespace OpenPopUnitTests.Mime
 		[Test]
 		public void ToMailMessageMultipleBodiesWithHtmlContent()
 		{
+			const string expectedPlain = "This is the body of the message - in plain text.";
+			const string expectedHtml = "This is some <b>HTML</b> :)";
 			const string multipartMessage =
 				"MIME-Version: 1.0\r\n" +
 				"Content-Type: multipart/alternative; boundary=\"frontier\"\r\n" +
@@ -506,32 +508,34 @@ namespace OpenPopUnitTests.Mime
 				"--frontier\r\n" +
 				"Content-Type: text/plain\r\n" +
 				"\r\n" +
-				"This is the body of the message - in plain text.\r\n" +
+				expectedPlain +
+				"\r\n" +
 				"--frontier\r\n" +
 				"Content-Type: text/html\r\n" +
 				"\r\n" +
-				"This is some HTML :)\r\n" +
+				expectedHtml +
+				"\r\n" +
 				"--frontier--";
 
 			MailMessage mailMessage = new Message(Encoding.ASCII.GetBytes(multipartMessage)).ToMailMessage();
 
 			Assert.NotNull(mailMessage);
 
-			// Check body
+			// Check body for html
 			Assert.NotNull(mailMessage.Body);
-			Assert.AreEqual("This is the body of the message - in plain text.", mailMessage.Body);
+			Assert.AreEqual(expectedHtml, mailMessage.Body);
 			Assert.AreEqual(Encoding.ASCII, mailMessage.BodyEncoding);
 			Assert.IsTrue(mailMessage.IsBodyHtml);
 
-			// Check html alternative view
+			// Check alternative view for plain text
 			Assert.IsNotEmpty(mailMessage.AlternateViews);
 			Assert.AreEqual(1, mailMessage.AlternateViews.Count);
 
 			AlternateView firstAlternative = mailMessage.AlternateViews[0];
 			Assert.NotNull(firstAlternative.ContentType);
 			Assert.NotNull(firstAlternative.ContentType.MediaType);
-			Assert.AreEqual("text/html", firstAlternative.ContentType.MediaType);
-			Assert.AreEqual("This is some HTML :)", Encoding.ASCII.GetString(getAttachmentBytes(firstAlternative)));
+			Assert.AreEqual("text/plain", firstAlternative.ContentType.MediaType);
+			Assert.AreEqual(expectedPlain, Encoding.ASCII.GetString(getAttachmentBytes(firstAlternative)));
 
 			// Check attachments
 			Assert.IsEmpty(mailMessage.Attachments);
