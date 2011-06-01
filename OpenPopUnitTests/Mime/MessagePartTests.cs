@@ -243,5 +243,17 @@ namespace OpenPopUnitTests.Mime
 			Assert.AreEqual(Encoding.ASCII, messagePart.BodyEncoding);
 			Assert.AreEqual("foo", messagePart.GetBodyAsText());
 		}
+
+        [Test]
+        public void TestContentTypeWithMissingSemicolonAndTabs()
+        {
+            const string messagePartContent =
+                "Content-Type: text/plain;\r\n\tcharset=\"Windows-1252\"\r\n\tname=\"ALERTA_1.txt\"\r\n" +
+                "\r\n"; // End of message headers
+
+            MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+            Assert.AreEqual(Encoding.GetEncoding(1252), messagePart.BodyEncoding);
+        }
 	}
 }

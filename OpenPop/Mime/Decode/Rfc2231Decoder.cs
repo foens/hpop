@@ -72,12 +72,13 @@ namespace OpenPop.Mime.Decode
 		{
 			// Normalize the input to take account for missing semicolons after parameters.
 			// Example
-			// text/plain; charset=\"iso-8859-1\" name=\"somefile.txt\"
+			// text/plain; charset=\"iso-8859-1\" name=\"somefile.txt\" or
+            // text/plain;\tcharset=\"iso-8859-1\"\tname=\"somefile.txt\"
 			// is normalized to
 			// text/plain; charset=\"iso-8859-1\"; name=\"somefile.txt\"
 			// Only works for parameters inside quotes
 			// \s = matches whitespace
-			toDecode = Regex.Replace(toDecode, "=\\s*\"(?<value>[^\"]*)\" ", "=\"${value}\"; ");
+			toDecode = Regex.Replace(toDecode, "=\\s*\"(?<value>[^\"]*)\"\\s", "=\"${value}\"; ");
 
 			// Split by semicolon, but only if not inside quotes
 			List<string> splitted = Utility.SplitStringWithCharNotInsideQuotes(toDecode.Trim(), ';');
