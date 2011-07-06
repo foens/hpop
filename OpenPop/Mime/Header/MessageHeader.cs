@@ -72,7 +72,7 @@ namespace OpenPop.Mime.Header
 		/// <br/>
 		/// The list will be empty if no Received header was present in the message
 		/// </summary>
-		public List<string> Received { get; private set; }
+		public List<Received> Received { get; private set; }
 
 		/// <summary>
 		/// Importance of this email.<br/>
@@ -245,7 +245,7 @@ namespace OpenPop.Mime.Header
 			To = new List<RfcMailAddress>(0);
 			Cc = new List<RfcMailAddress>(0);
 			Bcc = new List<RfcMailAddress>(0);
-			Received = new List<string>();
+			Received = new List<Received>();
 			Keywords = new List<string>();
 			InReplyTo = new List<string>(0);
 			References = new List<string>(0);
@@ -359,7 +359,7 @@ namespace OpenPop.Mime.Header
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.7
 				case "RECEIVED":
 					// Simply add the value to the list
-					Received.Add(headerValue.Trim());
+					Received.Add(new Received(headerValue.Trim()));
 					break;
 
 				case "IMPORTANCE":

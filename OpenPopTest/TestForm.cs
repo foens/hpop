@@ -638,7 +638,7 @@ namespace OpenPop.TestApplication
 			rows.Add(new object[] {"Content-Id", message.Headers.ContentId});
 			foreach (string keyword in message.Headers.Keywords) rows.Add(new object[] {"Keyword", keyword});
 			foreach (RfcMailAddress dispositionNotificationTo in message.Headers.DispositionNotificationTo) rows.Add(new object[] {"Disposition-Notification-To", dispositionNotificationTo});
-			foreach (string received in message.Headers.Received) rows.Add(new object[] {"Received", received});
+			foreach (Received received in message.Headers.Received) rows.Add(new object[] {"Received", received.Raw});
 			rows.Add(new object[] {"Importance", message.Headers.Importance});
 			rows.Add(new object[] {"Content-Transfer-Encoding", message.Headers.ContentTransferEncoding});
 			foreach (RfcMailAddress cc in message.Headers.Cc) rows.Add(new object[] {"Cc", cc});
