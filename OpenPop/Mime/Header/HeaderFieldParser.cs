@@ -110,6 +110,11 @@ namespace OpenPop.Mime.Header
 					case "":
 						// This is the MediaType - it has no key since it is the first one mentioned in the
 						// headerValue and has no = in it.
+
+						// Check for illegal content-type
+						if (value.ToUpperInvariant().Equals("TEXT"))
+							value = "text/plain";
+
 						contentType.MediaType = value;
 						break;
 
