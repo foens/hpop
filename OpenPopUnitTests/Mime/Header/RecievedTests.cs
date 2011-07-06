@@ -157,8 +157,8 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("esmtp (Exim 4.76) (envelope-from <thefeds@mail.dk>)", received.Names["with"]);
 			Assert.AreEqual("1Qcvg8-0004Kr-17", received.Names["id"]);
 			Assert.AreEqual("hpop-users@lists.sourceforge.net", received.Names["for"]);
+			Assert.AreEqual(5, received.Names.Keys.Count);
 			Assert.AreEqual(new DateTime(2011, 7, 2, 8, 35, 52, DateTimeKind.Utc), received.Date);
-			Assert.AreEqual(input, received.Raw);
 		}
 
 		[Test]
@@ -176,8 +176,8 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("smtp.nfit.au.dk ([10.19.9.11])", received.Names["from"]);
 			Assert.AreEqual("mbe1i (Cyrus v2.3.16-Invoca-RPM-2.3.16-3)", received.Names["by"]);
 			Assert.AreEqual("LMTPA", received.Names["with"]);
+			Assert.AreEqual(3, received.Names.Keys.Count);
 			Assert.AreEqual(new DateTime(2011, 7, 5, 9, 58, 11, DateTimeKind.Utc), received.Date);
-			Assert.AreEqual(input, received.Raw);
 		}
 
 		[Test]
@@ -197,8 +197,8 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("ns2.au.dk (8.13.7+Sun/8.12.5)", received.Names["by"]);
 			Assert.AreEqual("ESMTP", received.Names["with"]);
 			Assert.AreEqual("p659boKa018808", received.Names["id"]);
+			Assert.AreEqual(4, received.Names.Keys.Count);
 			Assert.AreEqual(new DateTime(2011, 7, 5, 9, 38, 04, DateTimeKind.Utc), received.Date);
-			Assert.AreEqual(input, received.Raw);
 		}
 
 		[Test]
@@ -220,8 +220,68 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("ESMTP", received.Names["with"]);
 			Assert.AreEqual("<20110530134858.YAHN18594.fep34.mail.dk@fep29>", received.Names["id"]);
 			Assert.AreEqual("<thefeds@mail.dk>", received.Names["for"]);
+			Assert.AreEqual(5, received.Names.Keys.Count);
 			Assert.AreEqual(new DateTime(2011, 5, 30, 13, 48, 58, DateTimeKind.Utc), received.Date);
+		}
+
+		[Test]
+		public void TestFullReceivedLineExessiveWhitespace()
+		{
+			const string input =
+				"from fep26 ([80.160.76.230]) by fep34.mail.dk          (InterMail vM.8.01.04.07 201-2260-137-119-20110503) with ESMTP          id <20110706105008.PZHJ18594.fep34.mail.dk@fep26>          for <thefeds@mail.dk>; Wed, 6 Jul 2011 12:50:08 +0200";
+
+			Received received = new Received(input);
+
 			Assert.AreEqual(input, received.Raw);
+			Assert.AreEqual("fep26 ([80.160.76.230])", received.Names["from"]);
+			Assert.AreEqual("fep34.mail.dk (InterMail vM.8.01.04.07 201-2260-137-119-20110503)", received.Names["by"]);
+			Assert.AreEqual("ESMTP", received.Names["with"]);
+			Assert.AreEqual("<20110706105008.PZHJ18594.fep34.mail.dk@fep26>", received.Names["id"]);
+			Assert.AreEqual("<thefeds@mail.dk>", received.Names["for"]);
+			Assert.AreEqual(5, received.Names.Keys.Count);
+			Assert.AreEqual(new DateTime(2011, 7, 6, 10, 50, 08, DateTimeKind.Utc), received.Date);
+		}
+
+		[Test]
+		public void TestFullReceivedLineWithManyComments()
+		{
+			const string input =
+				"from [189.7.13.40] (helo=AlexandrePC) " +
+				"by insvr1018.insite.com.br " +
+				"with esmtpsa (TLSv1:AES256-SHA:256) (Exim 4.69) (envelope-from <alexandre@vetorjoinville.com.br>) " +
+				"id 1QIUsX-0007Ki-6q " +
+				"for hpop-users@lists.sourceforge.net; " +
+				"Mon, 30 May 2011 15:48:58 +0200";
+
+			Received received = new Received(input);
+
+			Assert.AreEqual(input, received.Raw);
+			Assert.AreEqual("[189.7.13.40] (helo=AlexandrePC)", received.Names["from"]);
+			Assert.AreEqual("insvr1018.insite.com.br", received.Names["by"]);
+			Assert.AreEqual("esmtpsa (TLSv1:AES256-SHA:256) (Exim 4.69) (envelope-from <alexandre@vetorjoinville.com.br>)", received.Names["with"]);
+			Assert.AreEqual("1QIUsX-0007Ki-6q", received.Names["id"]);
+			Assert.AreEqual("hpop-users@lists.sourceforge.net", received.Names["for"]);
+			Assert.AreEqual(5, received.Names.Keys.Count);
+			Assert.AreEqual(new DateTime(2011, 5, 30, 13, 48, 58, DateTimeKind.Utc), received.Date);
+		}
+
+		[Test]
+		public void TestFullReceivedLineWithStartingComment()
+		{
+			const string input =
+				"(from apache@localhost) " + 
+				"by ip6.nabto.com (8.13.8/8.13.8/Submit) " + 
+				"id o937M53u009287; " +
+				"Sun, 3 Oct 2010 09:22:05 +0200";
+
+			Received received = new Received(input);
+
+			Assert.AreEqual(input, received.Raw);
+			Assert.IsFalse(received.Names.ContainsKey("from"));
+			Assert.AreEqual("ip6.nabto.com (8.13.8/8.13.8/Submit)", received.Names["by"]);
+			Assert.AreEqual("o937M53u009287", received.Names["id"]);
+			Assert.AreEqual(2, received.Names.Keys.Count);
+			Assert.AreEqual(new DateTime(2010, 10, 3, 7, 22, 05, DateTimeKind.Utc), received.Date);
 		}
 	}
 }

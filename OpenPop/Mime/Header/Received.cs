@@ -69,22 +69,21 @@ namespace OpenPop.Mime.Header
 			// Remove the date part from the full headerValue
 			string headerValueWithoutDate = headerValue.Substring(0, headerValue.LastIndexOf(';'));
 
+			// Reduce any whitespace character to one space only
+			headerValueWithoutDate = Regex.Replace(headerValueWithoutDate, @"\s+", " ");
+
 			// The regex below should capture the following:
 			// The name consists of non-whitespace characters followed by a whitespace and then the value follows.
 			// There are multiple cases for the value part:
 			//   1: Value is just some characters not including any whitespace
-			//   2: Value is some characters, a whitespace followed by a
-			//      parenthesized value which can contain whitespaces
-			//   3: Value is some characters, a whitespace followed by to parenthesized values
-			//      which can contain whitespaces and is delimited by whitespace.
-			//      This case is believed to be illigal according to the RFC's, but nonetheless
-			//      has been spotted in the wild.
+			//   2: Value is some characters, a whitespace followed by an unlimited number of
+			//      parenthesized values which can contain whitespaces, each delimited by whitespace
 			//
 			// Cheat sheet for regex:
 			// \s means every whitespace character
 			// [^\s] means every character except whitespace characters
 			// +? is a non-greedy equivalent of +
-			const string pattern = @"(?<name>[^\s]+)\s(?<value>[^\s]+(\s\(.+?\)(\s\(.+?\))?)?)";
+			const string pattern = @"(?<name>[^\s]+)\s(?<value>[^\s]+(\s\(.+?\))*)";
 
 			// Find each match in the string
 			MatchCollection matches = Regex.Matches(headerValueWithoutDate, pattern);
@@ -93,6 +92,15 @@ namespace OpenPop.Mime.Header
 				// Add the name and value part found in the matched result to the dictionary
 				string name = match.Groups["name"].Value;
 				string value = match.Groups["value"].Value;
+
+				// Check if the name is really a comment.
+				// In this case, the first entry in the header value
+				// is a comment
+				if (name.StartsWith("("))
+				{
+					continue;
+				}
+
 				dictionary.Add(name, value);
 			}
 
