@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -52,6 +53,35 @@ namespace OpenPopExamples
 				return allMessages;
 			}
         }
+
+		/// <summary>
+		/// Example showing:
+		///  - how to delete fetch an emails headers only
+		///  - how to delete a message from the server
+		/// </summary>
+		/// <param name="client">A connected and authenticated Pop3Client from which to delete a message</param>
+		/// <param name="messageId">A message ID of a message on the POP3 server. Is located in <see cref="MessageHeader.MessageId"/></param>
+		/// <returns><see langword="true"/> if message was deleted, <see langword="false"/> otherwise</returns>
+		public bool DeleteMessageByMessageId(Pop3Client client, string messageId)
+		{
+			// Get the number of messages on the POP3 server
+			int messageCount = client.GetMessageCount();
+
+			// Run trough each of these messages and download the headers
+			for (int messageItem = messageCount; messageItem > 0; messageItem--)
+			{
+				// If the Message ID of the current message is the same as the parameter given, delete that message
+				if (client.GetMessageHeaders(messageItem).MessageId == messageId)
+				{
+					// Delete
+					client.DeleteMessage(messageItem);
+					return true;
+				}
+			}
+
+			// We did not find any message with the given messageId, report this back
+			return false;
+		}
 
 		/// <summary>
 		/// Example showing:
