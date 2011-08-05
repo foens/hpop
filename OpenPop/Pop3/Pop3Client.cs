@@ -263,7 +263,10 @@ namespace OpenPop.Pop3
 
 		#region Authentication methods
 		/// <summary>
-		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>.
+		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>.<br/>
+		/// If this authentication fails but you are sure that the username and password is correct, it might
+		/// be that that the POP3 server is wrongly telling the client it supports <see cref="AuthenticationMethod.Apop"/>.
+		/// You should try using <see cref="Authenticate(string, string, AuthenticationMethod)"/> while passing <see cref="AuthenticationMethod.UsernameAndPassword"/> to the method.
 		/// </summary>
 		/// <param name="username">The username</param>
 		/// <param name="password">The user password</param>
