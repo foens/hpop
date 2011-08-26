@@ -51,8 +51,6 @@ namespace OpenPop.Mime.Decode
 			if(encodedWords == null)
 				throw new ArgumentNullException("encodedWords");
 
-			string decodedWords = encodedWords;
-
 			// Notice that RFC2231 redefines the BNF to
 			// encoded-word := "=?" charset ["*" language] "?" encoded-text "?="
 			// but no usage of this BNF have been spotted yet. It is here to
@@ -61,13 +59,25 @@ namespace OpenPop.Mime.Decode
 			// This is the regex that should fit the BNF
 			// RFC Says that NO WHITESPACE is allowed in this encoding, but there are examples
 			// where whitespace is there, and therefore this regex allows for such.
-			const string strRegEx = @"\=\?(?<Charset>\S+?)\?(?<Encoding>\w)\?(?<Content>.+?)\?\=";
+			const string encodedWordRegex = @"\=\?(?<Charset>\S+?)\?(?<Encoding>\w)\?(?<Content>.+?)\?\=";
 			// \w	Matches any word character including underscore. Equivalent to "[A-Za-z0-9_]".
 			// \S	Matches any nonwhite space character. Equivalent to "[^ \f\n\r\t\v]".
 			// +?   non-gready equivalent to +
 			// (?<NAME>REGEX) is a named group with name NAME and regular expression REGEX
 
-			MatchCollection matches = Regex.Matches(encodedWords, strRegEx);
+			// Any amount of linear-space-white between 'encoded-word's,
+            // even if it includes a CRLF followed by one or more SPACEs,
+            // is ignored for the purposes of display.
+            // http://tools.ietf.org/html/rfc2047#page-12
+			// Define a regular expression that captures two encoded words with some whitespace between them
+			const string replaceRegex = @"(?<first>" + encodedWordRegex + @")\s+(?<second>" + encodedWordRegex + ")";
+
+			// Then, find an occourance of such an expression, but remove the whitespace inbetween when found
+			encodedWords = Regex.Replace(encodedWords, replaceRegex, "${first}${second}");
+
+			string decodedWords = encodedWords;
+
+			MatchCollection matches = Regex.Matches(encodedWords, encodedWordRegex);
 			foreach (Match match in matches)
 			{
 				// If this match was not a success, we should not use it

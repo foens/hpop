@@ -46,5 +46,53 @@ namespace OpenPopUnitTests.Mime.Decode
 			string result = EncodedWord.Decode(input);
 			Assert.AreEqual("Fwd: Dviračiai vasarą vagiami dažniau, bet draust", result);
 		}
+
+		/// <summary>
+		/// See http://tools.ietf.org/html/rfc2047#page-12
+		/// </summary>
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnored()
+		{
+			const string input = "(=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(ab)", result);
+		}
+
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnored2()
+		{
+			const string input = "(=?ISO-8859-1?Q?a?=  =?ISO-8859-1?Q?b?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(ab)", result);
+		}
+
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnored3()
+		{
+			const string input = "(=?ISO-8859-1?Q?a?=        \n  \t    =?ISO-8859-1?Q?b?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(ab)", result);
+		}
+
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnored4()
+		{
+			const string input = "(=?ISO-8859-1?Q?a?= =?ISO-8859-2?Q?_b?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(a b)", result);
+		}
+
+		[Test]
+		public void TestOnlyWhiteSpaceBetweenEncodingsAreIgnored()
+		{
+			const string input = "(=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?=) (=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(ab) (ab)", result);
+		}
 	}
 }
