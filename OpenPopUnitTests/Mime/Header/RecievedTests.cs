@@ -283,5 +283,23 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(2, received.Names.Keys.Count);
 			Assert.AreEqual(new DateTime(2010, 10, 3, 7, 22, 05, DateTimeKind.Utc), received.Date);
 		}
+
+		[Test]
+		public void TestNoDate()
+		{
+			const string input =
+				"from 178.88.30.104 " +
+				"by rms-us011.v300.gmx.net " +
+				"with HTTP";
+
+			Received received = new Received(input);
+
+			Assert.AreEqual(input, received.Raw);
+			Assert.AreEqual("178.88.30.104", received.Names["from"]);
+			Assert.AreEqual("rms-us011.v300.gmx.net", received.Names["by"]);
+			Assert.AreEqual("HTTP", received.Names["with"]);
+			Assert.AreEqual(3, received.Names.Keys.Count);
+			Assert.AreEqual(DateTime.MinValue, received.Date);
+		}
 	}
 }

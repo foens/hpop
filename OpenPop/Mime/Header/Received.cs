@@ -50,11 +50,21 @@ namespace OpenPop.Mime.Header
 			if (headerValue == null)
 				throw new ArgumentNullException("headerValue");
 
-			string datePart = headerValue.Substring(headerValue.LastIndexOf(';') + 1);
-			
-			Date = Rfc2822DateTime.StringToDate(datePart);
-			Names = ParseDictionary(headerValue);
+			// Remember the raw input if someone whishes to use it
 			Raw = headerValue;
+
+			// Default Date value
+			Date = DateTime.MinValue;
+
+			// The date part is the last part of the string, and is preceeded by a semicolon
+			// Some emails forgets to specify the date, therefore we need to check if it is there
+			if(headerValue.Contains(";"))
+			{
+				string datePart = headerValue.Substring(headerValue.LastIndexOf(";") + 1);
+				Date = Rfc2822DateTime.StringToDate(datePart);
+			}
+
+			Names = ParseDictionary(headerValue);	
 		}
 
 		/// <summary>
@@ -66,8 +76,12 @@ namespace OpenPop.Mime.Header
 		{
 			Dictionary<string, string> dictionary = new Dictionary<string, string>();
 
-			// Remove the date part from the full headerValue
-			string headerValueWithoutDate = headerValue.Substring(0, headerValue.LastIndexOf(';'));
+			// Remove the date part from the full headerValue if it is present
+			string headerValueWithoutDate = headerValue;
+			if (headerValue.Contains(";"))
+			{
+				headerValueWithoutDate = headerValue.Substring(0, headerValue.LastIndexOf(";"));
+			}
 
 			// Reduce any whitespace character to one space only
 			headerValueWithoutDate = Regex.Replace(headerValueWithoutDate, @"\s+", " ");
