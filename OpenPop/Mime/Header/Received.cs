@@ -18,6 +18,7 @@ namespace OpenPop.Mime.Header
 	{
 		/// <summary>
 		/// The date of this received line.
+		/// Is <see cref="DateTime.MinValue"/> if not present in the received header line.
 		/// </summary>
 		public DateTime Date { get; private set; }
 
