@@ -80,6 +80,16 @@ namespace OpenPop.Mime.Decode
 			// \s = matches whitespace
 			toDecode = Regex.Replace(toDecode, "=\\s*\"(?<value>[^\"]*)\"\\s", "=\"${value}\"; ");
 
+			// Normalize 
+			// Since the above only works for parameters inside quotes, we need to normalize
+			// the special case with the first parameter.
+			// Example:
+			// attachment filename="foo"
+			// is normalized to
+			// attachment; filename="foo"
+			// ^ = matches start of line (when not inside square bracets [])
+			toDecode = Regex.Replace(toDecode, @"^(?<first>[^;\s]+)\s(?<second>[^;\s]+)", "${first}; ${second}");
+
 			// Split by semicolon, but only if not inside quotes
 			List<string> splitted = Utility.SplitStringWithCharNotInsideQuotes(toDecode.Trim(), ';');
 

@@ -332,6 +332,19 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreNotEqual("\"foobar\"", contentDisposition.Parameters["x-some-special-parameter-with-quotes"]);
 			Assert.IsFalse(contentDisposition.Inline);
 		}
+
+		[Test]
+		public void TestMissingSemicolonAfterAttachment()
+		{
+			// Notice that there should have been a semicolon imidiatly after "attachment"
+			const string contentDispositionString =
+				"attachment filename=\"Green-Eco-Products.jpg\"";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual("Green-Eco-Products.jpg", contentDisposition.Parameters["filename"]);
+			Assert.IsFalse(contentDisposition.Inline);
+		}
 		#endregion
 
 		#region Content-Type tests
