@@ -301,5 +301,57 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(3, received.Names.Keys.Count);
 			Assert.AreEqual(DateTime.MinValue, received.Date);
 		}
+
+		[Test]
+		public void TestDoubleWith()
+		{
+			const string input =
+				"from ([153.2.81.78])\t" +
+				"by magma11.ups.com " +
+				"with ESMTP " +
+				"with TLS " +
+				"id 6N259K1.118711799;\t" +
+				"Sat, 13 Aug 2011 03:49:33 -0400";
+
+			Received received = null;
+			Assert.DoesNotThrow(delegate { received = new Received(input); });
+
+			Assert.NotNull(received);
+
+			Assert.AreEqual(input, received.Raw);
+			Assert.AreEqual("([153.2.81.78])", received.Names["from"]);
+			Assert.AreEqual("magma11.ups.com", received.Names["by"]);
+			Assert.AreEqual("ESMTP", received.Names["with"]);
+			Assert.AreEqual("6N259K1.118711799", received.Names["id"]);
+			Assert.AreEqual(4, received.Names.Keys.Count);
+			Assert.AreEqual(new DateTime(2011, 8, 13, 7, 49, 33, DateTimeKind.Utc), received.Date);
+		}
+
+		[Test]
+		public void TestDoubleBy()
+		{
+			const string input =
+				"from x.x.x.x ([x.x.x.x]) " +
+				"by abc.def.com " +
+				"with emfmta (version 4.8.3.54) " +
+				"by TLS " +
+				"id 123456789 " +
+				"for fred@bloggs.com;123456789abcdef1; " +
+				"Mon, 12 Sep 2011 15:39:23 +0100";
+
+			Received received = null;
+			Assert.DoesNotThrow(delegate { received = new Received(input); });
+
+			Assert.NotNull(received);
+
+			Assert.AreEqual(input, received.Raw);
+			Assert.AreEqual("x.x.x.x ([x.x.x.x])", received.Names["from"]);
+			Assert.AreEqual("abc.def.com", received.Names["by"]);
+			Assert.AreEqual("emfmta (version 4.8.3.54)", received.Names["with"]);
+			Assert.AreEqual("123456789", received.Names["id"]);
+			Assert.AreEqual("fred@bloggs.com;123456789abcdef1", received.Names["for"]);
+			Assert.AreEqual(5, received.Names.Keys.Count);
+			Assert.AreEqual(new DateTime(2011, 9, 12, 14, 39, 23, DateTimeKind.Utc), received.Date);
+		}
 	}
 }

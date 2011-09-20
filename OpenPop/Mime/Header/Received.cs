@@ -25,6 +25,8 @@ namespace OpenPop.Mime.Header
 		/// <summary>
 		/// A dictionary that contains the names and values of the
 		/// received header line.
+		/// If the received header is invalid and contained one name
+		/// multiple times, the first one is used and the rest is ignored.
 		/// </summary>
 		/// <example>
 		/// If the header lines looks like:
@@ -116,7 +118,10 @@ namespace OpenPop.Mime.Header
 					continue;
 				}
 
-				dictionary.Add(name, value);
+				// Only add the first name pair
+				// All subsequent pairs are ignored, as they are invalid anyway
+				if(!dictionary.ContainsKey(name))
+					dictionary.Add(name, value);
 			}
 
 			return dictionary;
