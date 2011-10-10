@@ -345,6 +345,38 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("Green-Eco-Products.jpg", contentDisposition.Parameters["filename"]);
 			Assert.IsFalse(contentDisposition.Inline);
 		}
+
+		[Test]
+		public void TestMissingLanguageCodeInEncodedFilename()
+		{
+			// Notice that this header is supposed to be a continuation header, but it has been wrongly understood and
+			// therefore someone has specified it is a encoding header, but there is no encoding in the string.
+			// Check that this can be decoded correctly anyway
+			const string contentDispositionString =
+				"attachment;\r\n filename*=\"=?UTF-8?Q?This_is_an_attachment_with_long?= =?UTF-8?Q?_name_and_chinese_character_=E4=B8=AD=E6=96=87=2Etxt?=\";\r\n size=14";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.IsFalse(contentDisposition.Inline);
+			Assert.AreEqual(14, contentDisposition.Size);
+			Assert.AreEqual("This is an attachment with long name and chinese character 中文.txt", contentDisposition.Parameters["filename"]);
+		}
+
+		[Test]
+		public void TestMissingLanguageCodeInEncodedFilenameWithContinuation()
+		{
+			// Notice that this header is supposed to be a continuation header, but it has been wrongly understood and
+			// therefore someone has specified it is a encoding header, but there is no encoding in the string.
+			// Check that this can be decoded correctly anyway
+			const string contentDispositionString =
+				"attachment;\r\n filename*0*=\"=?UTF-8?Q?This_is_an_attachment_with_long?=\" filename*1*=\"=?UTF-8?Q?_name_and_chinese_character_=E4=B8=AD=E6=96=87=2Etxt?=\";\r\n size=14";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.IsFalse(contentDisposition.Inline);
+			Assert.AreEqual(14, contentDisposition.Size);
+			Assert.AreEqual("This is an attachment with long name and chinese character 中文.txt", contentDisposition.Parameters["filename"]);
+		}
 		#endregion
 
 		#region Content-Type tests

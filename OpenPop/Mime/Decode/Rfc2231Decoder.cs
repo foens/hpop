@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using OpenPop.Common.Logging;
 
 namespace OpenPop.Mime.Decode
 {
@@ -68,8 +69,12 @@ namespace OpenPop.Mime.Decode
 		/// </summary>
 		/// <param name="toDecode">The string to decode.</param>
 		/// <returns>A list of decoded key value pairs.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
 		public static List<KeyValuePair<string, string>> Decode(string toDecode)
 		{
+			if(toDecode == null)
+				throw new ArgumentNullException("toDecode");
+
 			// Normalize the input to take account for missing semicolons after parameters.
 			// Example
 			// text/plain; charset=\"iso-8859-1\" name=\"somefile.txt\" or
@@ -152,6 +157,8 @@ namespace OpenPop.Mime.Decode
 						// It is encoded.
 						
 						// Fetch out the encoding for later use and decode the value
+						// If the value was not encoded as the email specified
+						// encoding will be set to null. This will be used later.
 						value = DecodeSingleValue(value, out encoding);
 
 						// Find the right key to use to store the full value
@@ -194,10 +201,15 @@ namespace OpenPop.Mime.Decode
 							// Therefore the encoding will only be used if and only if the
 							// first part was encoded, in which case we have remembered the encoding used
 
-							// This value part of the continuation is encoded
-							// the encoding is not given in the current value,
-							// but was given in the first continuation, which we remembered for use here
-							valueJKey = DecodeSingleValue(valueJKey, encoding);
+							// Sometimes an email creator says that a string was encoded, but it really
+							// `was not. This is to catch that problem.
+							if (encoding != null)
+							{
+								// This value part of the continuation is encoded
+								// the encoding is not given in the current value,
+								// but was given in the first continuation, which we remembered for use here
+								valueJKey = DecodeSingleValue(valueJKey, encoding);
+							}
 							builder.Append(valueJKey);
 
 							// Remember to increment i, as we have now treated one more KeyValuePair
@@ -244,13 +256,34 @@ namespace OpenPop.Mime.Decode
 		/// <summary>
 		/// This will decode a single value of the form: <c>ISO-8859-1'en-us'%3D%3DIamHere</c><br/>
 		/// Which is basically a <see cref="EncodedWord"/> form just using % instead of =<br/>
-		/// Notice that 'en-us' part is not used for anything.
+		/// Notice that 'en-us' part is not used for anything.<br/>
+		/// <br/>
+		/// If the single value given is not on the correct form, it will be returned without 
+		/// being decoded and <paramref name="encodingUsed"/> will be set to <see langword="null"/>.
 		/// </summary>
-		/// <param name="encodingUsed">The encoding used to decode with - it is given back for later use</param>
+		/// <param name="encodingUsed">
+		/// The encoding used to decode with - it is given back for later use.<br/>
+		/// <see langword="null"/> if input was not in the correct form.
+		/// </param>
 		/// <param name="toDecode">The value to decode</param>
-		/// <returns>The decoded value that corresponds to <paramref name="toDecode"/></returns>
+		/// <returns>
+		/// The decoded value that corresponds to <paramref name="toDecode"/> or if
+		/// <paramref name="toDecode"/> is not on the correct form, it will be non-decoded.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="toDecode"/> is <see langword="null"/></exception>
 		private static string DecodeSingleValue(string toDecode, out string encodingUsed)
 		{
+			if(toDecode == null)
+				throw new ArgumentNullException("toDecode");
+
+			// Check if input has a part describing the encoding
+			if (toDecode.IndexOf('\'') == -1)
+			{
+				// The input was not encoded (at least not valid) and it is returned as is
+				DefaultLogger.Log.LogDebug("Rfc2231Decoder: Someone asked me to decode a string which was not encoded - returning raw string. Input: " + toDecode);
+				encodingUsed = null;
+				return toDecode;
+			}
 			encodingUsed = toDecode.Substring(0, toDecode.IndexOf('\''));
 			toDecode = toDecode.Substring(toDecode.LastIndexOf('\'') + 1);
 			return DecodeSingleValue(toDecode, encodingUsed);
@@ -263,8 +296,16 @@ namespace OpenPop.Mime.Decode
 		/// <param name="valueToDecode">The value to decode</param>
 		/// <param name="encoding">The encoding used to decode with</param>
 		/// <returns>The decoded value that corresponds to <paramref name="valueToDecode"/></returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="valueToDecode"/> is <see langword="null"/></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="encoding"/> is <see langword="null"/></exception>
 		private static string DecodeSingleValue(string valueToDecode, string encoding)
 		{
+			if(valueToDecode == null)
+				throw new ArgumentNullException("valueToDecode");
+
+			if(encoding == null)
+				throw new ArgumentNullException("encoding");
+
 			// The encoding used is the same as QuotedPrintable, we only
 			// need to change % to =
 			// And otherwise make it look like the correct EncodedWord encoding
