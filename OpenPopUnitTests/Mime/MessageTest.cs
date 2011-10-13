@@ -277,7 +277,8 @@ namespace OpenPopUnitTests.Mime
 				"\r\n" +
 				"Isn\'t it\r\n" +
 				"<bigger><bigger>cool?</bigger></bigger>\r\n" +
-				"--unique-boundary-1\r\n" + "Content-Type: message/rfc822\r\n" + 
+				"--unique-boundary-1\r\n" +
+				"Content-Type: message/rfc822\r\n" + 
 				"\r\n" +
 				"From: Test <test@test.com>\r\n" +
 				"To: Test <test@test.com>\r\n" +
