@@ -83,6 +83,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mime\Decode\EncodingFinder.cs" />
     <Compile Include="Mime\Decode\Rfc2231Decoder.cs" />
     <Compile Include="Mime\Decode\Rfc2822DateTime.cs" />
     <Compile Include="Mime\Decode\Utility.cs" />

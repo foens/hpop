@@ -90,7 +90,7 @@ namespace OpenPop.Mime.Decode
 				string charset = match.Groups["Charset"].Value;
 
 				// Get the encoding which corrosponds to the character set
-				Encoding charsetEncoding = HeaderFieldParser.ParseCharsetToEncoding(charset);
+				Encoding charsetEncoding = EncodingFinder.FindEncoding(charset);
 
 				// Store decoded text here when done
 				string decodedText;

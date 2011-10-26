@@ -768,29 +768,5 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(defaultEncoding, encoding);
 		}
 		#endregion
-
-		#region Content-Type CharacterSet tests
-		[Test]
-		public void TestUTF8()
-		{
-			const string inputCharacterSet = "utf-8";
-
-			Encoding expected = Encoding.UTF8;
-			Encoding actual = HeaderFieldParser.ParseCharsetToEncoding(inputCharacterSet);
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestUTF8NoHyphenDecoding()
-		{
-			const string inputCharacterSet = "utf8";
-
-			Encoding expected = Encoding.UTF8;
-			Encoding actual = HeaderFieldParser.ParseCharsetToEncoding(inputCharacterSet);
-
-			Assert.AreEqual(expected, actual);
-		}
-		#endregion
 	}
 }

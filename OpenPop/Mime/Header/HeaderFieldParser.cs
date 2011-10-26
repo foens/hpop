@@ -227,39 +227,6 @@ namespace OpenPop.Mime.Header
 		}
 
 		/// <summary>
-		/// Parse a character set into an encoding.
-		/// </summary>
-		/// <param name="characterSet">The character set to parse</param>
-		/// <returns>An encoding which corresponds to the character set</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="characterSet"/> is <see langword="null"/></exception>
-		public static Encoding ParseCharsetToEncoding(string characterSet)
-		{
-			if (characterSet == null)
-				throw new ArgumentNullException("characterSet");
-
-			string charSetUpper = characterSet.ToUpperInvariant();
-			if (charSetUpper.Contains("WINDOWS") || charSetUpper.Contains("CP"))
-			{
-				// It seems the character set contains an codepage value, which we should use to parse the encoding
-				charSetUpper = charSetUpper.Replace("CP", ""); // Remove cp
-				charSetUpper = charSetUpper.Replace("WINDOWS", ""); // Remove windows
-				charSetUpper = charSetUpper.Replace("-", ""); // Remove - which could be used as cp-1554
-
-				// Now we hope the only thing left in the characterSet is numbers.
-				int codepageNumber = int.Parse(charSetUpper, CultureInfo.InvariantCulture);
-
-				return Encoding.GetEncoding(codepageNumber);
-			}
-
-			// Some emails incorrectly specify the encoding to be utf8 - but it has to be utf-8
-			if (characterSet.Equals("utf8", StringComparison.InvariantCultureIgnoreCase))
-				characterSet = "utf-8";
-
-			// It seems there is no codepage value in the characterSet. It must be a named encoding
-			return Encoding.GetEncoding(characterSet);
-		}
-
-		/// <summary>
 		/// Parses an ID like Message-Id and Content-Id.<br/>
 		/// Example:<br/>
 		/// <c>&lt;test@test.com&gt;</c><br/>

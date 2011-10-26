@@ -241,7 +241,7 @@ namespace OpenPop.Mime
 			// If the character set was specified, find the encoding that the character
 			// set describes, and use that one instead
 			if (!string.IsNullOrEmpty(characterSet))
-				encoding = HeaderFieldParser.ParseCharsetToEncoding(characterSet);
+				encoding = EncodingFinder.FindEncoding(characterSet);
 
 			return encoding;
 		}
