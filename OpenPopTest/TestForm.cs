@@ -158,7 +158,7 @@ namespace OpenPop.TestApplication
 			this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
 			this.panelTop.Location = new System.Drawing.Point(0, 0);
 			this.panelTop.Name = "panelTop";
-			this.panelTop.Size = new System.Drawing.Size(804, 64);
+			this.panelTop.Size = new System.Drawing.Size(865, 64);
 			this.panelTop.TabIndex = 0;
 			// 
 			// useSslCheckBox
@@ -276,7 +276,7 @@ namespace OpenPop.TestApplication
 			this.panelProperties.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.panelProperties.Location = new System.Drawing.Point(0, 260);
 			this.panelProperties.Name = "panelProperties";
-			this.panelProperties.Size = new System.Drawing.Size(804, 184);
+			this.panelProperties.Size = new System.Drawing.Size(865, 184);
 			this.panelProperties.TabIndex = 1;
 			// 
 			// gridHeaders
@@ -290,7 +290,7 @@ namespace OpenPop.TestApplication
 			this.gridHeaders.Name = "gridHeaders";
 			this.gridHeaders.PreferredColumnWidth = 400;
 			this.gridHeaders.ReadOnly = true;
-			this.gridHeaders.Size = new System.Drawing.Size(804, 188);
+			this.gridHeaders.Size = new System.Drawing.Size(865, 188);
 			this.gridHeaders.TabIndex = 3;
 			// 
 			// panelMiddle
@@ -301,7 +301,7 @@ namespace OpenPop.TestApplication
 			this.panelMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panelMiddle.Location = new System.Drawing.Point(0, 64);
 			this.panelMiddle.Name = "panelMiddle";
-			this.panelMiddle.Size = new System.Drawing.Size(804, 196);
+			this.panelMiddle.Size = new System.Drawing.Size(865, 196);
 			this.panelMiddle.TabIndex = 2;
 			// 
 			// panelMessageBody
@@ -312,7 +312,7 @@ namespace OpenPop.TestApplication
 			this.panelMessageBody.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panelMessageBody.Location = new System.Drawing.Point(175, 0);
 			this.panelMessageBody.Name = "panelMessageBody";
-			this.panelMessageBody.Size = new System.Drawing.Size(492, 196);
+			this.panelMessageBody.Size = new System.Drawing.Size(376, 196);
 			this.panelMessageBody.TabIndex = 6;
 			// 
 			// progressBar
@@ -321,7 +321,7 @@ namespace OpenPop.TestApplication
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.progressBar.Location = new System.Drawing.Point(7, 172);
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(476, 12);
+			this.progressBar.Size = new System.Drawing.Size(360, 12);
 			this.progressBar.TabIndex = 10;
 			// 
 			// messageTextBox
@@ -334,7 +334,7 @@ namespace OpenPop.TestApplication
 			this.messageTextBox.Multiline = true;
 			this.messageTextBox.Name = "messageTextBox";
 			this.messageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.messageTextBox.Size = new System.Drawing.Size(476, 143);
+			this.messageTextBox.Size = new System.Drawing.Size(360, 143);
 			this.messageTextBox.TabIndex = 9;
 			// 
 			// labelMessageBody
@@ -352,7 +352,7 @@ namespace OpenPop.TestApplication
 			this.panelMessagesView.Dock = System.Windows.Forms.DockStyle.Left;
 			this.panelMessagesView.Location = new System.Drawing.Point(0, 0);
 			this.panelMessagesView.Name = "panelMessagesView";
-			this.panelMessagesView.Size = new System.Drawing.Size(175, 196);
+			this.panelMessagesView.Size = new System.Drawing.Size(281, 196);
 			this.panelMessagesView.TabIndex = 5;
 			// 
 			// listMessages
@@ -363,7 +363,7 @@ namespace OpenPop.TestApplication
 			this.listMessages.ContextMenu = this.contextMenuMessages;
 			this.listMessages.Location = new System.Drawing.Point(8, 24);
 			this.listMessages.Name = "listMessages";
-			this.listMessages.Size = new System.Drawing.Size(160, 160);
+			this.listMessages.Size = new System.Drawing.Size(266, 160);
 			this.listMessages.TabIndex = 8;
 			this.listMessages.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListMessagesMessageSelected);
 			// 
@@ -391,7 +391,7 @@ namespace OpenPop.TestApplication
 			this.labelMessageNumber.Name = "labelMessageNumber";
 			this.labelMessageNumber.Size = new System.Drawing.Size(136, 16);
 			this.labelMessageNumber.TabIndex = 1;
-			this.labelMessageNumber.Text = "Message Number";
+			this.labelMessageNumber.Text = "Messages";
 			// 
 			// attachmentPanel
 			// 
@@ -400,7 +400,7 @@ namespace OpenPop.TestApplication
 			this.attachmentPanel.Dock = System.Windows.Forms.DockStyle.Right;
 			this.attachmentPanel.Location = new System.Drawing.Point(667, 0);
 			this.attachmentPanel.Name = "attachmentPanel";
-			this.attachmentPanel.Size = new System.Drawing.Size(137, 196);
+			this.attachmentPanel.Size = new System.Drawing.Size(208, 196);
 			this.attachmentPanel.TabIndex = 4;
 			this.attachmentPanel.Visible = false;
 			// 
@@ -413,7 +413,7 @@ namespace OpenPop.TestApplication
 			this.listAttachments.Name = "listAttachments";
 			this.listAttachments.ShowLines = false;
 			this.listAttachments.ShowRootLines = false;
-			this.listAttachments.Size = new System.Drawing.Size(121, 160);
+			this.listAttachments.Size = new System.Drawing.Size(192, 160);
 			this.listAttachments.TabIndex = 10;
 			this.listAttachments.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ListAttachmentsAttachmentSelected);
 			// 
@@ -432,7 +432,7 @@ namespace OpenPop.TestApplication
 			// TestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(804, 444);
+			this.ClientSize = new System.Drawing.Size(865, 444);
 			this.Controls.Add(this.panelMiddle);
 			this.Controls.Add(this.panelProperties);
 			this.Controls.Add(this.panelTop);
