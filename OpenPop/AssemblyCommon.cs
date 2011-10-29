@@ -4,7 +4,7 @@
 // sure that commen assembly information is shared correctly
 
 // Last part of the version number is the SVN version
-[assembly: AssemblyVersion("2.0.3.358")]
+[assembly: AssemblyVersion("2.0.4.369")]
 
 // This is the configuration when building the assembly
 [assembly: AssemblyConfiguration("Release mode assembly. Built for .NET 2.0")]
