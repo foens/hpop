@@ -47,7 +47,8 @@ namespace OpenPopExamples
 
 				// Messages are numbered in the interval: [1, messageCount]
 				// Ergo: message numbers are 1-based.
-				for(int i = 1; i <= messageCount; i++)
+				// Most servers give the latest message the highest number
+				for (int i = messageCount; i > 0; i--)
 				{
 					allMessages.Add(client.GetMessage(i));
 				}
