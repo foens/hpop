@@ -128,7 +128,7 @@ namespace OpenPop.Mime.Decode
 		/// into the <see cref="EncodingFinder"/>'s internal mapping Dictionary.
 		/// </summary>
 		/// <param name="characterSet">The string that maps to the <paramref name="encoding"/></param>
-		/// <param name="encoding">The <see cref="Encoding"/> that should be mapped from <see cref="characterSet"/></param>
+		/// <param name="encoding">The <see cref="Encoding"/> that should be mapped from <paramref name="characterSet"/></param>
 		/// <exception cref="ArgumentNullException">If <paramref name="characterSet"/> is <see langword="null"/></exception>
 		/// <exception cref="ArgumentNullException">If <paramref name="encoding"/> is <see langword="null"/></exception>
 		public static void AddMapping(string characterSet, Encoding encoding)
