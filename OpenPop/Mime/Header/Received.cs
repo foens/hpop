@@ -6,13 +6,13 @@ using OpenPop.Mime.Decode;
 namespace OpenPop.Mime.Header
 {
 	/// <summary>
-	/// Class that hold information about one "Received:" header line.
-	/// 
-	/// Visit these RFCs for more information:
-	/// <see href="http://tools.ietf.org/html/rfc5321#section-4.4">RFC 5321 section 4.4</see>
-	/// <see href="http://tools.ietf.org/html/rfc4021#section-3.6.7">RFC 4021 section 3.6.7</see>
-	/// <see href="http://tools.ietf.org/html/rfc2822#section-3.6.7">RFC 2822 section 3.6.7</see>
-	/// <see href="http://tools.ietf.org/html/rfc2821#section-4.4">RFC 2821 section 4.4</see>
+	/// Class that hold information about one "Received:" header line.<br/>
+	/// <br/>
+	/// Visit these RFCs for more information:<br/>
+	/// <see href="http://tools.ietf.org/html/rfc5321#section-4.4">RFC 5321 section 4.4</see><br/>
+	/// <see href="http://tools.ietf.org/html/rfc4021#section-3.6.7">RFC 4021 section 3.6.7</see><br/>
+	/// <see href="http://tools.ietf.org/html/rfc2822#section-3.6.7">RFC 2822 section 3.6.7</see><br/>
+	/// <see href="http://tools.ietf.org/html/rfc2821#section-4.4">RFC 2821 section 4.4</see><br/>
 	/// </summary>
 	public class Received
 	{
@@ -24,7 +24,7 @@ namespace OpenPop.Mime.Header
 
 		/// <summary>
 		/// A dictionary that contains the names and values of the
-		/// received header line.
+		/// received header line.<br/>
 		/// If the received header is invalid and contained one name
 		/// multiple times, the first one is used and the rest is ignored.
 		/// </summary>

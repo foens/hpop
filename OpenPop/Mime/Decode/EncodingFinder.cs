@@ -37,7 +37,7 @@ namespace OpenPop.Mime.Decode
 		public delegate Encoding FallbackDecoderDelegate(string characterSet);
 
 		/// <summary>
-		/// Last resort decoder. <seealso cref="FallbackDecoderDelegate"/>.
+		/// Last resort decoder.
 		/// </summary>
 		public static FallbackDecoderDelegate FallbackDecoder { private get; set; }
 
