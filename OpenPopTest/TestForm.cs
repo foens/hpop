@@ -722,7 +722,7 @@ namespace OpenPop.TestApplication
 				// Lets try to save to the file
 				try
 				{
-					attachment.SaveToFile(file);
+					attachment.Save(file);
 
 					MessageBox.Show(this, "Attachment saved successfully");
 				} catch (Exception e)

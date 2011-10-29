@@ -66,7 +66,6 @@
     <Compile Include="Pop3\POPClientPositiveTests.cs" />
     <Compile Include="Pop3\POPClientUnconnectedTests.cs" />
     <Compile Include="Shared\StreamUtilityTests.cs" />
-    <Compile Include="UnfixedIssuesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenPOP\OpenPop.csproj">

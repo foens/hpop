@@ -35,7 +35,7 @@ namespace OpenPopUnitTests.Mime
 		}
 
 		[Test]
-		public void TestIsTextMessageRFC822()
+		public void TestIsTextMessageRfc822()
 		{
 			const string messagePartContent =
 				"Content-Type: message/rfc822\r\n" +
@@ -119,7 +119,7 @@ namespace OpenPopUnitTests.Mime
 				"Ljk2IDg0Mi4wNF0gL0NvbnRlbnRzIDQgMCBSL0dyb3VwPDwvVHlwZS9Hcm91cC9TL1RyYW5z\r\n" +
 				"cGFyZW5jeS9DUy9EZXZpY2VSR0I+Pi9UYWJzL1MvU3RydWN0UGFyZW50cyAwPj4NCmVuZG9i";
 
-			const string partPDF =
+			const string partPdf =
 				"Content-Type: application/pdf;\r\n" +
 				" name=\"=?ISO-8859-1?Q?=D8nskeliste=2Epdf?=\"\r\n" +
 				"Content-Transfer-Encoding: base64\r\n" +
@@ -127,7 +127,7 @@ namespace OpenPopUnitTests.Mime
 				base64;
 
 			// Base 64 is only in ASCII
-			Message message = new Message(Encoding.ASCII.GetBytes(partPDF));
+			Message message = new Message(Encoding.ASCII.GetBytes(partPdf));
 
 			MessagePart messagePart = message.MessagePart;
 
@@ -141,7 +141,7 @@ namespace OpenPopUnitTests.Mime
 			Assert.AreEqual(correctBytes, messagePart.Body);
 
 			FileInfo testFile = new FileInfo("test_message_save_.testFile");
-			messagePart.SaveToFile(testFile);
+			messagePart.Save(testFile);
 
 			byte[] fileBytes = File.ReadAllBytes(testFile.ToString());
 			testFile.Delete();

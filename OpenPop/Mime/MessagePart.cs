@@ -479,18 +479,35 @@ namespace OpenPop.Mime
 		}
 
 		/// <summary>
-		/// Save this <see cref="MessagePart"/> to a file.<br/>
+		/// Save this <see cref="MessagePart"/>'s contents to a file.<br/>
 		/// There are no methods to reload the file.
 		/// </summary>
 		/// <param name="file">The File location to save the <see cref="MessagePart"/> to. Existent files will be overwritten.</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
-		/// <exception>Other exceptions relevant to file saving might be thrown as well</exception>
-		public void SaveToFile(FileInfo file)
+		/// <exception>Other exceptions relevant to using a <see cref="FileStream"/> might be thrown as well</exception>
+		public void Save(FileInfo file)
 		{
 			if (file == null)
 				throw new ArgumentNullException("file");
 
-			File.WriteAllBytes(file.FullName, Body);
+			using (FileStream stream = new FileStream(file.FullName, FileMode.OpenOrCreate))
+			{
+				Save(stream);
+			}
+		}
+
+		/// <summary>
+		/// Save this <see cref="MessagePart"/>'s contents to a stream.<br/>
+		/// </summary>
+		/// <param name="messageStream">The stream to write to</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="messageStream"/> is <see langword="null"/></exception>
+		/// <exception>Other exceptions relevant to <see cref="Stream.Write"/> might be thrown as well</exception>
+		public void Save(Stream messageStream)
+		{
+			if (messageStream == null)
+				throw new ArgumentNullException("messageStream");
+
+			messageStream.Write(Body, 0, Body.Length);
 		}
 		#endregion
 	}

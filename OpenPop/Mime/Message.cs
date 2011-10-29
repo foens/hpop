@@ -305,20 +305,6 @@ namespace OpenPop.Mime
 		/// <summary>
 		/// Save this <see cref="Message"/> to a file.<br/>
 		/// <br/>
-		/// Can be loaded at a later time using the <see cref="LoadFromFile"/> method.
-		/// </summary>
-		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
-		/// <exception>Other exceptions relevant to file saving might be thrown as well</exception>
-		[Obsolete("Use one of the Save method overrides instead of SaveToFile")]
-		public void SaveToFile(FileInfo file)
-		{
-			Save(file);
-		}
-
-		/// <summary>
-		/// Save this <see cref="Message"/> to a file.<br/>
-		/// <br/>
 		/// Can be loaded at a later time using the <see cref="Load(FileInfo)"/> method.
 		/// </summary>
 		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
@@ -347,20 +333,6 @@ namespace OpenPop.Mime
 				throw new ArgumentNullException("messageStream");
 
 			messageStream.Write(RawMessage, 0, RawMessage.Length);
-		}
-
-		/// <summary>
-		/// Loads a <see cref="Message"/> from a file with an email in it.
-		/// </summary>
-		/// <param name="file">The File location to load the <see cref="Message"/> from. File must be existent.</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
-		/// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
-		/// <exception>Other exceptions relevant to file loading might be thrown as well</exception>
-		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="file"/></returns>
-		[Obsolete("Use one of the Load method overrides instead of LoadFromFile")]
-		public static Message LoadFromFile(FileInfo file)
-		{
-			return Load(file);
 		}
 
 		/// <summary>

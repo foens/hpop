@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using OpenPop.Common.Logging;
 using OpenPop.Mime;
+using OpenPop.Mime.Decode;
 using OpenPop.Mime.Header;
 using OpenPop.Pop3;
 
@@ -14,7 +17,7 @@ namespace OpenPopExamples
 	/// <see cref="OpenPop"/>.NET POP3 library
 	/// </summary>
 	public class Examples
-    {
+	{
 		/// <summary>
 		/// Example showing:
 		///  - how to fetch all messages from a POP3 server
@@ -26,7 +29,7 @@ namespace OpenPopExamples
 		/// <param name="password">Password of the user on the server</param>
 		/// <returns>All Messages on the POP3 server</returns>
 		public static List<Message> FetchAllMessages(string hostname, int port, bool useSsl, string username, string password)
-        {
+		{
 			// The client disconnects from the server when being disposed
 			using(Pop3Client client = new Pop3Client())
 			{
@@ -52,7 +55,7 @@ namespace OpenPopExamples
 				// Now return the fetched messages
 				return allMessages;
 			}
-        }
+		}
 
 		/// <summary>
 		/// Example showing:
@@ -95,7 +98,7 @@ namespace OpenPopExamples
 			if(plainText != null)
 			{
 				// Save the plain text to a file, database or anything you like
-				plainText.SaveToFile(new FileInfo("plainText.txt"));
+				plainText.Save(new FileInfo("plainText.txt"));
 			}
 		}
 
@@ -111,7 +114,7 @@ namespace OpenPopExamples
 			if (html != null)
 			{
 				// Save the plain text to a file, database or anything you like
-				html.SaveToFile(new FileInfo("html.txt"));
+				html.Save(new FileInfo("html.txt"));
 			}
 		}
 
@@ -232,25 +235,25 @@ namespace OpenPopExamples
 			}
 		}
 
-    	/// <summary>
-    	/// Example showing:
-    	///  - how to use UID's (unique ID's) of messages from the POP3 server
-    	///  - how to download messages not seen before
-    	///    (notice that the POP3 protocol cannot see if a message has been read on the server
-    	///     before. Therefore the client need to maintain this state for itself)
-    	/// </summary>
-    	/// <param name="hostname">Hostname of the server. For example: pop3.live.com</param>
-    	/// <param name="port">Host port to connect to. Normally: 110 for plain POP3, 995 for SSL POP3</param>
-    	/// <param name="useSsl">Whether or not to use SSL to connect to server</param>
-    	/// <param name="username">Username of the user on the server</param>
-    	/// <param name="password">Password of the user on the server</param>
-    	/// <param name="seenUids">
-    	/// List of UID's of all messages seen before.
-    	/// New message UID's will be added to the list.
-    	/// Consider using a HashSet if you are using >= 3.5 .NET
-    	/// </param>
-    	/// <returns>A List of new Messages on the server</returns>
-    	public static List<Message> FetchUnseenMessages(string hostname, int port, bool useSsl, string username, string password, List<string> seenUids)
+		/// <summary>
+		/// Example showing:
+		///  - how to use UID's (unique ID's) of messages from the POP3 server
+		///  - how to download messages not seen before
+		///    (notice that the POP3 protocol cannot see if a message has been read on the server
+		///     before. Therefore the client need to maintain this state for itself)
+		/// </summary>
+		/// <param name="hostname">Hostname of the server. For example: pop3.live.com</param>
+		/// <param name="port">Host port to connect to. Normally: 110 for plain POP3, 995 for SSL POP3</param>
+		/// <param name="useSsl">Whether or not to use SSL to connect to server</param>
+		/// <param name="username">Username of the user on the server</param>
+		/// <param name="password">Password of the user on the server</param>
+		/// <param name="seenUids">
+		/// List of UID's of all messages seen before.
+		/// New message UID's will be added to the list.
+		/// Consider using a HashSet if you are using >= 3.5 .NET
+		/// </param>
+		/// <returns>A List of new Messages on the server</returns>
+		public static List<Message> FetchUnseenMessages(string hostname, int port, bool useSsl, string username, string password, List<string> seenUids)
 		{
 			// The client disconnects from the server when being disposed
 			using(Pop3Client client = new Pop3Client())
@@ -295,15 +298,15 @@ namespace OpenPopExamples
 			}
 		}
 
-    	/// <summary>
-    	/// Example showing:
-    	///  - how to set timeouts
-    	///  - how to override the SSL certificate checks with your own implementation
-    	/// </summary>
-    	/// <param name="hostname">Hostname of the server. For example: pop3.live.com</param>
-    	/// <param name="port">Host port to connect to. Normally: 110 for plain POP3, 995 for SSL POP3</param>
-    	/// <param name="timeouts">Read and write timeouts used by the Pop3Client</param>
-    	public static void BypassSslCertificateCheck(string hostname, int port, int timeouts)
+		/// <summary>
+		/// Example showing:
+		///  - how to set timeouts
+		///  - how to override the SSL certificate checks with your own implementation
+		/// </summary>
+		/// <param name="hostname">Hostname of the server. For example: pop3.live.com</param>
+		/// <param name="port">Host port to connect to. Normally: 110 for plain POP3, 995 for SSL POP3</param>
+		/// <param name="timeouts">Read and write timeouts used by the Pop3Client</param>
+		public static void BypassSslCertificateCheck(string hostname, int port, int timeouts)
 		{
 			// The client disconnects from the server when being disposed
 			using (Pop3Client client = new Pop3Client())
@@ -318,12 +321,12 @@ namespace OpenPopExamples
 			}
 		}
 
-    	private static bool certificateValidator(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-    	{
+		private static bool certificateValidator(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+		{
 			// We should check if there are some SSLPolicyErrors, but here we simply say that
 			// the certificate is okay - we trust it.
-    		return true;
-    	}
+			return true;
+		}
 
 		/// <summary>
 		/// Example showing:
@@ -346,9 +349,77 @@ namespace OpenPopExamples
 			// use the message again
 			return loadedMessage;
 		}
-    }
 
-	// Other examples to show, that is in the library
-	// Show how to build a TreeNode representation of the Message hierarchy using the
-	// TreeNodeBuilder class in OpenPopTest
+		/// <summary>
+		/// Example showing:
+		///  - How to change logging
+		///  - How to implement your own logger
+		/// </summary>
+		public static void ChangeLogging()
+		{
+			// All logging is sent trough logger defined at DefaultLogger.Log
+			// The logger can be changed by calling DefaultLogger.SetLog(someLogger)
+
+			// By default all logging is sent to the System.Diagnostics.Trace facilities.
+			// These are not very useful if you are not debugging
+			// Instead, lets send logging to a file:
+			DefaultLogger.SetLog(new FileLogger());
+			FileLogger.LogFile = new FileInfo("MyLoggingFile.log");
+
+			// It is also possible to implement your own logging:
+			DefaultLogger.SetLog(new MyOwnLogger());
+		}
+
+		class MyOwnLogger : ILog
+		{
+			public void LogError(string message)
+			{
+				Console.WriteLine("ERROR!!!: " + message);
+			}
+
+			public void LogDebug(string message)
+			{
+				// Dont want to log debug messages
+			}
+		}
+
+		/// <summary>
+		/// Example showing:
+		///  - How to provide custom Encoding class
+		///  - How to use UTF8 as default Encoding
+		/// </summary>
+		/// <param name="customEncoding">Own Encoding implementation</param>
+		public void InsertCustomEncodings(Encoding customEncoding)
+		{
+			// Lets say some email contains a characterSet of "iso-9999-9" which
+			// is fictional, but is really just UTF-8.
+			// Lets add that mapping to the class responsible for finding
+			// the Encoding from the name of it
+			EncodingFinder.AddMapping("iso-9999-9", Encoding.UTF8);
+
+			// It is also possible to implement your own Encoding if
+			// the framework does not provide what you need
+			EncodingFinder.AddMapping("specialEncoding", customEncoding);
+
+			// Now, if the EncodingFinder is not able to find an encoding, lets
+			// see if we can find one ourselves
+			EncodingFinder.FallbackDecoder = CustomFallbackDecoder;
+		}
+
+		Encoding CustomFallbackDecoder(string characterSet)
+		{
+			// Is it a "foo" encoding?
+			if (characterSet.StartsWith("foo"))
+				return Encoding.ASCII; // then use ASCII
+
+			// If no special encoding could be found, provide UTF8 as default.
+			// You can also return null here, which would tell OpenPop that
+			// no encoding could be found. This will then throw an exception.
+			return Encoding.UTF8;
+		}
+
+		// Other examples to show, that is in the library
+		// Show how to build a TreeNode representation of the Message hierarchy using the
+		// TreeNodeBuilder class in OpenPopTest
+	}
 }
