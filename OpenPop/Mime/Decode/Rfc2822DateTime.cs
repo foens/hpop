@@ -173,11 +173,28 @@ namespace OpenPop.Mime.Decode
 		private static DateTime ExtractDateTime(string dateInput)
 		{
 			// Matches the date and time part of a string
-			// Example: Fri, 21 Nov 1997 09:55:06 -0600
-			// Finds: 21 Nov 1997 09:55:06
+			// Given string example: Fri, 21 Nov 1997 09:55:06 -0600
+			// Needs to find: 21 Nov 1997 09:55:06
+
 			// Seconds does not need to be specified
 			// Even though it is illigal, sometimes hours, minutes or seconds are only specified with one digit
-			Match match = Regex.Match(dateInput, @"\d\d? .+ (\d\d\d\d|\d\d) \d?\d:\d?\d(:\d?\d)?");
+
+			// Year with 2 or 4 digits (1922 or 22)
+			const string year = @"(\d\d\d\d|\d\d)";
+
+			// Time with one or two digits for hour and minute and optinal seconds (06:04:06 or 6:4:6 or 06:04 or 6:4)
+			const string time = @"\d?\d:\d?\d(:\d?\d)?";
+
+			// Correct format is 21 Nov 1997 09:55:06
+			const string correctFormat = @"\d\d? .+ " + year + " " + time;
+
+			// Some uses incorrect format: 2012-1-1 12:30
+			const string incorrectFormat = year + @"-\d?\d-\d?\d " + time;
+
+			// We allow both correct and incorrect format
+			const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")";
+
+			Match match = Regex.Match(dateInput, joinedFormat);
 			if(match.Success)
 			{
                 return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);

@@ -341,5 +341,57 @@ namespace OpenPopUnitTests.Mime.Decode
 			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 00:00:00 -0000"));
 			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 77:77:77 -9999"));
 		}
+
+		[Test]
+		public void TestWrongFormatParses()
+		{
+			// This is a valid date, but in a incorrect format
+			const string inputDate = "1997-11-21 09:55:06 -0600";
+
+			// -0600 we need to add 6 hours when in UTC
+			DateTime expectedOutput = new DateTime(1997, 11, 21, 15, 55, 06, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestWrongFormatParsesNoTime()
+		{
+			// This is a valid date, but in a incorrect format
+			const string inputDate = "1997-11-21 09:55 -0600";
+
+			// -0600 we need to add 6 hours when in UTC
+			DateTime expectedOutput = new DateTime(1997, 11, 21, 15, 55, 00, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestWrongFormatParsesDateWithOneDigit()
+		{
+			// This is a valid date, but in a incorrect format
+			const string inputDate = "1997-1-2 09:55 -0600";
+
+			// -0600 we need to add 6 hours when in UTC
+			DateTime expectedOutput = new DateTime(1997, 1, 2, 15, 55, 00, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void TestWrongFormatParsesTimeWithOneDigit()
+		{
+			// This is a valid date, but in a incorrect format
+			const string inputDate = "1997-11-21 9:5:6 -0600";
+
+			// -0600 we need to add 6 hours when in UTC
+			DateTime expectedOutput = new DateTime(1997, 11, 21, 15, 5, 6, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }
