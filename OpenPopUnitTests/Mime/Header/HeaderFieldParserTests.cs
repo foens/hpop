@@ -377,6 +377,16 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(14, contentDisposition.Size);
 			Assert.AreEqual("This is an attachment with long name and chinese character 中文.txt", contentDisposition.Parameters["filename"]);
 		}
+
+		[Test]
+		public void TestNoQuotesInAttachmentFilenameWithLinebreakAndTab()
+		{
+			const string contentDispositionString = "attachment; filename=\r\n\t\"a.txt\"";
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.IsFalse(contentDisposition.Inline);
+			Assert.AreEqual("a.txt", contentDisposition.Parameters["filename"]);
+		}
 		#endregion
 
 		#region Content-Type tests

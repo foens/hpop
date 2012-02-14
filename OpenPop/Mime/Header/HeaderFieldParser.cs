@@ -170,7 +170,7 @@ namespace OpenPop.Mime.Header
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
 				string key = keyValuePair.Key.ToUpperInvariant().Trim();
-				string value = keyValuePair.Value;
+				string value = Utility.RemoveQuotesIfAny(keyValuePair.Value.Trim());
 				switch (key)
 				{
 					case "":
@@ -184,7 +184,7 @@ namespace OpenPop.Mime.Header
 					case "NAME":
 					case "FILENAME":
 						// The filename might be in qoutes, and it might be encoded-word encoded
-						contentDisposition.FileName = EncodedWord.Decode(Utility.RemoveQuotesIfAny(value));
+						contentDisposition.FileName = EncodedWord.Decode(value);
 						break;
 
 					case "CREATION-DATE":
@@ -194,28 +194,28 @@ namespace OpenPop.Mime.Header
 						// It is the same with ModificationDate and ReadDate.
 						// This is fixed in 4.0 - maybe in 3.0 too.
 						// Therefore we create a new DateTime which have a DateTimeKind set to unspecified
-						DateTime creationDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
+						DateTime creationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
 						contentDisposition.CreationDate = creationDate;
 						break;
 
 					case "MODIFICATION-DATE":
-						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
+						DateTime midificationDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
 						contentDisposition.ModificationDate = midificationDate;
 						break;
 
 					case "READ-DATE":
-						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(Utility.RemoveQuotesIfAny(value)).Ticks);
+						DateTime readDate = new DateTime(Rfc2822DateTime.StringToDate(value).Ticks);
 						contentDisposition.ReadDate = readDate;
 						break;
 
 					case "SIZE":
-						contentDisposition.Size = int.Parse(Utility.RemoveQuotesIfAny(value), CultureInfo.InvariantCulture);
+						contentDisposition.Size = int.Parse(value, CultureInfo.InvariantCulture);
 						break;
 
 					default:
 						if(key.StartsWith("X-"))
 						{
-							contentDisposition.Parameters.Add(key, Utility.RemoveQuotesIfAny(value));
+							contentDisposition.Parameters.Add(key, value);
 							break;
 						}
 
