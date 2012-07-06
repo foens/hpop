@@ -61,7 +61,7 @@ namespace OpenPop.Mime.Decode
 			const string encodedWordRegex = @"\=\?(?<Charset>\S+?)\?(?<Encoding>\w)\?(?<Content>.+?)\?\=";
 			// \w	Matches any word character including underscore. Equivalent to "[A-Za-z0-9_]".
 			// \S	Matches any nonwhite space character. Equivalent to "[^ \f\n\r\t\v]".
-			// +?   non-gready equivalent to +
+			// +?   non-greedy equivalent to +
 			// (?<NAME>REGEX) is a named group with name NAME and regular expression REGEX
 
 			// Any amount of linear-space-white between 'encoded-word's,
@@ -71,7 +71,10 @@ namespace OpenPop.Mime.Decode
 			// Define a regular expression that captures two encoded words with some whitespace between them
 			const string replaceRegex = @"(?<first>" + encodedWordRegex + @")\s+(?<second>" + encodedWordRegex + ")";
 
-			// Then, find an occourance of such an expression, but remove the whitespace inbetween when found
+			// Then, find an occurrence of such an expression, but remove the whitespace in between when found
+			// Need to be done twice for encodings such as "=?UTF-8?Q?a?= =?UTF-8?Q?b?= =?UTF-8?Q?c?="
+			// to be replaced correctly
+			encodedWords = Regex.Replace(encodedWords, replaceRegex, "${first}${second}");
 			encodedWords = Regex.Replace(encodedWords, replaceRegex, "${first}${second}");
 
 			string decodedWords = encodedWords;

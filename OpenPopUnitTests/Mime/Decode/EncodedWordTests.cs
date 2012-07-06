@@ -94,5 +94,23 @@ namespace OpenPopUnitTests.Mime.Decode
 			string result = EncodedWord.Decode(input);
 			Assert.AreEqual("(ab) (ab)", result);
 		}
+
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnoredWithMultipleParts()
+		{
+			const string input = "(=?UTF-8?Q?a?= =?UTF-8?Q?b?= =?UTF-8?Q?c?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(abc)", result);
+		}
+
+		[Test]
+		public void TestWhiteSpaceBetweenEncodingsAreIgnoredWithMultipleParts2()
+		{
+			const string input = "(=?UTF-8?Q?a?= =?UTF-8?Q?b?= =?UTF-8?Q?c?= =?UTF-8?Q?a?= =?UTF-8?Q?b?= =?UTF-8?Q?c?=)";
+
+			string result = EncodedWord.Decode(input);
+			Assert.AreEqual("(abcabc)", result);
+		}
 	}
 }
