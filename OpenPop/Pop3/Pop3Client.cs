@@ -181,10 +181,10 @@ namespace OpenPop.Pop3
 			if (port > IPEndPoint.MaxPort || port < IPEndPoint.MinPort)
 				throw new ArgumentOutOfRangeException("port");
 
-			if (receiveTimeout < -1)
+			if (receiveTimeout < 0)
 				throw new ArgumentOutOfRangeException("receiveTimeout");
 
-			if(sendTimeout < -1)
+			if(sendTimeout < 0)
 				throw new ArgumentOutOfRangeException("sendTimeout");
 
 			if (State != ConnectionState.Disconnected)
@@ -792,8 +792,12 @@ namespace OpenPop.Pop3
 		/// If it does, sets the <see cref="ApopTimeStamp"/> property to this value.
 		/// </summary>
 		/// <param name="response">The string to examine</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="response"/> is <see langword="null"/></exception>
 		private void ExtractApopTimestamp(string response)
 		{
+			if(response == null)
+				throw new ArgumentNullException("response");
+
 			// RFC Example:
 			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
 			Match match = Regex.Match(response, "<.+>");

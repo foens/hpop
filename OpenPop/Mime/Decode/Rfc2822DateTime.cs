@@ -18,7 +18,7 @@ namespace OpenPop.Mime.Decode
 		/// A valid <see cref="DateTime"/> object, which represents the same time as the string that was converted. 
 		/// If <paramref name="inputDate"/> is not a valid date representation, then <see cref="DateTime.MinValue"/> is returned.
 		/// </returns>
-		/// <exception cref="ArgumentNullException"><exception cref="ArgumentNullException">If <paramref name="inputDate"/> is <see langword="null"/></exception></exception>
+		/// <exception cref="ArgumentNullException">If <paramref name="inputDate"/> is <see langword="null"/></exception>
 		/// <exception cref="ArgumentException">If the <paramref name="inputDate"/> could not be parsed into a <see cref="DateTime"/> object</exception>
 		public static DateTime StringToDate(string inputDate)
 		{
@@ -170,8 +170,12 @@ namespace OpenPop.Mime.Decode
 		/// </summary>
 		/// <param name="dateInput">The date input string, from which to extract the date and time parts</param>
 		/// <returns>The extracted date part or <see langword="DateTime.MinValue"/> if <paramref name="dateInput"/> is not recognized as a valid date.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="dateInput"/> is <see langword="null"/></exception>
 		private static DateTime ExtractDateTime(string dateInput)
 		{
+			if(dateInput == null)
+				throw new ArgumentNullException("dateInput");
+
 			// Matches the date and time part of a string
 			// Given string example: Fri, 21 Nov 1997 09:55:06 -0600
 			// Needs to find: 21 Nov 1997 09:55:06
@@ -242,8 +246,12 @@ namespace OpenPop.Mime.Decode
 		/// </summary>
 		/// <param name="input">The input to strip from</param>
 		/// <returns>The stripped string</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="input"/> is <see langword="null"/></exception>
 		private static string StripCommentsAndExcessWhitespace(string input)
 		{
+			if(input == null)
+				throw new ArgumentNullException("input");
+
 			// Strip out comments
 			// Also strips out nested comments
 			input = Regex.Replace(input, @"(\((?>\((?<C>)|\)(?<-C>)|.?)*(?(C)(?!))\))", "");

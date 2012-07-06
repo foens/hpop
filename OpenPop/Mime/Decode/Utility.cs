@@ -19,8 +19,8 @@ namespace OpenPop.Mime.Decode
 			if(text == null)
 				throw new ArgumentNullException("text");
 
-			// Check if there are qoutes at both ends
-			if(text[0] == '"' && text[text.Length-1] == '"')
+			// Check if there are quotes at both ends and have at least two characters
+			if(text.Length > 1 && text[0] == '"' && text[text.Length-1] == '"')
 			{
 				// Remove quotes at both ends
 				return text.Substring(1, text.Length - 2);

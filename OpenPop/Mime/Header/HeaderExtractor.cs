@@ -19,8 +19,12 @@ namespace OpenPop.Mime.Header
 		/// </summary>
 		/// <param name="messageContent">The full message stored as a byte array</param>
 		/// <returns>The position of the line just after the header end blank line</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="messageContent"/> is <see langword="null"/></exception>
 		private static int FindHeaderEndPosition(byte[] messageContent)
 		{
+			if(messageContent == null)
+				throw new ArgumentNullException("messageContent");
+
 			// Convert the byte array into a stream
 			using (Stream stream = new MemoryStream(messageContent))
 			{

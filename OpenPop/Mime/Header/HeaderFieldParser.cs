@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Text;
 using OpenPop.Mime.Decode;
 using OpenPop.Common.Logging;
 

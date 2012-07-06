@@ -335,8 +335,12 @@ namespace OpenPop.Mime
 		/// <param name="rawBody">The raw byte array describing the body of a message which is a MultiPart message</param>
 		/// <param name="multipPartBoundary">The delimiter that splits the different MultiPart bodies from each other</param>
 		/// <returns>A list of byte arrays, each a full message of a <see cref="MessagePart"/></returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="rawBody"/> is <see langword="null"/></exception>
 		private static List<byte[]> GetMultiPartParts(byte[] rawBody, string multipPartBoundary)
 		{
+			if(rawBody == null)
+				throw new ArgumentNullException("rawBody");
+
 			// This is the list we want to return
 			List<byte[]> messageBodies = new List<byte[]>();
 

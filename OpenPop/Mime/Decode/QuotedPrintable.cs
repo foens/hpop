@@ -237,6 +237,9 @@ namespace OpenPop.Mime.Decode
 			if (decode.Length >= 3)
 				throw new ArgumentException("decode must have length lower than 3", "decode");
 
+			if(decode.Length <= 0)
+				throw new ArgumentException("decode must have length lower at least 1", "decode");
+
 			// First char must be =
 			if (decode[0] != '=')
 				throw new ArgumentException("First part of decode must be an equal sign", "decode");
