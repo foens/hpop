@@ -315,7 +315,7 @@ namespace OpenPop.Mime
 			if (file == null)
 				throw new ArgumentNullException("file");
 
-			using (FileStream stream = new FileStream(file.FullName, FileMode.OpenOrCreate))
+			using (FileStream stream = new FileStream(file.FullName, FileMode.Create))
 			{
 				Save(stream);
 			}

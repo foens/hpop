@@ -1306,5 +1306,36 @@ namespace OpenPopUnitTests.Mime
             string output = Message.Load(new MemoryStream(Encoding.ASCII.GetBytes(input))).MessagePart.GetBodyAsText();
             Assert.AreEqual(expectedOutput, output);
         }
+
+        [Test]
+        public void TestFileOverwriteTruncatesFileCorrectly()
+        {
+            const string longMessage = "Content-Type: text/plain\r\n" +
+                "Content-Disposition: attachment\r\n" +
+                "\r\n" +
+                "Testing very long...";
+
+            const string smallMessage =
+                "Content-Type: text/plain\r\n" +
+                "Content-Disposition: attachment\r\n" +
+                "\r\n" +
+                "Testing";
+
+            FileInfo testFile = new FileInfo("test_message_save_truncate.testFile");
+
+            Message messageLong = new Message(Encoding.ASCII.GetBytes(longMessage));
+            messageLong.Save(testFile);
+
+            Message messageSmall = new Message(Encoding.ASCII.GetBytes(smallMessage));
+            messageSmall.Save(testFile);
+
+            Message messageLoaded = Message.Load(testFile);
+
+            testFile.Delete();
+
+            // We should now have the small message in the file.
+            // IE We should have overwritten the longMessage file with our shortMessage file.
+            Assert.AreEqual(messageSmall.RawMessage, messageLoaded.RawMessage);
+        }
 	}
 }

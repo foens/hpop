@@ -255,5 +255,36 @@ namespace OpenPopUnitTests.Mime
 
             Assert.AreEqual(Encoding.GetEncoding(1252), messagePart.BodyEncoding);
         }
+
+        [Test]
+        public void TestFileOverwriteTruncatesFileCorrectly()
+        {
+            const string longMessage = "Content-Type: text/plain\r\n" +
+                "Content-Disposition: attachment\r\n" +
+                "\r\n" +
+                "Testing very long...";
+
+            const string smallMessage =
+                "Content-Type: text/plain\r\n" +
+                "Content-Disposition: attachment\r\n" +
+                "\r\n" +
+                "Testing";
+
+            const string filename = "test_message_part_save_truncate.testFile";
+
+            FileInfo longTestFile = new FileInfo(filename);
+            MessagePart messageLong = new Message(Encoding.ASCII.GetBytes(longMessage)).MessagePart;
+            messageLong.Save(longTestFile);
+            long longFileSize = longTestFile.Length;
+
+            FileInfo smallTestFile = new FileInfo(filename);
+            MessagePart messageSmall = new Message(Encoding.ASCII.GetBytes(smallMessage)).MessagePart;
+            messageSmall.Save(smallTestFile);
+            long smallFileSize = smallTestFile.Length;
+
+            smallTestFile.Delete();
+
+            Assert.AreNotEqual(longFileSize, smallFileSize);
+        }
 	}
 }
