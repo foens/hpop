@@ -195,13 +195,16 @@ namespace OpenPop.Mime.Decode
 			// Some uses incorrect format: 2012-1-1 12:30
 			const string incorrectFormat = year + @"-\d?\d-\d?\d " + time;
 
+			// Some uses incorrect format: 08-May-2012 16:52:30 +0100
+			const string correctFormatButWithDashes = @"\d\d?-[A-Za-z]{3}-" + year + " " + time;
+
 			// We allow both correct and incorrect format
-			const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")";
+            const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")|(" + correctFormatButWithDashes + ")";
 
 			Match match = Regex.Match(dateInput, joinedFormat);
 			if(match.Success)
 			{
-                return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
+				return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
 			}
 
 			DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);

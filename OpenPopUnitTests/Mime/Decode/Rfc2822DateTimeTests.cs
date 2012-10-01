@@ -393,5 +393,27 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual(expectedOutput, output);
 		}
+
+		[Test]
+		public void IllegalButStandardFormatWithDashes()
+		{
+			const string inputDate = "08-May-2012 16:52:30 +0100";
+
+			DateTime expectedOutput = new DateTime(2012, 5, 8, 15, 52, 30, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
+
+		[Test]
+		public void IllegalButStandardFormatWithDashes2()
+		{
+			const string inputDate = "03-jAN-2011 13:13:13 -0200";
+
+			DateTime expectedOutput = new DateTime(2011, 1, 3, 15, 13, 13, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }
