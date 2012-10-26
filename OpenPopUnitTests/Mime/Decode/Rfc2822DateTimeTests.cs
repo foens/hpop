@@ -415,5 +415,16 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual(expectedOutput, output);
 		}
+
+		[Test]
+		public void TestUnparseableDateWillNotThrowWhenAdjustingTimezone()
+		{
+			const string inputDate = "Fri, 19 Oct2012 13:59:12 +0200";
+
+			DateTime expectedOutput = DateTime.MinValue;
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }

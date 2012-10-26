@@ -33,6 +33,10 @@ namespace OpenPop.Mime.Decode
                 // Extract the DateTime
                 DateTime dateTime = ExtractDateTime(inputDate);
 
+				// Bail if we could not parse the date
+				if (dateTime == DateTime.MinValue)
+					return dateTime;
+
 				// If a day-name is specified in the inputDate string, check if it fits with the date
 				ValidateDayNameIfAny(dateTime, inputDate);
 
