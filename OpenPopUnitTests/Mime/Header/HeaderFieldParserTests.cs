@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Mime;
-using System.Text;
 using NUnit.Framework;
 using OpenPop.Mime.Header;
 
@@ -247,12 +246,76 @@ namespace OpenPopUnitTests.Mime.Header
 		{
 			const string contentDispositionString =
 				"attachment;" +
-				" creation-date=\"Fri, 11 Feb 2011 16:09:17 GMT\";" +
-				" filename=\"test.csv\";" +
-				" modification-date=\"Fri, 11 Feb 2011 16:09:17 GMT\";" +
 				" size=\"104710\"";
 
 			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionString);
+
+			Assert.AreEqual(104710, contentDisposition.Size);
+		}
+
+		[Test]
+		public void ParseSizeInKilobyte()
+		{
+			const string contentDispositionValue =
+				"inline; " +
+				"size=104 kB;";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionValue);
+
+			// 104 kilobytes = 106 496 bytes
+			Assert.AreEqual(106496, contentDisposition.Size);
+		}
+
+		[Test]
+		public void ParseSizeInMegaBytes()
+		{
+			const string contentDispositionValue =
+				"inline; " +
+				"size=2 mB;";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionValue);
+
+			// 2 megabytes = 2 097 152 bytes
+			Assert.AreEqual(2097152, contentDisposition.Size);
+		}
+
+		[Test]
+		public void ParseSizeInGigaBytes()
+		{
+			const string contentDispositionValue =
+				"inline; " +
+				"size=2 GB;";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionValue);
+
+			// 2 gigabytes = 2 147 483 648 bytes
+			Assert.AreEqual(2147483648, contentDisposition.Size);
+		}
+
+		[Test]
+		public void ParseSizeInTeraBytes()
+		{
+			const string contentDispositionValue =
+				"inline; " +
+				"size=3 TB;";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionValue);
+
+			// 3 terabytes = 3 298 534 883 328 bytes
+			Assert.AreEqual(3298534883328, contentDisposition.Size);
+		}
+
+		[Test]
+		public void ParseSizeInKiloBytesWithSpacesAdnQuotes()
+		{
+			const string contentDispositionValue =
+				"inline; " +
+				"size=\"  1   kb    \";";
+
+			ContentDisposition contentDisposition = HeaderFieldParser.ParseContentDisposition(contentDispositionValue);
+
+			// 1 kilobyte = 1 024 bytes
+			Assert.AreEqual(1024, contentDisposition.Size);
 		}
 
 		[Test]

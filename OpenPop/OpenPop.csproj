@@ -86,6 +86,7 @@
     <Compile Include="Mime\Decode\EncodingFinder.cs" />
     <Compile Include="Mime\Decode\Rfc2231Decoder.cs" />
     <Compile Include="Mime\Decode\Rfc2822DateTime.cs" />
+    <Compile Include="Mime\Decode\SizeParser.cs" />
     <Compile Include="Mime\Decode\Utility.cs" />
     <Compile Include="Mime\Header\Received.cs" />
     <Compile Include="Mime\Header\RfcMailAddress.cs" />
