@@ -184,7 +184,7 @@ namespace OpenPop.Pop3
 			if (receiveTimeout < 0)
 				throw new ArgumentOutOfRangeException("receiveTimeout");
 
-			if(sendTimeout < 0)
+			if (sendTimeout < 0)
 				throw new ArgumentOutOfRangeException("sendTimeout");
 
 			if (State != ConnectionState.Disconnected)
