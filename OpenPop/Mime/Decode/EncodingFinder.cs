@@ -83,7 +83,7 @@ namespace OpenPop.Mime.Decode
 			if (EncodingMap.ContainsKey(charSetUpper))
 				return EncodingMap[charSetUpper];
 
-			// Try to find the generally find the encoding
+			// Try to generally find the encoding
 			try
 			{
 				if (charSetUpper.Contains("WINDOWS") || charSetUpper.Contains("CP"))
