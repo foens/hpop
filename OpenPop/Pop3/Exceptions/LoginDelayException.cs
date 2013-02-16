@@ -13,7 +13,7 @@
 		///</summary>
 		///<param name="innerException">The exception that is the cause of this exception</param>
 		public LoginDelayException(PopServerException innerException)
-			: base("The account is locked or in use", innerException)
+			: base("FIX", innerException)
 		{ }
 	}
 }
