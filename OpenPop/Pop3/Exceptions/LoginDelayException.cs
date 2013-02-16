@@ -13,7 +13,7 @@
 		///</summary>
 		///<param name="innerException">The exception that is the cause of this exception</param>
 		public LoginDelayException(PopServerException innerException)
-			: base("FIX", innerException)
+			: base("Login denied because of recent connection to this maildrop. Increase time between connections.", innerException)
 		{ }
 	}
 }
