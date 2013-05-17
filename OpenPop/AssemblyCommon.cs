@@ -2,9 +2,7 @@
 
 // This file is linked to by other OpenPop projects to make
 // sure that commen assembly information is shared correctly
-
-// Last part of the version number is the SVN version
-[assembly: AssemblyVersion("2.0.4.369")]
+[assembly: AssemblyVersion("2.0.5")]
 
 // This is the configuration when building the assembly
 [assembly: AssemblyConfiguration("Release mode assembly. Built for .NET 2.0")]
