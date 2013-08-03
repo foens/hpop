@@ -38,6 +38,30 @@ namespace OpenPopUnitTests.Mime.Decode
 			Assert.AreEqual(expectedOutput, output);
 		}
 
+        /// <summary>
+        /// Make a test that a non-numeric equals sign can be decoded
+        /// This is necessasry because of the way QuotedPrintable catches exceptions.
+        /// If the value after the equals sign is non-numeric, Convert.ToByte() will throw
+        /// an ArgumentException, not a FormatException.
+        /// 
+        /// This issue can happen in emails sent from gmail, as an example. They'll end up with something like this:
+        /// 
+        /// .... font=
+        /// -size:7pt;
+        /// 
+        /// which will crash while parsing the =-s
+        /// </summary>
+        [Test]
+        public void CanDecodeNonNumericEqualSign()
+        {
+            const string input = "=-s";
+            const string expectedOutput = "=-s";
+
+            string output = QuotedPrintable.DecodeEncodedWord(input, Encoding.GetEncoding("iso-8859-1"));
+
+            Assert.AreEqual(expectedOutput, output);
+        }
+
 		/// <summary>
 		/// Make sure that the decoder does not first decode, and then decode that once again
 		/// </summary>
