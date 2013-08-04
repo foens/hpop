@@ -528,6 +528,36 @@ namespace OpenPopUnitTests.Mime
 		}
 
 		/// <summary>
+		/// Tests to make sure that base64 strings containing newlines
+		/// (both CR and CRLF) can be properly parsed
+		/// </summary>
+		[Test]
+		public void ParsingBase64ContainingNewlines()
+		{
+			const string base64 = "VGhpcyBpcyBhIGJhc2U2NC1lbmNvZGVkIG1lc3\r\n" +
+								  "NhZ2UgdGhhdCBjb250YWlucyBhIGxpbmUgYnJl\n" +
+								  "YWsgc29tZXdoZXJlLCBJIGhvcGUuIAoK";
+			const string partText =
+				"Content-Type: text/plain;\r\n" +
+				" charset=utf-8\r\n" +
+				"Content-Transfer-Encoding: base64\r\n" +
+				"\r\n" +
+				base64;
+
+			// Base 64 is only in ASCII
+			Message message = new Message(Encoding.ASCII.GetBytes(partText));
+
+			MessagePart messagePart = message.MessagePart;
+
+			// Check the headers
+			Assert.AreEqual("text/plain", messagePart.ContentType.MediaType);
+			Assert.AreEqual(ContentTransferEncoding.Base64, messagePart.ContentTransferEncoding);
+
+			// Base64.Decode() should give the same result as Convert.FromBase64String()
+			Assert.AreEqual(Convert.FromBase64String(base64), messagePart.Body);
+		}
+
+		/// <summary>
 		/// Test that test that a message that does not end with the correct boundary of
 		/// "--boundary--" but ends with "--boundary" instead can be parsed
 		/// </summary>
