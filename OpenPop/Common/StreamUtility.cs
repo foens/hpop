@@ -49,6 +49,7 @@ namespace OpenPop.Common
 				return memoryStream.ToArray();
 			}
 		}
+       
 
 		/// <summary>
 		/// Read a line from the stream. <see cref="ReadLineAsBytes"/> for more documentation.

@@ -24,3 +24,4 @@ using System.Security;
 // This will not defeat security, since normal security policies
 // like DNS, IO permissions are still in effect
 [assembly: AllowPartiallyTrustedCallers]
+[assembly: InternalsVisibleTo("OpenPop.Async")]
