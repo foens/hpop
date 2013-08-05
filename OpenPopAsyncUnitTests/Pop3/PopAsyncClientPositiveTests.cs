@@ -2,24 +2,27 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using OpenPop.Async.Pop3;
 using OpenPop.Mime;
 using OpenPop.Mime.Header;
 using OpenPop.Pop3;
 using OpenPop.Pop3.Exceptions;
+using OpenPopAsyncUnitTests;
+using OpenPopAsyncUnitTests.Utils;
 
 namespace OpenPopUnitTests.Pop3
 {
-    /*
 	[TestFixture]
-	public class POPClientPositiveTests
+	public class PopAsyncClientPositiveTests
 	{
 		/// <summary>
 		/// This test comes from the RFC 1939 example located at 
 		/// http://tools.ietf.org/html/rfc1939#page-16
 		/// </summary>
 		[Test]
-		public void TestApopAuthentication()
+		public async Task TestApopAuthentication()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string loginMessage = "+OK mrose's maildrop has 2 messages (320 octets)";
@@ -28,13 +31,13 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-            var client = new Pop3AsyncClient();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server supports APOP
 			Assert.IsTrue(client.ApopSupported);
 
-			client.Authenticate("mrose", "tanstaaf", AuthenticationMethod.Apop);
+			await client.AuthenticateAsync("mrose", "tanstaaf", AuthenticationMethod.Apop);
 
 			const string expectedOutput = "APOP mrose c4c9334bac560ecc979e58001b3e22fb\r\n";
 			string output = Encoding.ASCII.GetString(outputStream.ToArray());
@@ -44,7 +47,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestAutoAuthenticationApop()
+		public async Task TestAutoAuthenticationApop()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string loginMessage = "+OK mrose's maildrop has 2 messages (320 octets)";
@@ -53,13 +56,13 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server supports APOP
 			Assert.IsTrue(client.ApopSupported);
 
-			client.Authenticate("mrose", "tanstaaf");
+			await client.AuthenticateAsync("mrose", "tanstaaf");
 
 			const string expectedOutput = "APOP mrose c4c9334bac560ecc979e58001b3e22fb\r\n";
 			string output = Encoding.ASCII.GetString(outputStream.ToArray());
@@ -69,7 +72,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestAutoAuthenticationUsernameAndPassword()
+		public async Task TestAutoAuthenticationUsernameAndPassword()
 		{
 			const string welcomeMessage = "+OK POP3 server ready";
 			const string okUsername = "+OK";
@@ -79,13 +82,13 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server does not support APOP
 			Assert.IsFalse(client.ApopSupported);
 
-			client.Authenticate("mrose", "tanstaaf");
+			await client.AuthenticateAsync("mrose", "tanstaaf");
 
 			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
@@ -97,7 +100,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestUsernameAndPasswordAuthentication()
+		public async Task TestUsernameAndPasswordAuthentication()
 		{
 			const string welcomeMessage = "+OK POP3 server ready";
 			const string okUsername = "+OK";
@@ -107,13 +110,13 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server does not support APOP
 			Assert.IsFalse(client.ApopSupported);
 
-			client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword);
+			await client.AuthenticateAsync("foo", "bar", AuthenticationMethod.UsernameAndPassword);
 
 			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 
@@ -125,7 +128,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestUsernameAndPasswordAuthenticationLocked()
+		public async Task TestUsernameAndPasswordAuthenticationLocked()
 		{
 			const string welcomeMessage = "+OK POP3 server ready";
 			const string okUsername = "+OK";
@@ -135,17 +138,18 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server does not support APOP
 			Assert.IsFalse(client.ApopSupported);
 
-			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+		    AsyncAssert.Throws<PopServerLockedException>(client.AuthenticateAsync("foo", "bar",
+		                                                                          AuthenticationMethod.UsernameAndPassword));
 		}
 
 		[Test]
-		public void TestUsernameAndPasswordAuthenticationInUse()
+		public async Task TestUsernameAndPasswordAuthenticationInUse()
 		{
 			const string welcomeMessage = "+OK POP3 server ready";
 			const string okUsername = "+OK";
@@ -155,17 +159,17 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server does not support APOP
 			Assert.IsFalse(client.ApopSupported);
 
-			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+			AsyncAssert.Throws<PopServerLockedException>(client.AuthenticateAsync("foo", "bar", AuthenticationMethod.UsernameAndPassword));
 		}
 
 		[Test]
-		public void TestUsernameAndPasswordAuthenticationInUseCaseInsensitive()
+		public async Task TestUsernameAndPasswordAuthenticationInUseCaseInsensitive()
 		{
 			const string welcomeMessage = "+OK POP3 server ready";
 			const string okUsername = "+OK";
@@ -175,20 +179,20 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
 			// The Pop3Client should now have seen, that the server does not support APOP
 			Assert.IsFalse(client.ApopSupported);
 
-			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+			AsyncAssert.Throws<PopServerLockedException>(client.AuthenticateAsync("foo", "bar", AuthenticationMethod.UsernameAndPassword));
 		}
 
 		/// <summary>
 		/// http://tools.ietf.org/html/rfc1939#page-6
 		/// </summary>
 		[Test]
-		public void TestGetMessageCount()
+		public async Task TestGetMessageCount()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -199,11 +203,11 @@ namespace OpenPopUnitTests.Pop3
 
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
-			int numberOfMessages = client.GetMessageCount();
+			int numberOfMessages = await client.GetMessageCountAsync();
 
 			// We expected 5 messages
 			Assert.AreEqual(5, numberOfMessages);
@@ -213,7 +217,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-8
 		/// </summary>
 		[Test]
-		public void TestDeleteMessage()
+		public async Task TestDeleteMessage()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -225,11 +229,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
-			client.DeleteMessage(5);
+			await client.DeleteMessageAsync(5);
 
 			const string expectedOutput = "DELE 5";
 			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -237,7 +241,7 @@ namespace OpenPopUnitTests.Pop3
 			// We expected that the last command is the delete command
 			Assert.AreEqual(expectedOutput, output);
 
-			client.Disconnect();
+			await client.DisconnectAsync();
 
 			const string expectedOutputAfterQuit = "QUIT";
 			string outputAfterQuit = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -250,7 +254,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-8
 		/// </summary>
 		[Test]
-		public void TestDeleteAllMessages()
+		public async Task TestDeleteAllMessages()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -263,12 +267,12 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			// Delete all the messages
-			client.DeleteAllMessages();
+			await client.DeleteAllMessagesAsync();
 
 			// Check that message 1 and message 2 was deleted
 			string[] commandsFired = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -291,7 +295,7 @@ namespace OpenPopUnitTests.Pop3
 			Assert.IsTrue(message2Deleted);
 
 			// Quit and commit
-			client.Disconnect();
+			await client.DisconnectAsync();
 
 			const string expectedOutputAfterQuit = "QUIT";
 			string outputAfterQuit = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -304,7 +308,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-9
 		/// </summary>
 		[Test]
-		public void TestNoOperation()
+		public async Task TestNoOperation()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -315,11 +319,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
-			client.NoOperation();
+			await client.NoOperationAsync();
 
 			// Get the last command issued by the client
 			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -334,7 +338,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-9
 		/// </summary>
 		[Test]
-		public void TestReset()
+		public async Task TestReset()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -345,11 +349,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
-			client.Reset();
+			await client.ResetAsync();
 
 			// Get the last command issued by the client
 			string output = GetLastCommand(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
@@ -364,7 +368,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-12
 		/// </summary>
 		[Test]
-		public void TestGetMessageUid()
+		public async Task TestGetMessageUid()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -375,14 +379,14 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			const string expectedOutput = "psycho";
 
 			// Delete all the messages
-			string output = client.GetMessageUid(2);
+			string output = await client.GetMessageUidAsync(2);
 
 			// We now expect that the client has given us the correct UID
 			Assert.AreEqual(expectedOutput, output);
@@ -392,7 +396,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-12
 		/// </summary>
 		[Test]
-		public void TestGetMessageUids()
+		public async Task TestGetMessageUids()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -406,12 +410,12 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			// Get the UIDs for all the messages in sorted order from 1 and upwards
-			List<string> uids = client.GetMessageUids();
+			List<string> uids = await client.GetMessageUidsAsync();
 
 			// The list should have size 2
 			Assert.AreEqual(2, uids.Count);
@@ -427,7 +431,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-7
 		/// </summary>
 		[Test]
-		public void TestGetMessageSize()
+		public async Task TestGetMessageSize()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -438,13 +442,13 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			// Message 9 should have size 200
 			const int expectedOutput = 200;
-			int output = client.GetMessageSize(9);
+			int output = await client.GetMessageSizeAsync(9);
 
 			Assert.AreEqual(expectedOutput, output);
 		}
@@ -453,7 +457,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-7
 		/// </summary>
 		[Test]
-		public void TestGetMessageSizes()
+		public async Task TestGetMessageSizes()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -467,12 +471,12 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			// Message 9 should have size 200
-			List<int> messageSizes = client.GetMessageSizes();
+			List<int> messageSizes = await client.GetMessageSizesAsync();
 
 			// The list should have size 2
 			Assert.AreEqual(2, messageSizes.Count);
@@ -489,7 +493,7 @@ namespace OpenPopUnitTests.Pop3
 		/// This also tests that the message parsing is correct
 		/// </summary>
 		[Test]
-		public void TestGetMessageNoContentType()
+		public async Task TestGetMessageNoContentType()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -505,11 +509,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -548,7 +552,7 @@ namespace OpenPopUnitTests.Pop3
 		/// Tests a real email between Kasper and John
 		/// </summary>
 		[Test]
-		public void TestGetMessageIso88591()
+		public async Task TestGetMessageIso88591()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -564,11 +568,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.GetEncoding("ISO-8859-1").GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("something", "else");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("something", "else");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -626,7 +630,7 @@ namespace OpenPopUnitTests.Pop3
 		/// Base64 string from http://en.wikipedia.org/wiki/Base64#Examples
 		/// </summary>
 		[Test]
-		public void TestGetMessageBase64()
+		public async Task TestGetMessageBase64()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -643,11 +647,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("something", "else");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("something", "else");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -697,7 +701,7 @@ namespace OpenPopUnitTests.Pop3
 		/// Tests a ISO-8859-1 email which has special characters in the body
 		/// </summary>
 		[Test]
-		public void TestGetMessageIso88591SpecialChars()
+		public async Task TestGetMessageIso88591SpecialChars()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -721,11 +725,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(serverResponsesInBytes);
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("user", "password");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("user", "password");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -770,7 +774,7 @@ namespace OpenPopUnitTests.Pop3
 		/// Tests a ISO-8859-2 email which has special characters in the body
 		/// </summary>
 		[Test]
-		public void TestGetMessageIso88592()
+		public async Task TestGetMessageIso88592()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -794,11 +798,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(serverResponsesInBytes);
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("user", "password");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("user", "password");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -815,7 +819,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestGetMessageWindows1252()
+		public async Task TestGetMessageWindows1252()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -839,11 +843,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(serverResponsesInBytes);
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("user", "password");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("user", "password");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -863,7 +867,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestGetMessageUTF8()
+		public async Task TestGetMessageUTF8()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -887,11 +891,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(serverResponsesInBytes);
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("user", "password");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("user", "password");
 
-			Message message = client.GetMessage(132);
+			Message message = await client.GetMessageAsync(132);
 
 			Assert.NotNull(message);
 			Assert.NotNull(message.Headers);
@@ -911,7 +915,7 @@ namespace OpenPopUnitTests.Pop3
 		/// http://tools.ietf.org/html/rfc1939#page-11
 		/// </summary>
 		[Test]
-		public void TestGetMessageHeaders()
+		public async Task TestGetMessageHeaders()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -925,12 +929,12 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("test", "test");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("test", "test");
 
 			// Fetch the header of message 7
-			MessageHeader header = client.GetMessageHeaders(7);
+			MessageHeader header =await client.GetMessageHeadersAsync(7);
 
 			const string expectedSubject = "[Blinded by the lights] New Comment On: Comparison of .Net libraries for fetching emails via POP3";
 			string subject = header.Subject;
@@ -939,7 +943,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestGetMessageAsBytes()
+		public async Task TestGetMessageAsBytes()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -959,11 +963,11 @@ namespace OpenPopUnitTests.Pop3
 
 			byte[] expectedBytes = Encoding.ASCII.GetBytes(message);
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("something", "else");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("something", "else");
 
-			byte[] messageBytes = client.GetMessageAsBytes(132);
+			byte[] messageBytes =await client.GetMessageAsBytesAsync(132);
 
 			Assert.AreEqual(expectedBytes, messageBytes);
 		}
@@ -983,7 +987,7 @@ namespace OpenPopUnitTests.Pop3
 		/// This dot should be removed when fetching the email - this is what this test is testing
 		/// </summary>
 		[Test]
-		public void TestGetMessageAsBytesWithDotDot()
+		public async Task TestGetMessageAsBytesWithDotDot()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -1002,17 +1006,17 @@ namespace OpenPopUnitTests.Pop3
 			// When a .. is expected as the first character of a line, it really means that it is only a .
 			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedMessage);
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("something", "else");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("something", "else");
 
-			byte[] messageBytes = client.GetMessageAsBytes(139);
+			byte[] messageBytes = await client.GetMessageAsBytesAsync(139);
 
 			Assert.AreEqual(expectedBytes, messageBytes);
 		}
 
 		[Test]
-		public void TestFetchingMessageWithoutBodyWorks()
+		public async Task TestFetchingMessageWithoutBodyWorks()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -1026,11 +1030,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			Stream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("something", "else");
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("something", "else");
 
-			Message messageFetched = client.GetMessage(3);
+			Message messageFetched = await client.GetMessageAsync(3);
 
 			Assert.NotNull(messageFetched);
 			Assert.IsEmpty(messageFetched.Headers.ReturnPath.DisplayName);
@@ -1041,7 +1045,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCramMd5Login()
+		public async Task TestCramMd5Login()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
@@ -1052,9 +1056,9 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5);
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5);
 
 			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
@@ -1070,7 +1074,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCramMd5LoginOtherUser()
+		public async Task TestCramMd5LoginOtherUser()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "+ PHRoaXMuaXMudGhlLmJhc2U2NC5lbmNvZGVkLmNoYWxsZW5nZUBzZXJ2ZXIuY29tPg==";
@@ -1081,9 +1085,9 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			client.Authenticate("foens", "thisIsAnInsanelyLongPasswordManWoot", AuthenticationMethod.CramMd5);
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			await client.AuthenticateAsync("foens", "thisIsAnInsanelyLongPasswordManWoot", AuthenticationMethod.CramMd5);
 
 			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
@@ -1099,7 +1103,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCramMd5LoginNotSupported()
+		public async Task TestCramMd5LoginNotSupported()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "-ERR CRAM-MD5 is not supported on this server";
@@ -1109,9 +1113,9 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			Assert.Throws<NotSupportedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			AsyncAssert.Throws<NotSupportedException>(client.AuthenticateAsync("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5));
 
 			string[] commandsFromClient = GetCommands(new StreamReader(new MemoryStream(outputStream.ToArray())).ReadToEnd());
 			Assert.NotNull(commandsFromClient);
@@ -1124,7 +1128,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCramMd5LoginNotCorrect()
+		public async Task TestCramMd5LoginNotCorrect()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
@@ -1135,13 +1139,13 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			Assert.Throws<InvalidLoginException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			AsyncAssert.Throws<InvalidLoginException>(client.AuthenticateAsync("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5));
 		}
 
 		[Test]
-		public void TestCramMd5LoginCorrectButMaildropLocked()
+		public async Task TestCramMd5LoginCorrectButMaildropLocked()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
@@ -1152,13 +1156,13 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
-			Assert.Throws<PopServerLockedException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
+			AsyncAssert.Throws<PopServerLockedException>(client.AuthenticateAsync("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5));
 		}
 
 		[Test]
-		public void TestDisposeSendsQuit()
+		public async Task TestDisposeSendsQuit()
 		{
 			const string welcomeMessage = "+OK";
 			const string quitOk = "+OK";
@@ -1168,9 +1172,9 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			using (Pop3Client client = new Pop3Client())
+			using (var client = new Pop3AsyncClient())
 			{
-				client.Connect(new CombinedStream(inputStream, outputStream));
+				await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 			}
 
 			// Check that a command was sent
@@ -1184,7 +1188,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCapabilityRfcExample()
+		public async Task TestCapabilityRfcExample()
 		{
 			const string welcomeMessage = "+OK";
 			const string capabilityResponse =
@@ -1206,11 +1210,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			using (Pop3Client client = new Pop3Client())
+			using (var client = new Pop3AsyncClient())
 			{
-				client.Connect(new CombinedStream(inputStream, outputStream));
+				await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-				Dictionary<string, List<string>> capabilities = client.Capabilities();
+				Dictionary<string, List<string>> capabilities = await client.CapabilitiesAsync();
 
 				// Check the capabilities received was correct
 				Assert.Contains("TOP", capabilities.Keys);
@@ -1264,7 +1268,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCapabilityOtherCapabilities()
+		public async Task TestCapabilityOtherCapabilities()
 		{
 			const string welcomeMessage = "+OK";
 			const string capabilityResponse =
@@ -1281,11 +1285,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			using (Pop3Client client = new Pop3Client())
+			using (var client = new Pop3AsyncClient())
 			{
-				client.Connect(new CombinedStream(inputStream, outputStream));
+				await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-				Dictionary<string, List<string>> capabilities = client.Capabilities();
+				Dictionary<string, List<string>> capabilities = await client.CapabilitiesAsync();
 
 				// Check the capabilities received was correct
 				Assert.Contains("FOO", capabilities.Keys);
@@ -1322,7 +1326,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCapabilityInTransactionState()
+		public async Task TestCapabilityInTransactionState()
 		{
 			const string welcomeMessage = "+OK";
 			const string okUsername = "+OK";
@@ -1339,13 +1343,13 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			using (Pop3Client client = new Pop3Client())
+			using (var client = new Pop3AsyncClient())
 			{
-				client.Connect(new CombinedStream(inputStream, outputStream));
+				await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-				client.Authenticate("user", "password");
+				await client.AuthenticateAsync("user", "password");
 
-				Dictionary<string, List<string>> capabilities = client.Capabilities();
+				Dictionary<string, List<string>> capabilities = await client.CapabilitiesAsync();
 
 				// Check the capabilities received was correct
 				Assert.Contains("TEST", capabilities.Keys);
@@ -1369,7 +1373,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestCapabilityCaseInsensitivity()
+		public async Task TestCapabilityCaseInsensitivity()
 		{
 			const string welcomeMessage = "+OK";
 			const string capabilityResponse =
@@ -1385,11 +1389,11 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			using (Pop3Client client = new Pop3Client())
+			using (var client = new Pop3AsyncClient())
 			{
-				client.Connect(new CombinedStream(inputStream, outputStream));
+				await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-				Dictionary<string, List<string>> capabilities = client.Capabilities();
+				Dictionary<string, List<string>> capabilities = await client.CapabilitiesAsync();
 
 				// Check the capabilities received was correct
 				Assert.IsTrue(capabilities.ContainsKey("test"));
@@ -1411,7 +1415,7 @@ namespace OpenPopUnitTests.Pop3
 		}
 
 		[Test]
-		public void TestAccountLoginDelayResponseApop()
+		public async Task TestAccountLoginDelayResponseApop()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string loginMessage = "-ERR [LOGIN-DELAY] wait some time before loggin in";
@@ -1420,14 +1424,14 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.Apop); });
+			AsyncAssert.Throws<LoginDelayException>(client.AuthenticateAsync("foo", "bar", AuthenticationMethod.Apop));
 		}
 
 		[Test]
-		public void TestAccountLoginDelayResponseCramMd5()
+		public async Task TestAccountLoginDelayResponseCramMd5()
 		{
 			const string welcomeMessage = "+OK";
 			const string challengeResponse = "+ PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+";
@@ -1438,14 +1442,14 @@ namespace OpenPopUnitTests.Pop3
 			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5); });
+			AsyncAssert.Throws<LoginDelayException>(client.AuthenticateAsync("tim", "tanstaaftanstaaf", AuthenticationMethod.CramMd5));
 		}
 
 		[Test]
-		public void TestAccountLoginDelayResponseUsernamePassword()
+		public async Task TestAccountLoginDelayResponseUsernamePassword()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string userOk = "+OK";
@@ -1455,14 +1459,14 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+			AsyncAssert.Throws<LoginDelayException>(client.AuthenticateAsync("foo", "bar", AuthenticationMethod.UsernameAndPassword));
 		}
 
 		[Test]
-		public void TestAccountLoginDelayResponseUsernamePasswordInsensitiveCasing()
+		public async Task TestAccountLoginDelayResponseUsernamePasswordInsensitiveCasing()
 		{
 			const string welcomeMessage = "+OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>";
 			const string userOk = "+OK";
@@ -1472,10 +1476,10 @@ namespace OpenPopUnitTests.Pop3
 
 			MemoryStream outputStream = new MemoryStream();
 
-			Pop3Client client = new Pop3Client();
-			client.Connect(new CombinedStream(inputStream, outputStream));
+			var client = new Pop3AsyncClient();
+			await client.ConnectAsync(new CombinedStream(inputStream, outputStream));
 
-			Assert.Throws<LoginDelayException>(delegate { client.Authenticate("foo", "bar", AuthenticationMethod.UsernameAndPassword); });
+			AsyncAssert.Throws<LoginDelayException>(client.AuthenticateAsync("foo", "bar", AuthenticationMethod.UsernameAndPassword));
 		}
 
 		/// <summary>
@@ -1499,5 +1503,5 @@ namespace OpenPopUnitTests.Pop3
 		{
 			return builder.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
 		}
-	}*/
+	}
 }

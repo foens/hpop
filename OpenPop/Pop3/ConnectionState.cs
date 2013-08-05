@@ -6,7 +6,7 @@
 	/// <br/>
 	/// Used to keep track of which state the <see cref="Pop3Client"/> is in.
 	/// </summary>
-	internal enum ConnectionState
+	public enum ConnectionState
 	{
 		/// <summary>
 		/// This is when the Pop3Client is not even connected to the server

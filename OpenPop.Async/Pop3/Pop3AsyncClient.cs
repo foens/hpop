@@ -8,18 +8,19 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using OpenPop.Common.Logging;
 using OpenPop.Mime;
 using OpenPop.Mime.Header;
+using OpenPop.Pop3;
 using OpenPop.Pop3.Exceptions;
-using OpenPop.Common;
-using OpenPop.Common.Logging;
+using OpenPop.Async.Common;
 
-namespace OpenPop.Pop3
+namespace OpenPop.Async.Pop3
 {
     /// <summary>
     /// POP3 compliant POP Client<br/>
     /// <br/>	
-    /// If you want to override where logging is sent, look at <see cref="DefaultLogger"/>
+    /// If you want to override where logging is sent, look at <see cref="OpenPop.Common.Logging.DefaultLogger"/>
     /// </summary>
     /// <example>
     /// Examples are available on the <a href="http://hpop.sourceforge.net/">project homepage</a>.

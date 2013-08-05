@@ -32,7 +32,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -111,7 +111,6 @@
     <Compile Include="Mime\Header\HeaderFieldParser.cs" />
     <Compile Include="Mime\Header\HeaderExtractor.cs" />
     <Compile Include="Pop3\AuthenticationMethod.cs" />
-    <Compile Include="Pop3\Pop3AsyncClient.cs" />
     <Compile Include="Pop3\CramMd5.cs" />
     <Compile Include="Pop3\Disposable.cs" />
     <Compile Include="Pop3\Exceptions\LoginDelayException.cs" />
