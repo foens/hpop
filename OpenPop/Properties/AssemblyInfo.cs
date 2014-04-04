@@ -15,7 +15,7 @@ using System.Security;
 // even though they do not have the FullTrust priviledge.
 // This will not defeat security, since normal security policies
 // like DNS, IO permissions are still in effect
-[assembly: AllowPartiallyTrustedCallers]﻿using System.Reflection;
+[assembly: AllowPartiallyTrustedCallers]
 
 // This file is linked to by other OpenPop projects to make
 // sure that commen assembly information is shared correctly
