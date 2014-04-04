@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<package 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:noNamespaceSchemaLocation="nuspec.xsd"
+>
+  <metadata>
+    
+    <version>$version$</version>
+    <id>OpenPop.NET</id>
+    <title>OpenPop.NET</title>
+    <authors>OpenPop</authors>
+    <owners>OpenPop</owners>
+    <language>en-US</language>
+    <licenseUrl>http://unlicense.org/</licenseUrl>
+    <projectUrl>http://hpop.sourceforge.net/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>OpenPop.NET is Public Domain</copyright>
+
+    <tags>POP3 Client TCP SSL MIME Parsing email</tags>
+    <summary>.NET library written in C# with a full implementation of a POP3 client. Easy to use but yet powerful. Includes a robust MIME parser backed by several hundred test cases.</summary>
+    <releaseNotes>See the main project page (http://hpop.sourceforge.net/) for release notes.</releaseNotes>
+    <description>
+      OpenPop.NET is an open source implementation of a POP3 client and a robust MIME parser written in C#.
+      It allows developers easy access to email on a POP3 server in a matter of minutes.
+
+      The project is backed by several hundred test cases and is therefore believed to be very robust.
+      If you find a bug, please report this by sending an email to hpop-users@lists.sourceforge.net.
+
+      POP3 Client Features
+      - Easy to use POP3 client
+      - Support for plain TCP or TLS/SSL connections
+      - Authentication methods supported
+      - - Plain
+      - - APOP
+      - - CRAM-MD5 (RFC 2195)
+      - CAPA capabilities command supported (RFC 2449)
+
+      MIME Parsing Features
+      - Preserves the MIME email hierarchy
+      - Easy access to different MediaType parts of the email
+      - Headers are parsed into strong types and are easy to examine
+      - Includes robust decoders for
+      - - QuotedPrintable
+      - - Base64
+      - - EncodedWord
+      - - Continuation and encoding of header fields (RFC 2231)
+      - Emails are fully persistable
+    </description>
+
+    <references>
+      <reference file="OpenPop.dll"/>
+    </references>
+
+  </metadata>
+  
+  <files>
+    <file src="OpenPop\bin\Release\OpenPop.*" target="lib\net20" />
+    <file src="OpenPop\bin\net40\OpenPop.*" target="lib\net40" />
+    <file src="OpenPop\**\*.cs" target="src\OpenPop\"/>
+  </files>
+  
+</package>
