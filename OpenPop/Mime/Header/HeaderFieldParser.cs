@@ -111,7 +111,8 @@ namespace OpenPop.Mime.Header
 						// headerValue and has no = in it.
 
 						// Check for illegal content-type
-						if (value.ToUpperInvariant().Equals("TEXT"))
+						string v = value.ToUpperInvariant();
+						if (v.Equals("TEXT") || v.Equals("TEXT/"))
 							value = "text/plain";
 
 						contentType.MediaType = value;
