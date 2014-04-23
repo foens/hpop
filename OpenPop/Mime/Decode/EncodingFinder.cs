@@ -64,6 +64,7 @@ namespace OpenPop.Mime.Decode
 
 			// Some emails incorrectly specify the encoding as utf8, but it should have been utf-8.
 			AddMapping("utf8", Encoding.UTF8);
+			AddMapping("binary", Encoding.ASCII);
 		}
 
 		/// <summary>
