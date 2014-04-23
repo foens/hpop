@@ -380,6 +380,14 @@ namespace OpenPop.Mime
 							break;
 					}
 
+					// Special case: empty part.
+					// skipping by moving start location
+					if(startLocation >= stopLocation)
+					{
+						startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
+						continue;
+					}
+
 					// We have now found the start and end of a message part
 					// Now we create a byte array with the correct length and put the message part's bytes into
 					// it and add it to our list we want to return

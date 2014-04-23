@@ -286,5 +286,30 @@ namespace OpenPopUnitTests.Mime
 
             Assert.AreNotEqual(longFileSize, smallFileSize);
         }
-	}
+
+        [Test]
+        public void TestEmptyPartInMultipartMessage()
+        {
+            const string messagePartContent = "Content-Type: multipart/mixed;\r\n"
+                + "\tboundary=\"----=_NextPart_000_012A_01CDF7CD.431E54B0\"\r\n"
+                + "\r\n"
+                + "------=_NextPart_000_012A_01CDF7CD.431E54B0\r\n"
+                + "------=_NextPart_000_012A_01CDF7CD.431E54B0\r\n"
+                + "\r\n"
+                + "------=_NextPart_000_012A_01CDF7CD.431E54B0\r\n"
+                + "Content-Type: text/plain;\r\n"
+                + "\r\n"
+                + "foo\r\n"
+                + "------=_NextPart_000_012A_01CDF7CD.431E54B0\r\n"
+                + "------=_NextPart_000_012A_01CDF7CD.431E54B0--\r\n"
+                + "\r\n"
+                + "\r\n"
+                ;
+
+            MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+
+            Assert.AreEqual(1, messagePart.MessageParts.Count);
+            Assert.AreEqual("foo", messagePart.MessageParts[0].GetBodyAsText());
+        }
+    }
 }
