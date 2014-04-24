@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using OpenPop.Mime.Header;
+using System.Collections.Specialized;
 
 namespace OpenPopUnitTests.Mime.Header
 {
@@ -31,5 +32,29 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual( expectedName, header.Key, "Header Name" );
 			Assert.AreEqual( expectedValue, header.Value, "Header Value" );
 		}
+
+		[Test]
+		public void TestTabInBase64HeaderValue()
+		{
+			string base64Header = "Disposition-Notification-To: =?windows-1251?B?ZWFzdXJlLg\r\n"
+				+ "\t==?=\r\n"
+				+ "\t<user@server.domain>\r\n"
+				;
+
+			string expectedName = "easure.";
+			string expectedAddress = "user@server.domain";
+
+			NameValueCollection col = HeaderExtractor.ExtractHeaders(base64Header);
+			Assert.AreEqual(1, col.Count);
+
+			MessageHeader header = new MessageHeader(col);
+			Assert.AreEqual(1, header.DispositionNotificationTo.Count);
+
+			RfcMailAddress address = header.DispositionNotificationTo[0];
+			Assert.IsNotNull(address.MailAddress);
+			Assert.AreEqual(expectedName, address.MailAddress.DisplayName);
+			Assert.AreEqual(expectedAddress, address.MailAddress.Address);
+		}
+
 	}
 }

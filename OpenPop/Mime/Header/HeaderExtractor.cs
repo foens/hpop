@@ -81,7 +81,7 @@ namespace OpenPop.Mime.Header
 		/// <param name="messageContent">The message to extract headers from. Does not need the body part. Needs the empty headers end line.</param>
 		/// <returns>A collection of Name and Value pairs of headers</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="messageContent"/> is <see langword="null"/></exception>
-		private static NameValueCollection ExtractHeaders(string messageContent)
+		public static NameValueCollection ExtractHeaders(string messageContent)
 		{
 			if(messageContent == null)
 				throw new ArgumentNullException("messageContent");

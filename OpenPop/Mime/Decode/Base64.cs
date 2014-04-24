@@ -29,6 +29,7 @@ namespace OpenPop.Mime.Decode
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
 					base64Encoded = base64Encoded.Replace("\r\n", "");
+					base64Encoded = base64Encoded.Replace("\t", "");
 
 					byte[] inputBytes = Encoding.ASCII.GetBytes(base64Encoded);
 
