@@ -79,5 +79,19 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(expectedAddress, address.MailAddress.Address);
 		}
 
+
+		[Test]
+		public void TestInvalidParameterCharsetInContentDisposition()
+		{
+			string base64Header = "Content-Disposition: attachment; charset=windows-1251; filename=\"image.jpg\"";
+			string expectedName = "image.jpg";
+
+			NameValueCollection col = HeaderExtractor.ExtractHeaders(base64Header);
+			Assert.AreEqual(1, col.Count);
+
+			MessageHeader header = new MessageHeader(col);
+			Assert.IsNotNull(header.ContentDisposition);
+			Assert.AreEqual(expectedName, header.ContentDisposition.FileName);
+		}
 	}
 }

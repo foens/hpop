@@ -212,6 +212,9 @@ namespace OpenPop.Mime.Header
 						contentDisposition.Size = SizeParser.Parse(value);
 						break;
 
+					case "CHARSET": // ignoring invalid parameter in Content-Disposition
+						break;
+
 					default:
 						if(key.StartsWith("X-"))
 						{
