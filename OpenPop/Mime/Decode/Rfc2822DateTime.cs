@@ -25,13 +25,16 @@ namespace OpenPop.Mime.Decode
 			if(inputDate == null)
 				throw new ArgumentNullException("inputDate");
 
+			// Handle very wrong date time format: Tue Feb 18 10:23:30 2014 (MSK)
+			inputDate = FixSpecialCases(inputDate);
+
 			// Old date specification allows comments and a lot of whitespace
 			inputDate = StripCommentsAndExcessWhitespace(inputDate);
 
 			try
 			{
-                // Extract the DateTime
-                DateTime dateTime = ExtractDateTime(inputDate);
+				// Extract the DateTime
+				DateTime dateTime = ExtractDateTime(inputDate);
 
 				// Bail if we could not parse the date
 				if (dateTime == DateTime.MinValue)
@@ -65,7 +68,6 @@ namespace OpenPop.Mime.Decode
 		/// <param name="dateTime">The date to alter</param>
 		/// <param name="dateInput">The input date, in which the timezone can be found</param>
 		/// <returns>An date altered according to the timezone</returns>
-		/// <exception cref="ArgumentException">If no timezone was found in <paramref name="dateInput"/></exception>
 		private static DateTime AdjustTimezone(DateTime dateTime, string dateInput)
 		{
 			// We know that the timezones are always in the last part of the date input
@@ -73,7 +75,7 @@ namespace OpenPop.Mime.Decode
 			string lastPart = parts[parts.Length - 1];
 
 			// Convert timezones in older formats to [+-]dddd format.
-			lastPart = Regex.Replace(lastPart, @"UT|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|[A-I]|[K-Y]|Z", MatchEvaluator);
+			lastPart = Regex.Replace(lastPart, @"UT|GMT|EST|EDT|CST|CDT|MST|MDT|PST|MSK|PDT|[A-I]|[K-Y]|Z", MatchEvaluator);
 
 			// Find the timezone specification
 			// Example: Fri, 21 Nov 1997 09:55:06 -0600
@@ -164,6 +166,9 @@ namespace OpenPop.Mime.Decode
 				case "PDT": return "-0700"; // PDT is semantically equivalent to -0700
 				case "PST": return "-0800"; // PST is semantically equivalent to -0800
 
+				// EU time zones
+				case "MSK": return "+0400"; // MSK is semantically equivalent to +0400
+
 				default:
 					throw new ArgumentException("Unexpected input");
 			}
@@ -203,7 +208,7 @@ namespace OpenPop.Mime.Decode
 			const string correctFormatButWithDashes = @"\d\d?-[A-Za-z]{3}-" + year + " " + time;
 
 			// We allow both correct and incorrect format
-            const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")|(" + correctFormatButWithDashes + ")";
+			const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")|(" + correctFormatButWithDashes + ")";
 
 			Match match = Regex.Match(dateInput, joinedFormat);
 			if(match.Success)
@@ -277,6 +282,39 @@ namespace OpenPop.Mime.Decode
 			input = Regex.Replace(input, @" ?: ?", ":");
 
 			return input;
+		}
+
+		/// <summary>
+		/// Converts date time string in very wrong date time format:
+		/// Tue Feb 18 10:23:30 2014 (MSK)
+		/// to
+		/// Feb 18 2014 10:23:30 MSK
+		/// </summary>
+		/// <param name="inputDate">The date to convert</param>
+		/// <returns>The corrected string</returns>
+		private static string FixSpecialCases(string inputDate)
+		{
+			const string weekDayPattern = "(?<weekDay>Mon|Tue|Wed|Thu|Fri|Sat|Sun)";
+			const string monthPattern = @"(?<month>[A-Za-z]+)";
+			const string dayPattern = @"(?<day>\d?\d)";
+			const string yearPattern = @"(?<year>\d\d\d\d)";
+			const string timePattern = @"(?<time>\d?\d:\d?\d(:\d?\d)?)";
+			const string timeZonePattern = @"(?<timeZone>[A-Z]{3})";
+
+			string incorrectFormat = String.Format(@"{0} +{1} +{2} +{3} +{4} +\({5}\)", weekDayPattern, monthPattern, dayPattern, timePattern, yearPattern, timeZonePattern);
+
+			Match match = Regex.Match(inputDate, incorrectFormat);
+			if(match.Success)
+			{
+				var month = match.Groups["month"];
+				var day = match.Groups["day"];
+				var year = match.Groups["year"];
+				var time = match.Groups["time"];
+				var timeZone = match.Groups["timeZone"];
+				return String.Format("{0} {1} {2} {3} {4}", day, month, year, time, timeZone);
+			}
+
+			return inputDate;
 		}
 	}
 }
