@@ -637,6 +637,35 @@ namespace OpenPop.Pop3
 		}
 
 		/// <summary>
+		/// Get MessageInfo (identifier and size) of all the messages.<br/>
+		/// Messages marked as deleted are not listed.
+		/// </summary>
+		/// <returns>MessageInfo of each message excluding deleted ones</returns>
+		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
+		public List<MessageInfo> GetMessageInfos()
+		{
+			AssertDisposed();
+
+			if(State != ConnectionState.Transaction)
+				throw new InvalidUseException("Cannot get message infos, when the user has not been authenticated yet");
+
+			List<string> identifiers = GetMessageUids();
+			List<int> sizes = GetMessageSizes();
+
+			if(sizes.Count != identifiers.Count)
+				throw new PopServerException("Server LIST and UIDL responses do not match.");
+			int count = identifiers.Count;
+			List<MessageInfo> messageInfos = new List<MessageInfo>(count);
+			for(int i = 0; i < count; i++)
+			{
+				messageInfos.Add(new MessageInfo(i + 1, identifiers[i], sizes[i]));
+			}
+
+			return messageInfos;
+		}
+
+
+		/// <summary>
 		/// Fetches a message from the server and parses it
 		/// </summary>
 		/// <param name="messageNumber">

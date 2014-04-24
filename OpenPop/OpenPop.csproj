@@ -90,6 +90,7 @@
     <Compile Include="Mime\Decode\Utility.cs" />
     <Compile Include="Mime\Header\Received.cs" />
     <Compile Include="Mime\Header\RfcMailAddress.cs" />
+    <Compile Include="Mime\MessageInfo.cs" />
     <Compile Include="Mime\Traverse\AttachmentFinder.cs" />
     <Compile Include="Mime\Traverse\FindAllMessagePartsWithMediaType.cs" />
     <Compile Include="Mime\Traverse\IQuestionAnswerMessageTraverser.cs" />
