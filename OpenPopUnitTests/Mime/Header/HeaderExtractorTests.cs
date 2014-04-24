@@ -56,5 +56,28 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual(expectedAddress, address.MailAddress.Address);
 		}
 
+		[Test]
+		public void TestSpaceInBase64HeaderValue()
+		{
+			string base64Header = "Disposition-Notification-To: =?windows-1251?B?ZWFzdXJlLg\r\n"
+				+ " ==?=\r\n"
+				+ "\t<user@server.domain>\r\n"
+				;
+
+			string expectedName = "easure.";
+			string expectedAddress = "user@server.domain";
+
+			NameValueCollection col = HeaderExtractor.ExtractHeaders(base64Header);
+			Assert.AreEqual(1, col.Count);
+
+			MessageHeader header = new MessageHeader(col);
+			Assert.AreEqual(1, header.DispositionNotificationTo.Count);
+
+			RfcMailAddress address = header.DispositionNotificationTo[0];
+			Assert.IsNotNull(address.MailAddress);
+			Assert.AreEqual(expectedName, address.MailAddress.DisplayName);
+			Assert.AreEqual(expectedAddress, address.MailAddress.Address);
+		}
+
 	}
 }

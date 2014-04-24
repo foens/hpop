@@ -30,6 +30,7 @@ namespace OpenPop.Mime.Decode
 				{
 					base64Encoded = base64Encoded.Replace("\r\n", "");
 					base64Encoded = base64Encoded.Replace("\t", "");
+					base64Encoded = base64Encoded.Replace(" ", "");
 
 					byte[] inputBytes = Encoding.ASCII.GetBytes(base64Encoded);
 
