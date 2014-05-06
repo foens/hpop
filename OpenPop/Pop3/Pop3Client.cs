@@ -649,16 +649,47 @@ namespace OpenPop.Pop3
 			if(State != ConnectionState.Transaction)
 				throw new InvalidUseException("Cannot get message infos, when the user has not been authenticated yet");
 
-			List<string> identifiers = GetMessageUids();
-			List<int> sizes = GetMessageSizes();
 
+			// getting message identifiers
+			SendCommand("UIDL");
+			Dictionary<int, string> identifiers = new Dictionary<int, string>();
+			string response1;
+			while(!IsLastLineInMultiLineResponse(response1 = StreamUtility.ReadLineAsAscii(Stream)))
+			{
+				String[] pair = response1.Split(' ');
+				int messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
+				string messageIdentifier = pair[1];
+				identifiers.Add(messageNumber, messageIdentifier);
+			}
+
+
+			// getting sizes
+			SendCommand("LIST");
+			Dictionary<int, int> sizes = new Dictionary<int, int>();
+			string response2;
+			while(!IsLastLineInMultiLineResponse(response2 = StreamUtility.ReadLineAsAscii(Stream)))
+			{
+				String[] pair = response2.Split(' ');
+				int messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
+				int messageSize = Int32.Parse(pair[1], CultureInfo.InvariantCulture);
+				sizes.Add(messageNumber, messageSize);
+			}
+
+
+			// simple validation
 			if(sizes.Count != identifiers.Count)
 				throw new PopServerException("Server LIST and UIDL responses do not match.");
+
+
+			// merging two dictionaries
 			int count = identifiers.Count;
 			List<MessageInfo> messageInfos = new List<MessageInfo>(count);
-			for(int i = 0; i < count; i++)
+
+			foreach(int messageNumber in identifiers.Keys)
 			{
-				messageInfos.Add(new MessageInfo(i + 1, identifiers[i], sizes[i]));
+				string identifier = identifiers[messageNumber];
+				int size = sizes[messageNumber];
+				messageInfos.Add(new MessageInfo(messageNumber, identifier, size));
 			}
 
 			return messageInfos;
