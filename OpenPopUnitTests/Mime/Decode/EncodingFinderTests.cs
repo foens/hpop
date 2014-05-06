@@ -77,6 +77,12 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestBinary()
+		{
+			Assert.AreEqual(Encoding.ASCII, EncodingFinder.FindEncoding("binary"));
+		}
+
+		[Test]
 		public void TestMap()
 		{
 			Encoding obscureEncoding = Encoding.UTF32;

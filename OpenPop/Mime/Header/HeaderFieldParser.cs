@@ -111,7 +111,8 @@ namespace OpenPop.Mime.Header
 						// headerValue and has no = in it.
 
 						// Check for illegal content-type
-						if (value.ToUpperInvariant().Equals("TEXT"))
+						string v = value.ToUpperInvariant();
+						if (v.Equals("TEXT") || v.Equals("TEXT/"))
 							value = "text/plain";
 
 						contentType.MediaType = value;
@@ -209,6 +210,9 @@ namespace OpenPop.Mime.Header
 
 					case "SIZE":
 						contentDisposition.Size = SizeParser.Parse(value);
+						break;
+
+					case "CHARSET": // ignoring invalid parameter in Content-Disposition
 						break;
 
 					default:

@@ -755,6 +755,19 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("text/plain", contentType.MediaType);
 			Assert.AreEqual("us-ascii", contentType.CharSet);
 		}
+
+		[Test]
+		public void TestIllegalContentTypeMediaTypeTrailingSlash()
+		{
+			const string contentTypeString =
+				"text/; charset=\"utf-8\";";
+
+			ContentType contentType = null;
+			Assert.DoesNotThrow(delegate { contentType = HeaderFieldParser.ParseContentType(contentTypeString); });
+			Assert.NotNull(contentType);
+			Assert.AreEqual("text/plain", contentType.MediaType);
+			Assert.AreEqual("utf-8", contentType.CharSet);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests

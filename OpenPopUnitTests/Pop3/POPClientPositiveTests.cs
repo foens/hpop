@@ -1498,5 +1498,109 @@ namespace OpenPopUnitTests.Pop3
 		{
 			return builder.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
 		}
+
+		/// <summary>
+		/// Tests that GetMessageInfos correctly associates message numbers, identifiers and sizes
+		/// </summary>
+		[Test]
+		public void TestGetMessageInfos()
+		{
+			// arrange
+			const string welcomeMessage = "+OK";
+			const string okUsername = "+OK";
+			const string okPassword = "+OK";
+
+			const string messageUidAccepted = "+OK";
+			const string messageUid1 = "1 psycho"; // Message 1 has UID psycho
+			const string messageUid2 = "2 lord"; // Message 2 has UID lord
+			const string uidListEnded = ".";
+
+			const string messageListAccepted = "+OK 2 messages (320 octets)";
+			const string messageSize1 = "1 120";
+			const string messageSize2 = "2 200";
+			const string messageListEnd = ".";
+
+
+			const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n"
+				+ messageUidAccepted + "\r\n" + messageUid1 + "\r\n" + messageUid2 + "\r\n" + uidListEnded + "\r\n"
+				+ messageListAccepted + "\r\n" + messageSize1 + "\r\n" + messageSize2 + "\r\n" + messageListEnd + "\r\n"
+				;
+
+			Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+			Stream outputStream = new MemoryStream();
+
+			// act
+			Pop3Client client = new Pop3Client();
+			client.Connect(new CombinedStream(inputStream, outputStream));
+			client.Authenticate("test", "test");
+
+			List<MessageInfo> infos = client.GetMessageInfos();
+
+			// assert
+			Assert.AreEqual(2, infos.Count);
+
+			Assert.AreEqual(1, infos[0].Number);
+			Assert.AreEqual("psycho", infos[0].Identifier);
+			Assert.AreEqual(120, infos[0].Size);
+
+			Assert.AreEqual(2, infos[1].Number);
+			Assert.AreEqual("lord", infos[1].Identifier);
+			Assert.AreEqual(200, infos[1].Size);
+		}
+
+
+        /// <summary>
+        /// Tests that GetMessageInfos correctly associates message numbers, identifiers and sizes
+        /// </summary>
+        [Test]
+        public void TestGetMessageInfosAfterDelete()
+        {
+            // arrange
+            const string welcomeMessage = "+OK";
+            const string okUsername = "+OK";
+            const string okPassword = "+OK";
+
+            const string messageDeleteAccepted = "+OK";
+
+            const string messageUidAccepted = "+OK";
+            const string messageUid1 = "1 psycho"; // Message 1 has UID psycho
+            const string messageUid2 = "3 lord"; // Message 3 has UID lord
+            const string uidListEnded = ".";
+
+            const string messageListAccepted = "+OK 2 messages (320 octets)";
+            const string messageSize1 = "1 120";
+            const string messageSize2 = "3 200";
+            const string messageListEnd = ".";
+
+
+            const string serverResponses = welcomeMessage + "\r\n" + okUsername + "\r\n" + okPassword + "\r\n"
+                + messageDeleteAccepted + "\r\n"
+                + messageUidAccepted + "\r\n" + messageUid1 + "\r\n" + messageUid2 + "\r\n" + uidListEnded + "\r\n"
+                + messageListAccepted + "\r\n" + messageSize1 + "\r\n" + messageSize2 + "\r\n" + messageListEnd + "\r\n"
+                ;
+
+            Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(serverResponses));
+            Stream outputStream = new MemoryStream();
+
+            // act
+            Pop3Client client = new Pop3Client();
+            client.Connect(new CombinedStream(inputStream, outputStream));
+            client.Authenticate("test", "test");
+
+            client.DeleteMessage(2);
+            List<MessageInfo> infos = client.GetMessageInfos();
+
+            // assert
+            Assert.AreEqual(2, infos.Count);
+
+            Assert.AreEqual(1, infos[0].Number);
+            Assert.AreEqual("psycho", infos[0].Identifier);
+            Assert.AreEqual(120, infos[0].Size);
+
+            Assert.AreEqual(3, infos[1].Number);
+            Assert.AreEqual("lord", infos[1].Identifier);
+            Assert.AreEqual(200, infos[1].Size);
+        }
+
 	}
 }

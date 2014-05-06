@@ -426,5 +426,16 @@ namespace OpenPopUnitTests.Mime.Decode
 
 			Assert.AreEqual(expectedOutput, output);
 		}
+
+		[Test]
+		public void TestInvalidDateTimeWithYearAtTheEnd()
+		{
+			const string inputDate = "Tue Feb 18 10:23:30 2014 (MSK)";
+
+			DateTime expectedOutput = new DateTime(2014, 2, 18, 6, 23, 30, DateTimeKind.Utc);
+			DateTime output = Rfc2822DateTime.StringToDate(inputDate);
+
+			Assert.AreEqual(expectedOutput, output);
+		}
 	}
 }
