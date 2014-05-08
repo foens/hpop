@@ -19,9 +19,9 @@ using System.Security;
 
 // This file is linked to by other OpenPop projects to make
 // sure that commen assembly information is shared correctly
-[assembly: AssemblyVersion("2.0.5")]
-[assembly: AssemblyFileVersion("2.0.5.0")]
-[assembly: AssemblyInformationalVersion("2.0.5.0")]
+[assembly: AssemblyVersion("2.0.6")]
+[assembly: AssemblyFileVersion("2.0.6.0")]
+[assembly: AssemblyInformationalVersion("2.0.6.0")]
 
 // This is the configuration when building the assembly
 [assembly: AssemblyConfiguration("Release mode assembly. Built for .NET 2.0")]
