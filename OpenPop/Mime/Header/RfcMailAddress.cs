@@ -114,19 +114,18 @@ namespace OpenPop.Mime.Header
 		}
 		#endregion
 
-		/// <summary>
-		/// A string representation of the <see cref="RfcMailAddress"/> object
-		/// </summary>
-		/// <returns>Returns the string representation for the object</returns>
-		public override string ToString()
-		{
-			if (HasValidMailAddress)
-				return MailAddress.ToString();
+        #region ToString
+        /// <summary>
+	    /// A string representation of the <see cref="RfcMailAddress"/> object
+	    /// </summary>
+	    /// <returns>Returns the string representation for the object</returns>
+	    public override string ToString()
+	    {
+	        return HasValidMailAddress ? MailAddress.ToString() : Raw;
+	    }
+	    #endregion
 
-			return Raw;
-		}
-
-		#region Parsing
+	    #region Parsing
 		/// <summary>
 		/// Parses an email address from a MIME header<br/>
 		/// <br/>

@@ -10,8 +10,7 @@
 		/// Creates a InvalidUseException with the given message
 		///</summary>
 		///<param name="message">The message to include in the exception</param>
-		public InvalidUseException(string message)
-			: base(message)
+		public InvalidUseException(string message) : base(message)
 		{ }
 	}
 }

@@ -12,8 +12,7 @@ namespace OpenPop.Pop3.Exceptions
 		///</summary>
 		///<param name="message">The message to include in the exception</param>
 		///<param name="innerException">The exception that is the cause of this exception</param>
-		public PopServerNotFoundException(string message, Exception innerException)
-			: base(message, innerException)
+		public PopServerNotFoundException(string message, Exception innerException) : base(message, innerException)
 		{ }
 	}
 }

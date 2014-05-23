@@ -81,7 +81,7 @@ namespace OpenPop.Mime
 	/// </example>
 	public class MessagePart
 	{
-		#region Public properties
+		#region Properties
 		/// <summary>
 		/// The Content-Type header field.<br/>
 		/// <br/>
@@ -227,8 +227,8 @@ namespace OpenPop.Mime
 		}
 		#endregion
 
-		#region Parsing
-		/// <summary>
+        #region ParseBodyEncoding
+        /// <summary>
 		/// Parses a character set into an encoding
 		/// </summary>
 		/// <param name="characterSet">The character set that needs to be parsed. <see langword="null"/> is allowed.</param>
@@ -236,7 +236,7 @@ namespace OpenPop.Mime
 		private static Encoding ParseBodyEncoding(string characterSet)
 		{
 			// Default encoding in Mime messages is US-ASCII
-			Encoding encoding = Encoding.ASCII;
+			var encoding = Encoding.ASCII;
 
 			// If the character set was specified, find the encoding that the character
 			// set describes, and use that one instead
@@ -245,205 +245,224 @@ namespace OpenPop.Mime
 
 			return encoding;
 		}
+        #endregion
 
-		/// <summary>
-		/// Figures out the filename of this message part from some headers.
-		/// <see cref="FileName"/> property.
-		/// </summary>
-		/// <param name="contentType">The Content-Type header</param>
-		/// <param name="contentDisposition">The Content-Disposition header</param>
-		/// <param name="defaultName">The default filename to use, if no other could be found</param>
-		/// <returns>The filename found, or the default one if not such filename could be found in the headers</returns>
-		/// <exception cref="ArgumentNullException">if <paramref name="contentType"/> is <see langword="null"/></exception>
-		private static string FindFileName(ContentType contentType, ContentDisposition contentDisposition, string defaultName)
-		{
-			if(contentType == null)
-				throw new ArgumentNullException("contentType");
+        #region FindFileName
+        /// <summary>
+	    /// Figures out the filename of this message part from some headers.
+	    /// <see cref="FileName"/> property.
+	    /// </summary>
+	    /// <param name="contentType">The Content-Type header</param>
+	    /// <param name="contentDisposition">The Content-Disposition header</param>
+	    /// <param name="defaultName">The default filename to use, if no other could be found</param>
+	    /// <returns>The filename found, or the default one if not such filename could be found in the headers</returns>
+	    /// <exception cref="ArgumentNullException">if <paramref name="contentType"/> is <see langword="null"/></exception>
+	    private static string FindFileName(ContentType contentType, ContentDisposition contentDisposition,
+	        string defaultName)
+	    {
+	        if (contentType == null)
+	            throw new ArgumentNullException("contentType");
 
-			if (contentDisposition != null && contentDisposition.FileName != null)
-				return contentDisposition.FileName;
+	        if (contentDisposition != null && contentDisposition.FileName != null)
+	            return contentDisposition.FileName;
 
-			if (contentType.Name != null)
-				return contentType.Name;
+	        return contentType.Name ?? defaultName;
+	    }
+	    #endregion
 
-			return defaultName;
-		}
+        #region ParseBody
+        /// <summary>
+	    /// Parses a byte array as a body of an email message.
+	    /// </summary>
+	    /// <param name="rawBody">The byte array to parse as body of an email message. This array may not contain headers.</param>
+	    private void ParseBody(byte[] rawBody)
+	    {
+	        if (IsMultiPart)
+	        {
+	            // Parses a MultiPart message
+	            ParseMultiPartBody(rawBody);
+	        }
+	        else
+	        {
+	            // Parses a non MultiPart message
+	            // Decode the body accodingly and set the Body property
+	            Body = DecodeBody(rawBody, ContentTransferEncoding);
+	        }
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Parses a byte array as a body of an email message.
-		/// </summary>
-		/// <param name="rawBody">The byte array to parse as body of an email message. This array may not contain headers.</param>
-		private void ParseBody(byte[] rawBody)
-		{
-			if(IsMultiPart)
-			{
-				// Parses a MultiPart message
-				ParseMultiPartBody(rawBody);
-			} else
-			{
-				// Parses a non MultiPart message
-				// Decode the body accodingly and set the Body property
-				Body = DecodeBody(rawBody, ContentTransferEncoding);
-			}
-		}
+        #region ParseMultiPartBody
+        /// <summary>
+	    /// Parses the <paramref name="rawBody"/> byte array as a MultiPart message.<br/>
+	    /// It is not valid to call this method if <see cref="IsMultiPart"/> returned <see langword="false"/>.<br/>
+	    /// Fills the <see cref="MessageParts"/> property of this <see cref="MessagePart"/>.
+	    /// </summary>
+	    /// <param name="rawBody">The byte array which is to be parsed as a MultiPart message</param>
+	    private void ParseMultiPartBody(byte[] rawBody)
+	    {
+	        // Fetch out the boundary used to delimit the messages within the body
+	        var multipartBoundary = ContentType.Boundary;
 
-		/// <summary>
-		/// Parses the <paramref name="rawBody"/> byte array as a MultiPart message.<br/>
-		/// It is not valid to call this method if <see cref="IsMultiPart"/> returned <see langword="false"/>.<br/>
-		/// Fills the <see cref="MessageParts"/> property of this <see cref="MessagePart"/>.
-		/// </summary>
-		/// <param name="rawBody">The byte array which is to be parsed as a MultiPart message</param>
-		private void ParseMultiPartBody(byte[] rawBody)
-		{
-			// Fetch out the boundary used to delimit the messages within the body
-			string multipartBoundary = ContentType.Boundary;
+	        // Fetch the individual MultiPart message parts using the MultiPart boundary
+	        var bodyParts = GetMultiPartParts(rawBody, multipartBoundary);
 
-			// Fetch the individual MultiPart message parts using the MultiPart boundary
-			List<byte[]> bodyParts = GetMultiPartParts(rawBody, multipartBoundary);
+	        // Initialize the MessageParts property, with room to as many bodies as we have found
+	        MessageParts = new List<MessagePart>(bodyParts.Count);
 
-			// Initialize the MessageParts property, with room to as many bodies as we have found
-			MessageParts = new List<MessagePart>(bodyParts.Count);
+	        // Now parse each byte array as a message body and add it the the MessageParts property
+	        foreach (var bodyPart in bodyParts)
+	        {
+	            var messagePart = GetMessagePart(bodyPart);
+	            MessageParts.Add(messagePart);
+	        }
+	    }
+	    #endregion
 
-			// Now parse each byte array as a message body and add it the the MessageParts property
-			foreach (byte[] bodyPart in bodyParts)
-			{
-				MessagePart messagePart = GetMessagePart(bodyPart);
-				MessageParts.Add(messagePart);
-			}
-		}
+        #region GetMessagePart
+        /// <summary>
+	    /// Given a byte array describing a full message.<br/>
+	    /// Parses the byte array into a <see cref="MessagePart"/>.
+	    /// </summary>
+	    /// <param name="rawMessageContent">The byte array containing both headers and body of a message</param>
+	    /// <returns>A <see cref="MessagePart"/> which was described by the <paramref name="rawMessageContent"/> byte array</returns>
+	    private static MessagePart GetMessagePart(byte[] rawMessageContent)
+	    {
+	        // Find the headers and the body parts of the byte array
+	        MessageHeader headers;
+	        byte[] body;
+	        HeaderExtractor.ExtractHeadersAndBody(rawMessageContent, out headers, out body);
 
-		/// <summary>
-		/// Given a byte array describing a full message.<br/>
-		/// Parses the byte array into a <see cref="MessagePart"/>.
-		/// </summary>
-		/// <param name="rawMessageContent">The byte array containing both headers and body of a message</param>
-		/// <returns>A <see cref="MessagePart"/> which was described by the <paramref name="rawMessageContent"/> byte array</returns>
-		private static MessagePart GetMessagePart(byte[] rawMessageContent)
-		{
-			// Find the headers and the body parts of the byte array
-			MessageHeader headers;
-			byte[] body;
-			HeaderExtractor.ExtractHeadersAndBody(rawMessageContent, out headers, out body);
+	        // Create a new MessagePart from the headers and the body
+	        return new MessagePart(body, headers);
+	    }
+	    #endregion
 
-			// Create a new MessagePart from the headers and the body
-			return new MessagePart(body, headers);
-		}
+        #region GetMultiPartParts
+        /// <summary>
+	    /// Gets a list of byte arrays where each entry in the list is a full message of a message part
+	    /// </summary>
+	    /// <param name="rawBody">The raw byte array describing the body of a message which is a MultiPart message</param>
+	    /// <param name="multipPartBoundary">The delimiter that splits the different MultiPart bodies from each other</param>
+	    /// <returns>A list of byte arrays, each a full message of a <see cref="MessagePart"/></returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="rawBody"/> is <see langword="null"/></exception>
+	    private static List<byte[]> GetMultiPartParts(byte[] rawBody, string multipPartBoundary)
+	    {
+	        if (rawBody == null)
+	            throw new ArgumentNullException("rawBody");
 
-		/// <summary>
-		/// Gets a list of byte arrays where each entry in the list is a full message of a message part
-		/// </summary>
-		/// <param name="rawBody">The raw byte array describing the body of a message which is a MultiPart message</param>
-		/// <param name="multipPartBoundary">The delimiter that splits the different MultiPart bodies from each other</param>
-		/// <returns>A list of byte arrays, each a full message of a <see cref="MessagePart"/></returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="rawBody"/> is <see langword="null"/></exception>
-		private static List<byte[]> GetMultiPartParts(byte[] rawBody, string multipPartBoundary)
-		{
-			if(rawBody == null)
-				throw new ArgumentNullException("rawBody");
+	        // This is the list we want to return
+	        var messageBodies = new List<byte[]>();
 
-			// This is the list we want to return
-			List<byte[]> messageBodies = new List<byte[]>();
+	        // Create a stream from which we can find MultiPart boundaries
+	        using (var memoryStream = new MemoryStream(rawBody))
+	        {
+	            bool lastMultipartBoundaryEncountered;
 
-			// Create a stream from which we can find MultiPart boundaries
-			using (MemoryStream stream = new MemoryStream(rawBody))
-			{
-				bool lastMultipartBoundaryEncountered;
+	            // Find the start of the first message in this multipart
+	            // Since the method returns the first character on a the line containing the MultiPart boundary, we
+	            // need to add the MultiPart boundary with prepended "--" and appended CRLF pair to the position returned.
+	            var startLocation =
+	                FindPositionOfNextMultiPartBoundary(memoryStream, multipPartBoundary,
+	                    out lastMultipartBoundaryEncountered) +
+	                ("--" + multipPartBoundary + "\r\n").Length;
+	            while (true)
+	            {
+	                // When we have just parsed the last multipart entry, stop parsing on
+	                if (lastMultipartBoundaryEncountered)
+	                    break;
 
-				// Find the start of the first message in this multipart
-				// Since the method returns the first character on a the line containing the MultiPart boundary, we
-				// need to add the MultiPart boundary with prepended "--" and appended CRLF pair to the position returned.
-				int startLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary, out lastMultipartBoundaryEncountered) + ("--" + multipPartBoundary + "\r\n").Length;
-				while (true)
-				{
-					// When we have just parsed the last multipart entry, stop parsing on
-					if(lastMultipartBoundaryEncountered)
-						break;
+	                // Find the end location of the current multipart
+	                // Since the method returns the first character on a the line containing the MultiPart boundary, we
+	                // need to go a CRLF pair back, so that we do not get that into the body of the message part
+	                var stopLocation =
+	                    FindPositionOfNextMultiPartBoundary(memoryStream, multipPartBoundary,
+	                        out lastMultipartBoundaryEncountered) -
+	                    "\r\n".Length;
 
-					// Find the end location of the current multipart
-					// Since the method returns the first character on a the line containing the MultiPart boundary, we
-					// need to go a CRLF pair back, so that we do not get that into the body of the message part
-					int stopLocation = FindPositionOfNextMultiPartBoundary(stream, multipPartBoundary, out lastMultipartBoundaryEncountered) - "\r\n".Length;
+	                // If we could not find the next multipart boundary, but we had not yet discovered the last boundary, then
+	                // we will consider the rest of the bytes as contained in a last message part.
+	                if (stopLocation <= -1)
+	                {
+	                    // Include everything except the last CRLF.
+	                    stopLocation = (int) memoryStream.Length - "\r\n".Length;
 
-					// If we could not find the next multipart boundary, but we had not yet discovered the last boundary, then
-					// we will consider the rest of the bytes as contained in a last message part.
-					if (stopLocation <= -1)
-					{
-						// Include everything except the last CRLF.
-						stopLocation = (int) stream.Length - "\r\n".Length;
+	                    // We consider this as the last part
+	                    lastMultipartBoundaryEncountered = true;
 
-						// We consider this as the last part
-						lastMultipartBoundaryEncountered = true;
+	                    // Special case: when the last multipart delimiter is not ending with "--", but is indeed the last
+	                    // one, then the next multipart would contain nothing, and we should not include such one.
+	                    if (startLocation >= stopLocation)
+	                        break;
+	                }
 
-						// Special case: when the last multipart delimiter is not ending with "--", but is indeed the last
-						// one, then the next multipart would contain nothing, and we should not include such one.
-						if (startLocation >= stopLocation)
-							break;
-					}
+	                // Special case: empty part.
+	                // skipping by moving start location
+	                if (startLocation >= stopLocation)
+	                {
+	                    startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
+	                    continue;
+	                }
 
-					// Special case: empty part.
-					// skipping by moving start location
-					if(startLocation >= stopLocation)
-					{
-						startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
-						continue;
-					}
+	                // We have now found the start and end of a message part
+	                // Now we create a byte array with the correct length and put the message part's bytes into
+	                // it and add it to our list we want to return
+	                var length = stopLocation - startLocation;
+	                var messageBody = new byte[length];
+	                Array.Copy(rawBody, startLocation, messageBody, 0, length);
+	                messageBodies.Add(messageBody);
 
-					// We have now found the start and end of a message part
-					// Now we create a byte array with the correct length and put the message part's bytes into
-					// it and add it to our list we want to return
-					int length = stopLocation - startLocation;
-					byte[] messageBody = new byte[length];
-					Array.Copy(rawBody, startLocation, messageBody, 0, length);
-					messageBodies.Add(messageBody);
+	                // We want to advance to the next message parts start.
+	                // We can find this by jumping forward the MultiPart boundary from the last
+	                // message parts end position
+	                startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
+	            }
+	        }
 
-					// We want to advance to the next message parts start.
-					// We can find this by jumping forward the MultiPart boundary from the last
-					// message parts end position
-					startLocation = stopLocation + ("\r\n" + "--" + multipPartBoundary + "\r\n").Length;
-				}
-			}
+	        // We are done
+	        return messageBodies;
+	    }
+	    #endregion
 
-			// We are done
-			return messageBodies;
-		}
+        #region FindPositionOfNextMultiPartBoundary
+        /// <summary>
+	    /// Method that is able to find a specific MultiPart boundary in a Stream.<br/>
+	    /// The Stream passed should not be used for anything else then for looking for MultiPart boundaries
+	    /// <param name="stream">The stream to find the next MultiPart boundary in. Do not use it for anything else then with this method.</param>
+	    /// <param name="multiPartBoundary">The MultiPart boundary to look for. This should be found in the <see cref="ContentType"/> header</param>
+	    /// <param name="lastMultipartBoundaryFound">Is set to <see langword="true"/> if the next MultiPart boundary was indicated to be the last one, by having -- appended to it. Otherwise set to <see langword="false"/></param>
+	    /// </summary>
+	    /// <returns>The position of the first character of the line that contained MultiPartBoundary or -1 if no (more) MultiPart boundaries was found</returns>
+	    private static int FindPositionOfNextMultiPartBoundary(Stream stream, string multiPartBoundary,
+	        out bool lastMultipartBoundaryFound)
+	    {
+	        lastMultipartBoundaryFound = false;
+	        while (true)
+	        {
+	            // Get the current position. This is the first position on the line - no characters of the line will
+	            // have been read yet
+	            var currentPos = (int) stream.Position;
 
-		/// <summary>
-		/// Method that is able to find a specific MultiPart boundary in a Stream.<br/>
-		/// The Stream passed should not be used for anything else then for looking for MultiPart boundaries
-		/// <param name="stream">The stream to find the next MultiPart boundary in. Do not use it for anything else then with this method.</param>
-		/// <param name="multiPartBoundary">The MultiPart boundary to look for. This should be found in the <see cref="ContentType"/> header</param>
-		/// <param name="lastMultipartBoundaryFound">Is set to <see langword="true"/> if the next MultiPart boundary was indicated to be the last one, by having -- appended to it. Otherwise set to <see langword="false"/></param>
-		/// </summary>
-		/// <returns>The position of the first character of the line that contained MultiPartBoundary or -1 if no (more) MultiPart boundaries was found</returns>
-		private static int FindPositionOfNextMultiPartBoundary(Stream stream, string multiPartBoundary, out bool lastMultipartBoundaryFound)
-		{
-			lastMultipartBoundaryFound = false;
-			while(true)
-			{
-				// Get the current position. This is the first position on the line - no characters of the line will
-				// have been read yet
-				int currentPos = (int) stream.Position;
+	            // Read the line
+	            var line = StreamUtility.ReadLineAsAscii(stream);
 
-				// Read the line
-				string line = StreamUtility.ReadLineAsAscii(stream);
+	            // If we kept reading until there was no more lines, we did not meet
+	            // the MultiPart boundary. -1 is then returned to describe this.
+	            if (line == null)
+	                return -1;
 
-				// If we kept reading until there was no more lines, we did not meet
-				// the MultiPart boundary. -1 is then returned to describe this.
-				if (line == null)
-					return -1;
+	            // The MultiPart boundary is the MultiPartBoundary with "--" in front of it
+	            // which is to be at the very start of a line
+	            if (!line.StartsWith("--" + multiPartBoundary, StringComparison.Ordinal)) continue;
+	            // Check if the found boundary was also the last one
+	            lastMultipartBoundaryFound = line.StartsWith("--" + multiPartBoundary + "--",
+	                StringComparison.OrdinalIgnoreCase);
+	            return currentPos;
+	        }
+	    }
+	    #endregion
 
-				// The MultiPart boundary is the MultiPartBoundary with "--" in front of it
-				// which is to be at the very start of a line
-				if (line.StartsWith("--" + multiPartBoundary, StringComparison.Ordinal))
-				{
-					// Check if the found boundary was also the last one
-					lastMultipartBoundaryFound = line.StartsWith("--" + multiPartBoundary + "--", StringComparison.OrdinalIgnoreCase);
-					return currentPos;
-				}
-			}
-		}
-
-		/// <summary>
+        #region  DecodeBody
+        /// <summary>
 		/// Decodes a byte array into another byte array based upon the Content Transfer encoding
 		/// </summary>
 		/// <param name="messageBody">The byte array to decode into another byte array</param>
