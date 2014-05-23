@@ -92,125 +92,126 @@ namespace OpenPop.Mime
 		}
 		#endregion
 
-		/// <summary>
-		/// This method will convert this <see cref="Message"/> into a <see cref="MailMessage"/> equivalent.<br/>
-		/// The returned <see cref="MailMessage"/> can be used with <see cref="System.Net.Mail.SmtpClient"/> to forward the email.<br/>
-		/// <br/>
-		/// You should be aware of the following about this method:
-		/// <list type="bullet">
-		/// <item>
-		///    All sender and receiver mail addresses are set.
-		///    If you send this email using a <see cref="System.Net.Mail.SmtpClient"/> then all
-		///    receivers in To, From, Cc and Bcc will receive the email once again.
-		/// </item>
-		/// <item>
-		///    If you view the source code of this Message and looks at the source code of the forwarded
-		///    <see cref="MailMessage"/> returned by this method, you will notice that the source codes are not the same.
-		///    The content that is presented by a mail client reading the forwarded <see cref="MailMessage"/> should be the
-		///    same as the original, though.
-		/// </item>
-		/// <item>
-		///    Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
-		///    It is simply not possible to set these on Attachments.
-		/// </item>
-		/// <item>
-		///    HTML content will be treated as the preferred view for the <see cref="MailMessage.Body"/>. Plain text content will be used for the
-		///    <see cref="MailMessage.Body"/> when HTML is not available.
-		/// </item>
-		/// </list>
-		/// </summary>
-		/// <returns>A <see cref="MailMessage"/> object that contains the same information that this Message does</returns>
-		public MailMessage ToMailMessage()
-		{
-			// Construct an empty MailMessage to which we will gradually build up to look like the current Message object (this)
-			MailMessage message = new MailMessage();
+        #region ToMailMessage
+        /// <summary>
+	    /// This method will convert this <see cref="Message"/> into a <see cref="MailMessage"/> equivalent.<br/>
+	    /// The returned <see cref="MailMessage"/> can be used with <see cref="System.Net.Mail.SmtpClient"/> to forward the email.<br/>
+	    /// <br/>
+	    /// You should be aware of the following about this method:
+	    /// <list type="bullet">
+	    /// <item>
+	    ///    All sender and receiver mail addresses are set.
+	    ///    If you send this email using a <see cref="System.Net.Mail.SmtpClient"/> then all
+	    ///    receivers in To, From, Cc and Bcc will receive the email once again.
+	    /// </item>
+	    /// <item>
+	    ///    If you view the source code of this Message and looks at the source code of the forwarded
+	    ///    <see cref="MailMessage"/> returned by this method, you will notice that the source codes are not the same.
+	    ///    The content that is presented by a mail client reading the forwarded <see cref="MailMessage"/> should be the
+	    ///    same as the original, though.
+	    /// </item>
+	    /// <item>
+	    ///    Content-Disposition headers will not be copied to the <see cref="MailMessage"/>.
+	    ///    It is simply not possible to set these on Attachments.
+	    /// </item>
+	    /// <item>
+	    ///    HTML content will be treated as the preferred view for the <see cref="MailMessage.Body"/>. Plain text content will be used for the
+	    ///    <see cref="MailMessage.Body"/> when HTML is not available.
+	    /// </item>
+	    /// </list>
+	    /// </summary>
+	    /// <returns>A <see cref="MailMessage"/> object that contains the same information that this Message does</returns>
+	    public MailMessage ToMailMessage()
+	    {
+	        // Construct an empty MailMessage to which we will gradually build up to look like the current Message object (this)
+	        var message = new MailMessage();
 
-			message.Subject = Headers.Subject;
+	        message.Subject = Headers.Subject;
 
-			// We here set the encoding to be UTF-8
-			// We cannot determine what the encoding of the subject was at this point.
-			// But since we know that strings in .NET is stored in UTF, we can
-			// use UTF-8 to decode the subject into bytes
-			message.SubjectEncoding = Encoding.UTF8;
-			
-			// The HTML version should take precedent over the plain text if it is available
-			MessagePart preferredVersion = FindFirstHtmlVersion();
-			if ( preferredVersion != null )
-			{
-				// Make sure that the IsBodyHtml property is being set correctly for our content
-				message.IsBodyHtml = true;
-			}
-			else
-			{
-				// otherwise use the first plain text version as the body, if it exists
-				preferredVersion = FindFirstPlainTextVersion();
-			}
+	        // We here set the encoding to be UTF-8
+	        // We cannot determine what the encoding of the subject was at this point.
+	        // But since we know that strings in .NET is stored in UTF, we can
+	        // use UTF-8 to decode the subject into bytes
+	        message.SubjectEncoding = Encoding.UTF8;
 
-			if (preferredVersion != null)
-			{
-				message.Body = preferredVersion.GetBodyAsText();
-				message.BodyEncoding = preferredVersion.BodyEncoding;
-			}
+	        // The HTML version should take precedent over the plain text if it is available
+	        var preferredVersion = FindFirstHtmlVersion();
+	        if (preferredVersion != null)
+	        {
+	            // Make sure that the IsBodyHtml property is being set correctly for our content
+	            message.IsBodyHtml = true;
+	        }
+	        else
+	        {
+	            // otherwise use the first plain text version as the body, if it exists
+	            preferredVersion = FindFirstPlainTextVersion();
+	        }
 
-			// Add body and alternative views (html and such) to the message
-			IEnumerable<MessagePart> textVersions = FindAllTextVersions();
-			foreach (MessagePart textVersion in textVersions)
-			{
-				// The textVersions also contain the preferred version, therefore
-				// we should skip that one
-				if (textVersion == preferredVersion)
-					continue;
+	        if (preferredVersion != null)
+	        {
+	            message.Body = preferredVersion.GetBodyAsText();
+	            message.BodyEncoding = preferredVersion.BodyEncoding;
+	        }
 
-				MemoryStream stream = new MemoryStream(textVersion.Body);
-				AlternateView alternative = new AlternateView(stream);
-				alternative.ContentId = textVersion.ContentId;
-				alternative.ContentType = textVersion.ContentType;
-				message.AlternateViews.Add(alternative);
-			}
+	        // Add body and alternative views (html and such) to the message
+	        IEnumerable<MessagePart> textVersions = FindAllTextVersions();
+	        foreach (var textVersion in textVersions)
+	        {
+	            // The textVersions also contain the preferred version, therefore
+	            // we should skip that one
+	            if (textVersion == preferredVersion)
+	                continue;
 
-			// Add attachments to the message
-			IEnumerable<MessagePart> attachments = FindAllAttachments();
-			foreach (MessagePart attachmentMessagePart in attachments)
-			{
-				MemoryStream stream = new MemoryStream(attachmentMessagePart.Body);
-				Attachment attachment = new Attachment(stream, attachmentMessagePart.ContentType);
-				attachment.ContentId = attachmentMessagePart.ContentId;
-				message.Attachments.Add(attachment);
-			}
+	            var memoryStream = new MemoryStream(textVersion.Body);
+	            var alternateView = new AlternateView(memoryStream);
+	            alternateView.ContentId = textVersion.ContentId;
+	            alternateView.ContentType = textVersion.ContentType;
+	            message.AlternateViews.Add(alternateView);
+	        }
 
-			if(Headers.From != null && Headers.From.HasValidMailAddress)
-				message.From = Headers.From.MailAddress;
+	        // Add attachments to the message
+	        IEnumerable<MessagePart> attachments = FindAllAttachments();
+	        foreach (var attachmentMessagePart in attachments)
+	        {
+	            var memoryStream = new MemoryStream(attachmentMessagePart.Body);
+	            var attachment = new Attachment(memoryStream, attachmentMessagePart.ContentType);
+	            attachment.ContentId = attachmentMessagePart.ContentId;
+	            message.Attachments.Add(attachment);
+	        }
 
-			if (Headers.ReplyTo != null && Headers.ReplyTo.HasValidMailAddress)
-				message.ReplyTo = Headers.ReplyTo.MailAddress;
+	        if (Headers.From != null && Headers.From.HasValidMailAddress)
+	            message.From = Headers.From.MailAddress;
 
-			if(Headers.Sender != null && Headers.Sender.HasValidMailAddress)
-				message.Sender = Headers.Sender.MailAddress;
+	        if (Headers.ReplyTo != null && Headers.ReplyTo.HasValidMailAddress)
+	            message.ReplyToList.Add(Headers.ReplyTo.MailAddress);
 
-			foreach (RfcMailAddress to in Headers.To)
-			{
-				if(to.HasValidMailAddress)
-					message.To.Add(to.MailAddress);
-			}
+	        if (Headers.Sender != null && Headers.Sender.HasValidMailAddress)
+	            message.Sender = Headers.Sender.MailAddress;
 
-			foreach (RfcMailAddress cc in Headers.Cc)
-			{
-				if (cc.HasValidMailAddress)
-					message.CC.Add(cc.MailAddress);
-			}
+	        foreach (var to in Headers.To)
+	        {
+	            if (to.HasValidMailAddress)
+	                message.To.Add(to.MailAddress);
+	        }
 
-			foreach (RfcMailAddress bcc in Headers.Bcc)
-			{
-				if (bcc.HasValidMailAddress)
-					message.Bcc.Add(bcc.MailAddress);
-			}
+	        foreach (var cc in Headers.Cc)
+	        {
+	            if (cc.HasValidMailAddress)
+	                message.CC.Add(cc.MailAddress);
+	        }
 
-			return message;
-		}
+	        foreach (var bcc in Headers.Bcc)
+	        {
+	            if (bcc.HasValidMailAddress)
+	                message.Bcc.Add(bcc.MailAddress);
+	        }
 
-		#region MessagePart Searching Methods
+	        return message;
+	    }
+	    #endregion
 
-		/// <summary>
+        #region FindFirstPlainTextVersion
+        /// <summary>
 		/// Finds the first text/plain <see cref="MessagePart"/> in this message.<br/>
 		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
 		/// <br/>
@@ -224,66 +225,76 @@ namespace OpenPop.Mime
 		{
 			return FindFirstMessagePartWithMediaType("text/plain");
 		}
+        #endregion
 
-		/// <summary>
-		/// Finds the first text/html <see cref="MessagePart"/> in this message.<br/>
-		/// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
-		/// <br/>
-		/// If no text/html version is found, <see langword="null"/> is returned.
-		/// </summary>
-		/// <returns>
-		/// <see cref="MessagePart"/> which has a MediaType of text/html or <see langword="null"/>
-		/// if such <see cref="MessagePart"/> could not be found.
-		/// </returns>
-		public MessagePart FindFirstHtmlVersion()
-		{
-			return FindFirstMessagePartWithMediaType("text/html");
-		}
+	    #region FindFirstHtmlVersion
+	    /// <summary>
+	    /// Finds the first text/html <see cref="MessagePart"/> in this message.<br/>
+	    /// This is a convenience method - it simply propagates the call to <see cref="FindFirstMessagePartWithMediaType"/>.<br/>
+	    /// <br/>
+	    /// If no text/html version is found, <see langword="null"/> is returned.
+	    /// </summary>
+	    /// <returns>
+	    /// <see cref="MessagePart"/> which has a MediaType of text/html or <see langword="null"/>
+	    /// if such <see cref="MessagePart"/> could not be found.
+	    /// </returns>
+	    public MessagePart FindFirstHtmlVersion()
+	    {
+	        return FindFirstMessagePartWithMediaType("text/html");
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Finds all the <see cref="MessagePart"/>'s which contains a text version.<br/>
-		/// <br/>
-		/// <see cref="Mime.MessagePart.IsText"/> for MessageParts which are considered to be text versions.<br/>
-		/// <br/>
-		/// Examples of MessageParts media types are:
-		/// <list type="bullet">
-		///    <item>text/plain</item>
-		///    <item>text/html</item>
-		///    <item>text/xml</item>
-		/// </list>
-		/// </summary>
-		/// <returns>A List of MessageParts where each part is a text version</returns>
-		public List<MessagePart> FindAllTextVersions()
-		{
-			return new TextVersionFinder().VisitMessage(this);
-		}
+	    #region FindAllTextVersions
+	    /// <summary>
+	    /// Finds all the <see cref="MessagePart"/>'s which contains a text version.<br/>
+	    /// <br/>
+	    /// <see cref="Mime.MessagePart.IsText"/> for MessageParts which are considered to be text versions.<br/>
+	    /// <br/>
+	    /// Examples of MessageParts media types are:
+	    /// <list type="bullet">
+	    ///    <item>text/plain</item>
+	    ///    <item>text/html</item>
+	    ///    <item>text/xml</item>
+	    /// </list>
+	    /// </summary>
+	    /// <returns>A List of MessageParts where each part is a text version</returns>
+	    public List<MessagePart> FindAllTextVersions()
+	    {
+	        return new TextVersionFinder().VisitMessage(this);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Finds all the <see cref="MessagePart"/>'s which are attachments to this message.<br/>
-		/// <br/>
-		/// <see cref="Mime.MessagePart.IsAttachment"/> for MessageParts which are considered to be attachments.
-		/// </summary>
-		/// <returns>A List of MessageParts where each is considered an attachment</returns>
-		public List<MessagePart> FindAllAttachments()
-		{
-			return new AttachmentFinder().VisitMessage(this);
-		}
+	    #region FindAllAttachments
+	    /// <summary>
+	    /// Finds all the <see cref="MessagePart"/>'s which are attachments to this message.<br/>
+	    /// <br/>
+	    /// <see cref="Mime.MessagePart.IsAttachment"/> for MessageParts which are considered to be attachments.
+	    /// </summary>
+	    /// <returns>A List of MessageParts where each is considered an attachment</returns>
+	    public List<MessagePart> FindAllAttachments()
+	    {
+	        return new AttachmentFinder().VisitMessage(this);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.<br/>
-		/// <br/>
-		/// The search in the hierarchy is a depth-first traversal.
-		/// </summary>
-		/// <param name="mediaType">The MediaType to search for. Case is ignored.</param>
-		/// <returns>
-		/// A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found
-		/// </returns>
-		public MessagePart FindFirstMessagePartWithMediaType(string mediaType)
-		{
-			return new FindFirstMessagePartWithMediaType().VisitMessage(this, mediaType);
-		}
+	    #region FindFirstMessagePartWithMediaType
+	    /// <summary>
+	    /// Finds the first <see cref="MessagePart"/> in the <see cref="Message"/> hierarchy with the given MediaType.<br/>
+	    /// <br/>
+	    /// The search in the hierarchy is a depth-first traversal.
+	    /// </summary>
+	    /// <param name="mediaType">The MediaType to search for. Case is ignored.</param>
+	    /// <returns>
+	    /// A <see cref="MessagePart"/> with the given MediaType or <see langword="null"/> if no such <see cref="MessagePart"/> was found
+	    /// </returns>
+	    public MessagePart FindFirstMessagePartWithMediaType(string mediaType)
+	    {
+	        return new FindFirstMessagePartWithMediaType().VisitMessage(this, mediaType);
+	    }
+	    #endregion
 
-		/// <summary>
+        #region FindAllMessagePartsWithMediaType
+        /// <summary>
 		/// Finds all the <see cref="MessagePart"/>s in the <see cref="Message"/> hierarchy with the given MediaType.
 		/// </summary>
 		/// <param name="mediaType">The MediaType to search for. Case is ignored.</param>
@@ -297,11 +308,9 @@ namespace OpenPop.Mime
 		{
 			return new FindAllMessagePartsWithMediaType().VisitMessage(this, mediaType);
 		}
-
 		#endregion
 
-		#region Message Persistence
-
+		#region Save
 		/// <summary>
 		/// Save this <see cref="Message"/> to a file.<br/>
 		/// <br/>
@@ -315,10 +324,8 @@ namespace OpenPop.Mime
 			if (file == null)
 				throw new ArgumentNullException("file");
 
-			using (FileStream stream = new FileStream(file.FullName, FileMode.Create))
-			{
-				Save(stream);
-			}
+			using (var fileStream = new FileStream(file.FullName, FileMode.Create))
+				Save(fileStream);
 		}
 
 		/// <summary>
@@ -334,8 +341,10 @@ namespace OpenPop.Mime
 
 			messageStream.Write(RawMessage, 0, RawMessage.Length);
 		}
+        #endregion
 
-		/// <summary>
+        #region Load
+        /// <summary>
 		/// Loads a <see cref="Message"/> from a file containing a raw email.
 		/// </summary>
 		/// <param name="file">The File location to load the <see cref="Message"/> from. The file must exist.</param>
@@ -351,12 +360,9 @@ namespace OpenPop.Mime
 			if (!file.Exists)
 				throw new FileNotFoundException("Cannot load message from non-existent file", file.FullName);
 
-			using (FileStream stream = new FileStream(file.FullName, FileMode.Open))
-			{
-				return Load(stream);
-			}
+			using (var fileStream = new FileStream(file.FullName, FileMode.Open))
+                return Load(fileStream);
 		}
-
 
 		/// <summary>
 		/// Loads a <see cref="Message"/> from a <see cref="Stream"/> containing a raw email.
@@ -370,23 +376,11 @@ namespace OpenPop.Mime
 			if (messageStream == null)
 				throw new ArgumentNullException("messageStream");
 
-			using (MemoryStream outStream = new MemoryStream())
+			using (var memoryStream = new MemoryStream())
 			{
-#if DOTNET4
-				// TODO: Enable using native v4 framework methods when support is formally added.
-				messageStream.CopyTo(outStream);
-#else
-				int bytesRead;
-				byte[] buffer = new byte[4096];
-
-				while ((bytesRead = messageStream.Read(buffer, 0, 4096)) > 0)
-				{
-					outStream.Write(buffer, 0, bytesRead);
-				}
-#endif
-				byte[] content = outStream.ToArray();
-
-				return new Message(content);
+                messageStream.CopyTo(memoryStream);
+                var content = memoryStream.ToArray();
+                return new Message(content);
 			}
 		}
 		#endregion

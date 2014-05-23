@@ -10,66 +10,78 @@ namespace OpenPop.Mime.Decode
 	/// It does not know about differences such as kilobits vs kilobytes.
 	/// </summary>
 	static class SizeParser
-	{
-		private static readonly Dictionary<string, long> UnitsToMultiplicator = InitializeSizes();
+    {
+        #region Fields
+        private static readonly Dictionary<string, long> UnitsToMultiplicator = InitializeSizes();
+        #endregion
 
-		private static Dictionary<string, long> InitializeSizes()
-		{
-			return new Dictionary<string, long>
-			{ 
-				{ "", 1L },  // No unit is the same as a byte
-				{ "B", 1L }, // Byte
-				{ "KB", 1024L }, // Kilobyte
-				{ "MB", 1024L * 1024L}, // Megabyte
-				{ "GB", 1024L * 1024L * 1024L}, // Gigabyte
-				{ "TB", 1024L * 1024L * 1024L * 1024L} // Terabyte
-			};
-		}
+        #region InitializeSizes
+        private static Dictionary<string, long> InitializeSizes()
+	    {
+	        return new Dictionary<string, long>
+	        {
+	            {"", 1L}, // No unit is the same as a byte
+	            {"B", 1L}, // Byte
+	            {"KB", 1024L}, // Kilobyte
+	            {"MB", 1024L*1024L}, // Megabyte
+	            {"GB", 1024L*1024L*1024L}, // Gigabyte
+	            {"TB", 1024L*1024L*1024L*1024L} // Terabyte
+	        };
+	    }
+	    #endregion
 
-		public static long Parse(string value)
-		{
-			value = value.Trim();
+        #region Parse
+        public static long Parse(string value)
+	    {
+	        value = value.Trim();
 
-			string unit = ExtractUnit(value);
-			string valueWithoutUnit = value.Substring(0, value.Length - unit.Length).Trim();
+	        var unit = ExtractUnit(value);
+	        var valueWithoutUnit = value.Substring(0, value.Length - unit.Length).Trim();
 
-			long multiplicatorForUnit = MultiplicatorForUnit(unit);
+	        var multiplicatorForUnit = MultiplicatorForUnit(unit);
 
-			double size = double.Parse(valueWithoutUnit, NumberStyles.Number, CultureInfo.InvariantCulture);
+	        var size = double.Parse(valueWithoutUnit, NumberStyles.Number, CultureInfo.InvariantCulture);
 
-			return (long)(multiplicatorForUnit * size);
-		}
+	        return (long) (multiplicatorForUnit*size);
+	    }
+	    #endregion
 
-		private static string ExtractUnit(string sizeWithUnit)
-		{
-			// start right, end at the first digit
-			int lastChar = sizeWithUnit.Length - 1;
-			int unitLength = 0;
+        #region ExtractUnit
+        private static string ExtractUnit(string sizeWithUnit)
+	    {
+	        // start right, end at the first digit
+	        var lastChar = sizeWithUnit.Length - 1;
+	        var unitLength = 0;
 
-			while (unitLength <= lastChar
-				&& sizeWithUnit[lastChar - unitLength] != ' '       // stop when a space
-				&& !IsDigit(sizeWithUnit[lastChar - unitLength]))   // or digit is found
-			{
-				unitLength++;
-			}
+	        while (unitLength <= lastChar
+	               && sizeWithUnit[lastChar - unitLength] != ' ' // stop when a space
+	               && !IsDigit(sizeWithUnit[lastChar - unitLength])) // or digit is found
+	        {
+	            unitLength++;
+	        }
 
-			return sizeWithUnit.Substring(sizeWithUnit.Length - unitLength).ToUpperInvariant();
-		}
+	        return sizeWithUnit.Substring(sizeWithUnit.Length - unitLength).ToUpperInvariant();
+	    }
+	    #endregion
 
-		private static bool IsDigit(char value)
-		{
-			// we don't want to use char.IsDigit since it would accept esoterical unicode digits
-			return value >= '0' && value <= '9';
-		}
+        #region IsDigit
+        private static bool IsDigit(char value)
+	    {
+	        // we don't want to use char.IsDigit since it would accept esoterical unicode digits
+	        return value >= '0' && value <= '9';
+	    }
+	    #endregion
 
-		private static long MultiplicatorForUnit(string unit)
-		{
-			unit = unit.ToUpperInvariant();
+        #region MultiplicatorForUnit
+        private static long MultiplicatorForUnit(string unit)
+	    {
+	        unit = unit.ToUpperInvariant();
 
-			if (!UnitsToMultiplicator.ContainsKey(unit))
-				throw new ArgumentException("illegal or unknown unit: \"" + unit + "\"", "unit");
+	        if (!UnitsToMultiplicator.ContainsKey(unit))
+	            throw new ArgumentException("illegal or unknown unit: \"" + unit + "\"", "unit");
 
-			return UnitsToMultiplicator[unit];
-		}
+	        return UnitsToMultiplicator[unit];
+	    }
+	    #endregion
 	}
 }

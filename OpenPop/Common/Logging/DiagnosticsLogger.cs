@@ -7,8 +7,9 @@ namespace OpenPop.Common.Logging
 	/// <see cref="System.Diagnostics.Trace"/> facilities.
 	/// </summary>
 	public class DiagnosticsLogger : ILog
-	{
-		/// <summary>
+    {
+        #region LogError
+        /// <summary>
 		/// Logs an error message to the System Trace facility
 		/// </summary>
 		/// <param name="message">This is the error message to log</param>
@@ -19,8 +20,10 @@ namespace OpenPop.Common.Logging
 
 			System.Diagnostics.Trace.WriteLine("OpenPOP: " + message);
 		}
+        #endregion
 
-		/// <summary>
+        #region LogDebug
+        /// <summary>
 		/// Logs a debug message to the system Trace Facility
 		/// </summary>
 		/// <param name="message">This is the debug message to log</param>
@@ -30,6 +33,7 @@ namespace OpenPop.Common.Logging
 				throw new ArgumentNullException("message");
 
 			System.Diagnostics.Trace.WriteLine("OpenPOP: (DEBUG) " + message);
-		}
-	}
+        }
+        #endregion
+    }
 }

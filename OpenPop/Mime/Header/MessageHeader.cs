@@ -228,70 +228,70 @@ namespace OpenPop.Mime.Header
 		public string Subject { get; private set; }
 		#endregion
 
-		/// <summary>
-		/// Parses a <see cref="NameValueCollection"/> to a MessageHeader
-		/// </summary>
-		/// <param name="headers">The collection that should be traversed and parsed</param>
-		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
-		internal MessageHeader(NameValueCollection headers)
-		{
-			if (headers == null)
-				throw new ArgumentNullException("headers");
+	    #region Constructor
+	    /// <summary>
+	    /// Parses a <see cref="NameValueCollection"/> to a MessageHeader
+	    /// </summary>
+	    /// <param name="headers">The collection that should be traversed and parsed</param>
+	    /// <returns>A valid MessageHeader object</returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
+	    internal MessageHeader(NameValueCollection headers)
+	    {
+	        if (headers == null)
+	            throw new ArgumentNullException("headers");
 
-			// Create empty lists as defaults. We do not like null values
-			// List with an initial capacity set to zero will be replaced
-			// when a corrosponding header is found
-			To = new List<RfcMailAddress>(0);
-			Cc = new List<RfcMailAddress>(0);
-			Bcc = new List<RfcMailAddress>(0);
-			Received = new List<Received>();
-			Keywords = new List<string>();
-			InReplyTo = new List<string>(0);
-			References = new List<string>(0);
-			DispositionNotificationTo = new List<RfcMailAddress>();
-			UnknownHeaders = new NameValueCollection();
+	        // Create empty lists as defaults. We do not like null values
+	        // List with an initial capacity set to zero will be replaced
+	        // when a corrosponding header is found
+	        To = new List<RfcMailAddress>(0);
+	        Cc = new List<RfcMailAddress>(0);
+	        Bcc = new List<RfcMailAddress>(0);
+	        Received = new List<Received>();
+	        Keywords = new List<string>();
+	        InReplyTo = new List<string>(0);
+	        References = new List<string>(0);
+	        DispositionNotificationTo = new List<RfcMailAddress>();
+	        UnknownHeaders = new NameValueCollection();
 
-			// Default importancetype is Normal (assumed if not set)
-			Importance = MailPriority.Normal;
+	        // Default importancetype is Normal (assumed if not set)
+	        Importance = MailPriority.Normal;
 
-			// 7BIT is the default ContentTransferEncoding (assumed if not set)
-			ContentTransferEncoding = ContentTransferEncoding.SevenBit;
+	        // 7BIT is the default ContentTransferEncoding (assumed if not set)
+	        ContentTransferEncoding = ContentTransferEncoding.SevenBit;
 
-			// text/plain; charset=us-ascii is the default ContentType
-			ContentType = new ContentType("text/plain; charset=us-ascii");
+	        // text/plain; charset=us-ascii is the default ContentType
+	        ContentType = new ContentType("text/plain; charset=us-ascii");
 
-			// Now parse the actual headers
-			ParseHeaders(headers);
-		}
+	        // Now parse the actual headers
+	        ParseHeaders(headers);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Parses a <see cref="NameValueCollection"/> to a <see cref="MessageHeader"/>
-		/// </summary>
-		/// <param name="headers">The collection that should be traversed and parsed</param>
-		/// <returns>A valid <see cref="MessageHeader"/> object</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
-		private void ParseHeaders(NameValueCollection headers)
-		{
-			if (headers == null)
-				throw new ArgumentNullException("headers");
+        #region ParseHeaders
+        /// <summary>
+	    /// Parses a <see cref="NameValueCollection"/> to a <see cref="MessageHeader"/>
+	    /// </summary>
+	    /// <param name="headers">The collection that should be traversed and parsed</param>
+	    /// <returns>A valid <see cref="MessageHeader"/> object</returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
+	    private void ParseHeaders(NameValueCollection headers)
+	    {
+	        if (headers == null)
+	            throw new ArgumentNullException("headers");
 
-			// Now begin to parse the header values
-			foreach (string headerName in headers.Keys)
-			{
-				string[] headerValues = headers.GetValues(headerName);
-				if (headerValues != null)
-				{
-					foreach (string headerValue in headerValues)
-					{
-						ParseHeader(headerName, headerValue);
-					}
-				}
-			}
-		}
+	        // Now begin to parse the header values
+	        foreach (string headerName in headers.Keys)
+	        {
+	            var headerValues = headers.GetValues(headerName);
+	            if (headerValues == null) continue;
+	            foreach (var headerValue in headerValues)
+	                ParseHeader(headerName, headerValue);
+	        }
+	    }
+	    #endregion
 
-		#region Header fields parsing
-		/// <summary>
+        #region ParseHeader
+        /// <summary>
 		/// Parses a single header and sets member variables according to it.
 		/// </summary>
 		/// <param name="headerName">The name of the header</param>
@@ -348,8 +348,8 @@ namespace OpenPop.Mime.Header
 				// The field are intended to have only human-readable content
 				// with information about the message
 				case "KEYWORDS":
-					string[] keywordsTemp = headerValue.Split(',');
-					foreach (string keyword in keywordsTemp)
+					var keywordsTemp = headerValue.Split(',');
+					foreach (var keyword in keywordsTemp)
 					{
 						// Remove the quotes if there is any
 						Keywords.Add(Utility.RemoveQuotesIfAny(keyword.Trim()));

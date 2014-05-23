@@ -94,8 +94,8 @@ namespace OpenPop.Pop3
 		}
 		#endregion
 
-		#region Connection managing methods
-		/// <summary>
+        #region Connect
+        /// <summary>
 		/// Connect to the server using user supplied stream
 		/// </summary>
 		/// <param name="stream">The stream used to communicate with the server</param>
@@ -113,7 +113,7 @@ namespace OpenPop.Pop3
 			Stream = stream;
 
 			// Fetch the server one-line welcome greeting
-			string response = StreamUtility.ReadLineAsAscii(Stream);
+			var response = StreamUtility.ReadLineAsAscii(Stream);
 
 			// Check if the response was an OK response
 			try
@@ -190,7 +190,7 @@ namespace OpenPop.Pop3
 			if (State != ConnectionState.Disconnected)
 				throw new InvalidUseException("You cannot ask to connect to a POP3 server, when we are already connected to one. Disconnect first.");
 
-			TcpClient clientSocket = new TcpClient();
+			var clientSocket = new TcpClient();
 			clientSocket.ReceiveTimeout = receiveTimeout;
 			clientSocket.SendTimeout = sendTimeout;
 
@@ -213,15 +213,9 @@ namespace OpenPop.Pop3
 				// If we want to use SSL, open a new SSLStream on top of the open TCP stream.
 				// We also want to close the TCP stream when the SSL stream is closed
 				// If a validator was passed to us, use it.
-				SslStream sslStream;
-				if (certificateValidator == null)
-				{
-					sslStream = new SslStream(clientSocket.GetStream(), false);
-				}
-				else
-				{
-					sslStream = new SslStream(clientSocket.GetStream(), false, certificateValidator);
-				}
+			    var sslStream = certificateValidator == null
+			        ? new SslStream(clientSocket.GetStream(), false)
+			        : new SslStream(clientSocket.GetStream(), false, certificateValidator);
 				sslStream.ReadTimeout = receiveTimeout;
 				sslStream.WriteTimeout = sendTimeout;
 
@@ -239,8 +233,10 @@ namespace OpenPop.Pop3
 			// Now do the connect with the same stream being used to read and write to
 			Connect(stream);
 		}
+        #endregion
 
-		/// <summary>
+        #region Disconnect
+        /// <summary>
 		/// Disconnects from POP3 server.
 		/// Sends the QUIT command before closing the connection, which deletes all the messages that was marked as such.
 		/// </summary>
@@ -261,8 +257,8 @@ namespace OpenPop.Pop3
 		}
 		#endregion
 
-		#region Authentication methods
-		/// <summary>
+        #region Authenticate
+        /// <summary>
 		/// Authenticates a user towards the POP server using <see cref="AuthenticationMethod.Auto"/>.<br/>
 		/// If this authentication fails but you are sure that the username and password is correct, it might
 		/// be that that the POP3 server is wrongly telling the client it supports <see cref="AuthenticationMethod.Apop"/>.
@@ -327,7 +323,8 @@ namespace OpenPop.Pop3
 						AuthenticateUsingCramMd5(username, password);
 						break;
 				}
-			} catch(PopServerException e)
+			} 
+            catch(PopServerException e)
 			{
 				DefaultLogger.Log.LogError("Problem logging in using method " + authenticationMethod + ". Server response was: " + LastServerResponse);
 
@@ -405,10 +402,10 @@ namespace OpenPop.Pop3
 			}
 			
 			// Fetch out the challenge from the server response
-			string challenge = LastServerResponse.Substring(2);
+			var challenge = LastServerResponse.Substring(2);
 
 			// Compute the challenge response
-			string response = CramMd5.ComputeDigest(username, password, challenge);
+			var response = CramMd5.ComputeDigest(username, password, challenge);
 
 			// Send the response to the server
 			SendCommand(response);
@@ -417,8 +414,8 @@ namespace OpenPop.Pop3
 		}
 		#endregion
 
-		#region Public POP3 commands
-		/// <summary>
+        #region GetMessageCount
+        /// <summary>
 		/// Get the number of messages on the server using a STAT command
 		/// </summary>
 		/// <returns>The message count on the server</returns>
@@ -432,8 +429,10 @@ namespace OpenPop.Pop3
 
 			return SendCommandIntResponse("STAT", 1);
 		}
+        #endregion
 
-		/// <summary>
+        #region DeleteMessage
+        /// <summary>
 		/// Marks the message with the given message number as deleted.<br/>
 		/// <br/>
 		/// The message will not be deleted until a QUIT command is sent to the server.<br/>
@@ -455,8 +454,10 @@ namespace OpenPop.Pop3
 
 			SendCommand("DELE " + messageNumber);
 		}
+        #endregion
 
-		/// <summary>
+        #region DeleteAllMessages
+        /// <summary>
 		/// Marks all messages as deleted.<br/>
 		/// <br/>
 		/// The messages will not be deleted until a QUIT command is sent to the server.<br/>
@@ -468,15 +469,15 @@ namespace OpenPop.Pop3
 		{
 			AssertDisposed();
 
-			int messageCount = GetMessageCount();
+			var messageCount = GetMessageCount();
 
-			for (int messageItem = messageCount; messageItem > 0; messageItem--)
-			{
+			for (var messageItem = messageCount; messageItem > 0; messageItem--)
 				DeleteMessage(messageItem);
-			}
 		}
+        #endregion
 
-		/// <summary>
+        #region NoOperation
+        /// <summary>
 		/// Keep server active by sending a NOOP command.<br/>
 		/// This might keep the server from closing the connection due to inactivity.<br/>
 		/// <br/>
@@ -493,281 +494,300 @@ namespace OpenPop.Pop3
 
 			SendCommand("NOOP");
 		}
+        #endregion
 
-		/// <summary>
-		/// Send a reset command to the server.<br/>
-		/// <br/>
-		/// RFC:<br/>
-		/// If any messages have been marked as deleted by the POP3
-		/// server, they are unmarked. The POP3 server then replies
-		/// with a positive response.
-		/// </summary>
-		/// <exception cref="PopServerException">If the server did not accept the RSET command</exception>
-		public void Reset()
-		{
-			AssertDisposed();
+	    #region Reset
+	    /// <summary>
+	    /// Send a reset command to the server.<br/>
+	    /// <br/>
+	    /// RFC:<br/>
+	    /// If any messages have been marked as deleted by the POP3
+	    /// server, they are unmarked. The POP3 server then replies
+	    /// with a positive response.
+	    /// </summary>
+	    /// <exception cref="PopServerException">If the server did not accept the RSET command</exception>
+	    public void Reset()
+	    {
+	        AssertDisposed();
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("You cannot use the RSET command unless you are authenticated to the server");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("You cannot use the RSET command unless you are authenticated to the server");
 
-			SendCommand("RSET");
-		}
+	        SendCommand("RSET");
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Get a unique ID for a single message.<br/>
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number, which may not be marked as deleted.<br/>
-		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>The unique ID for the message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the <paramref name="messageNumber"/> does not exist</exception>
-		public string GetMessageUid(int messageNumber)
-		{
-			AssertDisposed();
+	    #region GetMessageUid
+	    /// <summary>
+	    /// Get a unique ID for a single message.<br/>
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number, which may not be marked as deleted.<br/>
+	    /// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <returns>The unique ID for the message</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the UIDL command. This could happen if the <paramref name="messageNumber"/> does not exist</exception>
+	    public string GetMessageUid(int messageNumber)
+	    {
+	        AssertDisposed();
 
-			ValidateMessageNumber(messageNumber);
+	        ValidateMessageNumber(messageNumber);
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot get message ID, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot get message ID, when the user has not been authenticated yet");
 
-			// Example from RFC:
-			//C: UIDL 2
-			//S: +OK 2 QhdPYR:00WBw1Ph7x7
+	        // Example from RFC:
+	        //C: UIDL 2
+	        //S: +OK 2 QhdPYR:00WBw1Ph7x7
 
-			SendCommand("UIDL " + messageNumber);
+	        SendCommand("UIDL " + messageNumber);
 
-			// Parse out the unique ID
-			return LastServerResponse.Split(' ')[2];
-		}
+	        // Parse out the unique ID
+	        return LastServerResponse.Split(' ')[2];
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Gets a list of unique IDs for all messages.<br/>
-		/// Messages marked as deleted are not listed.
-		/// </summary>
-		/// <returns>
-		/// A list containing the unique IDs in sorted order from message number 1 and upwards.
-		/// </returns>
-		/// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
-		public List<string> GetMessageUids()
-		{
-			AssertDisposed();
+	    #region GetMessageUids
+	    /// <summary>
+	    /// Gets a list of unique IDs for all messages.<br/>
+	    /// Messages marked as deleted are not listed.
+	    /// </summary>
+	    /// <returns>
+	    /// A list containing the unique IDs in sorted order from message number 1 and upwards.
+	    /// </returns>
+	    /// <exception cref="PopServerException">If the server did not accept the UIDL command</exception>
+	    public List<string> GetMessageUids()
+	    {
+	        AssertDisposed();
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot get message IDs, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot get message IDs, when the user has not been authenticated yet");
 
-			// RFC Example:
-			// C: UIDL
-			// S: +OK
-			// S: 1 whqtswO00WBw418f9t5JxYwZ
-			// S: 2 QhdPYR:00WBw1Ph7x7
-			// S: .      // this is the end
+	        // RFC Example:
+	        // C: UIDL
+	        // S: +OK
+	        // S: 1 whqtswO00WBw418f9t5JxYwZ
+	        // S: 2 QhdPYR:00WBw1Ph7x7
+	        // S: .      // this is the end
 
-			SendCommand("UIDL");
+	        SendCommand("UIDL");
 
-			List<string> uids = new List<string>();
+	        var uids = new List<string>();
 
-			string response;
-			// Keep reading until multi-line ends with a "."
-			while (!IsLastLineInMultiLineResponse(response = StreamUtility.ReadLineAsAscii(Stream)))
-			{
-				// Add the unique ID to the list
-				uids.Add(response.Split(' ')[1]);
-			}
+	        string response;
+	        // Keep reading until multi-line ends with a "."
+	        while (!IsLastLineInMultiLineResponse(response = StreamUtility.ReadLineAsAscii(Stream)))
+	        {
+	            // Add the unique ID to the list
+	            uids.Add(response.Split(' ')[1]);
+	        }
 
-			return uids;
-		}
+	        return uids;
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Gets the size in bytes of a single message
-		/// </summary>
-		/// <param name="messageNumber">
-		/// The number of a message which may not be a message marked as deleted.<br/>
-		/// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>Size of the message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
-		public int GetMessageSize(int messageNumber)
-		{
-			AssertDisposed();
+	    #region GetMessageSize
+	    /// <summary>
+	    /// Gets the size in bytes of a single message
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// The number of a message which may not be a message marked as deleted.<br/>
+	    /// The <paramref name="messageNumber"/> must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <returns>Size of the message</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
+	    public int GetMessageSize(int messageNumber)
+	    {
+	        AssertDisposed();
 
-			ValidateMessageNumber(messageNumber);
+	        ValidateMessageNumber(messageNumber);
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot get message size, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot get message size, when the user has not been authenticated yet");
 
-			// RFC Example:
-			// C: LIST 2
-			// S: +OK 2 200
-			return SendCommandIntResponse("LIST " + messageNumber, 2);
-		}
+	        // RFC Example:
+	        // C: LIST 2
+	        // S: +OK 2 200
+	        return SendCommandIntResponse("LIST " + messageNumber, 2);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Get the sizes in bytes of all the messages.<br/>
-		/// Messages marked as deleted are not listed.
-		/// </summary>
-		/// <returns>Size of each message excluding deleted ones</returns>
-		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
-		public List<int> GetMessageSizes()
-		{
-			AssertDisposed();
+	    #region GetMessageSizes
+	    /// <summary>
+	    /// Get the sizes in bytes of all the messages.<br/>
+	    /// Messages marked as deleted are not listed.
+	    /// </summary>
+	    /// <returns>Size of each message excluding deleted ones</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
+	    public List<int> GetMessageSizes()
+	    {
+	        AssertDisposed();
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot get message sizes, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot get message sizes, when the user has not been authenticated yet");
 
-			// RFC Example:
-			// C: LIST
-			// S: +OK 2 messages (320 octets)
-			// S: 1 120
-			// S: 2 200
-			// S: .       // End of multi-line
+	        // RFC Example:
+	        // C: LIST
+	        // S: +OK 2 messages (320 octets)
+	        // S: 1 120
+	        // S: 2 200
+	        // S: .       // End of multi-line
 
-			SendCommand("LIST");
+	        SendCommand("LIST");
 
-			List<int> sizes = new List<int>();
+	        var sizes = new List<int>();
 
-			string response;
-			// Read until end of multi-line
-			while (!".".Equals(response = StreamUtility.ReadLineAsAscii(Stream)))
-			{
-				sizes.Add(int.Parse(response.Split(' ')[1], CultureInfo.InvariantCulture));
-			}
+	        string response;
+	        // Read until end of multi-line
+	        while (!".".Equals(response = StreamUtility.ReadLineAsAscii(Stream)))
+	        {
+	            sizes.Add(int.Parse(response.Split(' ')[1], CultureInfo.InvariantCulture));
+	        }
 
-			return sizes;
-		}
+	        return sizes;
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Get MessageInfo (identifier and size) of all the messages.<br/>
-		/// Messages marked as deleted are not listed.
-		/// </summary>
-		/// <returns>MessageInfo of each message excluding deleted ones</returns>
-		/// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
-		public List<MessageInfo> GetMessageInfos()
-		{
-			AssertDisposed();
+	    #region GetMessageInfos
+	    /// <summary>
+	    /// Get MessageInfo (identifier and size) of all the messages.<br/>
+	    /// Messages marked as deleted are not listed.
+	    /// </summary>
+	    /// <returns>MessageInfo of each message excluding deleted ones</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the LIST command</exception>
+	    public List<MessageInfo> GetMessageInfos()
+	    {
+	        AssertDisposed();
 
-			if(State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot get message infos, when the user has not been authenticated yet");
-
-
-			// getting message identifiers
-			SendCommand("UIDL");
-			Dictionary<int, string> identifiers = new Dictionary<int, string>();
-			string response1;
-			while(!IsLastLineInMultiLineResponse(response1 = StreamUtility.ReadLineAsAscii(Stream)))
-			{
-				String[] pair = response1.Split(' ');
-				int messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
-				string messageIdentifier = pair[1];
-				identifiers.Add(messageNumber, messageIdentifier);
-			}
-
-
-			// getting sizes
-			SendCommand("LIST");
-			Dictionary<int, int> sizes = new Dictionary<int, int>();
-			string response2;
-			while(!IsLastLineInMultiLineResponse(response2 = StreamUtility.ReadLineAsAscii(Stream)))
-			{
-				String[] pair = response2.Split(' ');
-				int messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
-				int messageSize = Int32.Parse(pair[1], CultureInfo.InvariantCulture);
-				sizes.Add(messageNumber, messageSize);
-			}
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot get message infos, when the user has not been authenticated yet");
 
 
-			// simple validation
-			if(sizes.Count != identifiers.Count)
-				throw new PopServerException("Server LIST and UIDL responses do not match.");
+	        // getting message identifiers
+	        SendCommand("UIDL");
+	        var identifiers = new Dictionary<int, string>();
+	        string response1;
+	        while (!IsLastLineInMultiLineResponse(response1 = StreamUtility.ReadLineAsAscii(Stream)))
+	        {
+	            var pair = response1.Split(' ');
+	            var messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
+	            var messageIdentifier = pair[1];
+	            identifiers.Add(messageNumber, messageIdentifier);
+	        }
 
 
-			// merging two dictionaries
-			int count = identifiers.Count;
-			List<MessageInfo> messageInfos = new List<MessageInfo>(count);
-
-			foreach(int messageNumber in identifiers.Keys)
-			{
-				string identifier = identifiers[messageNumber];
-				int size = sizes[messageNumber];
-				messageInfos.Add(new MessageInfo(messageNumber, identifier, size));
-			}
-
-			return messageInfos;
-		}
+	        // getting sizes
+	        SendCommand("LIST");
+	        var sizes = new Dictionary<int, int>();
+	        string response2;
+	        while (!IsLastLineInMultiLineResponse(response2 = StreamUtility.ReadLineAsAscii(Stream)))
+	        {
+	            var pair = response2.Split(' ');
+	            var messageNumber = Int32.Parse(pair[0], CultureInfo.InvariantCulture);
+	            var messageSize = Int32.Parse(pair[1], CultureInfo.InvariantCulture);
+	            sizes.Add(messageNumber, messageSize);
+	        }
 
 
-		/// <summary>
-		/// Fetches a message from the server and parses it
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.<br/>
-		/// Must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>The message, containing the email message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
-		public Message GetMessage(int messageNumber)
-		{
-			AssertDisposed();
+	        // simple validation
+	        if (sizes.Count != identifiers.Count)
+	            throw new PopServerException("Server LIST and UIDL responses do not match.");
 
-			ValidateMessageNumber(messageNumber);
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+	        // merging two dictionaries
+	        var count = identifiers.Count;
+	        var messageInfos = new List<MessageInfo>(count);
 
-			byte[] messageContent = GetMessageAsBytes(messageNumber);
+	        foreach (var messageNumber in identifiers.Keys)
+	        {
+	            var identifier = identifiers[messageNumber];
+	            var size = sizes[messageNumber];
+	            messageInfos.Add(new MessageInfo(messageNumber, identifier, size));
+	        }
 
-			return new Message(messageContent);
-		}
+	        return messageInfos;
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Fetches a message in raw form from the server
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.<br/>
-		/// Must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>The raw bytes of the message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
-		public byte[] GetMessageAsBytes(int messageNumber)
-		{
-			AssertDisposed();
+	    #region GetMessage
+	    /// <summary>
+	    /// Fetches a message from the server and parses it
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number on server, which may not be marked as deleted.<br/>
+	    /// Must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <returns>The message, containing the email message</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
+	    public Message GetMessage(int messageNumber)
+	    {
+	        AssertDisposed();
 
-			ValidateMessageNumber(messageNumber);
+	        ValidateMessageNumber(messageNumber);
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
 
-			// Get the full message
-			return GetMessageAsBytes(messageNumber, false);
-		}
+	        var messageContent = GetMessageAsBytes(messageNumber);
 
-		/// <summary>
-		/// Get all the headers for a message.<br/>
-		/// The server will not need to send the body of the message.
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number, which may not be marked as deleted.<br/>
-		/// Must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>MessageHeaders object</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
-		public MessageHeader GetMessageHeaders(int messageNumber)
-		{
-			AssertDisposed();
+	        return new Message(messageContent);
+	    }
+	    #endregion
 
-			ValidateMessageNumber(messageNumber);
+	    #region GetMessageAsBytes
+	    /// <summary>
+	    /// Fetches a message in raw form from the server
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number on server, which may not be marked as deleted.<br/>
+	    /// Must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <returns>The raw bytes of the message</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
+	    public byte[] GetMessageAsBytes(int messageNumber)
+	    {
+	        AssertDisposed();
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+	        ValidateMessageNumber(messageNumber);
 
-			// Only fetch the header part of the message
-			byte[] messageContent = GetMessageAsBytes(messageNumber, true);
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
 
-			// Do not parse the body - as it is not in the byte array
-			return new Message(messageContent, false).Headers;
-		}
+	        // Get the full message
+	        return GetMessageAsBytes(messageNumber, false);
+	    }
+	    #endregion
 
-		/// <summary>
+	    #region GetMessageHeaders
+	    /// <summary>
+	    /// Get all the headers for a message.<br/>
+	    /// The server will not need to send the body of the message.
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number, which may not be marked as deleted.<br/>
+	    /// Must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <returns>MessageHeaders object</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
+	    public MessageHeader GetMessageHeaders(int messageNumber)
+	    {
+	        AssertDisposed();
+
+	        ValidateMessageNumber(messageNumber);
+
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+
+	        // Only fetch the header part of the message
+	        var messageContent = GetMessageAsBytes(messageNumber, true);
+
+	        // Do not parse the body - as it is not in the byte array
+	        return new Message(messageContent, false).Headers;
+	    }
+	    #endregion
+
+        #region Capabilities
+        /// <summary>
 		/// Asks the server to return it's capability listing.<br/>
 		/// This is an optional command, which a server is not enforced to accept.
 		/// </summary>
@@ -816,7 +836,7 @@ namespace OpenPop.Pop3
 			SendCommand("CAPA");
 
 			// Capablities are case-insensitive
-			Dictionary<string, List<string>> capabilities = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+			var capabilities = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
 			string lineRead;
 			// Keep reading until we are at the end of the multi line response
@@ -826,17 +846,15 @@ namespace OpenPop.Pop3
 				// SASL CRAM-MD5 KERBEROS_V4
 				// SASL is the name of the capability while
 				// CRAM-MD5 and KERBEROS_V4 are arguments to SASL
-				string[] splitted = lineRead.Split(' ');
+				var splitted = lineRead.Split(' ');
 
 				// There should always be a capability name
-				string capabilityName = splitted[0];
+				var capabilityName = splitted[0];
 				
 				// Find all the arguments
-				List<string> capabilityArguments = new List<string>();
-				for(int i = 1; i<splitted.Length; i++)
-				{
+				var capabilityArguments = new List<string>();
+				for(var i = 1; i<splitted.Length; i++)
 					capabilityArguments.Add(splitted[i]);
-				}
 
 				// Add the capability found to the dictionary
 				capabilities.Add(capabilityName, capabilityArguments);
@@ -846,8 +864,8 @@ namespace OpenPop.Pop3
 		}
 		#endregion
 
-		#region Private helper methods
-		/// <summary>
+        #region ExtractApopTimestamp
+        /// <summary>
 		/// Examines string to see if it contains a time stamp to use with the APOP command.<br/>
 		/// If it does, sets the <see cref="ApopTimeStamp"/> property to this value.
 		/// </summary>
@@ -860,233 +878,257 @@ namespace OpenPop.Pop3
 
 			// RFC Example:
 			// +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>
-			Match match = Regex.Match(response, "<.+>");
-			if (match.Success)
-			{
-				ApopTimeStamp = match.Value;
-				ApopSupported = true;
-			}
+			var match = Regex.Match(response, "<.+>");
+		    if (!match.Success) return;
+		    ApopTimeStamp = match.Value;
+		    ApopSupported = true;
 		}
+        #endregion
 
-		/// <summary>
-		/// Tests a string to see if it is a "+" string.<br/>
-		/// An "+" string should be returned by a compliant POP3
-		/// server if the request could be served.<br/>
-		/// <br/>
-		/// The method does only check if it starts with "+".
-		/// </summary>
-		/// <param name="response">The string to examine</param>
-		/// <exception cref="PopServerException">Thrown if server did not respond with "+" message</exception>
-		private static void IsOkResponse(string response)
-		{
-			if (response == null)
-				throw new PopServerException("The stream used to retrieve responses from was closed");
+        #region IsOkResponse
+        /// <summary>
+	    /// Tests a string to see if it is a "+" string.<br/>
+	    /// An "+" string should be returned by a compliant POP3
+	    /// server if the request could be served.<br/>
+	    /// <br/>
+	    /// The method does only check if it starts with "+".
+	    /// </summary>
+	    /// <param name="response">The string to examine</param>
+	    /// <exception cref="PopServerException">Thrown if server did not respond with "+" message</exception>
+	    private static void IsOkResponse(string response)
+	    {
+	        if (response == null)
+	            throw new PopServerException("The stream used to retrieve responses from was closed");
 
-			if (response.StartsWith("+", StringComparison.OrdinalIgnoreCase))
-				return;
+	        if (response.StartsWith("+", StringComparison.OrdinalIgnoreCase))
+	            return;
 
-			throw new PopServerException("The server did not respond with a + response. The response was: \"" + response + "\"");
-		}
+	        throw new PopServerException("The server did not respond with a + response. The response was: \"" + response +
+	                                     "\"");
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Sends a command to the POP server.<br/>
-		/// If this fails, an exception is thrown.
-		/// </summary>
-		/// <param name="command">The command to send to server</param>
-		/// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
-		private void SendCommand(string command)
-		{
-			// Convert the command with CRLF afterwards as per RFC to a byte array which we can write
-			byte[] commandBytes = Encoding.ASCII.GetBytes(command + "\r\n");
+        #region SendCommand
+        /// <summary>
+	    /// Sends a command to the POP server.<br/>
+	    /// If this fails, an exception is thrown.
+	    /// </summary>
+	    /// <param name="command">The command to send to server</param>
+	    /// <exception cref="PopServerException">If the server did not send an OK message to the command</exception>
+	    private void SendCommand(string command)
+	    {
+	        // Convert the command with CRLF afterwards as per RFC to a byte array which we can write
+	        var commandBytes = Encoding.ASCII.GetBytes(command + "\r\n");
 
-			// Write the command to the server
-			Stream.Write(commandBytes, 0, commandBytes.Length);
-			Stream.Flush(); // Flush the content as we now wait for a response
+	        // Write the command to the server
+	        Stream.Write(commandBytes, 0, commandBytes.Length);
+	        Stream.Flush(); // Flush the content as we now wait for a response
 
-			// Read the response from the server. The response should be in ASCII
-			LastServerResponse = StreamUtility.ReadLineAsAscii(Stream);
+	        // Read the response from the server. The response should be in ASCII
+	        LastServerResponse = StreamUtility.ReadLineAsAscii(Stream);
 
-			IsOkResponse(LastServerResponse);
-		}
+	        IsOkResponse(LastServerResponse);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Sends a command to the POP server, expects an integer reply in the response
-		/// </summary>
-		/// <param name="command">command to send to server</param>
-		/// <param name="location">
-		/// The location of the int to return.<br/>
-		/// Example:<br/>
-		/// <c>S: +OK 2 200</c><br/>
-		/// Set <paramref name="location"/>=1 to get 2<br/>
-		/// Set <paramref name="location"/>=2 to get 200<br/>
-		/// </param>
-		/// <returns>Integer value in the reply</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command</exception>
-		private int SendCommandIntResponse(string command, int location)
-		{
-			SendCommand(command);
+        #region SendCommandIntResponse
+        /// <summary>
+	    /// Sends a command to the POP server, expects an integer reply in the response
+	    /// </summary>
+	    /// <param name="command">command to send to server</param>
+	    /// <param name="location">
+	    /// The location of the int to return.<br/>
+	    /// Example:<br/>
+	    /// <c>S: +OK 2 200</c><br/>
+	    /// Set <paramref name="location"/>=1 to get 2<br/>
+	    /// Set <paramref name="location"/>=2 to get 200<br/>
+	    /// </param>
+	    /// <returns>Integer value in the reply</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command</exception>
+	    private int SendCommandIntResponse(string command, int location)
+	    {
+	        SendCommand(command);
 
-			return int.Parse(LastServerResponse.Split(' ')[location], CultureInfo.InvariantCulture);
-		}
+	        return int.Parse(LastServerResponse.Split(' ')[location], CultureInfo.InvariantCulture);
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Asks the server for a message and returns the message response as a byte array.
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.<br/>
-		/// Must be inside the range [1, messageCount]
-		/// </param>
-		/// <param name="askOnlyForHeaders">If <see langword="true"/> only the header part of the message is requested from the server. If <see langword="false"/> the full message is requested</param>
-		/// <returns>A byte array that the message requested consists of</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
-		private byte[] GetMessageAsBytes(int messageNumber, bool askOnlyForHeaders)
-		{
-			AssertDisposed();
+        #region GetMessageAsBytes
+        /// <summary>
+	    /// Asks the server for a message and returns the message response as a byte array.
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number on server, which may not be marked as deleted.<br/>
+	    /// Must be inside the range [1, messageCount]
+	    /// </param>
+	    /// <param name="askOnlyForHeaders">If <see langword="true"/> only the header part of the message is requested from the server. If <see langword="false"/> the full message is requested</param>
+	    /// <returns>A byte array that the message requested consists of</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
+	    private byte[] GetMessageAsBytes(int messageNumber, bool askOnlyForHeaders)
+	    {
+	        AssertDisposed();
 
-			ValidateMessageNumber(messageNumber);
+	        ValidateMessageNumber(messageNumber);
 
-			if (State != ConnectionState.Transaction)
-				throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
+	        if (State != ConnectionState.Transaction)
+	            throw new InvalidUseException("Cannot fetch a message, when the user has not been authenticated yet");
 
-			if (askOnlyForHeaders)
-			{
-				// 0 is the number of lines of the message body to fetch, therefore it is set to zero to fetch only headers
-				SendCommand("TOP " + messageNumber + " 0");
-			}
-			else
-			{
-				// Ask for the full message
-				SendCommand("RETR " + messageNumber);
-			}
+	        if (askOnlyForHeaders)
+	        {
+	            // 0 is the number of lines of the message body to fetch, therefore it is set to zero to fetch only headers
+	            SendCommand("TOP " + messageNumber + " 0");
+	        }
+	        else
+	        {
+	            // Ask for the full message
+	            SendCommand("RETR " + messageNumber);
+	        }
 
-			// RFC 1939 Example
-			// C: RETR 1
-			// S: +OK 120 octets
-			// S: <the POP3 server sends the entire message here>
-			// S: .
+	        // RFC 1939 Example
+	        // C: RETR 1
+	        // S: +OK 120 octets
+	        // S: <the POP3 server sends the entire message here>
+	        // S: .
 
-			// Create a byte array builder which we use to write the bytes too
-			// When done, we can get the byte array out
-			using (MemoryStream byteArrayBuilder = new MemoryStream())
-			{
-				bool first = true;
-				byte[] lineRead;
+	        // Create a byte array builder which we use to write the bytes too
+	        // When done, we can get the byte array out
+	        using (var byteArrayBuilder = new MemoryStream())
+	        {
+	            var first = true;
+	            byte[] lineRead;
 
-				// Keep reading until we are at the end of the multi line response
-				while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(Stream)))
-				{
-					// We should not write CRLF on the very last line, therefore we do this
-					if (!first)
-					{
-						// Write CRLF which was not included in the lineRead bytes of last line
-						byte[] crlfPair = Encoding.ASCII.GetBytes("\r\n");
-						byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
-					} else
-					{
-						// We are now not the first anymore
-						first = false;
-					}
+	            // Keep reading until we are at the end of the multi line response
+	            while (!IsLastLineInMultiLineResponse(lineRead = StreamUtility.ReadLineAsBytes(Stream)))
+	            {
+	                // We should not write CRLF on the very last line, therefore we do this
+	                if (!first)
+	                {
+	                    // Write CRLF which was not included in the lineRead bytes of last line
+	                    var crlfPair = Encoding.ASCII.GetBytes("\r\n");
+	                    byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
+	                }
+	                else
+	                {
+	                    // We are now not the first anymore
+	                    first = false;
+	                }
 
-					// This is a multi-line. See http://tools.ietf.org/html/rfc1939#section-3
-					// It says that a line starting with "." and not having CRLF after it
-					// is a multi line, and the "." should be stripped
-					if (lineRead.Length > 0 && lineRead[0] == '.')
-					{
-						// Do not write the first period
-						byteArrayBuilder.Write(lineRead, 1, lineRead.Length - 1);
-					} else
-					{
-						// Write everything
-						byteArrayBuilder.Write(lineRead, 0, lineRead.Length);
-					}
-				}
+	                // This is a multi-line. See http://tools.ietf.org/html/rfc1939#section-3
+	                // It says that a line starting with "." and not having CRLF after it
+	                // is a multi line, and the "." should be stripped
+	                if (lineRead.Length > 0 && lineRead[0] == '.')
+	                {
+	                    // Do not write the first period
+	                    byteArrayBuilder.Write(lineRead, 1, lineRead.Length - 1);
+	                }
+	                else
+	                {
+	                    // Write everything
+	                    byteArrayBuilder.Write(lineRead, 0, lineRead.Length);
+	                }
+	            }
 
-				// If we are fetching a header - add an extra line to denote the headers ended
-				if (askOnlyForHeaders)
-				{
-					byte[] crlfPair = Encoding.ASCII.GetBytes("\r\n");
-					byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
-				}
+	            // If we are fetching a header - add an extra line to denote the headers ended
+	            if (askOnlyForHeaders)
+	            {
+	                var crlfPair = Encoding.ASCII.GetBytes("\r\n");
+	                byteArrayBuilder.Write(crlfPair, 0, crlfPair.Length);
+	            }
 
-				// Get out the bytes we have written to byteArrayBuilder
-				byte[] receivedBytes = byteArrayBuilder.ToArray();
+	            // Get out the bytes we have written to byteArrayBuilder
+	            var receivedBytes = byteArrayBuilder.ToArray();
 
-				return receivedBytes;
-			}
-		}
+	            return receivedBytes;
+	        }
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Check if the bytes received is the last line in a multi line response
-		/// from the pop3 server. It is the last line if the line contains only a "."
-		/// </summary>
-		/// <param name="bytesReceived">The last line received from the server, which could be the last response line</param>
-		/// <returns><see langword="true"/> if last line in a multi line response, <see langword="false"/> otherwise</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="bytesReceived"/> is <see langword="null"/></exception>
-		private static bool IsLastLineInMultiLineResponse(byte[] bytesReceived)
-		{
-			if(bytesReceived == null)
-				throw new ArgumentNullException("bytesReceived");
+        #region IsLastLineInMultiLineResponse
+        /// <summary>
+	    /// Check if the bytes received is the last line in a multi line response
+	    /// from the pop3 server. It is the last line if the line contains only a "."
+	    /// </summary>
+	    /// <param name="bytesReceived">The last line received from the server, which could be the last response line</param>
+	    /// <returns><see langword="true"/> if last line in a multi line response, <see langword="false"/> otherwise</returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="bytesReceived"/> is <see langword="null"/></exception>
+	    private static bool IsLastLineInMultiLineResponse(IList<byte> bytesReceived)
+	    {
+	        if (bytesReceived == null)
+	            throw new ArgumentNullException("bytesReceived");
 
-			return bytesReceived.Length == 1 && bytesReceived[0] == '.';
-		}
+	        return bytesReceived.Count == 1 && bytesReceived[0] == '.';
+	    }
+	    #endregion
 
-		/// <see cref="IsLastLineInMultiLineResponse(byte[])"> for documentation</see>
-		private static bool IsLastLineInMultiLineResponse(string lineReceived)
-		{
-			if (lineReceived == null)
-				throw new ArgumentNullException("lineReceived");
+        #region IsLastLineInMultiLineResponse
+	    /// <see> for documentation
+	    ///     <cref>IsLastLineInMultiLineResponse(byte[])</cref>
+	    /// </see>
+	    private static bool IsLastLineInMultiLineResponse(string lineReceived)
+	    {
+	        if (lineReceived == null)
+	            throw new ArgumentNullException("lineReceived");
 
-			// If the string is indeed the last line, then it is okay to do ASCII encoding
-			// on it. For performance reasons we check if the length is equal to 1
-			// so that we do not need to decode a long message string just to see if
-			// it is the last line
-			return lineReceived.Length == 1 && IsLastLineInMultiLineResponse(Encoding.ASCII.GetBytes(lineReceived));
-		}
+	        // If the string is indeed the last line, then it is okay to do ASCII encoding
+	        // on it. For performance reasons we check if the length is equal to 1
+	        // so that we do not need to decode a long message string just to see if
+	        // it is the last line
+	        return lineReceived.Length == 1 && IsLastLineInMultiLineResponse(Encoding.ASCII.GetBytes(lineReceived));
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Method for checking that a <paramref name="messageNumber"/> argument given to some method
-		/// is indeed valid. If not, <see cref="InvalidUseException"/> will be thrown.
-		/// </summary>
-		/// <param name="messageNumber">The message number to validate</param>
-		private static void ValidateMessageNumber(int messageNumber)
-		{
-			if(messageNumber <= 0)
-				throw new InvalidUseException("The messageNumber argument cannot have a value of zero or less. Valid messageNumber is in the range [1, messageCount]");
-		}
+        #region ValidateMessageNumber
+        /// <summary>
+	    /// Method for checking that a <paramref name="messageNumber"/> argument given to some method
+	    /// is indeed valid. If not, <see cref="InvalidUseException"/> will be thrown.
+	    /// </summary>
+	    /// <param name="messageNumber">The message number to validate</param>
+	    private static void ValidateMessageNumber(int messageNumber)
+	    {
+	        if (messageNumber <= 0)
+	            throw new InvalidUseException(
+	                "The messageNumber argument cannot have a value of zero or less. Valid messageNumber is in the range [1, messageCount]");
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Closes down the streams and sets the Pop3Client into the initial configuration
-		/// </summary>
-		private void DisconnectStreams()
-		{
-			try
-			{
-				Stream.Close();
-			}
-			finally
-			{
-				// Reset values to initial state
-				SetInitialValues();
-			}
-		}
+        #region DisconnectStreams
+        /// <summary>
+	    /// Closes down the streams and sets the Pop3Client into the initial configuration
+	    /// </summary>
+	    private void DisconnectStreams()
+	    {
+	        try
+	        {
+	            Stream.Close();
+	        }
+	        finally
+	        {
+	            // Reset values to initial state
+	            SetInitialValues();
+	        }
+	    }
+	    #endregion
 
-		/// <summary>
-		/// Sets the initial values on the public properties of this Pop3Client.
-		/// </summary>
-		private void SetInitialValues()
-		{
-			// We have not seen the APOPTimestamp yet
-			ApopTimeStamp = null;
+        #region SetInitialValues
+        /// <summary>
+	    /// Sets the initial values on the public properties of this Pop3Client.
+	    /// </summary>
+	    private void SetInitialValues()
+	    {
+	        // We have not seen the APOPTimestamp yet
+	        ApopTimeStamp = null;
 
-			// We are not connected
-			Connected = false;
-			State = ConnectionState.Disconnected;
+	        // We are not connected
+	        Connected = false;
+	        State = ConnectionState.Disconnected;
 
-			// APOP is not supported before we check on login
-			ApopSupported = false;
-		}
+	        // APOP is not supported before we check on login
+	        ApopSupported = false;
+	    }
+	    #endregion
 
-		/// <summary>
+        #region CheckFailedLoginServerResponse
+        /// <summary>
 		/// Checks for extra response codes when an authentication has failed and throws
 		/// the correct exception.
 		/// If no such response codes is found, nothing happens.
@@ -1097,7 +1139,7 @@ namespace OpenPop.Pop3
 		/// <exception cref="LoginDelayException">If the server rejects the login because of too recent logins</exception>
 		private static void CheckFailedLoginServerResponse(string serverErrorResponse, PopServerException e)
 		{
-			string upper = serverErrorResponse.ToUpperInvariant();
+			var upper = serverErrorResponse.ToUpperInvariant();
 
 			// Bracketed strings are extra response codes addded
 			// in RFC http://tools.ietf.org/html/rfc2449

@@ -15,8 +15,7 @@ namespace OpenPop.Pop3.Exceptions
 		/// Creates a PopServerLockedException with the given inner exception
 		///</summary>
 		///<param name="innerException">The exception that is the cause of this exception</param>
-		public PopServerLockedException(PopServerException innerException)
-			: base("The account is locked or in use", innerException)
+		public PopServerLockedException(PopServerException innerException) : base("The account is locked or in use", innerException)
 		{ }
 	}
 }

@@ -10,8 +10,7 @@ namespace OpenPop.Pop3.Exceptions
 		/// Creates a PopServerException with the given message
 		///</summary>
 		///<param name="message">The message to include in the exception</param>
-		public PopServerException(string message)
-			: base(message)
+		public PopServerException(string message) : base(message)
 		{ }
 	}
 }

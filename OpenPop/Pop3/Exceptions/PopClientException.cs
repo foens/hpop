@@ -12,8 +12,7 @@ namespace OpenPop.Pop3.Exceptions
 		///</summary>
 		///<param name="message">The message to include in the exception</param>
 		///<param name="innerException">The exception that is the cause of this exception</param>
-		protected PopClientException(string message, Exception innerException)
-			: base(message, innerException)
+		protected PopClientException(string message, Exception innerException) : base(message, innerException)
 		{
 			if(message == null)
 				throw new ArgumentNullException("message");
@@ -26,8 +25,7 @@ namespace OpenPop.Pop3.Exceptions
 		/// Creates a PopClientException with the given message
 		///</summary>
 		///<param name="message">The message to include in the exception</param>
-		protected PopClientException(string message)
-			: base(message)
+		protected PopClientException(string message) : base(message)
 		{
 			if (message == null)
 				throw new ArgumentNullException("message");
