@@ -177,5 +177,32 @@ namespace OpenPopUnitTests.Pop3
 			// Try connect again
 			Assert.Throws(typeof(InvalidUseException), delegate { Client.Connect(new CombinedStream(inputStream, outputStream)); });
 		}
+
+        [Test]
+        public void TestInvalidCredentialswithUsing()
+        {
+            Assert.DoesNotThrow(delegate
+            {
+                // Always allow connect, which is the first ok
+                // And never allow authenticate
+                string readerInput = "+OK\r\n+OK\r\n-ERR\r\n";
+                Stream inputStream = new MemoryStream(Encoding.ASCII.GetBytes(readerInput));
+                Stream outputStream = new MemoryStream();
+
+                // Authenticate with the client
+                using (Client)
+                {
+                    try
+                    {
+                        Client.Connect(new CombinedStream(inputStream, outputStream));
+                        Client.Authenticate(RandomString, RandomString);
+                    }
+                    catch (System.Exception)
+                    {
+                        // In order to prevent exception bubbling.
+                    }
+                }
+            });
+        }
 	}
 }

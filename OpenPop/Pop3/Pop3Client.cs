@@ -86,7 +86,11 @@ namespace OpenPop.Pop3
 			{
 				if (Connected)
 				{
-					Disconnect();
+					try
+					{
+						Disconnect();
+					}
+					catch { }
 				}
 			}
 
