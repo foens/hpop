@@ -8,8 +8,15 @@ namespace OpenPop.Mime.Decode
 	/// <summary>
 	/// Class used to decode RFC 2822 Date header fields.
 	/// </summary>
-	internal static class Rfc2822DateTime
+	public static class Rfc2822DateTime
 	{
+        /// <summary>
+        /// Custom DateTime formats - will be tried if cannot parse the dateInput string using the default method
+        ///     Specified using formats at http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=vs.110%29.aspx
+        ///     One format per string in the array
+        /// </summary>
+        public static string[] CustomDateTimeFormats { private get; set; }
+
 		/// <summary>
 		/// Converts a string in RFC 2822 format into a <see cref="DateTime"/> object
 		/// </summary>
@@ -224,6 +231,22 @@ namespace OpenPop.Mime.Decode
 			}
 
 			DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
+
+            //If there are some custom formats
+            if(CustomDateTimeFormats != null)
+            {
+                //Try and parse it as one of the custom formats
+                try
+                {
+                    DateTime dateTime = DateTime.ParseExact(dateInput, CustomDateTimeFormats, null, DateTimeStyles.None);
+                    DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
+                }
+                catch (FormatException) 
+                {
+                    DefaultLogger.Log.LogDebug("Failed to parse date input using custom formats: " + dateInput);
+                }
+            }
+
 			return DateTime.MinValue;
 		}
 
