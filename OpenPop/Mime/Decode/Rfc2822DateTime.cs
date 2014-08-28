@@ -213,7 +213,14 @@ namespace OpenPop.Mime.Decode
 			Match match = Regex.Match(dateInput, joinedFormat);
 			if(match.Success)
 			{
-				return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
+                try
+                {
+                    return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
+                }
+                catch(FormatException)
+                {
+                    DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
+                }
 			}
 
 			DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
