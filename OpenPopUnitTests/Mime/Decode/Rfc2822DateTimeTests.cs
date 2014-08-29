@@ -333,14 +333,14 @@ namespace OpenPopUnitTests.Mime.Decode
 			Assert.AreEqual(expectedOutput, output);
 		}
 
-		[Test]
-		public void TestInvalidDateThrowsArgumentException()
-		{
-			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 00:77:00 -0000"));
-			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 77:00:00 -0000"));
-			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 00:00:00 -0000"));
-			Assert.Throws<ArgumentException>(() => Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 77:77:77 -9999"));
-		}
+        [Test]
+        public void TestInvalidDateReturnsMinDate()
+        {
+            Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 00:77:00 -0000"));
+            Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("Sun, 03 Mar 2011 77:00:00 -0000"));
+            Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 00:00:00 -0000"));
+            Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 77:77:77 -9999"));
+        }
 
 		[Test]
 		public void TestWrongFormatParses()
