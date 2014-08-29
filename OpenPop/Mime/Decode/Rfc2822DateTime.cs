@@ -10,16 +10,16 @@ namespace OpenPop.Mime.Decode
 	/// </summary>
 	public static class Rfc2822DateTime
 	{
-        //Constants
-        private const string REGEX_OLD_TIMEZONE_FORMATS = @"UT|GMT|EST|EDT|CST|CDT|MST|MDT|PST|MSK|PDT|[A-I]|[K-Y]|Z"; //Timezone formats that aren't +-hhmm, e.g. UTC, or K. See MatchEvaluator method for conversions
-        private const string REGEX_NEW_TIMEZONE_FORMATS = @"[\+-](?<hours>\d\d)(?<minutes>\d\d)"; //Matches any +=hhmm timezone offset, e.g. +0100
+		//Constants
+		private const string REGEX_OLD_TIMEZONE_FORMATS = @"UT|GMT|EST|EDT|CST|CDT|MST|MDT|PST|MSK|PDT|[A-I]|[K-Y]|Z"; //Timezone formats that aren't +-hhmm, e.g. UTC, or K. See MatchEvaluator method for conversions
+		private const string REGEX_NEW_TIMEZONE_FORMATS = @"[\+-](?<hours>\d\d)(?<minutes>\d\d)"; //Matches any +=hhmm timezone offset, e.g. +0100
 
-        /// <summary>
-        /// Custom DateTime formats - will be tried if cannot parse the dateInput string using the default method
-        ///     Specified using formats at http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=vs.110%29.aspx
-        ///     One format per string in the array
-        /// </summary>
-        public static string[] CustomDateTimeFormats { private get; set; }
+		/// <summary>
+		/// Custom DateTime formats - will be tried if cannot parse the dateInput string using the default method
+		///	 Specified using formats at http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=vs.110%29.aspx
+		///	 One format per string in the array
+		/// </summary>
+		public static string[] CustomDateTimeFormats { private get; set; }
 
 		/// <summary>
 		/// Converts a string in RFC 2822 format into a <see cref="DateTime"/> object
@@ -191,93 +191,93 @@ namespace OpenPop.Mime.Decode
 		/// <param name="dateInput">The date input string, from which to extract the date and time parts</param>
 		/// <returns>The extracted date part or <see langword="DateTime.MinValue"/> if <paramref name="dateInput"/> is not recognized as a valid date.</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="dateInput"/> is <see langword="null"/></exception>
-        private static DateTime ExtractDateTime(string dateInput)
-        {
-            if (dateInput == null)
-                throw new ArgumentNullException("dateInput");
+		private static DateTime ExtractDateTime(string dateInput)
+		{
+			if (dateInput == null)
+				throw new ArgumentNullException("dateInput");
 
-            // Matches the date and time part of a string
-            // Given string example: Fri, 21 Nov 1997 09:55:06 -0600
-            // Needs to find: 21 Nov 1997 09:55:06
+			// Matches the date and time part of a string
+			// Given string example: Fri, 21 Nov 1997 09:55:06 -0600
+			// Needs to find: 21 Nov 1997 09:55:06
 
-            // Seconds does not need to be specified
-            // Even though it is illigal, sometimes hours, minutes or seconds are only specified with one digit
+			// Seconds does not need to be specified
+			// Even though it is illigal, sometimes hours, minutes or seconds are only specified with one digit
 
-            // Year with 2 or 4 digits (1922 or 22)
-            const string year = @"(\d\d\d\d|\d\d)";
+			// Year with 2 or 4 digits (1922 or 22)
+			const string year = @"(\d\d\d\d|\d\d)";
 
-            // Time with one or two digits for hour and minute and optinal seconds (06:04:06 or 6:4:6 or 06:04 or 6:4)
-            const string time = @"\d?\d:\d?\d(:\d?\d)?";
+			// Time with one or two digits for hour and minute and optinal seconds (06:04:06 or 6:4:6 or 06:04 or 6:4)
+			const string time = @"\d?\d:\d?\d(:\d?\d)?";
 
-            // Correct format is 21 Nov 1997 09:55:06
-            const string correctFormat = @"\d\d? .+ " + year + " " + time;
+			// Correct format is 21 Nov 1997 09:55:06
+			const string correctFormat = @"\d\d? .+ " + year + " " + time;
 
-            // Some uses incorrect format: 2012-1-1 12:30
-            const string incorrectFormat = year + @"-\d?\d-\d?\d " + time;
+			// Some uses incorrect format: 2012-1-1 12:30
+			const string incorrectFormat = year + @"-\d?\d-\d?\d " + time;
 
-            // Some uses incorrect format: 08-May-2012 16:52:30 +0100
-            const string correctFormatButWithDashes = @"\d\d?-[A-Za-z]{3}-" + year + " " + time;
+			// Some uses incorrect format: 08-May-2012 16:52:30 +0100
+			const string correctFormatButWithDashes = @"\d\d?-[A-Za-z]{3}-" + year + " " + time;
 
-            // We allow both correct and incorrect format
-            const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")|(" + correctFormatButWithDashes + ")";
+			// We allow both correct and incorrect format
+			const string joinedFormat = @"(" + correctFormat + ")|(" + incorrectFormat + ")|(" + correctFormatButWithDashes + ")";
 
-            Match match = Regex.Match(dateInput, joinedFormat);
-            if (match.Success)
-            {
-                try
-                {
-                    return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
-                }
-                catch (FormatException)
-                {
-                    DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
-                }
-            }
-            else
-            {
-                DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
-            }
+			Match match = Regex.Match(dateInput, joinedFormat);
+			if (match.Success)
+			{
+				try
+				{
+					return Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
+				}
+				catch (FormatException)
+				{
+					DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
+				}
+			}
+			else
+			{
+				DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
+			}
 
-            //If there are some custom formats
-            if (CustomDateTimeFormats != null)
-            {
-                //If there is a timezone at the end, remove it
-                string strDate = dateInput.Trim();
-                if (strDate.Contains(" ")) //Check contains a space before getting the last part to prevent accessing index -1
-                {
-                    string[] parts = strDate.Split(' ');
-                    string lastPart = parts[parts.Length - 1];
+			//If there are some custom formats
+			if (CustomDateTimeFormats != null)
+			{
+				//If there is a timezone at the end, remove it
+				string strDate = dateInput.Trim();
+				if (strDate.Contains(" ")) //Check contains a space before getting the last part to prevent accessing index -1
+				{
+					string[] parts = strDate.Split(' ');
+					string lastPart = parts[parts.Length - 1];
 
-                    // Convert timezones in older formats to [+-]dddd format.
-                    lastPart = Regex.Replace(lastPart, REGEX_OLD_TIMEZONE_FORMATS, MatchEvaluator);
+					// Convert timezones in older formats to [+-]dddd format.
+					lastPart = Regex.Replace(lastPart, REGEX_OLD_TIMEZONE_FORMATS, MatchEvaluator);
 
-                    // Find the timezone specification
-                    // Example: Fri, 21 Nov 1997 09:55:06 -0600
-                    // finds -0600
-                    Match timezoneMatch = Regex.Match(lastPart, REGEX_NEW_TIMEZONE_FORMATS);
-                    if (timezoneMatch.Success)
-                    {
-                        //This last part is a timezone, remove it
-                        strDate = strDate.Substring(0, strDate.Length - lastPart.Length).Trim();
-                        DefaultLogger.Log.LogDebug(String.Format("Stripped timezone from \"{0}\" to produce \"{1}\"", dateInput, strDate));
-                    }
-                }
+					// Find the timezone specification
+					// Example: Fri, 21 Nov 1997 09:55:06 -0600
+					// finds -0600
+					Match timezoneMatch = Regex.Match(lastPart, REGEX_NEW_TIMEZONE_FORMATS);
+					if (timezoneMatch.Success)
+					{
+						//This last part is a timezone, remove it
+						strDate = strDate.Substring(0, strDate.Length - lastPart.Length).Trim();
+						DefaultLogger.Log.LogDebug(String.Format("Stripped timezone from \"{0}\" to produce \"{1}\"", dateInput, strDate));
+					}
+				}
 
-                //Try and parse it as one of the custom formats
-                try
-                {
-                    DateTime dateTime = DateTime.ParseExact(strDate, CustomDateTimeFormats, null, DateTimeStyles.None);
-                    DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
-                    return dateTime;
-                }
-                catch (FormatException)
-                {
-                    DefaultLogger.Log.LogError("Failed to parse date input using custom formats: " + dateInput);
-                }
-            }
+				//Try and parse it as one of the custom formats
+				try
+				{
+					DateTime dateTime = DateTime.ParseExact(strDate, CustomDateTimeFormats, null, DateTimeStyles.None);
+					DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
+					return dateTime;
+				}
+				catch (FormatException)
+				{
+					DefaultLogger.Log.LogError("Failed to parse date input using custom formats: " + dateInput);
+				}
+			}
 
-            return DateTime.MinValue;
-        }
+			return DateTime.MinValue;
+		}
 
 		/// <summary>
 		/// Validates that the given <paramref name="dateTime"/> agrees with a day-name specified
@@ -297,13 +297,13 @@ namespace OpenPop.Mime.Decode
 				// If a dayName was specified. Check that the dateTime and the dayName
 				// agrees on which day it is
 				// This is just a failure-check and could be left out
-				if ((dateTime.DayOfWeek == DayOfWeek.Monday    && !dayName.Equals("Mon")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Tuesday   && !dayName.Equals("Tue")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Wednesday && !dayName.Equals("Wed")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Thursday  && !dayName.Equals("Thu")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Friday    && !dayName.Equals("Fri")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Saturday  && !dayName.Equals("Sat")) ||
-					(dateTime.DayOfWeek == DayOfWeek.Sunday    && !dayName.Equals("Sun")))
+				if ((dateTime.DayOfWeek == DayOfWeek.Monday		&& !dayName.Equals("Mon")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Tuesday	&& !dayName.Equals("Tue")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Wednesday	&& !dayName.Equals("Wed")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Thursday	&& !dayName.Equals("Thu")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Friday		&& !dayName.Equals("Fri")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Saturday	&& !dayName.Equals("Sat")) ||
+					(dateTime.DayOfWeek == DayOfWeek.Sunday		&& !dayName.Equals("Sun")))
 				{
 					DefaultLogger.Log.LogDebug("Day-name does not correspond to the weekday of the date: " + dateInput);					
 				}
