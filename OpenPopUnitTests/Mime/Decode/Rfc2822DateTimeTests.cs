@@ -342,6 +342,26 @@ namespace OpenPopUnitTests.Mime.Decode
             Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("Sun, 43 Mar 2011 77:77:77 -9999"));
         }
 
+        [Test]
+        public void TestCustomFormat()
+        {
+            Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
+            Assert.AreEqual(new DateTime(2014, 08, 25, 9, 34, 22), Rfc2822DateTime.StringToDate("Mon, 25 08 2014 09:34:22 -0000"));
+
+            //Reset the custom formats
+            Rfc2822DateTime.CustomDateTimeFormats = null;
+        }
+
+        [Test]
+        public void TestCustomFormatHandlesTimezone()
+        {
+            Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
+            Assert.AreEqual(new DateTime(2014, 08, 25, 15, 34, 22), Rfc2822DateTime.StringToDate("Mon, 25 08 2014 09:34:22 -0600"));
+
+            //Reset the custom formats
+            Rfc2822DateTime.CustomDateTimeFormats = null;
+        }
+
 		[Test]
 		public void TestWrongFormatParses()
 		{
