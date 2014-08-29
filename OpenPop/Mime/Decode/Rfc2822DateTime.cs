@@ -272,7 +272,7 @@ namespace OpenPop.Mime.Decode
                 }
                 catch (FormatException)
                 {
-                    DefaultLogger.Log.LogDebug("Failed to parse date input using custom formats: " + dateInput);
+                    DefaultLogger.Log.LogError("Failed to parse date input using custom formats: " + dateInput);
                 }
             }
 
