@@ -242,6 +242,20 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void UsTimeZoneMst()
+		{
+			const string inputDate = "Wed, 9 May 2007 12:39:13 MST";
+
+			// MST is equivalent to -0700
+			const string inputDateEquivalent = "Wed, 9 May 2007 12:39:13 -0700";
+
+			DateTime inputDateTime = Rfc2822DateTime.StringToDate(inputDate);
+			DateTime inputDateTimeEquivalent = Rfc2822DateTime.StringToDate(inputDateEquivalent);
+
+			Assert.AreEqual(inputDateTime, inputDateTimeEquivalent);
+		}
+
+		[Test]
 		public void DateWithNoSpace()
 		{
 			// This is actually an illigal string
@@ -357,6 +371,16 @@ namespace OpenPopUnitTests.Mime.Decode
 		{
 			Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
 			Assert.AreEqual(new DateTime(2014, 08, 25, 15, 34, 22), Rfc2822DateTime.StringToDate("Mon, 25 08 2014 09:34:22 -0600"));
+
+			//Reset the custom formats
+			Rfc2822DateTime.CustomDateTimeFormats = null;
+		}
+
+		[Test]
+		public void TestCustomFormatHandlesStringTimezone()
+		{
+			Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
+			Assert.AreEqual(new DateTime(2014, 08, 25, 15, 34, 22), Rfc2822DateTime.StringToDate("Mon, 25 08 2014 09:34:22 CST"));
 
 			//Reset the custom formats
 			Rfc2822DateTime.CustomDateTimeFormats = null;

@@ -258,7 +258,7 @@ namespace OpenPop.Mime.Decode
 					if (timezoneMatch.Success)
 					{
 						//This last part is a timezone, remove it
-						strDate = strDate.Substring(0, strDate.Length - lastPart.Length).Trim();
+						strDate = strDate.Substring(0, strDate.Length - parts[parts.Length - 1].Length).Trim(); //Use the length of the old last part
 						DefaultLogger.Log.LogDebug(String.Format("Stripped timezone from \"{0}\" to produce \"{1}\"", dateInput, strDate));
 					}
 				}
