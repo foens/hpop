@@ -161,6 +161,64 @@ namespace OpenPopUnitTests.Mime.Header
 		}
 
 		/// <summary>
+		/// Test that we can parse a list of email addresses separated by commas where an email address is 
+		/// enclosed by multiple brackets
+		/// </summary>
+		[Test]
+		public void ParsingMailAddressListMultipleBrackets()
+		{
+			const string addressList = "\"John McDaniel\" <<jmcdaniel@nospam.teltronics.com>>, snoopy@peanuts.com, <<bob@builder.org>>";
+			string[] expectedAddress = { "jmcdaniel@nospam.teltronics.com", "snoopy@peanuts.com", "bob@builder.org" };
+			string[] expectedRaw = { "\"John McDaniel\" <jmcdaniel@nospam.teltronics.com>", "snoopy@peanuts.com", "<bob@builder.org>" };
+			string[] expectedDisplay = { "John McDaniel", "", "", "" };
+			bool[] expectedValidMailAddress = { true, true, true, true };
+			List<RfcMailAddress> list = RfcMailAddress.ParseMailAddresses(addressList);
+			Assert.AreEqual(expectedAddress.Length, list.Count, "Number of items parsed");
+			for (int i = 0; i < list.Count; i++)
+			{
+				Assert.IsTrue(list[i].HasValidMailAddress, string.Format("HasValidMailAddress: {0}", i));
+				Assert.AreEqual(expectedAddress[i], list[i].MailAddress.Address, string.Format("Email Address: {0}", i));
+				Assert.AreEqual(expectedDisplay[i], list[i].DisplayName);
+				Assert.AreEqual(expectedRaw[i], list[i].Raw, string.Format("Email Raw: {0}", i));
+				Assert.AreEqual(expectedValidMailAddress[i], list[i].HasValidMailAddress);
+				if (expectedValidMailAddress[i])
+				{
+					Assert.IsTrue(list[i].Address.Equals(list[i].MailAddress.Address));
+					Assert.IsTrue(list[i].DisplayName.Equals(list[i].MailAddress.DisplayName));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Test that we can parse a list of email addresses separated by commas where an email address is 
+		/// enclosed by multiple brackets and there are multiple brackets in a Display Name
+		/// </summary>
+		[Test]
+		public void ParsingMailAddressListMultipleBracketsInDisplayName()
+		{
+			const string addressList = "\"John <<McDaniel\" <<jmcdaniel@nospam.teltronics.com>>, snoopy@peanuts.com, <<bob@builder.org>>";
+			string[] expectedAddress = { "jmcdaniel@nospam.teltronics.com", "snoopy@peanuts.com", "bob@builder.org" };
+			string[] expectedRaw = { "\"John <<McDaniel\" <jmcdaniel@nospam.teltronics.com>", "snoopy@peanuts.com", "<bob@builder.org>" };
+			string[] expectedDisplay = { "John <<McDaniel", "", "", "" };
+			bool[] expectedValidMailAddress = { true, true, true, true };
+			List<RfcMailAddress> list = RfcMailAddress.ParseMailAddresses(addressList);
+			Assert.AreEqual(expectedAddress.Length, list.Count, "Number of items parsed");
+			for (int i = 0; i < list.Count; i++)
+			{
+				Assert.IsTrue(list[i].HasValidMailAddress, string.Format("HasValidMailAddress: {0}", i));
+				Assert.AreEqual(expectedAddress[i], list[i].MailAddress.Address, string.Format("Email Address: {0}", i));
+				Assert.AreEqual(expectedDisplay[i], list[i].DisplayName);
+				Assert.AreEqual(expectedRaw[i], list[i].Raw, string.Format("Email Raw: {0}", i));
+				Assert.AreEqual(expectedValidMailAddress[i], list[i].HasValidMailAddress);
+				if (expectedValidMailAddress[i])
+				{
+					Assert.IsTrue(list[i].Address.Equals(list[i].MailAddress.Address));
+					Assert.IsTrue(list[i].DisplayName.Equals(list[i].MailAddress.DisplayName));
+				}
+			}
+		}
+
+		/// <summary>
 		/// Test that we can parse a list of email addresses separated by commas
 		/// </summary>
 		[Test]
