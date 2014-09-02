@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mail;
-using System.Text.RegularExpressions;
 using OpenPop.Mime.Decode;
 using OpenPop.Common.Logging;
 
