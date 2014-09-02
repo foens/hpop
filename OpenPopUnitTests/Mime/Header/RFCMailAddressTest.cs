@@ -113,6 +113,54 @@ namespace OpenPopUnitTests.Mime.Header
 		}
 
 		/// <summary>
+		/// Test that we can parse a fully qualified mail address which has the email address
+		/// part enclosed in multiple brackets, and the display name contains < and >
+		/// </summary>
+		[Test]
+		public void ParsingMailAddressFullMultipleBracketsDisplayNameContainsBrackets()
+		{
+			const string address = "\"John< M>cDaniel\" <<jmcdaniel@spam.teltronics.com>>";
+			const string expectedRaw = "\"John< M>cDaniel\" <jmcdaniel@spam.teltronics.com>";
+			const string expectedMailAddress = "jmcdaniel@spam.teltronics.com";
+			const string expectedDisplayName = "John< M>cDaniel";
+
+			RfcMailAddress rfcAddress = RfcMailAddress.ParseMailAddress(address);
+
+			Assert.AreEqual(expectedRaw, rfcAddress.Raw);
+			Assert.IsTrue(rfcAddress.HasValidMailAddress);
+			Assert.AreEqual(expectedMailAddress, rfcAddress.MailAddress.Address);
+			Assert.AreEqual(expectedDisplayName, rfcAddress.MailAddress.DisplayName);
+
+			// The address and displayname should be equal
+			Assert.IsTrue(rfcAddress.Address.Equals(rfcAddress.MailAddress.Address));
+			Assert.IsTrue(rfcAddress.DisplayName.Equals(rfcAddress.MailAddress.DisplayName));
+		}
+
+		/// <summary>
+		/// Test that we can parse a fully qualified mail address which has the email address
+		/// part enclosed in multiple brackets, and the display name contains multiple < and > (e.g. <<)
+		/// </summary>
+		[Test]
+		public void ParsingMailAddressFullMultipleBracketsDisplayNameContainsMultipleBrackets()
+		{
+			const string address = "\"John<< M>>cDaniel\" <<jmcdaniel@spam.teltronics.com>>";
+			const string expectedRaw = "\"John<< M>>cDaniel\" <jmcdaniel@spam.teltronics.com>";
+			const string expectedMailAddress = "jmcdaniel@spam.teltronics.com";
+			const string expectedDisplayName = "John<< M>>cDaniel";
+
+			RfcMailAddress rfcAddress = RfcMailAddress.ParseMailAddress(address);
+
+			Assert.AreEqual(expectedRaw, rfcAddress.Raw);
+			Assert.IsTrue(rfcAddress.HasValidMailAddress);
+			Assert.AreEqual(expectedMailAddress, rfcAddress.MailAddress.Address);
+			Assert.AreEqual(expectedDisplayName, rfcAddress.MailAddress.DisplayName);
+
+			// The address and displayname should be equal
+			Assert.IsTrue(rfcAddress.Address.Equals(rfcAddress.MailAddress.Address));
+			Assert.IsTrue(rfcAddress.DisplayName.Equals(rfcAddress.MailAddress.DisplayName));
+		}
+
+		/// <summary>
 		/// Test that we can parse a list of email addresses separated by commas
 		/// </summary>
 		[Test]
