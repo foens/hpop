@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mail;
+using System.Text.RegularExpressions;
 using OpenPop.Mime.Decode;
 using OpenPop.Common.Logging;
 
@@ -152,6 +153,11 @@ namespace OpenPop.Mime.Header
 
 			// Decode the value, if it was encoded
 			input = EncodedWord.Decode(input.Trim());
+
+			//Remove pairs of multiple brackets
+			//	i.e. make "First Last" <<<first.last@email.com>>> => "First Last" <first.last@email.com>
+			input = Regex.Replace(input, "<+", "<");
+			input = Regex.Replace(input, ">+", ">");
 
 			// Find the location of the email address
 			int indexStartEmail = input.LastIndexOf('<');
