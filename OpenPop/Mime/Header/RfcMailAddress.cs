@@ -153,6 +153,31 @@ namespace OpenPop.Mime.Header
 			// Decode the value, if it was encoded
 			input = EncodedWord.Decode(input.Trim());
 
+			//Remove any redundant sets of angle brackets around the email address
+			int lastOpenAngleBracketIdx = input.LastIndexOf('<');
+			int lastCloseAngleBracketIdx = input.LastIndexOf('>');
+
+			//Find the index of the first angle bracket in this series of angle brackets, e.g "a>b" <<blah@email.com>> wouldn't find the angle bracket in the display name
+			int firstOpenAngleBracketIdx = lastOpenAngleBracketIdx;
+			int firstCloseAngleBracketIdx = lastCloseAngleBracketIdx;
+
+			while (firstOpenAngleBracketIdx > 0 && //There is a character before the last open angle bracket
+				input[firstOpenAngleBracketIdx - 1] == '<' && //The character before the last open angle bracket is another open angle bracket
+				input[firstCloseAngleBracketIdx - 1] == '>') //The character before the last close angle bracket is another close angle bracket
+			{
+				//Update the first angle bracket indices
+				firstOpenAngleBracketIdx--;
+				firstCloseAngleBracketIdx--;
+			}
+
+			//If the email address in the input string is enclosed in multiple angle brackets
+			if(firstOpenAngleBracketIdx != lastOpenAngleBracketIdx)
+			{
+				//Remove the multiple angle brackets surrounding the email address from the input string leaving just a single set
+				input = input.Substring(0, firstOpenAngleBracketIdx) + //Part before any angle brackets (display name if there is one)
+					input.Substring(lastOpenAngleBracketIdx, firstCloseAngleBracketIdx - lastOpenAngleBracketIdx + 1); //actual email address, including one angle bracket either side
+			}
+
 			// Find the location of the email address
 			int indexStartEmail = input.LastIndexOf('<');
 			int indexEndEmail = input.LastIndexOf('>');
