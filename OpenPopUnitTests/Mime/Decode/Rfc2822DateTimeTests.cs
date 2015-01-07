@@ -387,6 +387,17 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestCustomFormatHandlesNoTimezone()
+		{
+			//If not timezome is supplied, custom formats should assume UTC
+			Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
+			Assert.AreEqual(new DateTime(2014, 12, 30, 10, 59, 22, DateTimeKind.Utc), Rfc2822DateTime.StringToDate("Tue, 30 12 2014 10:59:22"));
+
+			//Reset the custom formats
+			Rfc2822DateTime.CustomDateTimeFormats = null;
+		}
+
+		[Test]
 		public void TestWrongFormatParses()
 		{
 			// This is a valid date, but in a incorrect format
