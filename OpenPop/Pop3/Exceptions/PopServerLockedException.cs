@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace OpenPop.Pop3.Exceptions
 {
@@ -9,6 +10,7 @@ namespace OpenPop.Pop3.Exceptions
 	/// The mail boxes are locked when an existing session is open on the POP3 server.<br/>
 	/// Only one POP3 client can use a POP3 account at a time.
 	/// </remarks>
+	[Serializable]
 	public class PopServerLockedException : PopClientException
 	{
 		///<summary>
@@ -18,5 +20,15 @@ namespace OpenPop.Pop3.Exceptions
 		public PopServerLockedException(PopServerException innerException)
 			: base("The account is locked or in use", innerException)
 		{ }
+
+		/// <summary>
+		/// Creates a new instance of the PopServerLockedException class with serialized data.
+		/// </summary>
+		/// <param name="info">holds the serialized object data about the exception being thrown</param>
+		/// <param name="context">contains contextual information about the source or destination</param>
+		protected PopServerLockedException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
 	}
 }

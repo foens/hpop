@@ -1,4 +1,7 @@
-﻿namespace OpenPop.Pop3.Exceptions
+﻿using System;
+using System.Runtime.Serialization;
+
+namespace OpenPop.Pop3.Exceptions
 {
 	/// <summary>
 	/// This exception indicates that the user has logged in recently and
@@ -6,6 +9,7 @@
 	/// Check the parameter to the LOGIN-DELAY capability, that the server responds with when
 	/// <see cref="Pop3Client.Capabilities()"/> is called, to see what the delay is.
 	/// </summary>
+	[Serializable]
 	public class LoginDelayException : PopClientException
 	{
 		///<summary>
@@ -15,5 +19,15 @@
 		public LoginDelayException(PopServerException innerException)
 			: base("Login denied because of recent connection to this maildrop. Increase time between connections.", innerException)
 		{ }
+
+		/// <summary>
+		/// Creates a new instance of the LoginDelayException class with serialized data.
+		/// </summary>
+		/// <param name="info">holds the serialized object data about the exception being thrown</param>
+		/// <param name="context">contains contextual information about the source or destination</param>
+		protected LoginDelayException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
 	}
 }
