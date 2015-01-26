@@ -173,6 +173,10 @@ namespace OpenPop.Mime
 			foreach (MessagePart attachmentMessagePart in attachments)
 			{
 				MemoryStream stream = new MemoryStream(attachmentMessagePart.Body);
+				if (attachmentMessagePart.ContentType != null && string.IsNullOrEmpty(attachmentMessagePart.ContentType.Name))
+				{
+					attachmentMessagePart.ContentType.Name = Path.GetFileName(attachmentMessagePart.FileName);
+				}
 				Attachment attachment = new Attachment(stream, attachmentMessagePart.ContentType);
 				attachment.ContentId = attachmentMessagePart.ContentId;
 				message.Attachments.Add(attachment);
