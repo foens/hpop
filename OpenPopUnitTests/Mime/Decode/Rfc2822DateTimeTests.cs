@@ -398,6 +398,16 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestEmptyCustomFormats()
+		{
+			Rfc2822DateTime.CustomDateTimeFormats = new string[0];
+			Assert.AreEqual(DateTime.MinValue, Rfc2822DateTime.StringToDate("test"));
+
+			//Reset the custom formats
+			Rfc2822DateTime.CustomDateTimeFormats = null;
+		}
+
+		[Test]
 		public void TestWrongFormatParses()
 		{
 			// This is a valid date, but in a incorrect format
