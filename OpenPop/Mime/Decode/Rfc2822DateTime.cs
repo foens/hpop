@@ -230,16 +230,21 @@ namespace OpenPop.Mime.Decode
 				}
 				catch (FormatException)
 				{
-					DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
+					//Only log as an error if we won't be checking it against any custom formats
+					if (CustomDateTimeFormats == null || CustomDateTimeFormats.Length == 0)
+					{
+						DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
+					}
 				}
 			}
-			else
+			//Only log as an error if we won't be checking it against any custom formats
+			else if (CustomDateTimeFormats == null || CustomDateTimeFormats.Length == 0)
 			{
 				DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
 			}
 
 			//If there are some custom formats
-			if (CustomDateTimeFormats != null)
+			if (CustomDateTimeFormats != null && CustomDateTimeFormats.Length > 0)
 			{
 				//If there is a timezone at the end, remove it
 				string strDate = dateInput.Trim();
