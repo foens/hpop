@@ -115,7 +115,7 @@ namespace OpenPop.Mime.Header
 						if (v.Equals("TEXT") || v.Equals("TEXT/"))
 							value = "text/plain";
 
-						contentType.MediaType = value;
+						contentType.MediaType = cleanMediaType(value);
 						break;
 
 					case "BOUNDARY":
@@ -265,6 +265,105 @@ namespace OpenPop.Mime.Header
 			}
 
 			return returner;
+		}
+
+		/// <summary>
+		/// Strip out any invalid characters as specified in RFC 2045 Section 5: The Content-Type Header Field
+		/// </summary>
+		/// <param name="mediaType">The Media Type extracted from the Content-Type header field</param>
+		/// <returns>The Media Type after making it meet RFC 2045</returns>
+		private static string cleanMediaType(string mediaType)
+		{
+			//Validation
+			if(mediaType == null)
+			{
+				throw new ArgumentNullException("mediaType");
+			}
+
+			int typeEndIdx = mediaType.IndexOf('/');
+			if(typeEndIdx == -1)
+			{
+				throw new ArgumentException("Media Type must be in the format type \"/\" subtype", "mediaType");
+			}
+
+			if(typeEndIdx == mediaType.Length - 1)
+			{
+				throw new ArgumentException("Media Type must contain subtype, which is a madatory field and has no default", 
+					"mediaType");
+			}
+
+			string type = mediaType.Substring(0, typeEndIdx);
+			string subType = mediaType.Substring(typeEndIdx + 1, mediaType.Length - type.Length - 1);
+
+			//Haven't been strict about the value of type since new standard values can be added (although they have to
+			//	be documented & approved by IANA as described in Appendix F of RFC 1341)
+			type = stripRfc2045TSpecials(type);
+			type = stripRfc822Ctls(type);
+			type = type.Replace(" ", "");
+
+			subType = stripRfc2045TSpecials(subType);
+			subType = stripRfc822Ctls(subType);
+			subType = subType.Replace(" ", "");
+
+			string toRet = type + "/" + subType;
+
+			//Log a debug message if the media type has been changed
+			if(toRet != mediaType)
+			{
+				DefaultLogger.Log.LogDebug("Content-Type Media Type value has been changed since it was invalid. Original value \"" +
+					mediaType + "\". New Value \"" + toRet + "\"");
+			}
+			return toRet;
+		}
+
+		/// <summary>
+		/// Strips all tspecials (as specified in RFC 2045) from a given string.
+		/// Note that this is less strict that the previous RFC 1341 tspecials with "." being allowed
+		/// </summary>
+		/// <param name="s">input string</param>
+		/// <returns><paramref name="s"/> without tspecials</returns>
+		private static string stripRfc2045TSpecials(string s)
+		{
+			//Validation
+			if(s == null)
+			{
+				throw new ArgumentNullException("s");
+			}
+
+			string[] tSpecials = new string[] { "(", ")", "<", ">", "@", ",", ";", 
+				":", "\\", "\"", "/", "[", "]", "?", "=" };
+
+			foreach(string tSpecial in tSpecials)
+			{
+				s = s.Replace(tSpecial, "");
+			}
+			return s;
+		}
+
+		/// <summary>
+		/// Strips all CTL chars (as specified in RFC 822) from a given string
+		/// </summary>
+		/// <param name="s">input string</param>
+		/// <returns><paramref name="s"/> without CTL chars</returns>
+		private static string stripRfc822Ctls(string s)
+		{
+			//Validation
+			if(s == null)
+			{
+				throw new ArgumentNullException("s");
+			}
+
+			//ASCII Control Chars
+			for(int i = 0; i <= 31; i++)
+			{
+				char c = (char)i;
+				s = s.Replace(c.ToString(), "");
+			}
+
+			//Del
+			s = s.Replace(((char)127).ToString(), "");
+
+			return s;
 		}
 	}
 }

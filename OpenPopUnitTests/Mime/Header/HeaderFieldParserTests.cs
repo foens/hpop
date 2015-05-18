@@ -768,6 +768,17 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.AreEqual("text/plain", contentType.MediaType);
 			Assert.AreEqual("utf-8", contentType.CharSet);
 		}
+
+		[Test]
+		public void TestWhitespaceStrippedFromMediaType()
+		{
+			const string contentTypeString =
+				"application/vnd.openxmlformats-officedocument.wordprocessingml.documen \r\n\tt";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+			Assert.NotNull(contentType);
+			Assert.AreEqual("application/vnd.openxmlformats-officedocument.wordprocessingml.document", contentType.MediaType);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests
