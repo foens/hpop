@@ -217,7 +217,6 @@ namespace OpenPop.Mime.Decode
 					{
 						//This last part is a timezone, remove it
 						strDate = strDate.Substring(0, strDate.Length - parts[parts.Length - 1].Length).Trim(); //Use the length of the old last part
-						DefaultLogger.Log.LogDebug(String.Format("Stripped timezone from \"{0}\" to produce \"{1}\"", dateInput, strDate));
 					}
 				}
 
@@ -228,10 +227,7 @@ namespace OpenPop.Mime.Decode
 					DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
 					return dateTime;
 				}
-				catch (FormatException)
-				{
-					DefaultLogger.Log.LogDebug("Failed to parse date input using custom formats: " + dateInput);
-				}
+				catch (FormatException) {  }
 			}
 
 			// Matches the date and time part of a string
