@@ -127,6 +127,7 @@ namespace OpenPop.Pop3
 				// state to Disconnected
 				// If this is not set, Disconnect will throw an exception
 				State = ConnectionState.Authorization;
+				DefaultLogger.Log.LogDebug(string.Format("Connect-Response: \"{0}\"", response));
 
 				IsOkResponse(response);
 				ExtractApopTimestamp(response);
@@ -903,12 +904,16 @@ namespace OpenPop.Pop3
 			// Convert the command with CRLF afterwards as per RFC to a byte array which we can write
 			byte[] commandBytes = Encoding.ASCII.GetBytes(command + "\r\n");
 
+			DefaultLogger.Log.LogDebug(string.Format("SendCommand: \"{0}\"", command));
+
 			// Write the command to the server
 			Stream.Write(commandBytes, 0, commandBytes.Length);
 			Stream.Flush(); // Flush the content as we now wait for a response
 
 			// Read the response from the server. The response should be in ASCII
 			LastServerResponse = StreamUtility.ReadLineAsAscii(Stream);
+
+			DefaultLogger.Log.LogDebug(string.Format("Server-Response: \"{0}\"", LastServerResponse));
 
 			IsOkResponse(LastServerResponse);
 		}
