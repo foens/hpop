@@ -398,6 +398,21 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestCustomFormatTakesPriorityExample()
+		{
+			//If a date matches a supplied custom format, then that should be used over the default
+			//	Here a custom format specifies that a UK date format should be assumed (dd/mm/yyyy), whereas 
+			//	by defualt this date would be parsed in the US date format (mm/dd/yyyy)
+			//Note that if it was parsed in the US format it would then warn that the day was incorrect as debug message,
+			//	but for some cases even the day will be correct
+			Rfc2822DateTime.CustomDateTimeFormats = new string[] { "ddd, dd MM yyyy HH:mm:ss" };
+			Assert.AreEqual(new DateTime(2015, 06, 04, 09, 08, 22, DateTimeKind.Utc), Rfc2822DateTime.StringToDate("Thu, 04 06 2015 09:08:22"));
+
+			//Reset the custom formats
+			Rfc2822DateTime.CustomDateTimeFormats = null;
+		}
+
+		[Test]
 		public void TestEmptyCustomFormats()
 		{
 			Rfc2822DateTime.CustomDateTimeFormats = new string[0];

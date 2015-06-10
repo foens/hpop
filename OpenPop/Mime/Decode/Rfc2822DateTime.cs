@@ -196,6 +196,40 @@ namespace OpenPop.Mime.Decode
 			if (dateInput == null)
 				throw new ArgumentNullException("dateInput");
 
+			//If there are some custom formats, try and parse the dateInput string with these first
+			if (CustomDateTimeFormats != null && CustomDateTimeFormats.Length > 0)
+			{
+				//If there is a timezone at the end, remove it
+				string strDate = dateInput.Trim();
+				if (strDate.Contains(" ")) //Check contains a space before getting the last part to prevent accessing index -1
+				{
+					string[] parts = strDate.Split(' ');
+					string lastPart = parts[parts.Length - 1];
+
+					// Convert timezones in older formats to [+-]dddd format.
+					lastPart = Regex.Replace(lastPart, REGEX_OLD_TIMEZONE_FORMATS, MatchEvaluator);
+
+					// Find the timezone specification
+					// Example: Fri, 21 Nov 1997 09:55:06 -0600
+					// finds -0600
+					Match timezoneMatch = Regex.Match(lastPart, REGEX_NEW_TIMEZONE_FORMATS);
+					if (timezoneMatch.Success)
+					{
+						//This last part is a timezone, remove it
+						strDate = strDate.Substring(0, strDate.Length - parts[parts.Length - 1].Length).Trim(); //Use the length of the old last part
+					}
+				}
+
+				//Try and parse it as one of the custom formats
+				try
+				{
+					DateTime dateTime = DateTime.ParseExact(strDate, CustomDateTimeFormats, null, DateTimeStyles.None);
+					DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
+					return dateTime;
+				}
+				catch (FormatException) {  }
+			}
+
 			// Matches the date and time part of a string
 			// Given string example: Fri, 21 Nov 1997 09:55:06 -0600
 			// Needs to find: 21 Nov 1997 09:55:06
@@ -230,55 +264,12 @@ namespace OpenPop.Mime.Decode
 				}
 				catch (FormatException)
 				{
-					//Only log as an error if we won't be checking it against any custom formats
-					if (CustomDateTimeFormats == null || CustomDateTimeFormats.Length == 0)
-					{
-						DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
-					}
+					DefaultLogger.Log.LogError("The given date appeared to be in a valid format, but could not be converted to a DateTime object: " + dateInput);
 				}
 			}
-			//Only log as an error if we won't be checking it against any custom formats
-			else if (CustomDateTimeFormats == null || CustomDateTimeFormats.Length == 0)
+			else
 			{
 				DefaultLogger.Log.LogError("The given date does not appear to be in a valid format: " + dateInput);
-			}
-
-			//If there are some custom formats
-			if (CustomDateTimeFormats != null && CustomDateTimeFormats.Length > 0)
-			{
-				//If there is a timezone at the end, remove it
-				string strDate = dateInput.Trim();
-				if (strDate.Contains(" ")) //Check contains a space before getting the last part to prevent accessing index -1
-				{
-					string[] parts = strDate.Split(' ');
-					string lastPart = parts[parts.Length - 1];
-
-					// Convert timezones in older formats to [+-]dddd format.
-					lastPart = Regex.Replace(lastPart, REGEX_OLD_TIMEZONE_FORMATS, MatchEvaluator);
-
-					// Find the timezone specification
-					// Example: Fri, 21 Nov 1997 09:55:06 -0600
-					// finds -0600
-					Match timezoneMatch = Regex.Match(lastPart, REGEX_NEW_TIMEZONE_FORMATS);
-					if (timezoneMatch.Success)
-					{
-						//This last part is a timezone, remove it
-						strDate = strDate.Substring(0, strDate.Length - parts[parts.Length - 1].Length).Trim(); //Use the length of the old last part
-						DefaultLogger.Log.LogDebug(String.Format("Stripped timezone from \"{0}\" to produce \"{1}\"", dateInput, strDate));
-					}
-				}
-
-				//Try and parse it as one of the custom formats
-				try
-				{
-					DateTime dateTime = DateTime.ParseExact(strDate, CustomDateTimeFormats, null, DateTimeStyles.None);
-					DefaultLogger.Log.LogDebug(String.Format("Successfully parsed date input \"{0}\" using a custom format. Converted to date: {1}", dateInput, dateTime.ToString()));
-					return dateTime;
-				}
-				catch (FormatException)
-				{
-					DefaultLogger.Log.LogError("Failed to parse date input using custom formats: " + dateInput);
-				}
 			}
 
 			return DateTime.MinValue;
