@@ -779,6 +779,17 @@ namespace OpenPopUnitTests.Mime.Header
 			Assert.NotNull(contentType);
 			Assert.AreEqual("application/vnd.openxmlformats-officedocument.wordprocessingml.document", contentType.MediaType);
 		}
+
+		[Test]
+		public void TestNoKeyValuesGetsIgnored()
+		{
+			//Test that values that don't have a key after the first one (which is the media type) do not override the media type
+			const string contentTypeString = "text/html;iso-8859-1";
+
+			ContentType contentType = HeaderFieldParser.ParseContentType(contentTypeString);
+			Assert.NotNull(contentType);
+			Assert.AreEqual("text/html", contentType.MediaType);
+		}
 		#endregion
 
 		#region Content-Transfer-Encoding tests
