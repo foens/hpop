@@ -99,6 +99,7 @@ namespace OpenPop.Mime.Header
 
 			// Now decode the parameters
 			List<KeyValuePair<string, string>> parameters = Rfc2231Decoder.Decode(headerValue);
+			bool setMediaType = false;
 
 			foreach (KeyValuePair<string, string> keyValuePair in parameters)
 			{
@@ -110,12 +111,24 @@ namespace OpenPop.Mime.Header
 						// This is the MediaType - it has no key since it is the first one mentioned in the
 						// headerValue and has no = in it.
 
-						// Check for illegal content-type
-						string v = value.ToUpperInvariant();
-						if (v.Equals("TEXT") || v.Equals("TEXT/"))
-							value = "text/plain";
+						if (!setMediaType)
+						{
+							// Check for illegal content-type
+							string v = value.ToUpperInvariant();
+							if (v.Equals("TEXT") || v.Equals("TEXT/"))
+								value = "text/plain";
 
-						contentType.MediaType = cleanMediaType(value);
+							contentType.MediaType = cleanMediaType(value);
+
+							//Have now set the media type, ignore any later entries without a key (see #21)
+							setMediaType = true;
+						}
+						else
+						{
+							DefaultLogger.Log.LogDebug(
+								"Multiple values without a key in the Content Type header. Only the first will get used as the media type");
+						}
+						
 						break;
 
 					case "BOUNDARY":
