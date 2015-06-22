@@ -77,6 +77,30 @@ namespace OpenPopUnitTests.Mime.Decode
 		}
 
 		[Test]
+		public void TestIso885915()
+		{
+			Assert.AreEqual(Encoding.GetEncoding("iso-8859-15"), EncodingFinder.FindEncoding("iso-8859-15"));
+		}
+
+		[Test]
+		public void TestIso885915UpperCase()
+		{
+			Assert.AreEqual(Encoding.GetEncoding("iso-8859-15"), EncodingFinder.FindEncoding("ISO-8859-15"));
+		}
+
+		[Test]
+		public void TestIsoNoHyphen885915()
+		{
+			Assert.AreEqual(Encoding.GetEncoding("iso-8859-15"), EncodingFinder.FindEncoding("iso8859-15"));
+		}
+
+		[Test]
+		public void TestIsoNoHyphen885915UpperCase()
+		{
+			Assert.AreEqual(Encoding.GetEncoding("iso-8859-15"), EncodingFinder.FindEncoding("ISO8859-15"));
+		}
+
+		[Test]
 		public void TestBinary()
 		{
 			Assert.AreEqual(Encoding.ASCII, EncodingFinder.FindEncoding("binary"));
