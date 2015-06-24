@@ -101,6 +101,13 @@ namespace OpenPop.Mime.Decode
 				}
 
 				// It seems there is no codepage value in the characterSet. It must be a named encoding
+
+				//Handle missing hyphen after ISO, e.g. ISO8859-15 (#36)
+				if (charSetUpper.Length > 3 && charSetUpper.StartsWith("ISO") && charSetUpper[3] >= '0' && charSetUpper[3] <= '9')
+				{
+					return Encoding.GetEncoding("iso-" + characterSet.Substring(3));
+				}
+
 				return Encoding.GetEncoding(characterSet);
 			}
 			catch (ArgumentException)
