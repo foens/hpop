@@ -125,7 +125,7 @@ namespace OpenPop.Mime
 			// Construct an empty MailMessage to which we will gradually build up to look like the current Message object (this)
 			MailMessage message = new MailMessage();
 
-			message.Subject = Headers.Subject;
+            message.Subject = Headers.Subject.Replace('\r', ' ').Replace('\n', ' '); 
 
 			// We here set the encoding to be UTF-8
 			// We cannot determine what the encoding of the subject was at this point.
