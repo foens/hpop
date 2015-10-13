@@ -701,16 +701,18 @@ namespace OpenPop.Pop3
 		}
 
 
-		/// <summary>
-		/// Fetches a message from the server and parses it
-		/// </summary>
-		/// <param name="messageNumber">
-		/// Message number on server, which may not be marked as deleted.<br/>
-		/// Must be inside the range [1, messageCount]
-		/// </param>
-		/// <returns>The message, containing the email message</returns>
-		/// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
-		public Message GetMessage(int messageNumber)
+	    /// <summary>
+	    /// Fetches a message from the server and parses it
+	    /// </summary>
+	    /// <param name="messageNumber">
+	    /// Message number on server, which may not be marked as deleted.<br/>
+	    /// Must be inside the range [1, messageCount]
+	    /// </param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    /// <returns>The message, containing the email message</returns>
+	    /// <exception cref="PopServerException">If the server did not accept the command sent to fetch the message</exception>
+	    public Message GetMessage(int messageNumber, IParsingErrorHandler parsingErrorHandler = null)
 		{
 			AssertDisposed();
 
@@ -721,7 +723,7 @@ namespace OpenPop.Pop3
 
 			byte[] messageContent = GetMessageAsBytes(messageNumber);
 
-			return new Message(messageContent);
+            return new Message(messageContent, parsingErrorHandler);
 		}
 
 		/// <summary>

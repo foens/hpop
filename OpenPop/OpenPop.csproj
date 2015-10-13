@@ -8,7 +8,8 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <AssemblyName>OpenPop</AssemblyName>
-    <AssemblyOriginatorKeyFile>../OpenPopKeyFile.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
@@ -79,6 +80,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IParsingErrorHandler.cs" />
+    <Compile Include="ParseError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mime\Decode\EncodingFinder.cs" />
     <Compile Include="Mime\Decode\Rfc2231Decoder.cs" />
