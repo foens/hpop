@@ -175,6 +175,10 @@ namespace OpenPop.Mime
 				MemoryStream stream = new MemoryStream(attachmentMessagePart.Body);
 				Attachment attachment = new Attachment(stream, attachmentMessagePart.ContentType);
 				attachment.ContentId = attachmentMessagePart.ContentId;
+
+				attachment.Name = String.IsNullOrEmpty(attachment.Name) ? attachmentMessagePart.FileName : attachment.Name;
+				attachment.ContentDisposition.FileName = String.IsNullOrEmpty(attachment.ContentDisposition.FileName) ? attachmentMessagePart.FileName : attachment.ContentDisposition.FileName;
+				
 				message.Attachments.Add(attachment);
 			}
 
