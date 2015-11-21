@@ -43,15 +43,17 @@ namespace OpenPop.Mime.Header
 			}
 		}
 
-		/// <summary>
-		/// Extract the header part and body part of a message.<br/>
-		/// The headers are then parsed to a strongly typed <see cref="MessageHeader"/> object.
-		/// </summary>
-		/// <param name="fullRawMessage">The full message in bytes where header and body needs to be extracted from</param>
-		/// <param name="headers">The extracted header parts of the message</param>
-		/// <param name="body">The body part of the message</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="fullRawMessage"/> is <see langword="null"/></exception>
-		public static void ExtractHeadersAndBody(byte[] fullRawMessage, out MessageHeader headers, out byte[] body)
+	    /// <summary>
+	    /// Extract the header part and body part of a message.<br/>
+	    /// The headers are then parsed to a strongly typed <see cref="MessageHeader"/> object.
+	    /// </summary>
+	    /// <param name="fullRawMessage">The full message in bytes where header and body needs to be extracted from</param>
+	    /// <param name="headers">The extracted header parts of the message</param>
+	    /// <param name="body">The body part of the message</param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing an header. 
+        /// If it is not null, the handler handles the error on the specific header without stopping the message parsing process</param>
+	    /// <exception cref="ArgumentNullException">If <paramref name="fullRawMessage"/> is <see langword="null"/></exception>
+	    public static void ExtractHeadersAndBody(byte[] fullRawMessage, out MessageHeader headers, out byte[] body, IParsingErrorHandler parsingErrorHandler = null)
 		{
 			if(fullRawMessage == null)
 				throw new ArgumentNullException("fullRawMessage");
@@ -67,7 +69,7 @@ namespace OpenPop.Mime.Header
 			NameValueCollection headersUnparsedCollection = ExtractHeaders(headersString);
 
 			// Use the NameValueCollection to parse it into a strongly-typed MessageHeader header
-			headers = new MessageHeader(headersUnparsedCollection);
+			headers = new MessageHeader(headersUnparsedCollection, parsingErrorHandler);
 
 			// Since we know where the headers end, we also know where the body is
 			// Copy the body part into the body parameter

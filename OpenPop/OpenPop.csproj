@@ -79,6 +79,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IParsingErrorHandler.cs" />
+    <Compile Include="ParseError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mime\Decode\EncodingFinder.cs" />
     <Compile Include="Mime\Decode\Rfc2231Decoder.cs" />

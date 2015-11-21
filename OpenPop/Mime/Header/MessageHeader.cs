@@ -18,7 +18,9 @@ namespace OpenPop.Mime.Header
 	/// </remarks>
 	public sealed class MessageHeader
 	{
-		#region Properties
+	    private readonly IParsingErrorHandler _parsingErrorHandler;
+
+	    #region Properties
 		/// <summary>
 		/// All headers which were not recognized and explicitly dealt with.<br/>
 		/// This should mostly be custom headers, which are marked as X-[name].<br/>
@@ -228,15 +230,18 @@ namespace OpenPop.Mime.Header
 		public string Subject { get; private set; }
 		#endregion
 
-		/// <summary>
-		/// Parses a <see cref="NameValueCollection"/> to a MessageHeader
-		/// </summary>
-		/// <param name="headers">The collection that should be traversed and parsed</param>
-		/// <returns>A valid MessageHeader object</returns>
-		/// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
-		internal MessageHeader(NameValueCollection headers)
+	    /// <summary>
+	    /// Parses a <see cref="NameValueCollection"/> to a MessageHeader
+	    /// </summary>
+	    /// <param name="headers">The collection that should be traversed and parsed</param>
+	    /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing an header. 
+	    /// If it is not null, the handler handles the error on the specific header without stopping the message parsing process</param>
+	    /// <returns>A valid MessageHeader object</returns>
+	    /// <exception cref="ArgumentNullException">If <paramref name="headers"/> is <see langword="null"/></exception>
+	    internal MessageHeader(NameValueCollection headers, IParsingErrorHandler parsingErrorHandler = null)
 		{
-			if (headers == null)
+		    _parsingErrorHandler = parsingErrorHandler;
+		    if (headers == null)
 				throw new ArgumentNullException("headers");
 
 			// Create empty lists as defaults. We do not like null values
@@ -284,7 +289,21 @@ namespace OpenPop.Mime.Header
 				{
 					foreach (string headerValue in headerValues)
 					{
-						ParseHeader(headerName, headerValue);
+					    try
+					    {
+					        ParseHeader(headerName, headerValue);
+					    }
+					    catch (Exception ex)
+					    {
+					        if (_parsingErrorHandler != null)
+					        {
+					            _parsingErrorHandler.HandleParseError(new ParseError(ex, headerValue, string.Format("On header {0}", headerName)));
+					        }
+					        else
+					        {
+					            throw;
+					        }
+					    }
 					}
 				}
 			}

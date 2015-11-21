@@ -50,35 +50,40 @@ namespace OpenPop.Mime
 		#endregion
 
 		#region Constructors
-		/// <summary>
-		/// Convenience constructor for <see cref="Mime.Message(byte[], bool)"/>.<br/>
-		/// <br/>
-		/// Creates a message from a byte array. The full message including its body is parsed.
-		/// </summary>
-		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
-		public Message(byte[] rawMessageContent)
-			: this(rawMessageContent, true)
+
+	    /// <summary>
+	    /// Convenience constructor for <see cref="Mime.Message(byte[], bool, IParsingErrorHandler)"/>.<br/>
+	    /// <br/>
+	    /// Creates a message from a byte array. The full message including its body is parsed.
+	    /// </summary>
+	    /// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    public Message(byte[] rawMessageContent, IParsingErrorHandler parsingErrorHandler = null)
+			: this(rawMessageContent, true, parsingErrorHandler)
 		{
 		}
 
-		/// <summary>
-		/// Constructs a message from a byte array.<br/>
-		/// <br/>
-		/// The headers are always parsed, but if <paramref name="parseBody"/> is <see langword="false"/>, the body is not parsed.
-		/// </summary>
-		/// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
-		/// <param name="parseBody">
-		/// <see langword="true"/> if the body should be parsed,
-		/// <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> byte array
-		/// </param>
-		public Message(byte[] rawMessageContent, bool parseBody)
+	    /// <summary>
+	    /// Constructs a message from a byte array.<br/>
+	    /// <br/>
+	    /// The headers are always parsed, but if <paramref name="parseBody"/> is <see langword="false"/>, the body is not parsed.
+	    /// </summary>
+	    /// <param name="rawMessageContent">The byte array which is the message contents to parse</param>
+	    /// <param name="parseBody">
+	    /// <see langword="true"/> if the body should be parsed,
+	    /// <see langword="false"/> if only headers should be parsed out of the <paramref name="rawMessageContent"/> byte array
+	    /// </param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    public Message(byte[] rawMessageContent, bool parseBody, IParsingErrorHandler parsingErrorHandler = null)
 		{
 			RawMessage = rawMessageContent;
 
 			// Find the headers and the body parts of the byte array
 			MessageHeader headersTemp;
 			byte[] body;
-			HeaderExtractor.ExtractHeadersAndBody(rawMessageContent, out headersTemp, out body);
+			HeaderExtractor.ExtractHeadersAndBody(rawMessageContent, out headersTemp, out body, parsingErrorHandler);
 
 			// Set the Headers property
 			Headers = headersTemp;
@@ -87,7 +92,7 @@ namespace OpenPop.Mime
 			if (parseBody)
 			{
 				// Parse the body into a MessagePart
-				MessagePart = new MessagePart(body, Headers);
+				MessagePart = new MessagePart(body, Headers, parsingErrorHandler);
 			}
 		}
 		#endregion
@@ -309,7 +314,7 @@ namespace OpenPop.Mime
 		/// <summary>
 		/// Save this <see cref="Message"/> to a file.<br/>
 		/// <br/>
-		/// Can be loaded at a later time using the <see cref="Load(FileInfo)"/> method.
+		/// Can be loaded at a later time using the <see cref="Load(FileInfo, IParsingErrorHandler)"/> method.
 		/// </summary>
 		/// <param name="file">The File location to save the <see cref="Message"/> to. Existent files will be overwritten.</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
@@ -339,15 +344,17 @@ namespace OpenPop.Mime
 			messageStream.Write(RawMessage, 0, RawMessage.Length);
 		}
 
-		/// <summary>
-		/// Loads a <see cref="Message"/> from a file containing a raw email.
-		/// </summary>
-		/// <param name="file">The File location to load the <see cref="Message"/> from. The file must exist.</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
-		/// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
-		/// <exception>Other exceptions relevant to a <see cref="FileStream"/> might be thrown as well</exception>
-		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="file"/></returns>
-		public static Message Load(FileInfo file)
+	    /// <summary>
+	    /// Loads a <see cref="Message"/> from a file containing a raw email.
+	    /// </summary>
+	    /// <param name="file">The File location to load the <see cref="Message"/> from. The file must exist.</param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    /// <exception cref="ArgumentNullException">If <paramref name="file"/> is <see langword="null"/></exception>
+	    /// <exception cref="FileNotFoundException">If <paramref name="file"/> does not exist</exception>
+	    /// <exception>Other exceptions relevant to a <see cref="FileStream"/> might be thrown as well</exception>
+	    /// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="file"/></returns>
+	    public static Message Load(FileInfo file, IParsingErrorHandler parsingErrorHandler = null)
 		{
 			if (file == null)
 				throw new ArgumentNullException("file");
@@ -357,19 +364,21 @@ namespace OpenPop.Mime
 
 			using (FileStream stream = new FileStream(file.FullName, FileMode.Open))
 			{
-				return Load(stream);
+				return Load(stream, parsingErrorHandler);
 			}
 		}
 
 
-		/// <summary>
-		/// Loads a <see cref="Message"/> from a <see cref="Stream"/> containing a raw email.
-		/// </summary>
-		/// <param name="messageStream">The <see cref="Stream"/> from which to load the raw <see cref="Message"/></param>
-		/// <exception cref="ArgumentNullException">If <paramref name="messageStream"/> is <see langword="null"/></exception>
-		/// <exception>Other exceptions relevant to <see cref="Stream.Read"/> might be thrown as well</exception>
-		/// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="messageStream"/></returns>
-		public static Message Load(Stream messageStream)
+	    /// <summary>
+	    /// Loads a <see cref="Message"/> from a <see cref="Stream"/> containing a raw email.
+	    /// </summary>
+	    /// <param name="messageStream">The <see cref="Stream"/> from which to load the raw <see cref="Message"/></param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    /// <exception cref="ArgumentNullException">If <paramref name="messageStream"/> is <see langword="null"/></exception>
+	    /// <exception>Other exceptions relevant to <see cref="Stream.Read"/> might be thrown as well</exception>
+	    /// <returns>A <see cref="Message"/> with the content loaded from the <paramref name="messageStream"/></returns>
+	    public static Message Load(Stream messageStream, IParsingErrorHandler parsingErrorHandler = null)
 		{
 			if (messageStream == null)
 				throw new ArgumentNullException("messageStream");
@@ -390,7 +399,7 @@ namespace OpenPop.Mime
 #endif
 				byte[] content = outStream.ToArray();
 
-				return new Message(content);
+				return new Message(content, parsingErrorHandler);
 			}
 		}
 		#endregion

@@ -81,7 +81,9 @@ namespace OpenPop.Mime
 	/// </example>
 	public class MessagePart
 	{
-		#region Public properties
+	    private readonly IParsingErrorHandler _parsingErrorHandler;
+
+	    #region Public properties
 		/// <summary>
 		/// The Content-Type header field.<br/>
 		/// <br/>
@@ -200,19 +202,24 @@ namespace OpenPop.Mime
 		#endregion
 
 		#region Constructors
-		/// <summary>
-		/// Used to construct the topmost message part
-		/// </summary>
-		/// <param name="rawBody">The body that needs to be parsed</param>
-		/// <param name="headers">The headers that should be used from the message</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="rawBody"/> or <paramref name="headers"/> is <see langword="null"/></exception>
-		internal MessagePart(byte[] rawBody, MessageHeader headers)
+
+	    /// <summary>
+	    /// Used to construct the topmost message part
+	    /// </summary>
+	    /// <param name="rawBody">The body that needs to be parsed</param>
+	    /// <param name="headers">The headers that should be used from the message</param>
+        /// <param name="parsingErrorHandler">(Optional) It is notifified when an error occurs while parsing something in the message. 
+        /// If it is not null, the handler handles the error on the specific element without stopping the message parsing process</param>
+	    /// <exception cref="ArgumentNullException">If <paramref name="rawBody"/> or <paramref name="headers"/> is <see langword="null"/></exception>
+	    internal MessagePart(byte[] rawBody, MessageHeader headers, IParsingErrorHandler parsingErrorHandler = null)
 		{
-			if(rawBody == null)
+		    if(rawBody == null)
 				throw new ArgumentNullException("rawBody");
 			
 			if(headers == null)
 				throw new ArgumentNullException("headers");
+
+		    _parsingErrorHandler = parsingErrorHandler;
 
 			ContentType = headers.ContentType;
 			ContentDescription = headers.ContentDescription;
@@ -221,7 +228,22 @@ namespace OpenPop.Mime
 			ContentDisposition = headers.ContentDisposition;
 
 			FileName = FindFileName(ContentType, ContentDisposition, "(no name)");
-			BodyEncoding = ParseBodyEncoding(ContentType.CharSet);
+		    try
+		    {
+		        BodyEncoding = ParseBodyEncoding(ContentType.CharSet);
+		    }
+		    catch (FormatException ex)
+		    {
+		        BodyEncoding = Encoding.UTF8;
+		        if (_parsingErrorHandler != null)
+		        {
+                    _parsingErrorHandler.HandleParseError(new ParseError(ex, ContentType.CharSet, string.Format("On body encoding. Encoding set to {0}", BodyEncoding.EncodingName)));
+		        }
+		        else
+		        {
+                    throw;
+		        }
+		    }
 
 			ParseBody(rawBody);
 		}
