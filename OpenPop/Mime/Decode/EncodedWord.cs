@@ -77,6 +77,8 @@ namespace OpenPop.Mime.Decode
 			encodedWords = Regex.Replace(encodedWords, replaceRegex, "${first}${second}");
 			encodedWords = Regex.Replace(encodedWords, replaceRegex, "${first}${second}");
 
+			string decodedWords = encodedWords;
+
 			MatchCollection matches = Regex.Matches(encodedWords, encodedWordRegex);
             if (matches.Count > 0)
             {
