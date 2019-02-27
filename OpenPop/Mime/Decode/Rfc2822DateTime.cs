@@ -132,6 +132,7 @@ namespace OpenPop.Mime.Decode
 				case "A": return "+0100";
 				case "B": return "+0200";
 				case "C": return "+0300";
+				case "MSK": // EU timezone MSK is semantically equivalent to +0400
 				case "D": return "+0400";
 				case "E": return "+0500";
 				case "F": return "+0600";
@@ -150,11 +151,24 @@ namespace OpenPop.Mime.Decode
 				case "N": return "-0100";
 				case "O": return "-0200";
 				case "P": return "-0300";
-				case "Q": return "-0400";
-				case "R": return "-0500";
-				case "S": return "-0600";
-				case "T": return "-0700";
-				case "U": return "-0800";
+				case "EDT":  // EDT is semantically equivalent to -0400
+				case "Q": 
+					  return "-0400";
+				case "EST": // EST,CDT is semantically equivalent to -0500
+				case "CDT":
+				case "R": 
+					  return "-0500";
+				case "CST": // CST,MDT is semantically equivalent to -0600
+				case "MDT":
+				case "S": 
+					  return "-0600";
+				case "MST": // US timezones MST,PDT is semantically equivalent to -0700
+				case "PDT": 
+				case "T": 
+					  return "-0700";
+				case "PST": // US timezone PST is semantically equivalent to -0800
+				case "U": 
+					  return "-0800";
 				case "V": return "-0900";
 				case "W": return "-1000";
 				case "X": return "-1100";
@@ -165,20 +179,7 @@ namespace OpenPop.Mime.Decode
 				case "Z":
 				case "UT":
 				case "GMT":
-					return "+0000";
-
-				// US time zones
-				case "EDT": return "-0400"; // EDT is semantically equivalent to -0400
-				case "EST": return "-0500"; // EST is semantically equivalent to -0500
-				case "CDT": return "-0500"; // CDT is semantically equivalent to -0500
-				case "CST": return "-0600"; // CST is semantically equivalent to -0600
-				case "MDT": return "-0600"; // MDT is semantically equivalent to -0600
-				case "MST": return "-0700"; // MST is semantically equivalent to -0700
-				case "PDT": return "-0700"; // PDT is semantically equivalent to -0700
-				case "PST": return "-0800"; // PST is semantically equivalent to -0800
-
-				// EU time zones
-				case "MSK": return "+0400"; // MSK is semantically equivalent to +0400
+					return "+0000";			
 
 				default:
 					throw new ArgumentException("Unexpected input");
