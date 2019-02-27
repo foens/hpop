@@ -328,18 +328,18 @@ namespace OpenPop.Mime.Header
 			{
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "TO":
-					To = RfcMailAddress.ParseMailAddresses(headerValue);
+                    To.AddRange(RfcMailAddress.ParseMailAddresses(headerValue));
 					break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "CC":
-					Cc = RfcMailAddress.ParseMailAddresses(headerValue);
-					break;
+                    Cc.AddRange(RfcMailAddress.ParseMailAddresses(headerValue));
+                    break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.3
 				case "BCC":
-					Bcc = RfcMailAddress.ParseMailAddresses(headerValue);
-					break;
+					Bcc.AddRange(RfcMailAddress.ParseMailAddresses(headerValue));
+                    break;
 
 				// See http://tools.ietf.org/html/rfc5322#section-3.6.2
 				case "FROM":
