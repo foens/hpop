@@ -40,8 +40,15 @@ namespace OpenPop.Mime.Header
 		/// </summary>
 		public string ContentDescription { get; private set; }
 
-		/// <summary>
-		/// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
+        /// <summary>
+        /// The Content location.<br/>
+        /// <br/>
+        /// <see langword="null"/> if no Content-Location header was present in the message.
+        /// </summary>
+        public string ContentLocation { get; private set; }
+
+        /// <summary>
+        /// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
 		/// <br/>
 		/// <see langword="null"/> if no Content-ID header field was present in the message.
 		/// </summary>
