@@ -40,8 +40,15 @@ namespace OpenPop.Mime.Header
 		/// </summary>
 		public string ContentDescription { get; private set; }
 
-		/// <summary>
-		/// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
+                /// <summary>
+                /// The Content location.<br/>
+                /// <br/>
+                /// <see langword="null"/> if no Content-Location header was present in the message.
+                /// </summary>
+                public string ContentLocation { get; private set; }
+
+                /// <summary>
+                /// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
 		/// <br/>
 		/// <see langword="null"/> if no Content-ID header field was present in the message.
 		/// </summary>
@@ -440,7 +447,12 @@ namespace OpenPop.Mime.Header
 					// Human description of for example a file. Can be encoded
 					ContentDescription = EncodedWord.Decode(headerValue.Trim());
 					break;
-
+				
+				// See https://tools.ietf.org/html/rfc2557#page-6
+                		case "CONTENT-LOCATION":
+                    			ContentLocation = headerValue.Trim();
+                    			break;
+					
 				// See http://tools.ietf.org/html/rfc2045#section-5.1
 				// Example: Content-type: text/plain; charset="us-ascii"
 				case "CONTENT-TYPE":
