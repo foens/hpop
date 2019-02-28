@@ -101,21 +101,21 @@ namespace OpenPop.Mime
 		/// </summary>
 		public string ContentDescription { get; private set; }
         
-        /// <summary>
-        /// his header describes the Content location.<br/>
-        /// <br/>
-        /// <see langword="null"/> if no Content-Location header was present in the message.<br/>
-        /// </summary>
-        public string ContentLocation { get; private set; }
+		/// <summary>
+		/// his header describes the Content location.<br/>
+		/// <br/>
+		/// <see langword="null"/> if no Content-Location header was present in the message.<br/>
+		/// </summary>
+		public string ContentLocation { get; private set; }
 
-        /// <summary>
-        /// This header describes the Content encoding during transfer.<br/>
-        /// <br/>
-        /// If no Content-Transfer-Encoding header was present in the message, it is set
-        /// to the default of <see cref="Header.ContentTransferEncoding.SevenBit">SevenBit</see> in accordance to the RFC.
-        /// </summary>
-        /// <remarks>See <a href="http://tools.ietf.org/html/rfc2045#section-6">RFC 2045 section 6</a> for details</remarks>
-        public ContentTransferEncoding ContentTransferEncoding { get; private set; }
+		/// <summary>
+		/// This header describes the Content encoding during transfer.<br/>
+		/// <br/>
+		/// If no Content-Transfer-Encoding header was present in the message, it is set
+		/// to the default of <see cref="Header.ContentTransferEncoding.SevenBit">SevenBit</see> in accordance to the RFC.
+		/// </summary>
+		/// <remarks>See <a href="http://tools.ietf.org/html/rfc2045#section-6">RFC 2045 section 6</a> for details</remarks>
+        	public ContentTransferEncoding ContentTransferEncoding { get; private set; }
 
 		/// <summary>
 		/// ID of the content part (like an attached image). Used with MultiPart messages.<br/>
