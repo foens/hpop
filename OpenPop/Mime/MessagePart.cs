@@ -233,9 +233,8 @@ namespace OpenPop.Mime
 			ContentTransferEncoding = headers.ContentTransferEncoding;
 			ContentId = headers.ContentId;
 			ContentDisposition = headers.ContentDisposition;
-            ContentLocation = headers.ContentLocation;
-
-            FileName = FindFileName(ContentType, ContentDisposition, "(no name)");
+			ContentLocation = headers.ContentLocation;
+			FileName = FindFileName(ContentType, ContentDisposition, "(no name)");
 		    try
 		    {
 		        BodyEncoding = ParseBodyEncoding(ContentType.CharSet);
