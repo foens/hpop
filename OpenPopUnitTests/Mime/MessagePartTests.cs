@@ -179,22 +179,22 @@ namespace OpenPopUnitTests.Mime
 			string actualDescription = messagePart.ContentDescription;
 			Assert.AreEqual(expectedDescription, actualDescription);
 		}
+		
+		[Test]
+		public void TestContentLocation()
+		{
+		    const string messagePartContent =
+			"Content-Location: Mime-Location\r\n" +
+			"\r\n"; // End of message headers
 
-        [Test]
-        public void TestContentLocation()
-        {
-            const string messagePartContent =
-                "Content-Location: Mime-Location\r\n" +
-                "\r\n"; // End of message headers
+		    MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
 
-            MessagePart messagePart = new Message(Encoding.ASCII.GetBytes(messagePartContent)).MessagePart;
+		    const string expectedLocation = "Mime-Location";
+		    string actualLocation = messagePart.ContentLocation;
+		    Assert.AreEqual(expectedLocation, actualLocation);
+		}
 
-            const string expectedLocation = "Mime-Location";
-            string actualLocation = messagePart.ContentLocation;
-            Assert.AreEqual(expectedLocation, actualLocation);
-        }
-
-        [Test]
+		[Test]
 		public void TestContentDescriptionTwo()
 		{
 			const string messagePartContent =
