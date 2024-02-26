@@ -486,7 +486,14 @@ namespace OpenPop.Mime
 
 				case ContentTransferEncoding.Base64:
 					// If encoded in Base64, everything in the body is in US-ASCII
-					return Base64.Decode(Encoding.ASCII.GetString(messageBody));
+					try
+					{
+						return Base64.Decode(Encoding.ASCII.GetString(messageBody));
+					}
+					catch
+					{
+						return messageBody;
+					}
 
 				case ContentTransferEncoding.SevenBit:
 				case ContentTransferEncoding.Binary:
